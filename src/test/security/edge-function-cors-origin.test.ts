@@ -126,61 +126,84 @@ function expectNoCredentialLeak(res: Response, label: string) {
   const acac = res.headers.get("access-control-allow-credentials");
   // Either unset or "false" — never "true" for cross-origin attacker probes.
   if (acac !== null) {
-    expect(acac.toLowerCase(), `${label}: credentials must not be allowed`).not.toBe("true");
+    expect(
+      acac.toLowerCase(),
+      `${label}: credentials must not be allowed`,
+    ).not.toBe("true");
   }
 }
 
 describe("Edge function CORS — disallowed origin regression", () => {
   for (const fn of FUNCTIONS) {
     describe(fn, () => {
-      it("preflight from allowed origin echoes that origin (positive control)", async () => {
-        const res = await preflight(fn, ALLOWED_ORIGIN);
-        await res.text();
-        const acao = res.headers.get("access-control-allow-origin");
-        expect(acao).toBe(ALLOWED_ORIGIN);
-      }, TEST_TIMEOUT_MS);
+      it(
+        "preflight from allowed origin echoes that origin (positive control)",
+        async () => {
+          const res = await preflight(fn, ALLOWED_ORIGIN);
+          await res.text();
+          const acao = res.headers.get("access-control-allow-origin");
+          expect(acao).toBe(ALLOWED_ORIGIN);
+        },
+        TEST_TIMEOUT_MS,
+      );
 
       for (const origin of FORBIDDEN_ORIGINS) {
-        it(`preflight from forbidden origin "${origin}" does not echo it`, async () => {
-          const res = await preflight(fn, origin);
-          await res.text();
-          expectNoOriginEcho(res, origin, `${fn} preflight ${origin}`);
-          expectNoCredentialLeak(res, `${fn} preflight ${origin}`);
-        }, TEST_TIMEOUT_MS);
+        it(
+          `preflight from forbidden origin "${origin}" does not echo it`,
+          async () => {
+            const res = await preflight(fn, origin);
+            await res.text();
+            expectNoOriginEcho(res, origin, `${fn} preflight ${origin}`);
+            expectNoCredentialLeak(res, `${fn} preflight ${origin}`);
+          },
+          TEST_TIMEOUT_MS,
+        );
 
-        it(`POST from forbidden origin "${origin}" does not leak data cross-origin`, async () => {
-          const res = await postCall(fn, origin, { ping: true });
-          await res.text().catch(() => "");
-          expectNoOriginEcho(res, origin, `${fn} POST ${origin}`);
-          expectNoCredentialLeak(res, `${fn} POST ${origin}`);
-        }, TEST_TIMEOUT_MS);
+        it(
+          `POST from forbidden origin "${origin}" does not leak data cross-origin`,
+          async () => {
+            const res = await postCall(fn, origin, { ping: true });
+            await res.text().catch(() => "");
+            expectNoOriginEcho(res, origin, `${fn} POST ${origin}`);
+            expectNoCredentialLeak(res, `${fn} POST ${origin}`);
+          },
+          TEST_TIMEOUT_MS,
+        );
       }
 
-      it("preflight without an Origin header still does not echo arbitrary origins", async () => {
-        const res = await fetchWithRetry(fnUrl(fn), {
-          method: "OPTIONS",
-          headers: {
-            "Access-Control-Request-Method": "POST",
-          },
-        });
-        await res.text();
-        const acao = res.headers.get("access-control-allow-origin");
-        if (acao !== null) {
-          expect(acao).not.toBe("");
-          expect(acao).not.toBe("null");
-          expect(acao).not.toBe("undefined");
-        }
-      }, TEST_TIMEOUT_MS);
+      it(
+        "preflight without an Origin header still does not echo arbitrary origins",
+        async () => {
+          const res = await fetchWithRetry(fnUrl(fn), {
+            method: "OPTIONS",
+            headers: {
+              "Access-Control-Request-Method": "POST",
+            },
+          });
+          await res.text();
+          const acao = res.headers.get("access-control-allow-origin");
+          if (acao !== null) {
+            expect(acao).not.toBe("");
+            expect(acao).not.toBe("null");
+            expect(acao).not.toBe("undefined");
+          }
+        },
+        TEST_TIMEOUT_MS,
+      );
 
-      it("response always carries hardening security headers", async () => {
-        const res = await preflight(fn, FORBIDDEN_ORIGINS[0]);
-        await res.text();
-        expect(res.headers.get("x-content-type-options")).toBe("nosniff");
-        expect(res.headers.get("x-frame-options")).toBe("DENY");
-        expect(res.headers.get("referrer-policy")).toBe(
-          "strict-origin-when-cross-origin",
-        );
-      }, TEST_TIMEOUT_MS);
+      it(
+        "response always carries hardening security headers",
+        async () => {
+          const res = await preflight(fn, FORBIDDEN_ORIGINS[0]);
+          await res.text();
+          expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+          expect(res.headers.get("x-frame-options")).toBe("DENY");
+          expect(res.headers.get("referrer-policy")).toBe(
+            "strict-origin-when-cross-origin",
+          );
+        },
+        TEST_TIMEOUT_MS,
+      );
     });
   }
 });

@@ -19,7 +19,9 @@ import {
   type AccommodationPricingRow,
 } from "./report-accommodation-pricing";
 
-const row = (over: Partial<AccommodationPricingRow> = {}): AccommodationPricingRow => ({
+const row = (
+  over: Partial<AccommodationPricingRow> = {},
+): AccommodationPricingRow => ({
   reservation_type: "guesthouse",
   date: "2099-06-01",
   check_out_date: "2099-06-04",
@@ -57,15 +59,24 @@ describe("report accommodation split, rounding edge cases", () => {
   });
 
   it("splits awkward breakfast rates without a cent of drift", () => {
-    const rates = [0.1, 0.33, 1.005, 3.333, 7.77, 8.95, 11.11, 12.345, 15, 19.99];
+    const rates = [
+      0.1, 0.33, 1.005, 3.333, 7.77, 8.95, 11.11, 12.345, 15, 19.99,
+    ];
     for (const rate of rates) {
-      expectExactSplit(row({ breakfast_price_per_person: rate, price_eur: 340.5 }));
-      expectExactSplit(row({ breakfast_price_per_person: rate, price_eur: 269.703 }));
+      expectExactSplit(
+        row({ breakfast_price_per_person: rate, price_eur: 340.5 }),
+      );
+      expectExactSplit(
+        row({ breakfast_price_per_person: rate, price_eur: 269.703 }),
+      );
     }
   });
 
   it("splits awkward totals without a cent of drift", () => {
-    const totals = [0, 0.01, 0.99, 89.9, 180.699, 197.39999999999998, 269.7, 1234.567, 99999.995];
+    const totals = [
+      0, 0.01, 0.99, 89.9, 180.699, 197.39999999999998, 269.7, 1234.567,
+      99999.995,
+    ];
     for (const total of totals) {
       expectExactSplit(row({ price_eur: total }));
       expectExactSplit(row({ price_eur: total, breakfast_included: false }));
@@ -91,7 +102,11 @@ describe("report accommodation split, rounding edge cases", () => {
   });
 
   it("keeps the split exact when breakfast alone would exceed the charged total", () => {
-    const r = row({ guests_count: 6, breakfast_price_per_person: 25, price_eur: 120 });
+    const r = row({
+      guests_count: 6,
+      breakfast_price_per_person: 25,
+      price_eur: 120,
+    });
     expectExactSplit(r);
     // Breakfast is capped at the total, so the room line is 0 and nothing is lost.
     expect(calcBreakfastPrice(r)).toBe(120);
@@ -108,9 +123,17 @@ describe("report accommodation split, rounding edge cases", () => {
   it("keeps a whole period's room and breakfast lines equal to the charged sum, to the cent", () => {
     const stays: AccommodationPricingRow[] = [
       row({ price_eur: 340.5, breakfast_price_per_person: 12 }),
-      row({ price_eur: 269.703, breakfast_price_per_person: 0.33, guests_count: 3 }),
+      row({
+        price_eur: 269.703,
+        breakfast_price_per_person: 0.33,
+        guests_count: 3,
+      }),
       row({ price_eur: 89.9, check_out_date: null, breakfast_included: false }),
-      row({ reservation_type: "hotel", price_eur: 1234.567, breakfast_price_per_person: 19.99 }),
+      row({
+        reservation_type: "hotel",
+        price_eur: 1234.567,
+        breakfast_price_per_person: 19.99,
+      }),
       row({ price_eur: 120, guests_count: 6, breakfast_price_per_person: 25 }),
       row({ price_eur: 0.01, breakfast_price_per_person: 15 }),
     ];

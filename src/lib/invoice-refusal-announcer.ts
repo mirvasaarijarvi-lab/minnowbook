@@ -114,10 +114,17 @@ export function restoreFocusAfterRefusal(previous: Element | null): void {
 
   const attempt = () => {
     const active = document.activeElement;
-    const focusLost = !active || active === document.body || active === document.documentElement;
+    const focusLost =
+      !active ||
+      active === document.body ||
+      active === document.documentElement;
     if (!focusLost) return;
     if (!document.body.contains(target)) return;
-    if (target.hasAttribute("disabled") || target.getAttribute("aria-hidden") === "true") return;
+    if (
+      target.hasAttribute("disabled") ||
+      target.getAttribute("aria-hidden") === "true"
+    )
+      return;
     target.focus({ preventScroll: true });
   };
 

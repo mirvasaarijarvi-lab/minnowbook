@@ -8,12 +8,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import {
-  Ticket, Plus, Copy, Ban, Trash2, Users, Calendar, Clock, Shield, Mail,
+  Ticket,
+  Plus,
+  Copy,
+  Ban,
+  Trash2,
+  Users,
+  Calendar,
+  Clock,
+  Shield,
+  Mail,
 } from "lucide-react";
 import BetaInviteEmailPreview from "./BetaInviteEmailPreview";
 
@@ -52,7 +72,9 @@ const AccessCodesPanel = () => {
   const [revokeReason, setRevokeReason] = useState("");
   // After successful creation, plaintext is shown ONCE for the superadmin to copy/share.
   // It is never stored in the DB (only the SHA-256 hash is).
-  const [lastCreatedPlaintext, setLastCreatedPlaintext] = useState<string | null>(null);
+  const [lastCreatedPlaintext, setLastCreatedPlaintext] = useState<
+    string | null
+  >(null);
   const [form, setForm] = useState({
     code: generateCode(),
     description: "",
@@ -68,7 +90,9 @@ const AccessCodesPanel = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("access_codes")
-        .select("id, code_prefix, description, tier, duration_days, valid_from, valid_until, max_uses, used_count, is_active, is_revoked, revoked_at, revoked_reason, created_by, created_at")
+        .select(
+          "id, code_prefix, description, tier, duration_days, valid_from, valid_until, max_uses, used_count, is_active, is_revoked, revoked_at, revoked_reason, created_by, created_at",
+        )
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as AccessCode[];
@@ -108,10 +132,17 @@ const AccessCodesPanel = () => {
       setCreateOpen(false);
       setLastCreatedPlaintext(plaintext);
       setForm({ ...form, code: generateCode(), description: "", max_uses: "" });
-      toast({ title: "Access code created", description: "Copy it now — only the hash is stored." });
+      toast({
+        title: "Access code created",
+        description: "Copy it now — only the hash is stored.",
+      });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -144,12 +175,22 @@ const AccessCodesPanel = () => {
       toast({ title: "Access code revoked" });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
   const toggleActiveMutation = useMutation({
-    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
+    mutationFn: async ({
+      id,
+      is_active,
+    }: {
+      id: string;
+      is_active: boolean;
+    }) => {
       const { error } = await supabase
         .from("access_codes")
         .update({ is_active, updated_at: new Date().toISOString() })
@@ -176,9 +217,15 @@ const AccessCodesPanel = () => {
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-2">
             <Ticket className="h-5 w-5 text-accent" />
-            <CardTitle className="text-xl font-serif">Beta Access Codes</CardTitle>
+            <CardTitle className="text-xl font-serif">
+              Beta Access Codes
+            </CardTitle>
           </div>
-          <Button size="sm" onClick={() => setCreateOpen(true)} className="gap-1.5">
+          <Button
+            size="sm"
+            onClick={() => setCreateOpen(true)}
+            className="gap-1.5"
+          >
             <Plus className="h-4 w-4" /> Create Code
           </Button>
         </CardHeader>
@@ -186,20 +233,37 @@ const AccessCodesPanel = () => {
           {lastCreatedPlaintext && (
             <div className="mb-4 p-3 rounded-md border border-accent bg-accent/10 space-y-2">
               <p className="text-xs font-medium text-foreground">
-                New code created — copy it now. Only the hash is stored, so it can't be retrieved later.
+                New code created — copy it now. Only the hash is stored, so it
+                can't be retrieved later.
               </p>
               <div className="flex items-center gap-2">
                 <code className="font-mono text-sm font-bold flex-1 px-2 py-1 rounded bg-background">
                   {lastCreatedPlaintext}
                 </code>
-                <Button size="sm" variant="outline" onClick={() => copyCode(lastCreatedPlaintext)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => copyCode(lastCreatedPlaintext)}
+                >
                   <Copy className="h-3 w-3 mr-1" /> Copy
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => setLastCreatedPlaintext(null)}>Dismiss</Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setLastCreatedPlaintext(null)}
+                >
+                  Dismiss
+                </Button>
               </div>
               <BetaInviteEmailPreview
                 code={lastCreatedPlaintext}
-                tierLabel={form.tier === "professional" ? "Professional" : form.tier === "business" ? "Business" : "Basic"}
+                tierLabel={
+                  form.tier === "professional"
+                    ? "Professional"
+                    : form.tier === "business"
+                      ? "Business"
+                      : "Basic"
+                }
                 durationDays={form.duration_days}
               />
             </div>
@@ -209,13 +273,18 @@ const AccessCodesPanel = () => {
               <div className="animate-spin h-6 w-6 border-4 border-accent border-t-transparent rounded-full" />
             </div>
           ) : (codes ?? []).length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">No access codes yet. Create one to invite beta testers.</p>
+            <p className="text-center py-8 text-muted-foreground">
+              No access codes yet. Create one to invite beta testers.
+            </p>
           ) : (
             <div className="space-y-3">
               {(codes ?? []).map((ac) => {
                 const codeRedemptions = getCodeRedemptions(ac.id);
                 return (
-                  <div key={ac.id} className="p-4 rounded-lg border border-border bg-card space-y-2">
+                  <div
+                    key={ac.id}
+                    className="p-4 rounded-lg border border-border bg-card space-y-2"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span
@@ -224,10 +293,28 @@ const AccessCodesPanel = () => {
                         >
                           {ac.code_prefix}…
                         </span>
-                        <Badge variant={ac.is_revoked ? "destructive" : ac.is_active ? "default" : "secondary"} className="text-[10px]">
-                          {ac.is_revoked ? "Revoked" : ac.is_active ? "Active" : "Paused"}
+                        <Badge
+                          variant={
+                            ac.is_revoked
+                              ? "destructive"
+                              : ac.is_active
+                                ? "default"
+                                : "secondary"
+                          }
+                          className="text-[10px]"
+                        >
+                          {ac.is_revoked
+                            ? "Revoked"
+                            : ac.is_active
+                              ? "Active"
+                              : "Paused"}
                         </Badge>
-                        <Badge variant="outline" className="text-[10px] capitalize">{ac.tier}</Badge>
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] capitalize"
+                        >
+                          {ac.tier}
+                        </Badge>
                       </div>
                       <div className="flex items-center gap-1">
                         {!ac.is_revoked && (
@@ -235,7 +322,12 @@ const AccessCodesPanel = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => toggleActiveMutation.mutate({ id: ac.id, is_active: !ac.is_active })}
+                              onClick={() =>
+                                toggleActiveMutation.mutate({
+                                  id: ac.id,
+                                  is_active: !ac.is_active,
+                                })
+                              }
                               className="text-xs h-7"
                             >
                               {ac.is_active ? "Pause" : "Activate"}
@@ -253,7 +345,9 @@ const AccessCodesPanel = () => {
                       </div>
                     </div>
                     {ac.description && (
-                      <p className="text-sm text-muted-foreground">{ac.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {ac.description}
+                      </p>
                     )}
                     <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
@@ -261,7 +355,8 @@ const AccessCodesPanel = () => {
                       </span>
                       <span className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
-                        {ac.used_count}{ac.max_uses !== null ? `/${ac.max_uses}` : ""} used
+                        {ac.used_count}
+                        {ac.max_uses !== null ? `/${ac.max_uses}` : ""} used
                       </span>
                       {ac.valid_from && (
                         <span className="flex items-center gap-1">
@@ -270,21 +365,40 @@ const AccessCodesPanel = () => {
                       )}
                       {ac.valid_until && (
                         <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" /> Until: {ac.valid_until}
+                          <Calendar className="h-3 w-3" /> Until:{" "}
+                          {ac.valid_until}
                         </span>
                       )}
                       {ac.revoked_reason && (
-                        <span className="text-destructive">Reason: {ac.revoked_reason}</span>
+                        <span className="text-destructive">
+                          Reason: {ac.revoked_reason}
+                        </span>
                       )}
                     </div>
                     {codeRedemptions.length > 0 && (
                       <div className="pt-1 space-y-1">
-                        <p className="text-xs font-medium text-muted-foreground">Redemptions:</p>
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Redemptions:
+                        </p>
                         {codeRedemptions.map((r: any) => (
-                          <div key={r.id} className="text-xs text-muted-foreground flex items-center gap-2 pl-2">
-                            <span className="font-medium text-foreground">{r.tenants?.name ?? "Unknown"}</span>
-                            <span>to {r.granted_tier} until {r.granted_until}</span>
-                            {!r.is_active && <Badge variant="destructive" className="text-[9px] h-4">Revoked</Badge>}
+                          <div
+                            key={r.id}
+                            className="text-xs text-muted-foreground flex items-center gap-2 pl-2"
+                          >
+                            <span className="font-medium text-foreground">
+                              {r.tenants?.name ?? "Unknown"}
+                            </span>
+                            <span>
+                              to {r.granted_tier} until {r.granted_until}
+                            </span>
+                            {!r.is_active && (
+                              <Badge
+                                variant="destructive"
+                                className="text-[9px] h-4"
+                              >
+                                Revoked
+                              </Badge>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -314,10 +428,16 @@ const AccessCodesPanel = () => {
               <div className="flex gap-2">
                 <Input
                   value={form.code}
-                  onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+                  onChange={(e) =>
+                    setForm({ ...form, code: e.target.value.toUpperCase() })
+                  }
                   className="font-mono"
                 />
-                <Button variant="outline" size="sm" onClick={() => setForm({ ...form, code: generateCode() })}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setForm({ ...form, code: generateCode() })}
+                >
                   Regenerate
                 </Button>
               </div>
@@ -327,15 +447,22 @@ const AccessCodesPanel = () => {
               <Textarea
                 placeholder="e.g. Beta tester group A"
                 value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, description: e.target.value })
+                }
                 rows={2}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Tier Granted</Label>
-                <Select value={form.tier} onValueChange={(v) => setForm({ ...form, tier: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={form.tier}
+                  onValueChange={(v) => setForm({ ...form, tier: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="basic">Basic</SelectItem>
                     <SelectItem value="professional">Professional</SelectItem>
@@ -350,7 +477,12 @@ const AccessCodesPanel = () => {
                   min={1}
                   max={365}
                   value={form.duration_days}
-                  onChange={(e) => setForm({ ...form, duration_days: parseInt(e.target.value) || 30 })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      duration_days: parseInt(e.target.value) || 30,
+                    })
+                  }
                 />
               </div>
             </div>
@@ -360,7 +492,9 @@ const AccessCodesPanel = () => {
                 <Input
                   type="date"
                   value={form.valid_from}
-                  onChange={(e) => setForm({ ...form, valid_from: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, valid_from: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -368,7 +502,9 @@ const AccessCodesPanel = () => {
                 <Input
                   type="date"
                   value={form.valid_until}
-                  onChange={(e) => setForm({ ...form, valid_until: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, valid_until: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -382,7 +518,10 @@ const AccessCodesPanel = () => {
                 onChange={(e) => setForm({ ...form, max_uses: e.target.value })}
               />
             </div>
-            <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !form.code.trim()}>
+            <Button
+              onClick={() => createMutation.mutate()}
+              disabled={createMutation.isPending || !form.code.trim()}
+            >
               {createMutation.isPending ? "Creating..." : "Create Access Code"}
             </Button>
           </div>
@@ -390,7 +529,10 @@ const AccessCodesPanel = () => {
       </Dialog>
 
       {/* Revoke dialog */}
-      <Dialog open={!!revokeId} onOpenChange={(open) => !open && setRevokeId(null)}>
+      <Dialog
+        open={!!revokeId}
+        onOpenChange={(open) => !open && setRevokeId(null)}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="font-serif text-destructive flex items-center gap-2">
@@ -400,7 +542,8 @@ const AccessCodesPanel = () => {
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <p className="text-sm text-muted-foreground">
-              This will permanently deactivate the code and revoke access for all tenants who redeemed it.
+              This will permanently deactivate the code and revoke access for
+              all tenants who redeemed it.
             </p>
             <div className="space-y-2">
               <Label>Reason (optional)</Label>
@@ -412,8 +555,14 @@ const AccessCodesPanel = () => {
               />
             </div>
             <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={() => setRevokeId(null)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => revokeMutation.mutate()} disabled={revokeMutation.isPending}>
+              <Button variant="outline" onClick={() => setRevokeId(null)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => revokeMutation.mutate()}
+                disabled={revokeMutation.isPending}
+              >
                 {revokeMutation.isPending ? "Revoking..." : "Revoke"}
               </Button>
             </div>

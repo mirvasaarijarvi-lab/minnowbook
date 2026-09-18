@@ -131,13 +131,17 @@ export function configureLedger(opts: {
 /** Cap noisy SDK errors so a single huge stack doesn't blow up the PDF. */
 function truncateError(msg: unknown): string | null {
   if (msg == null) return null;
-  const str = typeof msg === "string" ? msg : (msg as Error).message ?? String(msg);
+  const str =
+    typeof msg === "string" ? msg : ((msg as Error).message ?? String(msg));
   const firstLine = str.split("\n")[0]?.trim() ?? "";
   return firstLine.length > 240 ? firstLine.slice(0, 237) + "…" : firstLine;
 }
 
 export function recordUpload(
-  rec: Omit<UploadAttemptRecord, "kind" | "recordedAt" | "httpStatus" | "errorCode"> & {
+  rec: Omit<
+    UploadAttemptRecord,
+    "kind" | "recordedAt" | "httpStatus" | "errorCode"
+  > & {
     errorMessage?: unknown;
     httpStatus?: number | null;
     errorCode?: string | null;
@@ -248,7 +252,8 @@ function summarize(): LedgerSummary {
  * when downloaded together — same convention as rls-report-reporter.ts.
  */
 export function flushLedger(outDir = resolve(process.cwd(), "reports")) {
-  const flavor = (process.env.RLS_REPORT_FLAVOR ?? "default").trim() || "default";
+  const flavor =
+    (process.env.RLS_REPORT_FLAVOR ?? "default").trim() || "default";
   const safeFlavor = flavor.replace(/[^a-zA-Z0-9_-]+/g, "-").toLowerCase();
 
   const payload: LedgerPayload = {
@@ -268,7 +273,7 @@ export function flushLedger(outDir = resolve(process.cwd(), "reports")) {
     const flavored = resolve(outDir, `storage-attempts.${safeFlavor}.json`);
     writeFileSync(canonical, json, "utf-8");
     writeFileSync(flavored, json, "utf-8");
-    // eslint-disable-next-line no-console
+
     console.log(
       `\n[storage-ledger] (${flavor}) ${payload.summary.totalUploadAttempts} attempts, ` +
         `${payload.summary.unexpectedAllowed} unexpected leaks, ` +
@@ -277,7 +282,6 @@ export function flushLedger(outDir = resolve(process.cwd(), "reports")) {
     );
     return { canonical, flavored, payload };
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error("[storage-ledger] Failed to flush ledger:", err);
     return null;
   }

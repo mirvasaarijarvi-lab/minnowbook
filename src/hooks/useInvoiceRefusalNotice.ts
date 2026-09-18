@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useOptionalLocationKey } from "@/lib/router-compat";
 import { toast } from "sonner";
-import { useInvoiceRefusalMessage, type FormattedInvoiceRefusal } from "@/hooks/useInvoiceRefusalMessage";
+import {
+  useInvoiceRefusalMessage,
+  type FormattedInvoiceRefusal,
+} from "@/hooks/useInvoiceRefusalMessage";
 import type { InvoiceRefusalSurface } from "@/lib/invoice-refusal";
 import {
   announceInvoiceRefusal,
@@ -32,7 +35,9 @@ export type ShowRefusalOptions = {
   focusTarget?: Element | { current: Element | null } | null;
 };
 
-const resolveFocusTarget = (target: ShowRefusalOptions["focusTarget"]): Element | null => {
+const resolveFocusTarget = (
+  target: ShowRefusalOptions["focusTarget"],
+): Element | null => {
   if (!target) return null;
   if (typeof (target as { current?: unknown }).current !== "undefined") {
     return (target as { current: Element | null }).current;
@@ -78,7 +83,10 @@ export function useInvoiceRefusalNotice(
   const previousRoute = useRef<string | null>(routeKey);
 
   useEffect(() => {
-    if (previousScope.current !== scopeKey || previousRoute.current !== routeKey) {
+    if (
+      previousScope.current !== scopeKey ||
+      previousRoute.current !== routeKey
+    ) {
       previousScope.current = scopeKey;
       previousRoute.current = routeKey;
       toast.dismiss(INVOICE_REFUSAL_TOAST_ID);
@@ -120,15 +128,16 @@ export function useInvoiceRefusalNotice(
     (
       err: unknown,
       optionsOrResolveMessage?:
-        | ShowRefusalOptions
-        | ((refusal: FormattedInvoiceRefusal) => string),
+        ShowRefusalOptions | ((refusal: FormattedInvoiceRefusal) => string),
     ): FormattedInvoiceRefusal => {
       const options: ShowRefusalOptions =
         typeof optionsOrResolveMessage === "function"
           ? { resolveMessage: optionsOrResolveMessage }
-          : optionsOrResolveMessage ?? {};
+          : (optionsOrResolveMessage ?? {});
       const refusal = formatInvoiceRefusal(err);
-      const message = options.resolveMessage ? options.resolveMessage(refusal) : refusal.message;
+      const message = options.resolveMessage
+        ? options.resolveMessage(refusal)
+        : refusal.message;
       // Remember where focus was before the refused action's re-render can move
       // it, so we can put the user back on that control.
       const focusBefore =

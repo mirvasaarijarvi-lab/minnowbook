@@ -6,7 +6,11 @@ import { useUserSites } from "@/hooks/useUserSites";
 import { useTierGate } from "@/hooks/useTierGate";
 import SiteTabs from "./SiteTabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import {
   CalendarDays,
@@ -40,10 +44,21 @@ import EmailFailureAlert from "./EmailFailureAlert";
 import OnboardingChecklist from "./OnboardingChecklist";
 
 import { useMemo } from "react";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid } from "recharts";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
+  CartesianGrid,
+} from "recharts";
 
 interface DashboardOverviewProps {
-  onNavigate?: (view: string, filter?: { status?: string; invoiced?: boolean; checkoutToday?: boolean }) => void;
+  onNavigate?: (
+    view: string,
+    filter?: { status?: string; invoiced?: boolean; checkoutToday?: boolean },
+  ) => void;
 }
 
 const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
@@ -56,14 +71,33 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
   const { typeLabel } = useResourceTypeLabel();
   const dateFnsLocale = useDateLocale();
 
-  const weekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
-  const weekEnd = format(endOfWeek(new Date(), { weekStartsOn: 1 }), "yyyy-MM-dd");
-  const prevWeekStart = format(startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), "yyyy-MM-dd");
-  const prevWeekEnd = format(endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }), "yyyy-MM-dd");
+  const weekStart = format(
+    startOfWeek(new Date(), { weekStartsOn: 1 }),
+    "yyyy-MM-dd",
+  );
+  const weekEnd = format(
+    endOfWeek(new Date(), { weekStartsOn: 1 }),
+    "yyyy-MM-dd",
+  );
+  const prevWeekStart = format(
+    startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
+    "yyyy-MM-dd",
+  );
+  const prevWeekEnd = format(
+    endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
+    "yyyy-MM-dd",
+  );
 
   // Main stats query
   const { data: stats } = useQuery({
-    queryKey: ["dashboard-stats-full", tenantId, selectedSiteId, siteIds, today, weekStart],
+    queryKey: [
+      "dashboard-stats-full",
+      tenantId,
+      selectedSiteId,
+      siteIds,
+      today,
+      weekStart,
+    ],
     queryFn: async () => {
       if (!tenantId) return null;
 
@@ -83,45 +117,129 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         checkoutsRes,
         uninvoicedRes,
       ] = await Promise.all([
-        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("date", today).in("status", ["pending", "confirmed"])),
-        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("status", "pending")),
-        sf(supabase.from("reservations").select("guests_count, estimated_guests")
-          .eq("tenant_id", tenantId).eq("date", today).in("status", ["pending", "confirmed"])),
-        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("date", today).eq("is_checked_in", true)),
-        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("date", today).eq("status", "confirmed")),
-        sf(supabase.from("reservations").select("id, price_eur, guests_count, estimated_guests, date")
-          .eq("tenant_id", tenantId).gte("date", weekStart).lte("date", weekEnd).in("status", ["pending", "confirmed"])),
-        sf(supabase.from("reservations").select("id, price_eur, guests_count, estimated_guests")
-          .eq("tenant_id", tenantId).gte("date", prevWeekStart).lte("date", prevWeekEnd).in("status", ["pending", "confirmed"])),
-        sf(supabase.from("resources").select("id, capacity", { count: "exact" })
-          .eq("tenant_id", tenantId).eq("is_active", true)),
-        sf(supabase.from("reservations").select("reservation_type")
-          .eq("tenant_id", tenantId).eq("date", today).in("status", ["pending", "confirmed"])),
-        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("check_out_date", today).in("status", ["pending", "confirmed"])),
-        sf(supabase.from("reservations").select("id", { count: "exact", head: true })
-          .eq("tenant_id", tenantId).eq("is_invoiced", false).in("status", ["pending", "confirmed"])),
+        sf(
+          supabase
+            .from("reservations")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .eq("date", today)
+            .in("status", ["pending", "confirmed"]),
+        ),
+        sf(
+          supabase
+            .from("reservations")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .eq("status", "pending"),
+        ),
+        sf(
+          supabase
+            .from("reservations")
+            .select("guests_count, estimated_guests")
+            .eq("tenant_id", tenantId)
+            .eq("date", today)
+            .in("status", ["pending", "confirmed"]),
+        ),
+        sf(
+          supabase
+            .from("reservations")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .eq("date", today)
+            .eq("is_checked_in", true),
+        ),
+        sf(
+          supabase
+            .from("reservations")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .eq("date", today)
+            .eq("status", "confirmed"),
+        ),
+        sf(
+          supabase
+            .from("reservations")
+            .select("id, price_eur, guests_count, estimated_guests, date")
+            .eq("tenant_id", tenantId)
+            .gte("date", weekStart)
+            .lte("date", weekEnd)
+            .in("status", ["pending", "confirmed"]),
+        ),
+        sf(
+          supabase
+            .from("reservations")
+            .select("id, price_eur, guests_count, estimated_guests")
+            .eq("tenant_id", tenantId)
+            .gte("date", prevWeekStart)
+            .lte("date", prevWeekEnd)
+            .in("status", ["pending", "confirmed"]),
+        ),
+        sf(
+          supabase
+            .from("resources")
+            .select("id, capacity", { count: "exact" })
+            .eq("tenant_id", tenantId)
+            .eq("is_active", true),
+        ),
+        sf(
+          supabase
+            .from("reservations")
+            .select("reservation_type")
+            .eq("tenant_id", tenantId)
+            .eq("date", today)
+            .in("status", ["pending", "confirmed"]),
+        ),
+        sf(
+          supabase
+            .from("reservations")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .eq("check_out_date", today)
+            .in("status", ["pending", "confirmed"]),
+        ),
+        sf(
+          supabase
+            .from("reservations")
+            .select("id", { count: "exact", head: true })
+            .eq("tenant_id", tenantId)
+            .eq("is_invoiced", false)
+            .in("status", ["pending", "confirmed"]),
+        ),
       ]);
 
       const todayGuests = (todayGuestsRes.data ?? []).reduce(
-        (sum: number, r: any) => sum + (r.guests_count || r.estimated_guests || 0), 0
+        (sum: number, r: any) =>
+          sum + (r.guests_count || r.estimated_guests || 0),
+        0,
       );
 
       const weekData = weekRes.data ?? [];
       const prevWeekData = prevWeekRes.data ?? [];
 
-      const weekRevenue = weekData.reduce((s: number, r: any) => s + (r.price_eur ?? 0), 0);
-      const prevWeekRevenue = prevWeekData.reduce((s: number, r: any) => s + (r.price_eur ?? 0), 0);
-      const weekGuests = weekData.reduce((s: number, r: any) => s + (r.guests_count || r.estimated_guests || 0), 0);
-      const prevWeekGuests = prevWeekData.reduce((s: number, r: any) => s + (r.guests_count || r.estimated_guests || 0), 0);
+      const weekRevenue = weekData.reduce(
+        (s: number, r: any) => s + (r.price_eur ?? 0),
+        0,
+      );
+      const prevWeekRevenue = prevWeekData.reduce(
+        (s: number, r: any) => s + (r.price_eur ?? 0),
+        0,
+      );
+      const weekGuests = weekData.reduce(
+        (s: number, r: any) => s + (r.guests_count || r.estimated_guests || 0),
+        0,
+      );
+      const prevWeekGuests = prevWeekData.reduce(
+        (s: number, r: any) => s + (r.guests_count || r.estimated_guests || 0),
+        0,
+      );
 
       // Capacity utilization: today's reservations / total active resource capacity
-      const totalCapacity = (resourcesRes.data ?? []).reduce((s: number, r: any) => s + (r.capacity ?? 0), 0);
-      const utilization = totalCapacity > 0 ? Math.round((todayGuests / totalCapacity) * 100) : 0;
+      const totalCapacity = (resourcesRes.data ?? []).reduce(
+        (s: number, r: any) => s + (r.capacity ?? 0),
+        0,
+      );
+      const utilization =
+        totalCapacity > 0 ? Math.round((todayGuests / totalCapacity) * 100) : 0;
 
       // Today by type breakdown
       const byType: Record<string, number> = {};
@@ -173,26 +291,43 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
     return Math.round(((current - previous) / previous) * 100);
   };
 
-  const revChange = pctChange(stats?.weekRevenue ?? 0, stats?.prevWeekRevenue ?? 0);
-  const resChange = pctChange(stats?.weekReservations ?? 0, stats?.prevWeekReservations ?? 0);
-  const guestChange = pctChange(stats?.weekGuests ?? 0, stats?.prevWeekGuests ?? 0);
+  const revChange = pctChange(
+    stats?.weekRevenue ?? 0,
+    stats?.prevWeekRevenue ?? 0,
+  );
+  const resChange = pctChange(
+    stats?.weekReservations ?? 0,
+    stats?.prevWeekReservations ?? 0,
+  );
+  const guestChange = pctChange(
+    stats?.weekGuests ?? 0,
+    stats?.prevWeekGuests ?? 0,
+  );
 
   const allowedTypes = tenant?.allowed_reservation_types ?? [];
-  const typeConfig: { key: string; label: string; icon: React.ElementType }[] = [
-    { key: "restaurant", label: typeLabel("restaurant"), icon: UtensilsCrossed },
-    { key: "venue", label: typeLabel("venue"), icon: Building2 },
-    { key: "guesthouse", label: typeLabel("guesthouse"), icon: Home },
-    { key: "hotel", label: typeLabel("hotel"), icon: Home },
-  ].filter((tc) => allowedTypes.includes(tc.key));
+  const typeConfig: { key: string; label: string; icon: React.ElementType }[] =
+    [
+      {
+        key: "restaurant",
+        label: typeLabel("restaurant"),
+        icon: UtensilsCrossed,
+      },
+      { key: "venue", label: typeLabel("venue"), icon: Building2 },
+      { key: "guesthouse", label: typeLabel("guesthouse"), icon: Home },
+      { key: "hotel", label: typeLabel("hotel"), icon: Home },
+    ].filter((tc) => allowedTypes.includes(tc.key));
 
   const ChangeIndicator = ({ value }: { value: number }) => {
     if (value === 0) return null;
     const isPositive = value > 0;
     const Icon = isPositive ? TrendingUp : TrendingDown;
     return (
-      <span className={`flex items-center gap-0.5 text-xs font-medium ${isPositive ? "text-success" : "text-destructive"}`}>
+      <span
+        className={`flex items-center gap-0.5 text-xs font-medium ${isPositive ? "text-success" : "text-destructive"}`}
+      >
         <Icon className="h-3 w-3" />
-        {isPositive ? "+" : ""}{value}%
+        {isPositive ? "+" : ""}
+        {value}%
       </span>
     );
   };
@@ -212,7 +347,11 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           </p>
           <p className="text-sm font-medium text-foreground flex items-center gap-1.5 mt-1">
             <CalendarDays className="h-4 w-4 shrink-0" />
-            <span className="truncate">{format(new Date(), "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })}</span>
+            <span className="truncate">
+              {format(new Date(), "EEEE, MMMM d, yyyy", {
+                locale: dateFnsLocale,
+              })}
+            </span>
           </p>
         </div>
         {tenant?.slug && (
@@ -220,11 +359,19 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1.5 shrink-0">
                 <ExternalLink className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{t("dashboard.bookingLink")}</span>
-                <span className="sm:hidden">{t("dashboard.bookingLink").split(" ")[0]}</span>
+                <span className="hidden sm:inline">
+                  {t("dashboard.bookingLink")}
+                </span>
+                <span className="sm:hidden">
+                  {t("dashboard.bookingLink").split(" ")[0]}
+                </span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[min(500px,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto p-0" align="end" sideOffset={8}>
+            <PopoverContent
+              className="w-[min(500px,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto p-0"
+              align="end"
+              sideOffset={8}
+            >
               <BookingLinksCard />
               <div className="p-3 pt-0">
                 <ShareBookingPageCard />
@@ -249,23 +396,38 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
       />
 
       {/* Row 1: Today stats */}
-      <div data-tour="stats-grid" className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+      <div
+        data-tour="stats-grid"
+        className="grid gap-3 grid-cols-2 lg:grid-cols-4"
+      >
         <Card className="min-w-0">
           <CardContent className="pt-5 pb-4 text-center px-3">
             <CalendarDays className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.todayCount ?? 0}</p>
-            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">{t("dashboard.todaysReservations")}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">
+              {stats?.todayCount ?? 0}
+            </p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
+              {t("dashboard.todaysReservations")}
+            </p>
           </CardContent>
         </Card>
 
         <Card
           className={`min-w-0 ${stats?.pendingCount ? "cursor-pointer hover:shadow-md transition-shadow hover:ring-1 hover:ring-accent/30" : ""}`}
-          onClick={stats?.pendingCount ? () => onNavigate?.("reservations", { status: "pending" }) : undefined}
+          onClick={
+            stats?.pendingCount
+              ? () => onNavigate?.("reservations", { status: "pending" })
+              : undefined
+          }
         >
           <CardContent className="pt-5 pb-4 text-center relative px-3">
             <Clock className="h-5 w-5 mx-auto text-warning mb-1" />
-            <p className="text-2xl sm:text-3xl font-bold text-warning truncate">{stats?.pendingCount ?? 0}</p>
-            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">{t("dashboard.pending")} ({t("dashboard.total")})</p>
+            <p className="text-2xl sm:text-3xl font-bold text-warning truncate">
+              {stats?.pendingCount ?? 0}
+            </p>
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
+              {t("dashboard.pending")} ({t("dashboard.total")})
+            </p>
             {(stats?.pendingCount ?? 0) > 0 && (
               <ArrowRight className="h-4 w-4 absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
             )}
@@ -275,7 +437,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <Card className="min-w-0">
           <CardContent className="pt-5 pb-4 text-center px-3">
             <Users className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.todayGuests ?? 0}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">
+              {stats?.todayGuests ?? 0}
+            </p>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.guestsToday")}
             </p>
@@ -313,7 +477,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <Card className="min-w-0">
           <CardContent className="pt-5 pb-4 text-center px-3">
             <BarChart3 className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.weekReservations ?? 0}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">
+              {stats?.weekReservations ?? 0}
+            </p>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.weekReservations")}
             </p>
@@ -324,7 +490,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <Card className="min-w-0">
           <CardContent className="pt-5 pb-4 text-center px-3">
             <Users className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.weekGuests ?? 0}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">
+              {stats?.weekGuests ?? 0}
+            </p>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.weekGuests")}
             </p>
@@ -335,7 +503,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         <Card className="min-w-0">
           <CardContent className="pt-5 pb-4 text-center px-3">
             <Percent className="h-5 w-5 mx-auto text-muted-foreground mb-1" />
-            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">{stats?.utilization ?? 0}%</p>
+            <p className="text-2xl sm:text-3xl font-bold text-foreground truncate">
+              {stats?.utilization ?? 0}%
+            </p>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 leading-tight">
               {t("dashboard.utilizationToday")}
             </p>
@@ -354,16 +524,49 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           <CardContent>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={stats.chartData.map(d => ({ ...d, label: format(new Date(d.date + "T00:00:00"), "EEE", { locale: dateFnsLocale }) }))} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
+                <AreaChart
+                  data={stats.chartData.map((d) => ({
+                    ...d,
+                    label: format(new Date(d.date + "T00:00:00"), "EEE", {
+                      locale: dateFnsLocale,
+                    }),
+                  }))}
+                  margin={{ top: 5, right: 5, left: 0, bottom: 0 }}
+                >
                   <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                    <linearGradient
+                      id="colorRevenue"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="hsl(var(--accent))"
+                        stopOpacity={0.3}
+                      />
+                      <stop
+                        offset="95%"
+                        stopColor="hsl(var(--accent))"
+                        stopOpacity={0}
+                      />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                  <XAxis dataKey="label" className="text-xs" tick={{ fontSize: 12 }} />
-                  <YAxis className="text-xs" tick={{ fontSize: 12 }} width={50} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border"
+                  />
+                  <XAxis
+                    dataKey="label"
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    className="text-xs"
+                    tick={{ fontSize: 12 }}
+                    width={50}
+                  />
                   <RechartsTooltip
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",
@@ -371,7 +574,10 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
                       borderRadius: "8px",
                       fontSize: "12px",
                     }}
-                    formatter={(value: number) => [`€${value.toFixed(2)}`, t("dashboard.weekRevenue")]}
+                    formatter={(value: number) => [
+                      `€${value.toFixed(2)}`,
+                      t("dashboard.weekRevenue"),
+                    ]}
                   />
                   <Area
                     type="monotone"
@@ -398,16 +604,23 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           </CardHeader>
           <CardContent className="space-y-2">
             {typeConfig.map(({ key, label, icon: Icon }) => (
-              <div key={key} className="flex items-center justify-between text-sm">
+              <div
+                key={key}
+                className="flex items-center justify-between text-sm"
+              >
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <Icon className="h-4 w-4" />
                   {label}
                 </span>
-                <span className="font-semibold text-foreground">{stats?.byType?.[key] ?? 0}</span>
+                <span className="font-semibold text-foreground">
+                  {stats?.byType?.[key] ?? 0}
+                </span>
               </div>
             ))}
             {typeConfig.length === 0 && (
-              <p className="text-xs text-muted-foreground">No reservation types configured.</p>
+              <p className="text-xs text-muted-foreground">
+                No reservation types configured.
+              </p>
             )}
           </CardContent>
         </Card>
@@ -422,7 +635,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
           <CardContent className="space-y-2">
             <div
               className="flex items-center justify-between text-sm cursor-pointer rounded-md p-1 -m-1 hover:bg-accent/10 transition-colors"
-              onClick={() => onNavigate?.("reservations", { checkoutToday: true })}
+              onClick={() =>
+                onNavigate?.("reservations", { checkoutToday: true })
+              }
             >
               <span className="flex items-center gap-2 text-muted-foreground">
                 <BedDouble className="h-4 w-4" />

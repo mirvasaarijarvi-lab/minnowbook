@@ -48,7 +48,7 @@ describe("PermissionEmptyState", () => {
         title="No access"
         description="Ask an owner"
         detail="permission denied"
-      />
+      />,
     );
 
     expect(permissionEmptyStateShown).toHaveBeenCalledTimes(1);
@@ -68,13 +68,15 @@ describe("PermissionEmptyState", () => {
         title="No access"
         description="Ask an owner"
         detail="permission denied (retry)"
-      />
+      />,
     );
     expect(permissionEmptyStateShown).toHaveBeenCalledTimes(1);
   });
 
   it("sends nothing when no surface is given", () => {
-    render(<PermissionEmptyState title="No access" description="Ask an owner" />);
+    render(
+      <PermissionEmptyState title="No access" description="Ask an owner" />,
+    );
     expect(permissionEmptyStateShown).not.toHaveBeenCalled();
   });
 
@@ -87,7 +89,7 @@ describe("PermissionEmptyState", () => {
         surface="settings_panel"
         title="No access"
         description="Ask an owner"
-      />
+      />,
     );
     expect(screen.getByText("No access")).toBeInTheDocument();
   });
@@ -98,9 +100,11 @@ describe("PermissionEmptyState", () => {
         surface="settings_panel"
         title="No access"
         description="Ask an owner"
-      />
+      />,
     );
-    expect(screen.queryByRole("button", { name: "access.requestButton" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "access.requestButton" }),
+    ).toBeNull();
   });
 
   it("sends an access request and confirms it inline", async () => {
@@ -113,12 +117,19 @@ describe("PermissionEmptyState", () => {
         allowAccessRequest
         title="No access"
         description="Ask an owner"
-      />
+      />,
     );
 
-    await user.click(screen.getByRole("button", { name: /access.requestButton/ }));
-    await user.type(screen.getByRole("textbox"), "I need the branding settings");
-    await user.click(screen.getByRole("button", { name: "access.requestSubmit" }));
+    await user.click(
+      screen.getByRole("button", { name: /access.requestButton/ }),
+    );
+    await user.type(
+      screen.getByRole("textbox"),
+      "I need the branding settings",
+    );
+    await user.click(
+      screen.getByRole("button", { name: "access.requestSubmit" }),
+    );
 
     await waitFor(() => expect(insert).toHaveBeenCalledTimes(1));
     const payload = insert.mock.calls[0][0] as Record<string, string>;
@@ -127,6 +138,8 @@ describe("PermissionEmptyState", () => {
     expect(payload.subject).toContain("access.requestSubject");
     expect(payload.message).toContain("I need the branding settings");
 
-    expect(await screen.findByText("access.requestSentInline")).toBeInTheDocument();
+    expect(
+      await screen.findByText("access.requestSentInline"),
+    ).toBeInTheDocument();
   });
 });

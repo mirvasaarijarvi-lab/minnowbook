@@ -13,7 +13,9 @@ const EmailFailureAlert = () => {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from("email_send_log")
-        .select("id, status, created_at, recipient_email, template_name, error_message")
+        .select(
+          "id, status, created_at, recipient_email, template_name, error_message",
+        )
         .in("status", ["failed", "dlq"])
         .gte("created_at", since)
         .order("created_at", { ascending: false })
@@ -55,7 +57,10 @@ const EmailFailureAlert = () => {
         <div className="text-xs text-muted-foreground space-y-0.5 min-w-0">
           <p className="truncate">
             <Mail className="inline h-3 w-3 mr-1" />
-            Latest: <span className="font-mono break-all">{latestError.recipient_email}</span>
+            Latest:{" "}
+            <span className="font-mono break-all">
+              {latestError.recipient_email}
+            </span>
             {" · "}
             <span className="italic">{latestError.template_name}</span>
           </p>

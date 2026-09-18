@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Database, Check, Copy } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { useTenant } from "@/hooks/useTenant";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -50,12 +54,22 @@ const TenantBadge = ({ className, compact = false }: TenantBadgeProps) => {
           )}
         >
           <Database className="h-3 w-3 shrink-0" aria-hidden="true" />
-          {!compact && <span className="hidden sm:inline truncate max-w-[120px]">{tenantName}</span>}
-          <Badge variant="outline" className="font-mono text-[10px] py-0 px-1.5 leading-tight">
+          {!compact && (
+            <span className="hidden sm:inline truncate max-w-[120px]">
+              {tenantName}
+            </span>
+          )}
+          <Badge
+            variant="outline"
+            className="font-mono text-[10px] py-0 px-1.5 leading-tight"
+          >
             {shortId}
           </Badge>
           {copied ? (
-            <Check className="h-3 w-3 shrink-0 text-primary" aria-hidden="true" />
+            <Check
+              className="h-3 w-3 shrink-0 text-primary"
+              aria-hidden="true"
+            />
           ) : (
             <Copy className="h-3 w-3 shrink-0 opacity-60" aria-hidden="true" />
           )}
@@ -66,7 +80,9 @@ const TenantBadge = ({ className, compact = false }: TenantBadgeProps) => {
           <p className="font-semibold">Current tenant (RLS scope)</p>
           <p className="text-muted-foreground">{tenantName}</p>
           <p className="font-mono break-all">{tenantId}</p>
-          <p className="text-muted-foreground italic">Click to copy · debug aid</p>
+          <p className="text-muted-foreground italic">
+            Click to copy · debug aid
+          </p>
         </div>
       </TooltipContent>
     </Tooltip>

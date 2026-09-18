@@ -66,7 +66,10 @@ beforeAll(() => {
 });
 
 /** Hit the *public-object* HTTP endpoint directly. Private buckets return 400. */
-async function fetchPublicObject(bucket: string, path: string): Promise<Response> {
+async function fetchPublicObject(
+  bucket: string,
+  path: string,
+): Promise<Response> {
   const url = `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
   // Bound each request so a slow/hung edge can't blow the whole test budget.
   const ctrl = new AbortController();
@@ -99,7 +102,10 @@ async function safeAnonCreateSignedUrl(
   bucket: string,
   path: string,
   expiresIn = 60,
-): Promise<{ data: { signedUrl: string } | null; error: { message: string; status?: number } | null }> {
+): Promise<{
+  data: { signedUrl: string } | null;
+  error: { message: string; status?: number } | null;
+}> {
   // CI path: deterministic denial, no live network. Alternates 403 / 404
   // across probes so both forbidden- and not-found-shaped errors are
   // exercised by the regex assertion downstream.
@@ -125,7 +131,9 @@ async function safeAnonCreateSignedUrl(
   let lastErr: unknown = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const res = await client.storage.from(bucket).createSignedUrl(path, expiresIn);
+      const res = await client.storage
+        .from(bucket)
+        .createSignedUrl(path, expiresIn);
       if (res.error) {
         // SDK-shaped error: try to surface the underlying HTTP status &
         // body by re-issuing the same request directly. This is best-
@@ -147,24 +155,21 @@ async function safeAnonCreateSignedUrl(
         } catch (probeErr) {
           httpBody = `probe failed: ${probeErr instanceof Error ? probeErr.message : String(probeErr)}`;
         }
-        // eslint-disable-next-line no-console
-        console.warn(
-          `[tenant-assets-private] createSignedUrl returned error`,
-          {
-            bucket,
-            path,
-            attempt,
-            requestUrl,
-            sdkError: res.error.message,
-            httpStatus,
-            httpBody,
-          },
-        );
+
+        console.warn(`[tenant-assets-private] createSignedUrl returned error`, {
+          bucket,
+          path,
+          attempt,
+          requestUrl,
+          sdkError: res.error.message,
+          httpStatus,
+          httpBody,
+        });
       }
       return res as any;
     } catch (e) {
       lastErr = e;
-      // eslint-disable-next-line no-console
+
       console.warn(
         `[tenant-assets-private] createSignedUrl threw on attempt ${attempt}`,
         {
@@ -178,113 +183,146 @@ async function safeAnonCreateSignedUrl(
     }
   }
   const msg = lastErr instanceof Error ? lastErr.message : String(lastErr);
-  // eslint-disable-next-line no-console
+
   console.error(
     `[tenant-assets-private] createSignedUrl exhausted retries, normalizing to 403`,
     { bucket, path, requestUrl, lastError: msg },
   );
   return {
     data: null,
-    error: { message: `denied (normalized from transport error: ${msg})`, status: 403 },
+    error: {
+      message: `denied (normalized from transport error: ${msg})`,
+      status: 403,
+    },
   };
 }
-
-
 
 d("tenant-assets is private (regression)", () => {
   for (const bucket of PRIVATE_BUCKETS) {
     describe(`bucket: ${bucket}`, () => {
-      it("rejects requests to the public-object endpoint", async () => {
-        for (const path of PROBE_PATHS) {
-          const res = await fetchPublicObject(bucket, path);
-          // Supabase returns 400 ("Object not found" / bucket-not-public) for
-          // private buckets — never 200, never an actual object body.
-          expect(res.status).not.toBe(200);
-          // Infrastructure noise (pooler saturation returns 5xx such as 544)
-          // is not a privacy leak; only a 2xx would be. Accept the documented
-          // denial codes plus any server-side error.
-          expect(res.status >= 500 || [400, 404, 403].includes(res.status)).toBe(
-            true,
-          );
-          // Drain the body to keep the runtime tidy.
-          await res.text();
-        }
-      }, NET_TIMEOUT_MS);
+      it(
+        "rejects requests to the public-object endpoint",
+        async () => {
+          for (const path of PROBE_PATHS) {
+            const res = await fetchPublicObject(bucket, path);
+            // Supabase returns 400 ("Object not found" / bucket-not-public) for
+            // private buckets — never 200, never an actual object body.
+            expect(res.status).not.toBe(200);
+            // Infrastructure noise (pooler saturation returns 5xx such as 544)
+            // is not a privacy leak; only a 2xx would be. Accept the documented
+            // denial codes plus any server-side error.
+            expect(
+              res.status >= 500 || [400, 404, 403].includes(res.status),
+            ).toBe(true);
+            // Drain the body to keep the runtime tidy.
+            await res.text();
+          }
+        },
+        NET_TIMEOUT_MS,
+      );
 
-      it("denies anon list at the bucket root", async () => {
-        const { data, error } = await anon.storage.from(bucket).list("", {
-          limit: 100,
-        });
-        // RLS denial surfaces as either an error OR an empty array. What
-        // must NEVER happen: a populated array of real tenant folders.
-        if (error) {
-          expect(error.message).toMatch(
-            // The last alternative covers transient infrastructure errors
-            // (e.g. "Too many connections issued to the database"), which
-            // are noise, not a leak — no data is returned either way.
-            /permission|not allowed|denied|policy|invalid input|uuid|too many connections|timeout|unavailable/i,
-          );
-        } else {
-          expect(data ?? []).toEqual([]);
-        }
-      }, NET_TIMEOUT_MS);
-
-
-      it("denies anon list inside a tenant prefix", async () => {
-        for (const path of PROBE_PATHS) {
-          const prefix = path.split("/").slice(0, -1).join("/");
-          const { data, error } = await anon.storage.from(bucket).list(prefix, {
+      it(
+        "denies anon list at the bucket root",
+        async () => {
+          const { data, error } = await anon.storage.from(bucket).list("", {
             limit: 100,
           });
-          if (!error) {
+          // RLS denial surfaces as either an error OR an empty array. What
+          // must NEVER happen: a populated array of real tenant folders.
+          if (error) {
+            expect(error.message).toMatch(
+              // The last alternative covers transient infrastructure errors
+              // (e.g. "Too many connections issued to the database"), which
+              // are noise, not a leak — no data is returned either way.
+              /permission|not allowed|denied|policy|invalid input|uuid|too many connections|timeout|unavailable/i,
+            );
+          } else {
             expect(data ?? []).toEqual([]);
           }
-        }
-      }, NET_TIMEOUT_MS);
+        },
+        NET_TIMEOUT_MS,
+      );
 
-      it("denies anon createSignedUrl (only tenant members may sign)", async () => {
-        for (const path of PROBE_PATHS) {
-          const { data, error } = await safeAnonCreateSignedUrl(anon, bucket, path, 60);
-          // Invariant: anon NEVER receives a usable signedUrl.
-          if (!error) {
-            expect(data?.signedUrl ?? null).toBeNull();
-            continue;
+      it(
+        "denies anon list inside a tenant prefix",
+        async () => {
+          for (const path of PROBE_PATHS) {
+            const prefix = path.split("/").slice(0, -1).join("/");
+            const { data, error } = await anon.storage
+              .from(bucket)
+              .list(prefix, {
+                limit: 100,
+              });
+            if (!error) {
+              expect(data ?? []).toEqual([]);
+            }
           }
-          // Stable contract assertion: classify the SDK error and require
-          // it lands in one of the known-denied codes. We don't regex on
-          // wording anymore. Transport-shaped errors are surfaced through
-          // safeAnonCreateSignedUrl's normalization, so they classify as
-          // "forbidden" too.
-          const classified = classifySignedUrlFailure({ sdkError: error });
-          expect(["forbidden", "not_found"]).toContain(classified.code);
-        }
-      }, NET_TIMEOUT_MS);
+        },
+        NET_TIMEOUT_MS,
+      );
 
-      it("denies anon download (direct API)", async () => {
-        for (const path of PROBE_PATHS) {
-          const { data, error } = await anon.storage.from(bucket).download(path);
-          // Must NOT return a real Blob with content.
-          if (!error) {
-            expect(data?.size ?? 0).toBe(0);
+      it(
+        "denies anon createSignedUrl (only tenant members may sign)",
+        async () => {
+          for (const path of PROBE_PATHS) {
+            const { data, error } = await safeAnonCreateSignedUrl(
+              anon,
+              bucket,
+              path,
+              60,
+            );
+            // Invariant: anon NEVER receives a usable signedUrl.
+            if (!error) {
+              expect(data?.signedUrl ?? null).toBeNull();
+              continue;
+            }
+            // Stable contract assertion: classify the SDK error and require
+            // it lands in one of the known-denied codes. We don't regex on
+            // wording anymore. Transport-shaped errors are surfaced through
+            // safeAnonCreateSignedUrl's normalization, so they classify as
+            // "forbidden" too.
+            const classified = classifySignedUrlFailure({ sdkError: error });
+            expect(["forbidden", "not_found"]).toContain(classified.code);
           }
-        }
-      }, NET_TIMEOUT_MS);
+        },
+        NET_TIMEOUT_MS,
+      );
+
+      it(
+        "denies anon download (direct API)",
+        async () => {
+          for (const path of PROBE_PATHS) {
+            const { data, error } = await anon.storage
+              .from(bucket)
+              .download(path);
+            // Must NOT return a real Blob with content.
+            if (!error) {
+              expect(data?.size ?? 0).toBe(0);
+            }
+          }
+        },
+        NET_TIMEOUT_MS,
+      );
     });
   }
 });
 
 d("tenant-branding stays publicly readable (positive control)", () => {
-  it("public-object endpoint is reachable (200 or 400/404 for missing keys, never 401/403)", async () => {
-    // We don't know real branding paths; what we DO know is the bucket
-    // itself is reachable. A missing key returns 400 with "Object not found";
-    // a private bucket would consistently return 400 "Bucket not found"
-    // with a different shape. We assert no auth-style denial slips in.
-    const res = await fetchPublicObject(PUBLIC_BUCKET, "does-not-exist.png");
-    expect([200, 400, 404]).toContain(res.status);
-    expect(res.status).not.toBe(401);
-    expect(res.status).not.toBe(403);
-    await res.text();
-  }, NET_TIMEOUT_MS);
+  it(
+    "public-object endpoint is reachable (200 or 400/404 for missing keys, never 401/403)",
+    async () => {
+      // We don't know real branding paths; what we DO know is the bucket
+      // itself is reachable. A missing key returns 400 with "Object not found";
+      // a private bucket would consistently return 400 "Bucket not found"
+      // with a different shape. We assert no auth-style denial slips in.
+      const res = await fetchPublicObject(PUBLIC_BUCKET, "does-not-exist.png");
+      expect([200, 400, 404]).toContain(res.status);
+      expect(res.status).not.toBe(401);
+      expect(res.status).not.toBe(403);
+      await res.text();
+    },
+    NET_TIMEOUT_MS,
+  );
 });
 
 // Positive proof that signed URLs actually unlock objects, and that they
@@ -308,37 +346,49 @@ describe.runIf(Boolean(admin))(
       if (error) throw error;
     });
 
-    it("public-object endpoint refuses the planted file", async () => {
-      const res = await fetchPublicObject("tenant-assets", objectPath);
-      expect(res.status).not.toBe(200);
-      await res.text();
-    }, NET_TIMEOUT_MS);
+    it(
+      "public-object endpoint refuses the planted file",
+      async () => {
+        const res = await fetchPublicObject("tenant-assets", objectPath);
+        expect(res.status).not.toBe(200);
+        await res.text();
+      },
+      NET_TIMEOUT_MS,
+    );
 
-    it("a service-role-minted signed URL DOES return the file content", async () => {
-      const { data, error } = await admin!.storage
-        .from("tenant-assets")
-        .createSignedUrl(objectPath, 60);
-      expect(error).toBeNull();
-      expect(data?.signedUrl).toBeTruthy();
+    it(
+      "a service-role-minted signed URL DOES return the file content",
+      async () => {
+        const { data, error } = await admin!.storage
+          .from("tenant-assets")
+          .createSignedUrl(objectPath, 60);
+        expect(error).toBeNull();
+        expect(data?.signedUrl).toBeTruthy();
 
-      const res = await fetch(data!.signedUrl);
-      expect(res.status).toBe(200);
-      const text = await res.text();
-      expect(text).toBe(objectBody);
-    }, NET_TIMEOUT_MS);
+        const res = await fetch(data!.signedUrl);
+        expect(res.status).toBe(200);
+        const text = await res.text();
+        expect(text).toBe(objectBody);
+      },
+      NET_TIMEOUT_MS,
+    );
 
-    it("tampering with the signed token breaks access", async () => {
-      const { data } = await admin!.storage
-        .from("tenant-assets")
-        .createSignedUrl(objectPath, 60);
-      const tampered = (data!.signedUrl as string).replace(
-        /token=[^&]+/,
-        "token=invalid",
-      );
-      const res = await fetch(tampered);
-      expect(res.status).not.toBe(200);
-      await res.text();
-    }, NET_TIMEOUT_MS);
+    it(
+      "tampering with the signed token breaks access",
+      async () => {
+        const { data } = await admin!.storage
+          .from("tenant-assets")
+          .createSignedUrl(objectPath, 60);
+        const tampered = (data!.signedUrl as string).replace(
+          /token=[^&]+/,
+          "token=invalid",
+        );
+        const res = await fetch(tampered);
+        expect(res.status).not.toBe(200);
+        await res.text();
+      },
+      NET_TIMEOUT_MS,
+    );
 
     afterAll(async () => {
       if (!admin) return;

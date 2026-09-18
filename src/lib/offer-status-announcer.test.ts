@@ -10,13 +10,20 @@ const flush = () => new Promise((r) => setTimeout(r, 80));
 
 describe("composeOfferStatusMessage", () => {
   it("joins non-empty parts and terminates each sentence", () => {
-    expect(composeOfferStatusMessage(["Offer confirmed", "2 lines sent", null, "  "])).toBe(
-      "Offer confirmed. 2 lines sent.",
-    );
+    expect(
+      composeOfferStatusMessage([
+        "Offer confirmed",
+        "2 lines sent",
+        null,
+        "  ",
+      ]),
+    ).toBe("Offer confirmed. 2 lines sent.");
   });
 
   it("keeps existing punctuation", () => {
-    expect(composeOfferStatusMessage(["Done!", "Nothing sent."])).toBe("Done! Nothing sent.");
+    expect(composeOfferStatusMessage(["Done!", "Nothing sent."])).toBe(
+      "Done! Nothing sent.",
+    );
   });
 
   it("returns an empty string when nothing is worth announcing", () => {

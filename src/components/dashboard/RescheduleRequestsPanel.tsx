@@ -50,26 +50,45 @@ const RescheduleRequestsPanel = () => {
       if (error) throw error;
 
       const rows = (requests ?? []) as RescheduleRow[];
-      if (rows.length === 0) return { rows, reservations: {} as Record<string, ReservationRow> };
+      if (rows.length === 0)
+        return { rows, reservations: {} as Record<string, ReservationRow> };
 
       const { data: reservations } = await supabase
         .from("reservations")
-        .select("id, guest_name, guest_email, reservation_type, date, start_time, end_time")
-        .in("id", rows.map((r) => r.reservation_id));
+        .select(
+          "id, guest_name, guest_email, reservation_type, date, start_time, end_time",
+        )
+        .in(
+          "id",
+          rows.map((r) => r.reservation_id),
+        );
 
       const map: Record<string, ReservationRow> = {};
-      for (const res of (reservations ?? []) as ReservationRow[]) map[res.id] = res;
+      for (const res of (reservations ?? []) as ReservationRow[])
+        map[res.id] = res;
       return { rows, reservations: map };
     },
   });
 
   const reviewMutation = useMutation({
-    mutationFn: async ({ row, approve }: { row: RescheduleRow; approve: boolean }) => {
+    mutationFn: async ({
+      row,
+      approve,
+    }: {
+      row: RescheduleRow;
+      approve: boolean;
+    }) => {
       // The decision moves the booking, closes the request, and emails the
       // guest. Those must not drift apart, so the edge function owns all three.
-      const { data: res, error } = await supabase.functions.invoke("reschedule-review", {
-        body: { request_id: row.id, decision: approve ? "approved" : "declined" },
-      });
+      const { data: res, error } = await supabase.functions.invoke(
+        "reschedule-review",
+        {
+          body: {
+            request_id: row.id,
+            decision: approve ? "approved" : "declined",
+          },
+        },
+      );
       if (error) throw error;
       if ((res as any)?.error) throw new Error((res as any).error);
       return res;
@@ -80,8 +99,12 @@ const RescheduleRequestsPanel = () => {
           ? "Booking moved to the new date and the guest was notified."
           : "Request declined and the guest was notified.",
       );
-      queryClient.invalidateQueries({ queryKey: ["reschedule-requests", tenantId] });
-      queryClient.invalidateQueries({ queryKey: ["pending-reschedule-count", tenantId] });
+      queryClient.invalidateQueries({
+        queryKey: ["reschedule-requests", tenantId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["pending-reschedule-count", tenantId],
+      });
       queryClient.invalidateQueries({ queryKey: ["reservations"] });
     },
     onError: (err: any) => {
@@ -111,26 +134,41 @@ const RescheduleRequestsPanel = () => {
         {rows.map((row) => {
           const res = data?.reservations[row.reservation_id];
           return (
-            <div key={row.id} className="rounded-lg border border-border p-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div
+              key={row.id}
+              className="rounded-lg border border-border p-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+            >
               <div className="text-sm space-y-1">
                 <p className="font-medium">
-                  {res?.guest_name ?? "Guest"}{res ? ` · ${res.reservation_type}` : ""}
+                  {res?.guest_name ?? "Guest"}
+                  {res ? ` · ${res.reservation_type}` : ""}
                 </p>
                 <p className="text-muted-foreground">
-                  {res ? `${format(new Date(res.date), "d.M.yyyy")}${res.start_time ? ` ${res.start_time.slice(0, 5)}` : ""}` : "Current date"}
+                  {res
+                    ? `${format(new Date(res.date), "d.M.yyyy")}${res.start_time ? ` ${res.start_time.slice(0, 5)}` : ""}`
+                    : "Current date"}
                   {" → "}
                   <span className="text-foreground font-medium">
                     {format(new Date(row.requested_date), "d.M.yyyy")}
-                    {row.requested_start_time ? ` ${row.requested_start_time.slice(0, 5)}` : ""}
+                    {row.requested_start_time
+                      ? ` ${row.requested_start_time.slice(0, 5)}`
+                      : ""}
                   </span>
                 </p>
-                {row.guest_note && <p className="text-muted-foreground italic">"{row.guest_note}"</p>}
+                {row.guest_note && (
+                  <p className="text-muted-foreground italic">
+                    "{row.guest_note}"
+                  </p>
+                )}
               </div>
               <div className="flex gap-2 shrink-0">
                 <Button
                   size="sm"
                   disabled={busyId === row.id}
-                  onClick={() => { setBusyId(row.id); reviewMutation.mutate({ row, approve: true }); }}
+                  onClick={() => {
+                    setBusyId(row.id);
+                    reviewMutation.mutate({ row, approve: true });
+                  }}
                   className="gap-1"
                 >
                   <Check className="h-3.5 w-3.5" /> Approve
@@ -139,7 +177,10 @@ const RescheduleRequestsPanel = () => {
                   size="sm"
                   variant="outline"
                   disabled={busyId === row.id}
-                  onClick={() => { setBusyId(row.id); reviewMutation.mutate({ row, approve: false }); }}
+                  onClick={() => {
+                    setBusyId(row.id);
+                    reviewMutation.mutate({ row, approve: false });
+                  }}
                   className="gap-1"
                 >
                   <X className="h-3.5 w-3.5" /> Decline

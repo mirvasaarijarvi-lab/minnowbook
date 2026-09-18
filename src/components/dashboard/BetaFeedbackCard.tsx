@@ -60,10 +60,17 @@ const BetaFeedbackCard = () => {
     },
     onSuccess: () => {
       setSubmitted(true);
-      toast({ title: "Thank you!", description: "Your feedback helps us improve." });
+      toast({
+        title: "Thank you!",
+        description: "Your feedback helps us improve.",
+      });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -74,7 +81,9 @@ const BetaFeedbackCard = () => {
         <CardContent className="pt-6 pb-5">
           <div className="flex items-center gap-3 text-accent">
             <Check className="h-5 w-5" />
-            <p className="text-sm font-medium">Thanks for your feedback today!</p>
+            <p className="text-sm font-medium">
+              Thanks for your feedback today!
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -106,7 +115,9 @@ const BetaFeedbackCard = () => {
               }`}
             >
               <span className="text-2xl">{e.emoji}</span>
-              <span className="text-[10px] text-muted-foreground font-medium">{e.label}</span>
+              <span className="text-[10px] text-muted-foreground font-medium">
+                {e.label}
+              </span>
             </button>
           ))}
         </div>
@@ -122,7 +133,9 @@ const BetaFeedbackCard = () => {
               className="resize-none text-sm"
             />
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground">{comment.length}/1000</span>
+              <span className="text-[10px] text-muted-foreground">
+                {comment.length}/1000
+              </span>
               <Button
                 size="sm"
                 onClick={() => submitMutation.mutate()}

@@ -1,7 +1,16 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { CalendarIcon, CheckCircle2, Clock, Mail, Search, XCircle, AlertTriangle, X } from "lucide-react";
+import {
+  CalendarIcon,
+  CheckCircle2,
+  Clock,
+  Mail,
+  Search,
+  XCircle,
+  AlertTriangle,
+  X,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,18 +19,59 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-const statusConfig: Record<string, { color: string; icon: typeof CheckCircle2; label: string }> = {
-  sent: { color: "text-green-600 bg-green-100 dark:bg-green-900/30", icon: CheckCircle2, label: "Sent" },
-  pending: { color: "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30", icon: Clock, label: "Pending" },
-  failed: { color: "text-destructive bg-red-100 dark:bg-red-900/30", icon: XCircle, label: "Failed" },
-  dlq: { color: "text-destructive bg-red-100 dark:bg-red-900/30", icon: XCircle, label: "Dead Letter" },
-  suppressed: { color: "text-orange-600 bg-orange-100 dark:bg-orange-900/30", icon: AlertTriangle, label: "Suppressed" },
-  bounced: { color: "text-orange-600 bg-orange-100 dark:bg-orange-900/30", icon: AlertTriangle, label: "Bounced" },
-  complained: { color: "text-orange-600 bg-orange-100 dark:bg-orange-900/30", icon: AlertTriangle, label: "Complained" },
+const statusConfig: Record<
+  string,
+  { color: string; icon: typeof CheckCircle2; label: string }
+> = {
+  sent: {
+    color: "text-green-600 bg-green-100 dark:bg-green-900/30",
+    icon: CheckCircle2,
+    label: "Sent",
+  },
+  pending: {
+    color: "text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30",
+    icon: Clock,
+    label: "Pending",
+  },
+  failed: {
+    color: "text-destructive bg-red-100 dark:bg-red-900/30",
+    icon: XCircle,
+    label: "Failed",
+  },
+  dlq: {
+    color: "text-destructive bg-red-100 dark:bg-red-900/30",
+    icon: XCircle,
+    label: "Dead Letter",
+  },
+  suppressed: {
+    color: "text-orange-600 bg-orange-100 dark:bg-orange-900/30",
+    icon: AlertTriangle,
+    label: "Suppressed",
+  },
+  bounced: {
+    color: "text-orange-600 bg-orange-100 dark:bg-orange-900/30",
+    icon: AlertTriangle,
+    label: "Bounced",
+  },
+  complained: {
+    color: "text-orange-600 bg-orange-100 dark:bg-orange-900/30",
+    icon: AlertTriangle,
+    label: "Complained",
+  },
 };
 
 interface EmailLogRow {
@@ -47,7 +97,9 @@ const EmailLogPanel = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("email_send_log")
-        .select("id, message_id, template_name, recipient_email, status, error_message, created_at")
+        .select(
+          "id, message_id, template_name, recipient_email, status, error_message, created_at",
+        )
         .eq("tenant_id", tenantId!)
         .order("created_at", { ascending: false })
         .limit(500);
@@ -71,8 +123,12 @@ const EmailLogPanel = () => {
 
   const filtered = useMemo(() => {
     const q = recipientQuery.trim().toLowerCase();
-    const fromMs = fromDate ? new Date(fromDate.setHours(0, 0, 0, 0)).getTime() : null;
-    const toMs = toDate ? new Date(new Date(toDate).setHours(23, 59, 59, 999)).getTime() : null;
+    const fromMs = fromDate
+      ? new Date(fromDate.setHours(0, 0, 0, 0)).getTime()
+      : null;
+    const toMs = toDate
+      ? new Date(new Date(toDate).setHours(23, 59, 59, 999)).getTime()
+      : null;
     return deduped.filter((e) => {
       if (statusFilter !== "all" && e.status !== statusFilter) return false;
       if (q && !e.recipient_email.toLowerCase().includes(q)) return false;
@@ -88,7 +144,8 @@ const EmailLogPanel = () => {
       total: filtered.length,
       sent: filtered.filter((e) => e.status === "sent").length,
       pending: filtered.filter((e) => e.status === "pending").length,
-      failed: filtered.filter((e) => ["failed", "dlq"].includes(e.status)).length,
+      failed: filtered.filter((e) => ["failed", "dlq"].includes(e.status))
+        .length,
     }),
     [filtered],
   );
@@ -101,7 +158,10 @@ const EmailLogPanel = () => {
   };
 
   const hasActiveFilters =
-    recipientQuery.trim() !== "" || statusFilter !== "all" || fromDate || toDate;
+    recipientQuery.trim() !== "" ||
+    statusFilter !== "all" ||
+    fromDate ||
+    toDate;
 
   return (
     <Card>
@@ -121,7 +181,9 @@ const EmailLogPanel = () => {
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="email-recipient" className="text-xs">Recipient</Label>
+            <Label htmlFor="email-recipient" className="text-xs">
+              Recipient
+            </Label>
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -163,7 +225,11 @@ const EmailLogPanel = () => {
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {fromDate ? format(fromDate, "PPP") : <span>Pick a date</span>}
+                  {fromDate ? (
+                    format(fromDate, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -220,7 +286,9 @@ const EmailLogPanel = () => {
           </div>
           <div className="text-center p-3 rounded-lg bg-secondary/50">
             <Clock className="h-4 w-4 mx-auto text-yellow-600 mb-1" />
-            <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
+            <p className="text-2xl font-bold text-foreground">
+              {stats.pending}
+            </p>
             <p className="text-xs text-muted-foreground">Pending</p>
           </div>
           <div className="text-center p-3 rounded-lg bg-secondary/50">
@@ -237,7 +305,9 @@ const EmailLogPanel = () => {
           </div>
         ) : filtered.length === 0 ? (
           <p className="text-center py-8 text-muted-foreground">
-            {deduped.length === 0 ? "No emails sent yet." : "No emails match these filters."}
+            {deduped.length === 0
+              ? "No emails sent yet."
+              : "No emails match these filters."}
           </p>
         ) : (
           <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
@@ -259,9 +329,13 @@ const EmailLogPanel = () => {
                         {e.template_name}
                       </Badge>
                     </div>
-                    <p className="text-sm text-foreground truncate">{e.recipient_email}</p>
+                    <p className="text-sm text-foreground truncate">
+                      {e.recipient_email}
+                    </p>
                     {e.error_message && (
-                      <p className="text-[11px] text-destructive">{e.error_message}</p>
+                      <p className="text-[11px] text-destructive">
+                        {e.error_message}
+                      </p>
                     )}
                   </div>
                   <span className="text-[10px] text-muted-foreground whitespace-nowrap flex items-center gap-1">

@@ -17,10 +17,16 @@ const Privacy = () => {
 
   const dateStr = new Date().toLocaleDateString(
     language === "fi" ? "fi-FI" : language === "sv" ? "sv-SE" : "en-US",
-    { month: "long", day: "numeric", year: "numeric" }
+    { month: "long", day: "numeric", year: "numeric" },
   );
 
-  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  const Section = ({
+    title,
+    children,
+  }: {
+    title: string;
+    children: React.ReactNode;
+  }) => (
     <section>
       <h2 className="text-xl font-serif font-bold text-foreground">{title}</h2>
       {children}
@@ -40,7 +46,9 @@ const Privacy = () => {
       />
       <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-lg">
         <div className="max-w-4xl mx-auto flex items-center justify-between px-6 py-4">
-          <Link to="/"><Logo variant="color" size="sm" /></Link>
+          <Link to="/">
+            <Logo variant="color" size="sm" />
+          </Link>
           <Link to="/">
             <Button variant="ghost" size="sm" className="gap-1.5">
               <ArrowLeft className="h-4 w-4" /> {t("common.back")}
@@ -59,15 +67,21 @@ const Privacy = () => {
 
         <div className="space-y-8">
           <Section title={t("privacy.s1Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("privacy.s1P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("privacy.s1P1")}
+            </p>
           </Section>
 
           <Section title={t("privacy.s2Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("privacy.s2P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("privacy.s2P1")}
+            </p>
           </Section>
 
           <Section title={t("privacy.s3Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("privacy.s3P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("privacy.s3P1")}
+            </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-1 mt-2">
               <li>{t("privacy.s3Item1")}</li>
               <li>{t("privacy.s3Item2")}</li>
@@ -77,7 +91,9 @@ const Privacy = () => {
           </Section>
 
           <Section title={t("privacy.s4Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("privacy.s4P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("privacy.s4P1")}
+            </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-1 mt-2">
               <li>{t("privacy.s4Item1")}</li>
               <li>{t("privacy.s4Item2")}</li>
@@ -86,11 +102,15 @@ const Privacy = () => {
           </Section>
 
           <Section title={t("privacy.s5Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("privacy.s5P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("privacy.s5P1")}
+            </p>
           </Section>
 
           <Section title={t("privacy.s6Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("privacy.s6P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("privacy.s6P1")}
+            </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-1 mt-2">
               <li>{t("privacy.s6Item1")}</li>
               <li>{t("privacy.s6Item2")}</li>
@@ -101,11 +121,15 @@ const Privacy = () => {
           </Section>
 
           <Section title={t("privacy.s7Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("privacy.s7P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("privacy.s7P1")}
+            </p>
           </Section>
 
           <Section title={t("privacy.s8Title")}>
-            <p className="text-muted-foreground leading-relaxed mt-2">{t("privacy.s8P1")}</p>
+            <p className="text-muted-foreground leading-relaxed mt-2">
+              {t("privacy.s8P1")}
+            </p>
           </Section>
         </div>
       </main>

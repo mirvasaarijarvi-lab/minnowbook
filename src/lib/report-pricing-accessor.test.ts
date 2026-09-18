@@ -43,7 +43,9 @@ describe("reportAmounts: the single pricing accessor", () => {
   });
 
   it("treats a non-accommodation booking as one room-line amount", () => {
-    const a = reportAmounts(stay({ reservation_type: "venue", price_eur: 450 }));
+    const a = reportAmounts(
+      stay({ reservation_type: "venue", price_eur: 450 }),
+    );
     expect(a.charged).toBe(450);
     expect(a.room).toBe(450);
     expect(a.breakfast).toBe(0);
@@ -52,7 +54,11 @@ describe("reportAmounts: the single pricing accessor", () => {
 
   it("gives a menu-priced restaurant booking no amount and no split", () => {
     const a = reportAmounts(
-      stay({ reservation_type: "restaurant", pricing_type: "menu", price_eur: 80 }),
+      stay({
+        reservation_type: "restaurant",
+        pricing_type: "menu",
+        price_eur: 80,
+      }),
     );
     expect(a.charged).toBe(0);
     expect(a.room).toBe(0);
@@ -71,10 +77,22 @@ describe("reportAmounts: the single pricing accessor", () => {
   it("sums a period in cents so the total never drifts from its rows", () => {
     const rows = [
       stay(),
-      stay({ breakfast_price_per_person: 8.95, guests_count: 3, price_eur: 383.6 }),
+      stay({
+        breakfast_price_per_person: 8.95,
+        guests_count: 3,
+        price_eur: 383.6,
+      }),
       stay({ breakfast_price_per_person: null, price_eur: 315 }),
-      stay({ reservation_type: "restaurant", pricing_type: "menu", price_eur: 80 }),
-      stay({ reservation_type: "venue", breakfast_included: false, price_eur: 450 }),
+      stay({
+        reservation_type: "restaurant",
+        pricing_type: "menu",
+        price_eur: 80,
+      }),
+      stay({
+        reservation_type: "venue",
+        breakfast_included: false,
+        price_eur: 450,
+      }),
       stay({ price_eur: null }),
     ];
     const totals = sumReportAmounts(rows);
@@ -124,7 +142,9 @@ describe("no report view recomputes amounts", () => {
         "calcChargedTotal",
         "DEFAULT_BREAKFAST_PRICE_PER_PERSON",
       ]) {
-        expect(src.includes(banned), `${rel} must not use ${banned}`).toBe(false);
+        expect(src.includes(banned), `${rel} must not use ${banned}`).toBe(
+          false,
+        );
       }
     }
   });
@@ -141,14 +161,26 @@ describe("no report view recomputes amounts", () => {
       [/calcNights\([^)]*\)\s*\*/, "multiplying by nights"],
       [/\*\s*calcNights/, "multiplying by nights"],
       [/breakfast_price_per_person\s*[*]/, "recomputing breakfast"],
-      [/reduce\([^)]*effectivePrice/, "summing prices outside sumReportAmounts"],
-      [/reduce\([^)]*calcRoomPrice/, "summing room lines outside sumReportAmounts"],
-      [/reduce\([^)]*calcBreakfastPrice/, "summing breakfast outside sumReportAmounts"],
+      [
+        /reduce\([^)]*effectivePrice/,
+        "summing prices outside sumReportAmounts",
+      ],
+      [
+        /reduce\([^)]*calcRoomPrice/,
+        "summing room lines outside sumReportAmounts",
+      ],
+      [
+        /reduce\([^)]*calcBreakfastPrice/,
+        "summing breakfast outside sumReportAmounts",
+      ],
     ];
     for (const rel of REPORT_VIEWS) {
       const src = readSource(rel);
       for (const [pattern, why] of banned) {
-        expect(pattern.test(src), `${rel} must not contain ${why} (${pattern})`).toBe(false);
+        expect(
+          pattern.test(src),
+          `${rel} must not contain ${why} (${pattern})`,
+        ).toBe(false);
       }
     }
   });

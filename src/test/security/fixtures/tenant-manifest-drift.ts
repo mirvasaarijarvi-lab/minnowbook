@@ -149,13 +149,21 @@ export function classifyManifestDriftForTenants(input: {
       declaredInMigrations,
     });
     const verdict: TenantDriftVerdict =
-      drift.stale.length > 0 ? "stale" : drift.pendingMigration.length > 0 ? "pending" : "ok";
+      drift.stale.length > 0
+        ? "stale"
+        : drift.pendingMigration.length > 0
+          ? "pending"
+          : "ok";
     return { tenant: view.tenant, drift, verdict };
   });
   return {
     perTenant,
-    pendingTenants: perTenant.filter((r) => r.verdict === "pending").map((r) => r.tenant),
-    staleTenants: perTenant.filter((r) => r.verdict === "stale").map((r) => r.tenant),
+    pendingTenants: perTenant
+      .filter((r) => r.verdict === "pending")
+      .map((r) => r.tenant),
+    staleTenants: perTenant
+      .filter((r) => r.verdict === "stale")
+      .map((r) => r.tenant),
   };
 }
 

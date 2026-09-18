@@ -79,7 +79,9 @@ describe("ConfirmationEmailPreview branding URL contract", () => {
     expect(img!.getAttribute("src")).toBe(PUBLIC_LOGO);
     // Sanity: nothing in the rendered tree should contain a signed-URL marker
     for (const marker of SIGNED_URL_MARKERS) {
-      expect(container.innerHTML.toLowerCase()).not.toContain(marker.toLowerCase());
+      expect(container.innerHTML.toLowerCase()).not.toContain(
+        marker.toLowerCase(),
+      );
     }
   });
 

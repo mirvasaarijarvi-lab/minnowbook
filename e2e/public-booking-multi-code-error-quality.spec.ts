@@ -61,24 +61,45 @@ const isoDate = (daysFromNow: number): string => {
  * Assertions every guest-facing refusal sentence must satisfy, whatever the
  * reason for the refusal.
  */
-const expectFriendlySentence = (label: string, message: string, forbiddenEchoes: string[]) => {
+const expectFriendlySentence = (
+  label: string,
+  message: string,
+  forbiddenEchoes: string[],
+) => {
   expect(typeof message, `${label}: message is text`).toBe("string");
-  expect(message, `${label}: no leading/trailing whitespace`).toBe(message.trim());
-  expect(message.length, `${label}: long enough to explain`).toBeGreaterThanOrEqual(20);
-  expect(message.length, `${label}: short enough to read in a toast`).toBeLessThanOrEqual(160);
-  expect(message, `${label}: single sentence, no line breaks`).not.toMatch(/[\r\n]/);
-  expect(message[0], `${label}: starts with a capital`).toBe(message[0].toUpperCase());
+  expect(message, `${label}: no leading/trailing whitespace`).toBe(
+    message.trim(),
+  );
+  expect(
+    message.length,
+    `${label}: long enough to explain`,
+  ).toBeGreaterThanOrEqual(20);
+  expect(
+    message.length,
+    `${label}: short enough to read in a toast`,
+  ).toBeLessThanOrEqual(160);
+  expect(message, `${label}: single sentence, no line breaks`).not.toMatch(
+    /[\r\n]/,
+  );
+  expect(message[0], `${label}: starts with a capital`).toBe(
+    message[0].toUpperCase(),
+  );
   // House copy rule: no em/en dashes anywhere in user-facing text.
   expect(message, `${label}: no em or en dashes`).not.toMatch(/[\u2013\u2014]/);
   // No machine-readable code tokens shown to guests.
-  expect(message, `${label}: no UPPER_SNAKE code token`).not.toMatch(/\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/);
+  expect(message, `${label}: no UPPER_SNAKE code token`).not.toMatch(
+    /\b[A-Z][A-Z0-9]*_[A-Z0-9_]+\b/,
+  );
   for (const pattern of LEAK_PATTERNS) {
-    expect(message, `${label}: no internal detail (${pattern})`).not.toMatch(pattern);
+    expect(message, `${label}: no internal detail (${pattern})`).not.toMatch(
+      pattern,
+    );
   }
   for (const echo of forbiddenEchoes) {
-    expect(message.toUpperCase(), `${label}: does not echo submitted value ${echo}`).not.toContain(
-      echo.toUpperCase(),
-    );
+    expect(
+      message.toUpperCase(),
+      `${label}: does not echo submitted value ${echo}`,
+    ).not.toContain(echo.toUpperCase());
   }
 };
 
@@ -87,7 +108,10 @@ test.describe("Multiple promo codes: refusal message quality", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("every multi-code shape returns the same clean explanation", async ({
     ephemeralTenant,
@@ -188,13 +212,16 @@ test.describe("Multiple promo codes: refusal message quality", () => {
       codeField: Record<string, unknown>,
       forbiddenEchoes: string[],
     ): Promise<string> => {
-      const email = `ci+codecopy-${label}-${stamp}@mimmobook.test`.toLowerCase();
+      const email =
+        `ci+codecopy-${label}-${stamp}@mimmobook.test`.toLowerCase();
       const before = await usedCounts();
       const res = await post(basePayload(codeField, email));
 
       expect(res.status(), `${label}: refused with 400`).toBe(400);
       const headers = res.headers();
-      expect(headers["content-type"], `${label}: JSON response`).toContain("application/json");
+      expect(headers["content-type"], `${label}: JSON response`).toContain(
+        "application/json",
+      );
       expect(
         headers["access-control-allow-origin"],
         `${label}: reachable from the browser`,
@@ -202,7 +229,10 @@ test.describe("Multiple promo codes: refusal message quality", () => {
 
       const body = await res.json();
       // The payload carries the explanation and nothing else.
-      expect(Object.keys(body).sort(), `${label}: only an error message`).toEqual(["error"]);
+      expect(
+        Object.keys(body).sort(),
+        `${label}: only an error message`,
+      ).toEqual(["error"]);
       expectFriendlySentence(label, String(body.error), forbiddenEchoes);
 
       expect(await rowsFor(email), `${label}: nothing stored`).toHaveLength(0);
@@ -231,27 +261,47 @@ test.describe("Multiple promo codes: refusal message quality", () => {
 
     const messages: string[] = [];
     for (const [label, codeField] of multiShapes) {
-      messages.push(await refuse(label, codeField, [CODE_A, CODE_B, UNKNOWN_CODE]));
+      messages.push(
+        await refuse(label, codeField, [CODE_A, CODE_B, UNKNOWN_CODE]),
+      );
     }
 
     // One sentence for every shape: the copy cannot drift per input form.
-    expect(new Set(messages).size, "one consistent explanation for all shapes").toBe(1);
+    expect(
+      new Set(messages).size,
+      "one consistent explanation for all shapes",
+    ).toBe(1);
     expect(messages[0], "explains the one-code rule").toBe(MULTI_CODE_ERROR);
-    expect(messages[0].toLowerCase(), "names the limit").toContain("only one promo code");
-    expect(messages[0].toLowerCase(), "names what it applies to").toContain("booking");
+    expect(messages[0].toLowerCase(), "names the limit").toContain(
+      "only one promo code",
+    );
+    expect(messages[0].toLowerCase(), "names what it applies to").toContain(
+      "booking",
+    );
 
     // ---------- A single bad code reads differently, and just as cleanly ----------
-    const loneInvalid = await refuse("lone-unknown", { promo_code: UNKNOWN_CODE }, [UNKNOWN_CODE]);
-    expect(loneInvalid, "single bad code has its own reason").toBe(INVALID_CODE_ERROR);
-    expect(loneInvalid, "distinguishable from the multi-code refusal").not.toBe(MULTI_CODE_ERROR);
+    const loneInvalid = await refuse(
+      "lone-unknown",
+      { promo_code: UNKNOWN_CODE },
+      [UNKNOWN_CODE],
+    );
+    expect(loneInvalid, "single bad code has its own reason").toBe(
+      INVALID_CODE_ERROR,
+    );
+    expect(loneInvalid, "distinguishable from the multi-code refusal").not.toBe(
+      MULTI_CODE_ERROR,
+    );
 
     // ---------- The rule is not a dead end: one code still works ----------
-    const okEmail = `ci+codecopy-accepted-${stamp}@mimmobook.test`.toLowerCase();
+    const okEmail =
+      `ci+codecopy-accepted-${stamp}@mimmobook.test`.toLowerCase();
     const okRes = await post(basePayload({ promo_code: CODE_A }, okEmail));
     expect(okRes.status(), "one code is accepted").toBe(200);
     const okBody = await okRes.json();
     expect(okBody.success, "booking created").toBe(true);
     expect(okBody.error, "no error on the happy path").toBeUndefined();
-    expect(await rowsFor(okEmail), "exactly one booking stored").toHaveLength(1);
+    expect(await rowsFor(okEmail), "exactly one booking stored").toHaveLength(
+      1,
+    );
   });
 });

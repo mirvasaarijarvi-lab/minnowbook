@@ -69,7 +69,9 @@ function skipReason(): string {
 }
 
 function hashCode(plaintext: string): string {
-  return createHash("sha256").update(plaintext.trim().toUpperCase()).digest("hex");
+  return createHash("sha256")
+    .update(plaintext.trim().toUpperCase())
+    .digest("hex");
 }
 
 function freshPlaintext(): string {
@@ -89,7 +91,10 @@ async function ensureFixtureUser(admin: SupabaseClient): Promise<{
 }> {
   let userId: string | null = null;
   for (let page = 1; page <= 5; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+    const { data, error } = await admin.auth.admin.listUsers({
+      page,
+      perPage: 200,
+    });
     if (error) throw new Error(`listUsers failed: ${error.message}`);
     const users = data.users as Array<{ id: string; email?: string }>;
     const found = users.find(
@@ -129,12 +134,16 @@ async function ensureFixtureUser(admin: SupabaseClient): Promise<{
     email: FIXTURE_EMAIL,
     password: FIXTURE_PASSWORD,
   });
-  if (signInErr) throw new Error(`fixture sign-in failed: ${signInErr.message}`);
-  const { data: tenantId, error: rpcErr } = await userClient.rpc("create_tenant", {
-    p_name: FIXTURE_TENANT_NAME,
-    p_slug: FIXTURE_TENANT_SLUG,
-    p_tier: "basic",
-  });
+  if (signInErr)
+    throw new Error(`fixture sign-in failed: ${signInErr.message}`);
+  const { data: tenantId, error: rpcErr } = await userClient.rpc(
+    "create_tenant",
+    {
+      p_name: FIXTURE_TENANT_NAME,
+      p_slug: FIXTURE_TENANT_SLUG,
+      p_tier: "basic",
+    },
+  );
   if (rpcErr) throw new Error(`create_tenant failed: ${rpcErr.message}`);
   if (!tenantId) throw new Error("create_tenant returned no id");
   return { userId, tenantId: tenantId as string };
@@ -282,7 +291,11 @@ suite(
       await tracker.sweepStaleRows();
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
       token = await signInAndGetToken();
     }, 60_000);
@@ -310,7 +323,11 @@ suite(
       if (tenantId) {
         await admin
           .from("tenants")
-          .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+          .update({
+            tier: "basic",
+            sample_start_date: null,
+            sample_end_date: null,
+          })
           .eq("id", tenantId);
       }
     }, 30_000);
@@ -326,7 +343,11 @@ suite(
         .eq("tenant_id", tenantId);
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
 
       const key = makeIdemKey("serial");
@@ -339,11 +360,21 @@ suite(
       // First must be a real 200 success; replays must be byte-identical
       // and carry the Idempotent-Replay marker so we know the cache (not
       // a fresh claim) produced them.
-      expect(results[0].status, `first call must succeed: ${results[0].rawText}`).toBe(200);
+      expect(
+        results[0].status,
+        `first call must succeed: ${results[0].rawText}`,
+      ).toBe(200);
       for (let i = 1; i < RETRIES; i++) {
-        expect(results[i].status, `replay ${i} status drift`).toBe(results[0].status);
-        expect(results[i].rawText, `replay ${i} body drift`).toBe(results[0].rawText);
-        expect(results[i].replay, `replay ${i} must carry Idempotent-Replay`).toBe("true");
+        expect(results[i].status, `replay ${i} status drift`).toBe(
+          results[0].status,
+        );
+        expect(results[i].rawText, `replay ${i} body drift`).toBe(
+          results[0].rawText,
+        );
+        expect(
+          results[i].replay,
+          `replay ${i} must carry Idempotent-Replay`,
+        ).toBe("true");
       }
 
       // THE CORE INVARIANT: ledger has one row, used_count is exactly 1,
@@ -369,18 +400,26 @@ suite(
         .eq("tenant_id", tenantId);
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
 
       const key = makeIdemKey("burst");
       const PARALLEL = 12;
       const results = await Promise.all(
-        Array.from({ length: PARALLEL }, () => callRedeem(token, plaintext, key)),
+        Array.from({ length: PARALLEL }, () =>
+          callRedeem(token, plaintext, key),
+        ),
       );
 
       // No 5xx allowed under concurrent cache writes.
       const crashes = results.filter((r) => r.status >= 500);
-      expect(crashes.length, `unexpected 5xx: ${JSON.stringify(crashes)}`).toBe(0);
+      expect(crashes.length, `unexpected 5xx: ${JSON.stringify(crashes)}`).toBe(
+        0,
+      );
 
       // All responses must agree on status (one canonical outcome).
       const statuses = new Set(results.map((r) => r.status));
@@ -422,12 +461,18 @@ suite(
         .eq("tenant_id", tenantId);
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
 
       const firstKey = makeIdemKey("first");
       const first = await callRedeem(token, plaintext, firstKey);
-      expect(first.status, `first redeem must succeed: ${first.rawText}`).toBe(200);
+      expect(first.status, `first redeem must succeed: ${first.rawText}`).toBe(
+        200,
+      );
 
       // New key + new call body — exercises the no-cache-hit path.
       const secondKey = makeIdemKey("second");

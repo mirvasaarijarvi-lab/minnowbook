@@ -2,7 +2,11 @@ import { test, expect } from "./fixtures/ephemeral-tenant";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./fixtures/test-tenant";
 import { randomUUID } from "node:crypto";
 import { buildGroupInvoiceModel, type InvoiceLegRow } from "@/lib/invoicePdf";
-import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricing-accessor";
+import {
+  reportAmounts,
+  sumReportAmounts,
+  roundCents,
+} from "@/lib/report-pricing-accessor";
 
 /**
  * End-to-end: invoicing a booking that spans several resources.
@@ -22,7 +26,10 @@ test.describe("Multi-resource invoice line items", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("line items sum to the charged total for every leg and the group", async ({
     ephemeralTenant,
@@ -121,7 +128,9 @@ test.describe("Multi-resource invoice line items", () => {
           ? spec.fixedPrice
           : roundCents(
               spec.nightly * nights +
-                (spec.breakfast && spec.breakfastRate ? spec.breakfastRate * spec.guests * nights : 0),
+                (spec.breakfast && spec.breakfastRate
+                  ? spec.breakfastRate * spec.guests * nights
+                  : 0),
             );
       const charged = roundCents(gross * (1 - spec.discountPercent / 100));
       const { data, error } = await admin
@@ -140,9 +149,12 @@ test.describe("Multi-resource invoice line items", () => {
           price_eur: charged,
           original_price_eur: gross,
           discount_type: spec.discountPercent > 0 ? "percentage" : null,
-          discount_value: spec.discountPercent > 0 ? spec.discountPercent : null,
-          discount_reason: spec.discountPercent > 0 ? "Promo code: CIGROUP" : null,
-          pricing_type: spec.resource_type === "restaurant" ? "fixed_price" : null,
+          discount_value:
+            spec.discountPercent > 0 ? spec.discountPercent : null,
+          discount_reason:
+            spec.discountPercent > 0 ? "Promo code: CIGROUP" : null,
+          pricing_type:
+            spec.resource_type === "restaurant" ? "fixed_price" : null,
           linked_group_id: groupId,
           guest_name: `TEST CI Multi Resource Invoice ${stamp}`,
           guest_email: guestEmail,
@@ -177,36 +189,59 @@ test.describe("Multi-resource invoice line items", () => {
 
     for (const leg of legs!) {
       expect(leg.is_invoiced, "every leg is invoiced").toBe(true);
-      expect(Number(leg.price_eur), "every leg carries an amount").toBeGreaterThan(0);
+      expect(
+        Number(leg.price_eur),
+        "every leg carries an amount",
+      ).toBeGreaterThan(0);
     }
 
     const invoiceLegs = legs as unknown as InvoiceLegRow[];
-    const model = buildGroupInvoiceModel(invoiceLegs, "en", { businessName: "CI Test Stay" } as any);
+    const model = buildGroupInvoiceModel(invoiceLegs, "en", {
+      businessName: "CI Test Stay",
+    } as any);
 
     // Per leg: the room line plus the breakfast line equal the charged amount.
     for (const leg of invoiceLegs) {
       const a = reportAmounts(leg as any);
       const legLines = model.lines.filter((l) => l.legId === leg.id);
-      expect(legLines.length, `leg ${leg.id} has line items`).toBeGreaterThan(0);
-      const room = legLines.filter((l) => l.kind === "room").reduce((s, l) => s + l.amount, 0);
+      expect(legLines.length, `leg ${leg.id} has line items`).toBeGreaterThan(
+        0,
+      );
+      const room = legLines
+        .filter((l) => l.kind === "room")
+        .reduce((s, l) => s + l.amount, 0);
       const breakfast = legLines
         .filter((l) => l.kind === "breakfast")
         .reduce((s, l) => s + l.amount, 0);
-      expect(roundCents(room + breakfast), `leg ${leg.id} lines sum`).toBe(roundCents(a.charged));
-      expect(roundCents(room), `leg ${leg.id} room line`).toBe(roundCents(a.room));
-      expect(roundCents(breakfast), `leg ${leg.id} breakfast line`).toBe(roundCents(a.breakfast));
+      expect(roundCents(room + breakfast), `leg ${leg.id} lines sum`).toBe(
+        roundCents(a.charged),
+      );
+      expect(roundCents(room), `leg ${leg.id} room line`).toBe(
+        roundCents(a.room),
+      );
+      expect(roundCents(breakfast), `leg ${leg.id} breakfast line`).toBe(
+        roundCents(a.breakfast),
+      );
       expect(room, "no negative room line").toBeGreaterThanOrEqual(0);
     }
 
     // Whole group: the line items sum to the amount charged across all legs.
     const totals = sumReportAmounts(invoiceLegs as any);
-    const lineSumCents = model.lines.reduce((s, l) => s + Math.round(l.amount * 100), 0);
-    expect(roundCents(lineSumCents / 100), "line items sum to the group total").toBe(
+    const lineSumCents = model.lines.reduce(
+      (s, l) => s + Math.round(l.amount * 100),
+      0,
+    );
+    expect(
+      roundCents(lineSumCents / 100),
+      "line items sum to the group total",
+    ).toBe(totals.charged);
+    expect(model.total, "invoice total equals the charged total").toBe(
       totals.charged,
     );
-    expect(model.total, "invoice total equals the charged total").toBe(totals.charged);
     expect(roundCents(totals.room + totals.breakfast)).toBe(totals.charged);
-    expect(model.isInvoiced, "the invoice reflects the invoiced legs").toBe(true);
+    expect(model.isInvoiced, "the invoice reflects the invoiced legs").toBe(
+      true,
+    );
     expect(model.skippedLegIds, "no leg is silently dropped").toHaveLength(0);
 
     // The breakfast lines only exist where breakfast was actually taken.
@@ -215,9 +250,10 @@ test.describe("Multi-resource invoice line items", () => {
     );
     for (const leg of invoiceLegs) {
       const expected = reportAmounts(leg as any).breakfast > 0;
-      expect(breakfastLegIds.has(leg.id), `breakfast line for ${leg.reservation_type}`).toBe(
-        expected,
-      );
+      expect(
+        breakfastLegIds.has(leg.id),
+        `breakfast line for ${leg.reservation_type}`,
+      ).toBe(expected);
     }
 
     // A leg left without an amount is reported as skipped, never as 0.00.
@@ -236,15 +272,24 @@ test.describe("Multi-resource invoice line items", () => {
       .eq("linked_group_id", groupId)
       .order("internal_notes", { ascending: true });
 
-    const mixedModel = buildGroupInvoiceModel(mixedLegs as unknown as InvoiceLegRow[], "en");
-    expect(mixedModel.skippedLegIds, "the unpriced leg is skipped").toEqual([inserted[2]]);
+    const mixedModel = buildGroupInvoiceModel(
+      mixedLegs as unknown as InvoiceLegRow[],
+      "en",
+    );
+    expect(mixedModel.skippedLegIds, "the unpriced leg is skipped").toEqual([
+      inserted[2],
+    ]);
     expect(mixedModel.lines.every((l) => l.legId !== inserted[2])).toBe(true);
     const mixedTotals = sumReportAmounts(mixedLegs as any);
-    expect(mixedModel.total, "the total still matches the charged amounts").toBe(
-      mixedTotals.charged,
-    );
     expect(
-      roundCents(mixedModel.lines.reduce((s, l) => s + Math.round(l.amount * 100), 0) / 100),
+      mixedModel.total,
+      "the total still matches the charged amounts",
+    ).toBe(mixedTotals.charged);
+    expect(
+      roundCents(
+        mixedModel.lines.reduce((s, l) => s + Math.round(l.amount * 100), 0) /
+          100,
+      ),
     ).toBe(mixedTotals.charged);
   });
 });

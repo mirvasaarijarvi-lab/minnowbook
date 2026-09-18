@@ -40,7 +40,8 @@ export function usePermissions() {
       if (!tenantUser) return [] as string[];
 
       // Use custom_role_key if set, otherwise fall back to enum role
-      const effectiveRole = (tenantUser as any).custom_role_key || tenantUser.role;
+      const effectiveRole =
+        (tenantUser as any).custom_role_key || tenantUser.role;
 
       const { data: perms } = await supabase
         .from("role_permissions")
@@ -62,4 +63,3 @@ export function usePermissions() {
 
   return { can, isLoading, isSystemAdmin };
 }
-

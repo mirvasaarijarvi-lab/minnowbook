@@ -7,7 +7,9 @@ function repeat(s: string, n: number): string {
 
 describe("safeLoadYaml", () => {
   it("parses normal YAML and returns the value", () => {
-    const out = safeLoadYaml<{ a: number; b: string[] }>("a: 1\nb: [x, y, z]\n");
+    const out = safeLoadYaml<{ a: number; b: string[] }>(
+      "a: 1\nb: [x, y, z]\n",
+    );
     expect(out).toEqual({ a: 1, b: ["x", "y", "z"] });
   });
 
@@ -24,7 +26,9 @@ describe("safeLoadYaml", () => {
   it("rejects input with too many alias references", () => {
     const aliases = repeat("*a, ", 50).replace(/, $/, "");
     const payload = `a: &a {x: 1}\nb: {<<: [${aliases}]}\n`;
-    expect(() => safeLoadYaml(payload, { maxAliases: 10 })).toThrowError(/alias references/);
+    expect(() => safeLoadYaml(payload, { maxAliases: 10 })).toThrowError(
+      /alias references/,
+    );
     try {
       safeLoadYaml(payload, { maxAliases: 10 });
     } catch (err) {
@@ -33,20 +37,33 @@ describe("safeLoadYaml", () => {
   });
 
   it("rejects input with too many anchors", () => {
-    const lines = Array.from({ length: 20 }, (_, i) => `k${i}: &a${i} ${i}`).join("\n");
-    expect(() => safeLoadYaml(lines, { maxAnchors: 5 })).toThrowError(/anchors/);
+    const lines = Array.from(
+      { length: 20 },
+      (_, i) => `k${i}: &a${i} ${i}`,
+    ).join("\n");
+    expect(() => safeLoadYaml(lines, { maxAnchors: 5 })).toThrowError(
+      /anchors/,
+    );
   });
 
   it("rejects input with too many merge keys", () => {
-    const lines = Array.from({ length: 10 }, (_, i) => `obj${i}:\n  <<: {x: ${i}}`).join("\n");
-    expect(() => safeLoadYaml(lines, { maxMergeKeys: 3 })).toThrowError(/merge keys/);
+    const lines = Array.from(
+      { length: 10 },
+      (_, i) => `obj${i}:\n  <<: {x: ${i}}`,
+    ).join("\n");
+    expect(() => safeLoadYaml(lines, { maxMergeKeys: 3 })).toThrowError(
+      /merge keys/,
+    );
   });
 
   it("rejects structures deeper than maxDepth", () => {
     // 12 levels of nested mappings
     let payload = "v: 1";
-    for (let i = 0; i < 12; i += 1) payload = `k:\n  ${payload.replace(/\n/g, "\n  ")}`;
-    expect(() => safeLoadYaml(payload, { maxDepth: 5 })).toThrowError(/levels deep/);
+    for (let i = 0; i < 12; i += 1)
+      payload = `k:\n  ${payload.replace(/\n/g, "\n  ")}`;
+    expect(() => safeLoadYaml(payload, { maxDepth: 5 })).toThrowError(
+      /levels deep/,
+    );
   });
 
   it("ignores anchor-like sequences inside quoted strings", () => {
@@ -71,7 +88,10 @@ describe("safeLoadYaml", () => {
 
   it("includes the source label in errors when provided", () => {
     try {
-      safeLoadYaml(repeat("x", 200), { maxBytes: 50, source: "tenant config upload" });
+      safeLoadYaml(repeat("x", 200), {
+        maxBytes: 50,
+        source: "tenant config upload",
+      });
     } catch (err) {
       expect((err as YamlGuardError).source).toBe("tenant config upload");
     }
@@ -82,7 +102,9 @@ describe("safeLoadYaml", () => {
     // long before the parser is invoked, regardless of js-yaml version.
     const KEYS = 1000;
     const REPEATS = 1000;
-    const entries = Array.from({ length: KEYS }, (_, i) => `k${i}: ${i}`).join(", ");
+    const entries = Array.from({ length: KEYS }, (_, i) => `k${i}: ${i}`).join(
+      ", ",
+    );
     const aliases = Array.from({ length: REPEATS }, () => "*a").join(", ");
     const payload = `a: &a {${entries}}\nb: {<<: [${aliases}]}\n`;
     expect(() => safeLoadYaml(payload)).toThrow(YamlGuardError);

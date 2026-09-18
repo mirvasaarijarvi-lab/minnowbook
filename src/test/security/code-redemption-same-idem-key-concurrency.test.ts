@@ -81,7 +81,9 @@ function skipReason(): string {
 }
 
 function hashCode(plaintext: string): string {
-  return createHash("sha256").update(plaintext.trim().toUpperCase()).digest("hex");
+  return createHash("sha256")
+    .update(plaintext.trim().toUpperCase())
+    .digest("hex");
 }
 
 function freshPlaintext(): string {
@@ -101,7 +103,10 @@ async function ensureFixtureUser(admin: SupabaseClient): Promise<{
 }> {
   let userId: string | null = null;
   for (let page = 1; page <= 5; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+    const { data, error } = await admin.auth.admin.listUsers({
+      page,
+      perPage: 200,
+    });
     if (error) throw new Error(`listUsers failed: ${error.message}`);
     const users = data.users as Array<{ id: string; email?: string }>;
     const found = users.find(
@@ -141,12 +146,16 @@ async function ensureFixtureUser(admin: SupabaseClient): Promise<{
     email: FIXTURE_EMAIL,
     password: FIXTURE_PASSWORD,
   });
-  if (signInErr) throw new Error(`fixture sign-in failed: ${signInErr.message}`);
-  const { data: tenantId, error: rpcErr } = await userClient.rpc("create_tenant", {
-    p_name: FIXTURE_TENANT_NAME,
-    p_slug: FIXTURE_TENANT_SLUG,
-    p_tier: "basic",
-  });
+  if (signInErr)
+    throw new Error(`fixture sign-in failed: ${signInErr.message}`);
+  const { data: tenantId, error: rpcErr } = await userClient.rpc(
+    "create_tenant",
+    {
+      p_name: FIXTURE_TENANT_NAME,
+      p_slug: FIXTURE_TENANT_SLUG,
+      p_tier: "basic",
+    },
+  );
   if (rpcErr) throw new Error(`create_tenant failed: ${rpcErr.message}`);
   if (!tenantId) throw new Error("create_tenant returned no id");
   return { userId, tenantId: tenantId as string };
@@ -312,7 +321,11 @@ suite(
       // Reset to a known clean slate so prior tests can't bias the assertions.
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
       await admin
         .from("access_code_redemptions")
@@ -331,7 +344,9 @@ suite(
       const PARALLEL = 12;
       const t0 = Date.now();
       const results = await Promise.all(
-        Array.from({ length: PARALLEL }, () => callRedeem(token, plaintext, idemKey)),
+        Array.from({ length: PARALLEL }, () =>
+          callRedeem(token, plaintext, idemKey),
+        ),
       );
       const elapsedMs = Date.now() - t0;
 
@@ -377,7 +392,9 @@ suite(
       // captured a failure outcome before any real work happened.)
       const { data: redemptions, error: ledgerErr } = await admin
         .from("access_code_redemptions")
-        .select("id, redeemed_by, tenant_id, granted_tier, granted_until, is_active")
+        .select(
+          "id, redeemed_by, tenant_id, granted_tier, granted_until, is_active",
+        )
         .eq("access_code_id", accessCodeId)
         .eq("tenant_id", tenantId);
       expect(ledgerErr?.message ?? null).toBeNull();
@@ -399,7 +416,10 @@ suite(
         expect(typeof row.granted_until).toBe("string");
 
         // The winning response body must agree with the persisted row.
-        const winnerBody = results[0]!.body as { granted_until?: string; tier?: string };
+        const winnerBody = results[0]!.body as {
+          granted_until?: string;
+          tier?: string;
+        };
         expect(winnerBody.tier).toBe("business");
         expect(row.granted_until).toBe(winnerBody.granted_until);
       }
@@ -470,7 +490,11 @@ suite(
 
       await admin
         .from("tenants")
-        .update({ tier: "basic", sample_start_date: null, sample_end_date: null })
+        .update({
+          tier: "basic",
+          sample_start_date: null,
+          sample_end_date: null,
+        })
         .eq("id", tenantId);
       await admin
         .from("access_code_redemptions")

@@ -36,7 +36,11 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { CalendarIcon, Loader2, Tag, Link2, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { computeBookingCapacity, logBookingValidation, buildValidationReasons } from "@/lib/booking-validation-log";
+import {
+  computeBookingCapacity,
+  logBookingValidation,
+  buildValidationReasons,
+} from "@/lib/booking-validation-log";
 
 interface ManualReservationDialogProps {
   open: boolean;
@@ -97,10 +101,17 @@ const ManualReservationDialog = ({
   const { tenant, tenantId } = useTenant();
   const { selectedSiteId } = useSiteContext();
 
-  const [form, setForm] = useState({ ...emptyForm, reservation_type: defaultType ?? "" });
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(defaultDate);
+  const [form, setForm] = useState({
+    ...emptyForm,
+    reservation_type: defaultType ?? "",
+  });
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    defaultDate,
+  );
   const [selectedResourceId, setSelectedResourceId] = useState("");
-  const [selectedSubServices, setSelectedSubServices] = useState<{ id: string; name: string; price_eur?: number; qty: number }[]>([]);
+  const [selectedSubServices, setSelectedSubServices] = useState<
+    { id: string; name: string; price_eur?: number; qty: number }[]
+  >([]);
 
   type LinkedEntry = {
     id: string;
@@ -114,8 +125,10 @@ const ManualReservationDialog = ({
   // Reset form when dialog opens
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen) {
-      const allowedTypes = (tenant?.allowed_reservation_types as string[]) ?? [];
-      const autoType = defaultType || (allowedTypes.length === 1 ? allowedTypes[0] : "");
+      const allowedTypes =
+        (tenant?.allowed_reservation_types as string[]) ?? [];
+      const autoType =
+        defaultType || (allowedTypes.length === 1 ? allowedTypes[0] : "");
       setForm({ ...emptyForm, reservation_type: autoType });
       setSelectedDate(defaultDate);
       setSelectedResourceId("");
@@ -132,12 +145,16 @@ const ManualReservationDialog = ({
     queryKey: ["resources-for-type", tenantId, form.reservation_type],
     queryFn: async () => {
       if (!tenantId || !form.reservation_type) return [];
-      const types = form.reservation_type === "hotel" || form.reservation_type === "guesthouse"
-        ? ["hotel", "guesthouse"]
-        : [form.reservation_type];
+      const types =
+        form.reservation_type === "hotel" ||
+        form.reservation_type === "guesthouse"
+          ? ["hotel", "guesthouse"]
+          : [form.reservation_type];
       const { data, error } = await supabase
         .from("resources")
-        .select("id, name, resource_type, is_active, price_per_night, breakfast_price_per_person, room_type_pricing, custom_type_label, sub_services")
+        .select(
+          "id, name, resource_type, is_active, price_per_night, breakfast_price_per_person, room_type_pricing, custom_type_label, sub_services",
+        )
         .eq("tenant_id", tenantId)
         .in("resource_type", types)
         .eq("is_active", true)
@@ -150,9 +167,12 @@ const ManualReservationDialog = ({
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      if (!tenantId || !selectedDate) throw new Error("Missing required fields");
+      if (!tenantId || !selectedDate)
+        throw new Error("Missing required fields");
 
-      const isAccommodation = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+      const isAccommodation =
+        form.reservation_type === "hotel" ||
+        form.reservation_type === "guesthouse";
       const isVenue = form.reservation_type === "venue";
 
       // Resolve site_id: use selected site, or find matching site by resource type
@@ -170,8 +190,12 @@ const ManualReservationDialog = ({
       }
 
       const dateStr = format(selectedDate, "yyyy-MM-dd");
-      const requestedGuests = form.guests_count ? parseInt(form.guests_count) : 0;
-      const validLinked = linkedEntries.filter((e) => e.reservation_type && e.date);
+      const requestedGuests = form.guests_count
+        ? parseInt(form.guests_count)
+        : 0;
+      const validLinked = linkedEntries.filter(
+        (e) => e.reservation_type && e.date,
+      );
       const linkedGroupId = validLinked.length > 0 ? crypto.randomUUID() : null;
 
       // Capacity observation (no hard block)
@@ -186,7 +210,9 @@ const ManualReservationDialog = ({
       // ---------- Auto-compute price via shared helper ----------
       // Mirrors the public booking edge function so the backend reservation
       // shows the price the customer will actually pay.
-      const selRes: any = resources.find((r: any) => r.id === selectedResourceId);
+      const selRes: any = resources.find(
+        (r: any) => r.id === selectedResourceId,
+      );
       const priced = computeReservationPrice({
         reservation_type: form.reservation_type,
         resource: selRes ?? null,
@@ -204,63 +230,77 @@ const ManualReservationDialog = ({
             : null,
         stall_fee_eur: form.stall_fee ? parseFloat(form.stall_fee) : null,
         discount_type: (form.discount_type as any) || null,
-        discount_value: form.discount_value ? parseFloat(form.discount_value) : null,
+        discount_value: form.discount_value
+          ? parseFloat(form.discount_value)
+          : null,
         manual_price_eur: form.price_eur ? parseFloat(form.price_eur) : null,
       });
       const gross = priced.gross_eur;
       const final = priced.final_eur;
 
-      const { data: inserted, error } = await supabase.from("reservations").insert({
-        tenant_id: tenantId,
-        site_id: resolvedSiteId,
-        guest_name: form.guest_name.trim(),
-        guest_email: form.guest_email.trim(),
-        guest_phone: form.guest_phone.trim() || null,
-        guests_count: form.guests_count ? parseInt(form.guests_count) : null,
-        reservation_type: form.reservation_type,
-        date: dateStr,
-        start_time: form.start_time || null,
-        special_requests: form.special_requests.trim() || null,
-        internal_notes: form.internal_notes.trim() || null,
-        price_eur: final,
-        original_price_eur: gross,
-        status: "confirmed",
-        ...(linkedGroupId ? { linked_group_id: linkedGroupId } : {}),
-        ...(form.discount_type && form.discount_value ? {
-          discount_type: form.discount_type,
-          discount_value: parseFloat(form.discount_value),
-          discount_reason: form.discount_reason.trim() || null,
-        } : {}),
-        ...(isAccommodation && {
-          check_out_date: form.check_out_date || null,
-          room_type: form.room_type || null,
-          breakfast_included: form.breakfast_included,
-        }),
-        ...(isVenue && {
-          event_type: form.event_type || null,
-          estimated_guests: form.guests_count ? parseInt(form.guests_count) : null,
-          catering_needed: form.catering_needed,
-        }),
-        ...(form.reservation_type === "restaurant" && {
-          pricing_type: form.pricing_type || null,
-          restaurant_sub_type: form.restaurant_sub_type,
-          delivery_address: form.delivery_address || null,
-          dietary_notes: form.dietary_notes || null,
-          equipment_needed: form.equipment_needed,
-          staff_needed: form.staff_needed,
-          festival_name: form.festival_name || null,
-          stall_size: form.stall_size || null,
-          electricity_needed: form.electricity_needed,
-          water_needed: form.water_needed,
-          food_permits: form.food_permits || null,
-          stall_fee: form.stall_fee ? parseFloat(form.stall_fee) : null,
-        }),
-        ...(form.reservation_type === "custom" && selectedSubServices.length > 0 && {
-          selected_sub_services: selectedSubServices.map((s) => ({
-            id: s.id, name: s.name, price_eur: s.price_eur ?? null, qty: s.qty,
-          })),
-        }),
-      } as any).select("id").single();
+      const { data: inserted, error } = await supabase
+        .from("reservations")
+        .insert({
+          tenant_id: tenantId,
+          site_id: resolvedSiteId,
+          guest_name: form.guest_name.trim(),
+          guest_email: form.guest_email.trim(),
+          guest_phone: form.guest_phone.trim() || null,
+          guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+          reservation_type: form.reservation_type,
+          date: dateStr,
+          start_time: form.start_time || null,
+          special_requests: form.special_requests.trim() || null,
+          internal_notes: form.internal_notes.trim() || null,
+          price_eur: final,
+          original_price_eur: gross,
+          status: "confirmed",
+          ...(linkedGroupId ? { linked_group_id: linkedGroupId } : {}),
+          ...(form.discount_type && form.discount_value
+            ? {
+                discount_type: form.discount_type,
+                discount_value: parseFloat(form.discount_value),
+                discount_reason: form.discount_reason.trim() || null,
+              }
+            : {}),
+          ...(isAccommodation && {
+            check_out_date: form.check_out_date || null,
+            room_type: form.room_type || null,
+            breakfast_included: form.breakfast_included,
+          }),
+          ...(isVenue && {
+            event_type: form.event_type || null,
+            estimated_guests: form.guests_count
+              ? parseInt(form.guests_count)
+              : null,
+            catering_needed: form.catering_needed,
+          }),
+          ...(form.reservation_type === "restaurant" && {
+            pricing_type: form.pricing_type || null,
+            restaurant_sub_type: form.restaurant_sub_type,
+            delivery_address: form.delivery_address || null,
+            dietary_notes: form.dietary_notes || null,
+            equipment_needed: form.equipment_needed,
+            staff_needed: form.staff_needed,
+            festival_name: form.festival_name || null,
+            stall_size: form.stall_size || null,
+            electricity_needed: form.electricity_needed,
+            water_needed: form.water_needed,
+            food_permits: form.food_permits || null,
+            stall_fee: form.stall_fee ? parseFloat(form.stall_fee) : null,
+          }),
+          ...(form.reservation_type === "custom" &&
+            selectedSubServices.length > 0 && {
+              selected_sub_services: selectedSubServices.map((s) => ({
+                id: s.id,
+                name: s.name,
+                price_eur: s.price_eur ?? null,
+                qty: s.qty,
+              })),
+            }),
+        } as any)
+        .select("id")
+        .single();
       if (error) {
         const { reasons } = buildValidationReasons({
           tenantId,
@@ -349,7 +389,9 @@ const ManualReservationDialog = ({
               guest_name: form.guest_name.trim(),
               guest_email: form.guest_email.trim(),
               guest_phone: form.guest_phone.trim() || null,
-              guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+              guests_count: form.guests_count
+                ? parseInt(form.guests_count)
+                : null,
               reservation_type: entry.reservation_type,
               date: entry.date,
               start_time: entry.start_time || null,
@@ -357,11 +399,15 @@ const ManualReservationDialog = ({
               status: "confirmed",
               linked_group_id: linkedGroupId,
             };
-          })
+          }),
         );
-        const { error: linkedErr } = await supabase.from("reservations").insert(rows as any);
+        const { error: linkedErr } = await supabase
+          .from("reservations")
+          .insert(rows as any);
         if (linkedErr) {
-          toast.error(`Linked reservations partial failure: ${linkedErr.message}`);
+          toast.error(
+            `Linked reservations partial failure: ${linkedErr.message}`,
+          );
         }
       }
     },
@@ -397,25 +443,48 @@ const ManualReservationDialog = ({
     form.reservation_type &&
     (!needsResource || !!selectedResourceId);
 
-  const isHotelType = form.reservation_type === "guesthouse" || form.reservation_type === "hotel";
+  const isHotelType =
+    form.reservation_type === "guesthouse" || form.reservation_type === "hotel";
   const isVenueType = form.reservation_type === "venue";
   const isRestaurantType = form.reservation_type === "restaurant";
 
   // Compute price from selected resource
   const selectedResource = resources.find((r) => r.id === selectedResourceId);
   const computePrice = () => {
-    if (!isHotelType || !selectedResource?.price_per_night || !selectedDate || !form.check_out_date) return;
+    if (
+      !isHotelType ||
+      !selectedResource?.price_per_night ||
+      !selectedDate ||
+      !form.check_out_date
+    )
+      return;
     const checkIn = new Date(format(selectedDate, "yyyy-MM-dd") + "T00:00:00");
     const checkOut = new Date(form.check_out_date + "T00:00:00");
-    const nights = Math.max(0, Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000));
+    const nights = Math.max(
+      0,
+      Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000),
+    );
     if (nights <= 0) return;
-    const pricing = (selectedResource as any)?.room_type_pricing ?? { single: 1.0, double: 1.5, suite: 2.5, dorm: 0.6 };
+    const pricing = (selectedResource as any)?.room_type_pricing ?? {
+      single: 1.0,
+      double: 1.5,
+      suite: 2.5,
+      dorm: 0.6,
+    };
     const multiplier = form.room_type ? (pricing[form.room_type] ?? 1.0) : 1.0;
-    const roomTotal = nights * Math.round(selectedResource.price_per_night * multiplier * 100) / 100;
+    const roomTotal =
+      (nights *
+        Math.round(selectedResource.price_per_night * multiplier * 100)) /
+      100;
     const guestsCount = form.guests_count ? parseInt(form.guests_count) : 1;
     const bfPrice = selectedResource.breakfast_price_per_person ?? 15;
-    const bfTotal = form.breakfast_included ? nights * guestsCount * bfPrice : 0;
-    setForm((prev) => ({ ...prev, price_eur: (roomTotal + bfTotal).toFixed(2) }));
+    const bfTotal = form.breakfast_included
+      ? nights * guestsCount * bfPrice
+      : 0;
+    setForm((prev) => ({
+      ...prev,
+      price_eur: (roomTotal + bfTotal).toFixed(2),
+    }));
   };
 
   return (
@@ -435,7 +504,13 @@ const ManualReservationDialog = ({
               <Select
                 value={form.reservation_type}
                 onValueChange={(v) => {
-                  setForm({ ...emptyForm, reservation_type: v, guest_name: form.guest_name, guest_email: form.guest_email, guest_phone: form.guest_phone });
+                  setForm({
+                    ...emptyForm,
+                    reservation_type: v,
+                    guest_name: form.guest_name,
+                    guest_email: form.guest_email,
+                    guest_phone: form.guest_phone,
+                  });
                   setSelectedResourceId("");
                 }}
               >
@@ -470,7 +545,9 @@ const ManualReservationDialog = ({
                 <SelectContent>
                   {resources.map((r) => (
                     <SelectItem key={r.id} value={r.id}>
-                      {(r as any).custom_type_label ? `${(r as any).custom_type_label} — ${r.name}` : r.name}
+                      {(r as any).custom_type_label
+                        ? `${(r as any).custom_type_label} — ${r.name}`
+                        : r.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -479,77 +556,125 @@ const ManualReservationDialog = ({
           )}
 
           {/* Sub-services picker for selected custom resource */}
-          {form.reservation_type === "custom" && selectedResourceId && (() => {
-            const r: any = resources.find((x: any) => x.id === selectedResourceId);
-            const subs: { id: string; name: string; price_eur?: number }[] = Array.isArray(r?.sub_services) ? r.sub_services : [];
-            if (subs.length === 0) return null;
-            return (
-              <div className="space-y-2">
-                <Label>{t("booking.subServices")}</Label>
+          {form.reservation_type === "custom" &&
+            selectedResourceId &&
+            (() => {
+              const r: any = resources.find(
+                (x: any) => x.id === selectedResourceId,
+              );
+              const subs: { id: string; name: string; price_eur?: number }[] =
+                Array.isArray(r?.sub_services) ? r.sub_services : [];
+              if (subs.length === 0) return null;
+              return (
                 <div className="space-y-2">
-                  {subs.map((s) => {
-                    const sel = selectedSubServices.find((x) => x.id === s.id);
-                    const checked = !!sel;
-                    const qty = sel?.qty ?? 1;
-                    return (
-                      <div key={s.id} className="flex items-center justify-between gap-3 p-2 rounded-md border">
-                        <label className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
-                          <Checkbox
-                            checked={checked}
-                            onCheckedChange={(c) => {
-                              setSelectedSubServices((prev) => {
-                                const list = prev.filter((x) => x.id !== s.id);
-                                if (c) list.push({ id: s.id, name: s.name, price_eur: s.price_eur, qty: 1 });
-                                return list;
-                              });
-                            }}
-                          />
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium truncate">{s.name}</div>
-                            {s.price_eur != null && (
-                              <div className="text-xs text-muted-foreground">€{Number(s.price_eur).toFixed(2)}</div>
-                            )}
-                          </div>
-                        </label>
-                        {checked && (
-                          <Input
-                            type="number"
-                            min={1}
-                            max={99}
-                            value={qty}
-                            onChange={(e) => {
-                              const n = Math.max(1, Math.min(99, parseInt(e.target.value) || 1));
-                              setSelectedSubServices((prev) => prev.map((x) => x.id === s.id ? { ...x, qty: n } : x));
-                            }}
-                            className="w-16 h-8 shrink-0"
-                            aria-label={t("booking.subServiceQty")}
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
+                  <Label>{t("booking.subServices")}</Label>
+                  <div className="space-y-2">
+                    {subs.map((s) => {
+                      const sel = selectedSubServices.find(
+                        (x) => x.id === s.id,
+                      );
+                      const checked = !!sel;
+                      const qty = sel?.qty ?? 1;
+                      return (
+                        <div
+                          key={s.id}
+                          className="flex items-center justify-between gap-3 p-2 rounded-md border"
+                        >
+                          <label className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(c) => {
+                                setSelectedSubServices((prev) => {
+                                  const list = prev.filter(
+                                    (x) => x.id !== s.id,
+                                  );
+                                  if (c)
+                                    list.push({
+                                      id: s.id,
+                                      name: s.name,
+                                      price_eur: s.price_eur,
+                                      qty: 1,
+                                    });
+                                  return list;
+                                });
+                              }}
+                            />
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium truncate">
+                                {s.name}
+                              </div>
+                              {s.price_eur != null && (
+                                <div className="text-xs text-muted-foreground">
+                                  €{Number(s.price_eur).toFixed(2)}
+                                </div>
+                              )}
+                            </div>
+                          </label>
+                          {checked && (
+                            <Input
+                              type="number"
+                              min={1}
+                              max={99}
+                              value={qty}
+                              onChange={(e) => {
+                                const n = Math.max(
+                                  1,
+                                  Math.min(99, parseInt(e.target.value) || 1),
+                                );
+                                setSelectedSubServices((prev) =>
+                                  prev.map((x) =>
+                                    x.id === s.id ? { ...x, qty: n } : x,
+                                  ),
+                                );
+                              }}
+                              className="w-16 h-8 shrink-0"
+                              aria-label={t("booking.subServiceQty")}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })()}
+              );
+            })()}
 
           {/* Guest details */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>{t("common.name")} *</Label>
-              <Input value={form.guest_name} onChange={(e) => updateField("guest_name", e.target.value)} maxLength={100} />
+              <Input
+                value={form.guest_name}
+                onChange={(e) => updateField("guest_name", e.target.value)}
+                maxLength={100}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>{t("common.email")} *</Label>
-              <Input type="email" value={form.guest_email} onChange={(e) => updateField("guest_email", e.target.value)} maxLength={255} />
+              <Input
+                type="email"
+                value={form.guest_email}
+                onChange={(e) => updateField("guest_email", e.target.value)}
+                maxLength={255}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>{t("common.phone")}</Label>
-              <Input value={form.guest_phone} onChange={(e) => updateField("guest_phone", e.target.value)} maxLength={30} />
+              <Input
+                value={form.guest_phone}
+                onChange={(e) => updateField("guest_phone", e.target.value)}
+                maxLength={30}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>{t("common.guests")}</Label>
-              <Input type="number" min={1} max={500} value={form.guests_count} onChange={(e) => updateField("guests_count", e.target.value)} />
+              <Input
+                type="number"
+                min={1}
+                max={500}
+                value={form.guests_count}
+                onChange={(e) => updateField("guests_count", e.target.value)}
+              />
             </div>
           </div>
 
@@ -559,19 +684,36 @@ const ManualReservationDialog = ({
               <Label>{t("common.date")} *</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !selectedDate && "text-muted-foreground",
+                    )}
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {selectedDate ? format(selectedDate, "PPP", { locale: dateFnsLocale }) : t("booking.pickDate")}
+                    {selectedDate
+                      ? format(selectedDate, "PPP", { locale: dateFnsLocale })
+                      : t("booking.pickDate")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} className={cn("p-3 pointer-events-auto")} />
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={setSelectedDate}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
                 </PopoverContent>
               </Popover>
             </div>
             <div className="space-y-1.5">
               <Label>{t("booking.preferredTime")}</Label>
-              <Input type="time" value={form.start_time} onChange={(e) => updateField("start_time", e.target.value)} />
+              <Input
+                type="time"
+                value={form.start_time}
+                onChange={(e) => updateField("start_time", e.target.value)}
+              />
             </div>
           </div>
 
@@ -583,17 +725,38 @@ const ManualReservationDialog = ({
                   <Label>{t("dashboard.checkOutDate")}</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !form.check_out_date && "text-muted-foreground")}>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !form.check_out_date && "text-muted-foreground",
+                        )}
+                      >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {form.check_out_date ? format(new Date(form.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale }) : "—"}
+                        {form.check_out_date
+                          ? format(
+                              new Date(form.check_out_date + "T00:00:00"),
+                              "PPP",
+                              { locale: dateFnsLocale },
+                            )
+                          : "—"}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        selected={form.check_out_date ? new Date(form.check_out_date + "T00:00:00") : undefined}
-                        onSelect={(d) => d && updateField("check_out_date", format(d, "yyyy-MM-dd"))}
-                        disabled={(date) => !selectedDate || date <= selectedDate}
+                        selected={
+                          form.check_out_date
+                            ? new Date(form.check_out_date + "T00:00:00")
+                            : undefined
+                        }
+                        onSelect={(d) =>
+                          d &&
+                          updateField("check_out_date", format(d, "yyyy-MM-dd"))
+                        }
+                        disabled={(date) =>
+                          !selectedDate || date <= selectedDate
+                        }
                         className={cn("p-3 pointer-events-auto")}
                       />
                     </PopoverContent>
@@ -601,13 +764,26 @@ const ManualReservationDialog = ({
                 </div>
                 <div className="space-y-1.5">
                   <Label>{t("booking.roomType")}</Label>
-                  <Select value={form.room_type} onValueChange={(v) => updateField("room_type", v)}>
-                    <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                  <Select
+                    value={form.room_type}
+                    onValueChange={(v) => updateField("room_type", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="—" />
+                    </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="single">{t("booking.roomSingle")}</SelectItem>
-                      <SelectItem value="double">{t("booking.roomDouble")}</SelectItem>
-                      <SelectItem value="suite">{t("booking.roomSuite")}</SelectItem>
-                      <SelectItem value="dorm">{t("booking.roomDorm")}</SelectItem>
+                      <SelectItem value="single">
+                        {t("booking.roomSingle")}
+                      </SelectItem>
+                      <SelectItem value="double">
+                        {t("booking.roomDouble")}
+                      </SelectItem>
+                      <SelectItem value="suite">
+                        {t("booking.roomSuite")}
+                      </SelectItem>
+                      <SelectItem value="dorm">
+                        {t("booking.roomDorm")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -616,14 +792,24 @@ const ManualReservationDialog = ({
                 <Checkbox
                   id="new-breakfast"
                   checked={form.breakfast_included}
-                  onCheckedChange={(checked) => setForm((prev) => ({ ...prev, breakfast_included: !!checked }))}
+                  onCheckedChange={(checked) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      breakfast_included: !!checked,
+                    }))
+                  }
                 />
                 <Label htmlFor="new-breakfast" className="cursor-pointer">
                   {t("booking.breakfastIncluded")}
                 </Label>
               </div>
               {selectedResource?.price_per_night && (
-                <Button type="button" variant="outline" size="sm" onClick={computePrice}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={computePrice}
+                >
                   {t("booking.calculatePrice")}
                 </Button>
               )}
@@ -635,14 +821,29 @@ const ManualReservationDialog = ({
             <div className="space-y-3 rounded-lg border border-border p-3">
               <div className="space-y-1.5">
                 <Label>{t("booking.eventType")}</Label>
-                <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                <Select
+                  value={form.event_type}
+                  onValueChange={(v) => updateField("event_type", v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="wedding">{t("booking.eventWedding")}</SelectItem>
-                    <SelectItem value="corporate">{t("booking.eventCorporate")}</SelectItem>
-                    <SelectItem value="birthday">{t("booking.eventBirthday")}</SelectItem>
-                    <SelectItem value="conference">{t("booking.eventConference")}</SelectItem>
-                    <SelectItem value="other">{t("booking.eventOther")}</SelectItem>
+                    <SelectItem value="wedding">
+                      {t("booking.eventWedding")}
+                    </SelectItem>
+                    <SelectItem value="corporate">
+                      {t("booking.eventCorporate")}
+                    </SelectItem>
+                    <SelectItem value="birthday">
+                      {t("booking.eventBirthday")}
+                    </SelectItem>
+                    <SelectItem value="conference">
+                      {t("booking.eventConference")}
+                    </SelectItem>
+                    <SelectItem value="other">
+                      {t("booking.eventOther")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -650,7 +851,9 @@ const ManualReservationDialog = ({
                 <Checkbox
                   id="new-catering"
                   checked={form.catering_needed}
-                  onCheckedChange={(checked) => setForm((prev) => ({ ...prev, catering_needed: !!checked }))}
+                  onCheckedChange={(checked) =>
+                    setForm((prev) => ({ ...prev, catering_needed: !!checked }))
+                  }
                 />
                 <Label htmlFor="new-catering" className="cursor-pointer">
                   {t("booking.cateringNeeded")}
@@ -662,13 +865,31 @@ const ManualReservationDialog = ({
           {/* Restaurant sub-type & fields */}
           {isRestaurantType && (
             <div className="space-y-3 rounded-lg border border-border p-3">
-              <Label className="font-medium">{t("booking.restaurantSubType")}</Label>
-              <Select value={form.restaurant_sub_type} onValueChange={(v) => setForm((prev) => ({ ...prev, restaurant_sub_type: v as any }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Label className="font-medium">
+                {t("booking.restaurantSubType")}
+              </Label>
+              <Select
+                value={form.restaurant_sub_type}
+                onValueChange={(v) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    restaurant_sub_type: v as any,
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dine_in">{t("booking.subTypeDineIn")}</SelectItem>
-                  <SelectItem value="catering">{t("booking.subTypeCatering")}</SelectItem>
-                  <SelectItem value="popup">{t("booking.subTypePopup")}</SelectItem>
+                  <SelectItem value="dine_in">
+                    {t("booking.subTypeDineIn")}
+                  </SelectItem>
+                  <SelectItem value="catering">
+                    {t("booking.subTypeCatering")}
+                  </SelectItem>
+                  <SelectItem value="popup">
+                    {t("booking.subTypePopup")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
@@ -677,12 +898,35 @@ const ManualReservationDialog = ({
                   <Label>{t("booking.pricingType")}</Label>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox checked={form.pricing_type === "menu"} onCheckedChange={(checked) => { if (checked) setForm((prev) => ({ ...prev, pricing_type: "menu" as const, price_eur: "" })); }} />
-                      <span className="text-sm">{t("booking.pricingMenu")}</span>
+                      <Checkbox
+                        checked={form.pricing_type === "menu"}
+                        onCheckedChange={(checked) => {
+                          if (checked)
+                            setForm((prev) => ({
+                              ...prev,
+                              pricing_type: "menu" as const,
+                              price_eur: "",
+                            }));
+                        }}
+                      />
+                      <span className="text-sm">
+                        {t("booking.pricingMenu")}
+                      </span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <Checkbox checked={form.pricing_type === "fixed_price"} onCheckedChange={(checked) => { if (checked) setForm((prev) => ({ ...prev, pricing_type: "fixed_price" as const })); }} />
-                      <span className="text-sm">{t("booking.pricingFixed")}</span>
+                      <Checkbox
+                        checked={form.pricing_type === "fixed_price"}
+                        onCheckedChange={(checked) => {
+                          if (checked)
+                            setForm((prev) => ({
+                              ...prev,
+                              pricing_type: "fixed_price" as const,
+                            }));
+                        }}
+                      />
+                      <span className="text-sm">
+                        {t("booking.pricingFixed")}
+                      </span>
                     </label>
                   </div>
                 </>
@@ -690,11 +934,45 @@ const ManualReservationDialog = ({
 
               {form.restaurant_sub_type === "catering" && (
                 <div className="space-y-2">
-                  <div><Label>{t("booking.deliveryAddress")}</Label><Input value={form.delivery_address} onChange={(e) => updateField("delivery_address", e.target.value)} maxLength={200} /></div>
-                  <div><Label>{t("booking.dietaryNotes")}</Label><Input value={form.dietary_notes} onChange={(e) => updateField("dietary_notes", e.target.value)} maxLength={500} /></div>
+                  <div>
+                    <Label>{t("booking.deliveryAddress")}</Label>
+                    <Input
+                      value={form.delivery_address}
+                      onChange={(e) =>
+                        updateField("delivery_address", e.target.value)
+                      }
+                      maxLength={200}
+                    />
+                  </div>
+                  <div>
+                    <Label>{t("booking.dietaryNotes")}</Label>
+                    <Input
+                      value={form.dietary_notes}
+                      onChange={(e) =>
+                        updateField("dietary_notes", e.target.value)
+                      }
+                      maxLength={500}
+                    />
+                  </div>
                   <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.equipment_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, equipment_needed: !!c }))} />{t("booking.equipmentNeeded")}</label>
-                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.staff_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, staff_needed: !!c }))} />{t("booking.staffNeeded")}</label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={form.equipment_needed}
+                        onCheckedChange={(c) =>
+                          setForm((p) => ({ ...p, equipment_needed: !!c }))
+                        }
+                      />
+                      {t("booking.equipmentNeeded")}
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={form.staff_needed}
+                        onCheckedChange={(c) =>
+                          setForm((p) => ({ ...p, staff_needed: !!c }))
+                        }
+                      />
+                      {t("booking.staffNeeded")}
+                    </label>
                   </div>
                 </div>
               )}
@@ -702,24 +980,79 @@ const ManualReservationDialog = ({
               {form.restaurant_sub_type === "popup" && (
                 <div className="space-y-2">
                   <div className="grid gap-2 sm:grid-cols-2">
-                    <div><Label>{t("booking.festivalName")}</Label><Input value={form.festival_name} onChange={(e) => updateField("festival_name", e.target.value)} maxLength={100} /></div>
-                    <div><Label>{t("booking.stallSize")}</Label>
-                      <Select value={form.stall_size} onValueChange={(v) => updateField("stall_size", v)}>
-                        <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                    <div>
+                      <Label>{t("booking.festivalName")}</Label>
+                      <Input
+                        value={form.festival_name}
+                        onChange={(e) =>
+                          updateField("festival_name", e.target.value)
+                        }
+                        maxLength={100}
+                      />
+                    </div>
+                    <div>
+                      <Label>{t("booking.stallSize")}</Label>
+                      <Select
+                        value={form.stall_size}
+                        onValueChange={(v) => updateField("stall_size", v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="—" />
+                        </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="small">{t("booking.stallSizeSmall")}</SelectItem>
-                          <SelectItem value="medium">{t("booking.stallSizeMedium")}</SelectItem>
-                          <SelectItem value="large">{t("booking.stallSizeLarge")}</SelectItem>
+                          <SelectItem value="small">
+                            {t("booking.stallSizeSmall")}
+                          </SelectItem>
+                          <SelectItem value="medium">
+                            {t("booking.stallSizeMedium")}
+                          </SelectItem>
+                          <SelectItem value="large">
+                            {t("booking.stallSizeLarge")}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                   <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.electricity_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, electricity_needed: !!c }))} />{t("booking.electricityNeeded")}</label>
-                    <label className="flex items-center gap-2 cursor-pointer text-sm"><Checkbox checked={form.water_needed} onCheckedChange={(c) => setForm((p) => ({ ...p, water_needed: !!c }))} />{t("booking.waterNeeded")}</label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={form.electricity_needed}
+                        onCheckedChange={(c) =>
+                          setForm((p) => ({ ...p, electricity_needed: !!c }))
+                        }
+                      />
+                      {t("booking.electricityNeeded")}
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-sm">
+                      <Checkbox
+                        checked={form.water_needed}
+                        onCheckedChange={(c) =>
+                          setForm((p) => ({ ...p, water_needed: !!c }))
+                        }
+                      />
+                      {t("booking.waterNeeded")}
+                    </label>
                   </div>
-                  <div><Label>{t("booking.foodPermits")}</Label><Input value={form.food_permits} onChange={(e) => updateField("food_permits", e.target.value)} maxLength={500} /></div>
-                  <div><Label>{t("booking.stallFee")}</Label><Input type="number" step="0.01" min={0} value={form.stall_fee} onChange={(e) => updateField("stall_fee", e.target.value)} /></div>
+                  <div>
+                    <Label>{t("booking.foodPermits")}</Label>
+                    <Input
+                      value={form.food_permits}
+                      onChange={(e) =>
+                        updateField("food_permits", e.target.value)
+                      }
+                      maxLength={500}
+                    />
+                  </div>
+                  <div>
+                    <Label>{t("booking.stallFee")}</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min={0}
+                      value={form.stall_fee}
+                      onChange={(e) => updateField("stall_fee", e.target.value)}
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -734,22 +1067,55 @@ const ManualReservationDialog = ({
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">{t("discount.type")}</Label>
-                <Select value={form.discount_type} onValueChange={(v) => setForm((prev) => ({ ...prev, discount_type: v as any }))}>
-                  <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                <Select
+                  value={form.discount_type}
+                  onValueChange={(v) =>
+                    setForm((prev) => ({ ...prev, discount_type: v as any }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="—" />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="percentage">{t("discount.percentage")}</SelectItem>
+                    <SelectItem value="percentage">
+                      {t("discount.percentage")}
+                    </SelectItem>
                     <SelectItem value="fixed">{t("discount.fixed")}</SelectItem>
-                    <SelectItem value="free_nights">{t("discount.freeNights")}</SelectItem>
+                    <SelectItem value="free_nights">
+                      {t("discount.freeNights")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">{t("discount.value")}</Label>
-                <Input type="number" step="0.01" min={0} value={form.discount_value} onChange={(e) => updateField("discount_value", e.target.value)} placeholder={form.discount_type === "percentage" ? "e.g. 10" : form.discount_type === "free_nights" ? "e.g. 1" : "e.g. 20"} />
+                <Input
+                  type="number"
+                  step="0.01"
+                  min={0}
+                  value={form.discount_value}
+                  onChange={(e) =>
+                    updateField("discount_value", e.target.value)
+                  }
+                  placeholder={
+                    form.discount_type === "percentage"
+                      ? "e.g. 10"
+                      : form.discount_type === "free_nights"
+                        ? "e.g. 1"
+                        : "e.g. 20"
+                  }
+                />
               </div>
               <div className="space-y-1.5">
-                  <Label className="text-xs">{t("discount.reason")}</Label>
-                  <Input value={form.discount_reason} onChange={(e) => updateField("discount_reason", e.target.value)} maxLength={200} placeholder={t("discount.reasonPlaceholder")} />
+                <Label className="text-xs">{t("discount.reason")}</Label>
+                <Input
+                  value={form.discount_reason}
+                  onChange={(e) =>
+                    updateField("discount_reason", e.target.value)
+                  }
+                  maxLength={200}
+                  placeholder={t("discount.reasonPlaceholder")}
+                />
               </div>
             </div>
           </div>
@@ -758,17 +1124,34 @@ const ManualReservationDialog = ({
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label>{t("common.price")} (€)</Label>
-              <Input type="number" step="0.01" min={0} value={form.price_eur} onChange={(e) => updateField("price_eur", e.target.value)} />
+              <Input
+                type="number"
+                step="0.01"
+                min={0}
+                value={form.price_eur}
+                onChange={(e) => updateField("price_eur", e.target.value)}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>{t("booking.specialRequests")}</Label>
-              <Input value={form.special_requests} onChange={(e) => updateField("special_requests", e.target.value)} maxLength={1000} />
+              <Input
+                value={form.special_requests}
+                onChange={(e) =>
+                  updateField("special_requests", e.target.value)
+                }
+                maxLength={1000}
+              />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <Label>{t("dashboard.internalNotes")}</Label>
-            <Textarea value={form.internal_notes} onChange={(e) => updateField("internal_notes", e.target.value)} rows={2} maxLength={2000} />
+            <Textarea
+              value={form.internal_notes}
+              onChange={(e) => updateField("internal_notes", e.target.value)}
+              rows={2}
+              maxLength={2000}
+            />
           </div>
 
           {/* Linked (cross-type) reservations */}
@@ -789,7 +1172,9 @@ const ManualReservationDialog = ({
                       {
                         id: crypto.randomUUID(),
                         reservation_type: "",
-                        date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
+                        date: selectedDate
+                          ? format(selectedDate, "yyyy-MM-dd")
+                          : "",
                         start_time: "",
                         notes: "",
                       },
@@ -804,21 +1189,34 @@ const ManualReservationDialog = ({
                 {t("booking.linkedHint" as any)}
               </p>
               {linkedEntries.map((entry, idx) => (
-                <div key={entry.id} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] items-end border-t border-border pt-3">
+                <div
+                  key={entry.id}
+                  className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] items-end border-t border-border pt-3"
+                >
                   <div className="space-y-1">
                     <Label className="text-xs">{t("common.type")}</Label>
                     <Select
                       value={entry.reservation_type}
                       onValueChange={(v) =>
-                        setLinkedEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, reservation_type: v } : e)))
+                        setLinkedEntries((prev) =>
+                          prev.map((e) =>
+                            e.id === entry.id
+                              ? { ...e, reservation_type: v }
+                              : e,
+                          ),
+                        )
                       }
                     >
-                      <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
+                      <SelectTrigger>
+                        <SelectValue placeholder="—" />
+                      </SelectTrigger>
                       <SelectContent>
                         {allowedTypes
                           .filter((tp) => tp !== form.reservation_type)
                           .map((tp) => (
-                            <SelectItem key={tp} value={tp}>{tDynamic(`dashboard.${tp}`)}</SelectItem>
+                            <SelectItem key={tp} value={tp}>
+                              {tDynamic(`dashboard.${tp}`)}
+                            </SelectItem>
                           ))}
                       </SelectContent>
                     </Select>
@@ -829,17 +1227,31 @@ const ManualReservationDialog = ({
                       type="date"
                       value={entry.date}
                       onChange={(e) =>
-                        setLinkedEntries((prev) => prev.map((x) => (x.id === entry.id ? { ...x, date: e.target.value } : x)))
+                        setLinkedEntries((prev) =>
+                          prev.map((x) =>
+                            x.id === entry.id
+                              ? { ...x, date: e.target.value }
+                              : x,
+                          ),
+                        )
                       }
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs">{t("booking.preferredTime")}</Label>
+                    <Label className="text-xs">
+                      {t("booking.preferredTime")}
+                    </Label>
                     <Input
                       type="time"
                       value={entry.start_time}
                       onChange={(e) =>
-                        setLinkedEntries((prev) => prev.map((x) => (x.id === entry.id ? { ...x, start_time: e.target.value } : x)))
+                        setLinkedEntries((prev) =>
+                          prev.map((x) =>
+                            x.id === entry.id
+                              ? { ...x, start_time: e.target.value }
+                              : x,
+                          ),
+                        )
                       }
                     />
                   </div>
@@ -847,17 +1259,29 @@ const ManualReservationDialog = ({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    onClick={() => setLinkedEntries((prev) => prev.filter((x) => x.id !== entry.id))}
+                    onClick={() =>
+                      setLinkedEntries((prev) =>
+                        prev.filter((x) => x.id !== entry.id),
+                      )
+                    }
                     aria-label="Remove"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                   <div className="sm:col-span-4 space-y-1">
-                    <Label className="text-xs">{t("dashboard.internalNotes")}</Label>
+                    <Label className="text-xs">
+                      {t("dashboard.internalNotes")}
+                    </Label>
                     <Input
                       value={entry.notes}
                       onChange={(e) =>
-                        setLinkedEntries((prev) => prev.map((x) => (x.id === entry.id ? { ...x, notes: e.target.value } : x)))
+                        setLinkedEntries((prev) =>
+                          prev.map((x) =>
+                            x.id === entry.id
+                              ? { ...x, notes: e.target.value }
+                              : x,
+                          ),
+                        )
                       }
                       maxLength={500}
                     />
@@ -872,8 +1296,13 @@ const ManualReservationDialog = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("common.cancel")}
           </Button>
-          <Button onClick={() => createMutation.mutate()} disabled={!isValid || createMutation.isPending}>
-            {createMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          <Button
+            onClick={() => createMutation.mutate()}
+            disabled={!isValid || createMutation.isPending}
+          >
+            {createMutation.isPending && (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            )}
             {t("dashboard.createReservation")}
           </Button>
         </DialogFooter>

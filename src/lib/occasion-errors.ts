@@ -30,15 +30,19 @@ const CODE_TO_KEY: Record<OccasionErrorCode, TranslationKey> = {
   [OCCASION_ERROR_CODES.OCCASION_UNAVAILABLE]: "booking.occasionErrUnavailable",
   [OCCASION_ERROR_CODES.OCCASION_WRONG_DATE]: "booking.occasionErrWrongDate",
   [OCCASION_ERROR_CODES.OCCASION_WRONG_TYPE]: "booking.occasionErrWrongType",
-  [OCCASION_ERROR_CODES.OCCASION_SEATING_REQUIRED]: "booking.occasionErrSeatingRequired",
-  [OCCASION_ERROR_CODES.OCCASION_SEATING_UNAVAILABLE]: "booking.occasionErrSeatingUnavailable",
+  [OCCASION_ERROR_CODES.OCCASION_SEATING_REQUIRED]:
+    "booking.occasionErrSeatingRequired",
+  [OCCASION_ERROR_CODES.OCCASION_SEATING_UNAVAILABLE]:
+    "booking.occasionErrSeatingUnavailable",
   [OCCASION_ERROR_CODES.OCCASION_FULL]: "booking.occasionErrFull",
 };
 
 /** True when the given string is a known occasion error code. */
 export function isOccasionErrorCode(code: unknown): code is OccasionErrorCode {
-  return typeof code === "string" &&
-    Object.prototype.hasOwnProperty.call(CODE_TO_KEY, code);
+  return (
+    typeof code === "string" &&
+    Object.prototype.hasOwnProperty.call(CODE_TO_KEY, code)
+  );
 }
 
 /**
@@ -49,10 +53,12 @@ export function isOccasionErrorCode(code: unknown): code is OccasionErrorCode {
 export function parseOccasionError(err: unknown): OccasionErrorInfo | null {
   const code = (err as { code?: unknown } | null | undefined)?.code;
   if (!isOccasionErrorCode(code)) return null;
-  const ctx = ((err as { occasion?: OccasionErrorContext }).occasion ?? {}) as OccasionErrorContext;
-  const remaining = typeof ctx.remaining === "number" && Number.isFinite(ctx.remaining)
-    ? ctx.remaining
-    : null;
+  const ctx = ((err as { occasion?: OccasionErrorContext }).occasion ??
+    {}) as OccasionErrorContext;
+  const remaining =
+    typeof ctx.remaining === "number" && Number.isFinite(ctx.remaining)
+      ? ctx.remaining
+      : null;
   return {
     code,
     remaining,
@@ -68,7 +74,9 @@ export function parseOccasionError(err: unknown): OccasionErrorInfo | null {
  * has some seats left gets the "only N seats left" variant, which
  * tells a large party what to do next.
  */
-export function occasionErrorTranslationKey(info: OccasionErrorInfo): TranslationKey {
+export function occasionErrorTranslationKey(
+  info: OccasionErrorInfo,
+): TranslationKey {
   if (
     info.code === OCCASION_ERROR_CODES.OCCASION_FULL &&
     typeof info.remaining === "number" &&
@@ -88,7 +96,10 @@ export function applyOccasionErrorPlaceholders(
   info: OccasionErrorInfo,
 ): string {
   return template
-    .replace(/\{seats\}/g, info.remaining === null ? "0" : String(info.remaining))
+    .replace(
+      /\{seats\}/g,
+      info.remaining === null ? "0" : String(info.remaining),
+    )
     .replace(/\{name\}/g, info.name ?? "")
     .replace(/\{times\}/g, info.seatingTimes.join(", "))
     .trim();

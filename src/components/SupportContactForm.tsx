@@ -3,7 +3,13 @@ import { useSearchParams } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +23,6 @@ import {
   isChallengePassed,
   type AccessibleChallenge,
 } from "@/lib/accessibleChallenge";
-
 
 /**
  * The support address is never written as a complete string in the markup or
@@ -35,7 +40,6 @@ const RATE_MAX_SUBMITS = 3;
 const RATE_STORAGE_KEY = "mimmobook-support-submits";
 // From this many recent messages onwards, a text challenge is required.
 const CHALLENGE_AFTER_SUBMITS = 2;
-
 
 const contactSchema = z.object({
   name: z.string().trim().max(100, "Name must be under 100 characters."),
@@ -71,7 +75,10 @@ const readSubmitTimes = (): number[] => {
 
 const recordSubmit = (times: number[]) => {
   try {
-    localStorage.setItem(RATE_STORAGE_KEY, JSON.stringify([...times, Date.now()]));
+    localStorage.setItem(
+      RATE_STORAGE_KEY,
+      JSON.stringify([...times, Date.now()]),
+    );
   } catch {
     /* storage unavailable, limit simply not persisted */
   }
@@ -153,19 +160,25 @@ const SupportContactForm = () => {
     requestAnimationFrame(() => challengeInputRef.current?.focus());
   };
 
-
   // Initial prefill — runs when auth resolves or query params change.
   useEffect(() => {
     setEmail((current) => current || prefillEmail || user?.email || "");
-    setName((current) =>
-      current || (user?.user_metadata?.display_name as string | undefined) || ""
+    setName(
+      (current) =>
+        current ||
+        (user?.user_metadata?.display_name as string | undefined) ||
+        "",
     );
   }, [prefillEmail, user?.email, user?.user_metadata?.display_name]);
 
   // Keep subject/message in sync if the user navigates here from a different
   // area without having edited the fields yet.
   useEffect(() => {
-    setSubject((current) => (current === "" || current === "Support request" ? defaultSubject : current));
+    setSubject((current) =>
+      current === "" || current === "Support request"
+        ? defaultSubject
+        : current,
+    );
   }, [defaultSubject]);
 
   useEffect(() => {
@@ -223,7 +236,9 @@ const SupportContactForm = () => {
 
     // Repeated messages from this browser: require the challenge before sending.
     if (!challenge && recent.length >= CHALLENGE_AFTER_SUBMITS) {
-      requireChallenge("Please answer this short question to confirm you are a person.");
+      requireChallenge(
+        "Please answer this short question to confirm you are a person.",
+      );
       return;
     }
 
@@ -236,7 +251,6 @@ const SupportContactForm = () => {
       setChallengeAnswer("");
       setChallengeError(null);
     }
-
 
     setSubmitting(true);
     try {
@@ -280,7 +294,9 @@ const SupportContactForm = () => {
       <Card className="max-w-2xl mx-auto border-primary/20">
         <CardHeader>
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <CardTitle className="font-serif text-xl">Contact support</CardTitle>
+            <CardTitle className="font-serif text-xl">
+              Contact support
+            </CardTitle>
             {area !== "generic" && (
               <Badge variant="secondary" className="gap-1.5">
                 <MapPin className="h-3 w-3" />
@@ -289,8 +305,9 @@ const SupportContactForm = () => {
             )}
           </div>
           <CardDescription>
-            Send us a message and we'll reply by email. Response time is typically within one
-            business day. We use your details only to answer your request.
+            Send us a message and we'll reply by email. Response time is
+            typically within one business day. We use your details only to
+            answer your request.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -308,7 +325,10 @@ const SupportContactForm = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Honeypot: hidden from people and assistive tech, bots fill it. */}
-            <div aria-hidden="true" className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden">
+            <div
+              aria-hidden="true"
+              className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden"
+            >
               <label htmlFor="support-company-website">Company website</label>
               <input
                 id="support-company-website"
@@ -374,10 +394,16 @@ const SupportContactForm = () => {
                 activity or repeated messages from this browser. */}
             {challenge && (
               <div className="rounded-md border border-primary/30 bg-muted/40 p-3 space-y-2">
-                <div aria-live="polite" className="text-xs text-muted-foreground">
+                <div
+                  aria-live="polite"
+                  className="text-xs text-muted-foreground"
+                >
                   {challengeError}
                 </div>
-                <Label htmlFor="support-challenge" className="block leading-relaxed">
+                <Label
+                  htmlFor="support-challenge"
+                  className="block leading-relaxed"
+                >
                   {challenge.question}
                 </Label>
                 <Input
@@ -390,17 +416,22 @@ const SupportContactForm = () => {
                   maxLength={40}
                   required
                 />
-                <p id="support-challenge-hint" className="text-xs text-muted-foreground">
-                  {challenge.hint} Prefer not to answer? Use "Email instead" below, your message
-                  still reaches us.
+                <p
+                  id="support-challenge-hint"
+                  className="text-xs text-muted-foreground"
+                >
+                  {challenge.hint} Prefer not to answer? Use "Email instead"
+                  below, your message still reaches us.
                 </p>
               </div>
             )}
 
-
-
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
-              <Button type="submit" disabled={submitting} className="gap-1.5 flex-1">
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="gap-1.5 flex-1"
+              >
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -425,11 +456,16 @@ const SupportContactForm = () => {
             </div>
 
             <div className="pt-2 text-xs text-muted-foreground flex items-start gap-2">
-              <ShieldCheck className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+              <ShieldCheck
+                className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary"
+                aria-hidden="true"
+              />
               <p>
                 Our support address is hidden from automated crawlers.{" "}
                 {revealedAddress ? (
-                  <span className="text-foreground font-medium">{revealedAddress}</span>
+                  <span className="text-foreground font-medium">
+                    {revealedAddress}
+                  </span>
                 ) : (
                   <button
                     type="button"

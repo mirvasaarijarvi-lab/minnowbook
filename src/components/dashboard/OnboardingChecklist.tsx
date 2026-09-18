@@ -12,7 +12,11 @@ interface ChecklistItem {
   done: boolean;
 }
 
-const OnboardingChecklist = ({ onNavigate }: { onNavigate?: (view: string) => void }) => {
+const OnboardingChecklist = ({
+  onNavigate,
+}: {
+  onNavigate?: (view: string) => void;
+}) => {
   const { tenantId } = useTenant();
   const t = useT();
 
@@ -22,18 +26,44 @@ const OnboardingChecklist = ({ onNavigate }: { onNavigate?: (view: string) => vo
       if (!tenantId) return [];
 
       const [resourcesRes, hoursRes, settingsRes] = await Promise.all([
-        supabase.from("resources").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
-        supabase.from("tenant_opening_hours").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
-        supabase.from("tenant_settings" as any).select("business_name, logo_url, business_email").eq("tenant_id", tenantId).maybeSingle(),
+        supabase
+          .from("resources")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId),
+        supabase
+          .from("tenant_opening_hours")
+          .select("id", { count: "exact", head: true })
+          .eq("tenant_id", tenantId),
+        supabase
+          .from("tenant_settings" as any)
+          .select("business_name, logo_url, business_email")
+          .eq("tenant_id", tenantId)
+          .maybeSingle(),
       ]);
 
       const settings = settingsRes.data as any;
 
       return [
-        { key: "resource", label: "Add your first resource", done: (resourcesRes.count ?? 0) > 0 },
-        { key: "hours", label: "Set opening hours", done: (hoursRes.count ?? 0) > 0 },
-        { key: "branding", label: "Upload your logo", done: !!settings?.logo_url },
-        { key: "email", label: "Set business email", done: !!settings?.business_email },
+        {
+          key: "resource",
+          label: "Add your first resource",
+          done: (resourcesRes.count ?? 0) > 0,
+        },
+        {
+          key: "hours",
+          label: "Set opening hours",
+          done: (hoursRes.count ?? 0) > 0,
+        },
+        {
+          key: "branding",
+          label: "Upload your logo",
+          done: !!settings?.logo_url,
+        },
+        {
+          key: "email",
+          label: "Set business email",
+          done: !!settings?.business_email,
+        },
       ];
     },
     enabled: !!tenantId,
@@ -54,7 +84,9 @@ const OnboardingChecklist = ({ onNavigate }: { onNavigate?: (view: string) => vo
         <div className="flex items-center gap-2">
           <Rocket className="h-5 w-5 text-primary" />
           <CardTitle className="font-serif text-base">Get Started</CardTitle>
-          <span className="ml-auto text-sm font-medium text-primary">{pct}%</span>
+          <span className="ml-auto text-sm font-medium text-primary">
+            {pct}%
+          </span>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -67,7 +99,13 @@ const OnboardingChecklist = ({ onNavigate }: { onNavigate?: (view: string) => vo
               ) : (
                 <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
               )}
-              <span className={item.done ? "text-muted-foreground line-through" : "text-foreground"}>
+              <span
+                className={
+                  item.done
+                    ? "text-muted-foreground line-through"
+                    : "text-foreground"
+                }
+              >
                 {item.label}
               </span>
             </li>

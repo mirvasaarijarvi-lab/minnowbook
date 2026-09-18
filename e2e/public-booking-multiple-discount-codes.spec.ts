@@ -45,7 +45,10 @@ test.describe("Requests carrying multiple discount codes", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("are refused, and a single code is applied at its own value", async ({
     ephemeralTenant,
@@ -174,24 +177,49 @@ test.describe("Requests carrying multiple discount codes", () => {
     });
 
     // 2. Every multi-code shape is refused, and nothing is stored or counted.
-    const multiShapes: Array<{ name: string; body: Record<string, unknown> }> = [
-      { name: "array of codes", body: { promo_code: [percentCode, fixedCode] } },
-      { name: "plural array field", body: { promo_codes: [percentCode, fixedCode] } },
-      { name: "plural string field", body: { promo_codes: `${percentCode},${fixedCode}` } },
-      {
-        name: "single code plus plural field",
-        body: { promo_code: percentCode, promo_codes: [fixedCode] },
-      },
-      { name: "comma separated", body: { promo_code: `${percentCode},${fixedCode}` } },
-      { name: "semicolon separated", body: { promo_code: `${percentCode};${fixedCode}` } },
-      { name: "plus separated", body: { promo_code: `${percentCode}+${fixedCode}` } },
-      { name: "space separated", body: { promo_code: `${percentCode} ${fixedCode}` } },
-      { name: "slash separated", body: { promo_code: `${percentCode}/${fixedCode}` } },
-      {
-        name: "valid plus foreign code",
-        body: { promo_code: `${percentCode},${foreignCode}` },
-      },
-    ];
+    const multiShapes: Array<{ name: string; body: Record<string, unknown> }> =
+      [
+        {
+          name: "array of codes",
+          body: { promo_code: [percentCode, fixedCode] },
+        },
+        {
+          name: "plural array field",
+          body: { promo_codes: [percentCode, fixedCode] },
+        },
+        {
+          name: "plural string field",
+          body: { promo_codes: `${percentCode},${fixedCode}` },
+        },
+        {
+          name: "single code plus plural field",
+          body: { promo_code: percentCode, promo_codes: [fixedCode] },
+        },
+        {
+          name: "comma separated",
+          body: { promo_code: `${percentCode},${fixedCode}` },
+        },
+        {
+          name: "semicolon separated",
+          body: { promo_code: `${percentCode};${fixedCode}` },
+        },
+        {
+          name: "plus separated",
+          body: { promo_code: `${percentCode}+${fixedCode}` },
+        },
+        {
+          name: "space separated",
+          body: { promo_code: `${percentCode} ${fixedCode}` },
+        },
+        {
+          name: "slash separated",
+          body: { promo_code: `${percentCode}/${fixedCode}` },
+        },
+        {
+          name: "valid plus foreign code",
+          body: { promo_code: `${percentCode},${foreignCode}` },
+        },
+      ];
 
     for (const [i, shape] of multiShapes.entries()) {
       const email = `ci+multicode-${i}-${stamp}@mimmobook.test`;
@@ -206,7 +234,10 @@ test.describe("Requests carrying multiple discount codes", () => {
       expect(text, `${shape.name} gave the wrong reason`).toContain(
         "Only one promo code can be used per booking",
       );
-      expect(await rowsFor(email), `${shape.name} stored a booking`).toHaveLength(0);
+      expect(
+        await rowsFor(email),
+        `${shape.name} stored a booking`,
+      ).toHaveLength(0);
       expect(await usedCount(percentId)).toBe(0);
       expect(await usedCount(fixedId)).toBe(0);
       expect(await usedCount(foreign!.id)).toBe(0);
@@ -229,7 +260,9 @@ test.describe("Requests carrying multiple discount codes", () => {
     expect(percentRows).toHaveLength(1);
     const percentRow = percentRows[0];
     expect(Number(percentRow.original_price_eur)).toBe(GROSS_EUR);
-    expect(Number(percentRow.price_eur)).toBe(roundCents(GROSS_EUR * (1 - PERCENT_OFF / 100)));
+    expect(Number(percentRow.price_eur)).toBe(
+      roundCents(GROSS_EUR * (1 - PERCENT_OFF / 100)),
+    );
     expect(percentRow.discount_type).toBe("percentage");
     expect(Number(percentRow.discount_value)).toBe(PERCENT_OFF);
     expect(percentRow.discount_code_id).toBe(percentId);
@@ -248,7 +281,9 @@ test.describe("Requests carrying multiple discount codes", () => {
     expect(fixedRes.status(), await fixedRes.text()).toBe(200);
     const fixedRows = await rowsFor(fixedEmail);
     expect(fixedRows).toHaveLength(1);
-    expect(Number(fixedRows[0].price_eur)).toBe(roundCents(GROSS_EUR - FIXED_OFF));
+    expect(Number(fixedRows[0].price_eur)).toBe(
+      roundCents(GROSS_EUR - FIXED_OFF),
+    );
     expect(fixedRows[0].discount_code_id).toBe(fixedId);
     expect(await usedCount(fixedId)).toBe(1);
     expect(await usedCount(percentId)).toBe(1);
@@ -281,13 +316,16 @@ test.describe("Requests carrying multiple discount codes", () => {
         breakfast_price_per_person: Number(row.breakfast_price_per_person),
         price_eur: Number(row.price_eur),
       };
-      expect(roundCents(calcRoomPrice(reportRow) + calcBreakfastPrice(reportRow))).toBe(
-        roundCents(effectiveChargedTotal(reportRow)),
-      );
+      expect(
+        roundCents(calcRoomPrice(reportRow) + calcBreakfastPrice(reportRow)),
+      ).toBe(roundCents(effectiveChargedTotal(reportRow)));
     }
 
     // Cleanup: the foreign tenant lives outside the ephemeral fixture.
-    await admin.from("discount_codes").delete().eq("tenant_id", otherTenant!.id);
+    await admin
+      .from("discount_codes")
+      .delete()
+      .eq("tenant_id", otherTenant!.id);
     await admin.from("tenants").delete().eq("id", otherTenant!.id);
     await admin.auth.admin.deleteUser(otherOwner!.user!.id);
   });

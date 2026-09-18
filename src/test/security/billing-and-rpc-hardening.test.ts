@@ -25,12 +25,14 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY ??
   process.env.SUPABASE_PUBLISHABLE_KEY;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SERVICE_ROLE_KEY;
+const SERVICE_ROLE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SERVICE_ROLE_KEY;
 
 const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SERVICE_ROLE_KEY);
 
@@ -83,7 +85,11 @@ async function createOwner(service: SupabaseClient, label: string) {
   return { userId: data.user.id, email, password };
 }
 
-async function createTenant(service: SupabaseClient, ownerUserId: string, label: string) {
+async function createTenant(
+  service: SupabaseClient,
+  ownerUserId: string,
+  label: string,
+) {
   const id = randomUUID();
   const shortId = id.slice(0, 8);
   const slug = `ci-billing-${label}-${shortId}`;
@@ -121,7 +127,11 @@ describe.runIf(canRun)("billing + RPC hardening (live)", () => {
 
     const { data: siteRow, error: siteErr } = await ctx.service
       .from("sites")
-      .insert({ tenant_id: ctx.tenantId, name: "primary-site", slug: `site-${randomUUID().slice(0, 8)}` })
+      .insert({
+        tenant_id: ctx.tenantId,
+        name: "primary-site",
+        slug: `site-${randomUUID().slice(0, 8)}`,
+      })
       .select("id")
       .single();
     if (siteErr || !siteRow) throw siteErr ?? new Error("site insert failed");
@@ -129,17 +139,29 @@ describe.runIf(canRun)("billing + RPC hardening (live)", () => {
 
     const other = await createOwner(ctx.service, "other");
     ctx.otherOwnerId = other.userId;
-    ctx.otherTenantId = await createTenant(ctx.service, ctx.otherOwnerId, "other");
+    ctx.otherTenantId = await createTenant(
+      ctx.service,
+      ctx.otherOwnerId,
+      "other",
+    );
   }, 60_000);
 
   afterAll(async () => {
     if (!ctx.service) return;
     const swallow = async (p: PromiseLike<unknown>) => {
-      try { await p; } catch { /* best-effort cleanup */ }
+      try {
+        await p;
+      } catch {
+        /* best-effort cleanup */
+      }
     };
     for (const t of ctx.cleanupTenants) {
-      await swallow(ctx.service.from("reservations").delete().eq("tenant_id", t));
-      await swallow(ctx.service.from("tenant_users").delete().eq("tenant_id", t));
+      await swallow(
+        ctx.service.from("reservations").delete().eq("tenant_id", t),
+      );
+      await swallow(
+        ctx.service.from("tenant_users").delete().eq("tenant_id", t),
+      );
       await swallow(ctx.service.from("sites").delete().eq("tenant_id", t));
       await swallow(ctx.service.from("tenants").delete().eq("id", t));
     }
@@ -196,13 +218,21 @@ describe.runIf(canRun)("billing + RPC hardening (live)", () => {
       { discount_percentage: 99 },
     ];
     for (const patch of attempts) {
-      const { error } = await client.from("tenants").update(patch).eq("id", ctx.tenantId);
-      expect(error, `expected update ${JSON.stringify(patch)} to be rejected`).not.toBeNull();
+      const { error } = await client
+        .from("tenants")
+        .update(patch)
+        .eq("id", ctx.tenantId);
+      expect(
+        error,
+        `expected update ${JSON.stringify(patch)} to be rejected`,
+      ).not.toBeNull();
     }
 
     const { data: row } = await ctx.service
       .from("tenants")
-      .select("tier, subscription_status, stripe_customer_id, stripe_subscription_id, discount_percentage")
+      .select(
+        "tier, subscription_status, stripe_customer_id, stripe_subscription_id, discount_percentage",
+      )
       .eq("id", ctx.tenantId)
       .single();
     expect(row?.tier).toBe("basic");
@@ -239,17 +269,23 @@ describe.runIf(canRun)("billing + RPC hardening (live)", () => {
     expect(signInErr).toBeNull();
 
     // Cross-tenant: owner of tenantId targeting otherTenantId.
-    const { error: crossErr } = await client.rpc("copy_tenant_defaults_to_site", {
-      p_tenant_id: ctx.otherTenantId,
-      p_site_id: ctx.siteId,
-    });
+    const { error: crossErr } = await client.rpc(
+      "copy_tenant_defaults_to_site",
+      {
+        p_tenant_id: ctx.otherTenantId,
+        p_site_id: ctx.siteId,
+      },
+    );
     expect(crossErr, "cross-tenant call must be rejected").not.toBeNull();
 
     // Mismatched site: legitimate tenant but a site that belongs to another tenant.
-    const { error: mismatchErr } = await client.rpc("copy_tenant_defaults_to_site", {
-      p_tenant_id: ctx.tenantId,
-      p_site_id: randomUUID(),
-    });
+    const { error: mismatchErr } = await client.rpc(
+      "copy_tenant_defaults_to_site",
+      {
+        p_tenant_id: ctx.tenantId,
+        p_site_id: randomUUID(),
+      },
+    );
     expect(mismatchErr, "site-not-in-tenant must be rejected").not.toBeNull();
 
     await client.auth.signOut();
@@ -273,8 +309,13 @@ describe.runIf(canRun)("billing + RPC hardening (live)", () => {
       { discount_value: 50 },
     ];
     for (const extra of discountAttempts) {
-      const { error } = await anon.from("reservations").insert({ ...base, ...extra });
-      expect(error, `anon insert with ${JSON.stringify(extra)} must be rejected`).not.toBeNull();
+      const { error } = await anon
+        .from("reservations")
+        .insert({ ...base, ...extra });
+      expect(
+        error,
+        `anon insert with ${JSON.stringify(extra)} must be rejected`,
+      ).not.toBeNull();
     }
 
     // Control: same payload without discount fields is allowed.

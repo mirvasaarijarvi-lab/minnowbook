@@ -2,7 +2,16 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, subDays, parseISO } from "date-fns";
 import { CalendarDays } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -12,7 +21,13 @@ import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { useAnalyticsT } from "@/i18n/analytics";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -55,7 +70,9 @@ const BusiestWeekdayPanel = () => {
     queryFn: async () => {
       let query = supabase
         .from("reservations")
-        .select("id, reservation_type, date, guests_count, estimated_guests, site_id")
+        .select(
+          "id, reservation_type, date, guests_count, estimated_guests, site_id",
+        )
         .eq("tenant_id", tenantId!)
         .gte("date", startStr)
         .lte("date", endStr)
@@ -68,11 +85,14 @@ const BusiestWeekdayPanel = () => {
   });
 
   const { chartData, busiest, total } = useMemo(() => {
-    const filtered = rows.filter((r) => service === "all" || r.reservation_type === service);
+    const filtered = rows.filter(
+      (r) => service === "all" || r.reservation_type === service,
+    );
     const buckets = new Map<number, number>();
     for (const r of filtered) {
       const day = parseISO(`${r.date}T00:00:00`).getDay();
-      const value = metric === "guests" ? (r.guests_count ?? r.estimated_guests ?? 0) : 1;
+      const value =
+        metric === "guests" ? (r.guests_count ?? r.estimated_guests ?? 0) : 1;
       buckets.set(day, (buckets.get(day) ?? 0) + value);
     }
     const data = WEEKDAY_ORDER.map((day) => {
@@ -84,7 +104,11 @@ const BusiestWeekdayPanel = () => {
         value: buckets.get(day) ?? 0,
       };
     });
-    const top = data.reduce((best, d) => (d.value > best.value ? d : best), { day: -1, label: "-", value: 0 });
+    const top = data.reduce((best, d) => (d.value > best.value ? d : best), {
+      day: -1,
+      label: "-",
+      value: 0,
+    });
     return {
       chartData: data,
       busiest: top.value > 0 ? top : null,
@@ -105,8 +129,13 @@ const BusiestWeekdayPanel = () => {
         <div className="flex flex-wrap items-end gap-3">
           <div className="space-y-1">
             <Label className="text-xs">{t("an.range")}</Label>
-            <Select value={rangeKey} onValueChange={(v) => setRangeKey(v as RangeKey)}>
-              <SelectTrigger className="h-8 w-[170px] text-xs"><SelectValue /></SelectTrigger>
+            <Select
+              value={rangeKey}
+              onValueChange={(v) => setRangeKey(v as RangeKey)}
+            >
+              <SelectTrigger className="h-8 w-[170px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="30">{t("an.last30")}</SelectItem>
                 <SelectItem value="90">{t("an.last90")}</SelectItem>
@@ -116,10 +145,17 @@ const BusiestWeekdayPanel = () => {
           </div>
           <div className="space-y-1">
             <Label className="text-xs">{t("an.metric")}</Label>
-            <Select value={metric} onValueChange={(v) => setMetric(v as Metric)}>
-              <SelectTrigger className="h-8 w-[150px] text-xs"><SelectValue /></SelectTrigger>
+            <Select
+              value={metric}
+              onValueChange={(v) => setMetric(v as Metric)}
+            >
+              <SelectTrigger className="h-8 w-[150px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="reservations">{t("an.metricReservations")}</SelectItem>
+                <SelectItem value="reservations">
+                  {t("an.metricReservations")}
+                </SelectItem>
                 <SelectItem value="guests">{t("an.metricGuests")}</SelectItem>
               </SelectContent>
             </Select>
@@ -127,11 +163,15 @@ const BusiestWeekdayPanel = () => {
           <div className="space-y-1">
             <Label className="text-xs">{t("an.service")}</Label>
             <Select value={service} onValueChange={setService}>
-              <SelectTrigger className="h-8 w-[170px] text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-8 w-[170px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("an.allServices")}</SelectItem>
                 {allowedTypes.map((tp) => (
-                  <SelectItem key={tp} value={tp}>{typeLabel(tp)}</SelectItem>
+                  <SelectItem key={tp} value={tp}>
+                    {typeLabel(tp)}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -146,10 +186,15 @@ const BusiestWeekdayPanel = () => {
         {isLoading ? (
           <Skeleton className="h-[240px] w-full" />
         ) : total === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">{t("an.noData")}</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">
+            {t("an.noData")}
+          </p>
         ) : (
           <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={chartData} margin={{ top: 5, right: 10, left: -18, bottom: 5 }}>
+            <BarChart
+              data={chartData}
+              margin={{ top: 5, right: 10, left: -18, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
               <XAxis dataKey="label" tick={{ fontSize: 11 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
@@ -158,7 +203,11 @@ const BusiestWeekdayPanel = () => {
                 {chartData.map((d) => (
                   <Cell
                     key={d.day}
-                    fill={busiest && d.day === busiest.day ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"}
+                    fill={
+                      busiest && d.day === busiest.day
+                        ? "hsl(var(--primary))"
+                        : "hsl(var(--muted-foreground))"
+                    }
                   />
                 ))}
               </Bar>

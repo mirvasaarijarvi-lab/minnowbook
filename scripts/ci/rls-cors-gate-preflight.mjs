@@ -54,7 +54,11 @@ const log = (line) => {
 const problem = (title, message) => {
   // In a dry run the GitHub annotation would turn a local report into a red
   // step, so print the identical reason as plain text instead.
-  console.log(DRY_RUN ? `FAIL ${title}: ${message}` : `::error title=${title}::${message}`);
+  console.log(
+    DRY_RUN
+      ? `FAIL ${title}: ${message}`
+      : `::error title=${title}::${message}`,
+  );
   lines.push(`FAIL ${title}: ${message}`);
   problems.push({ title, message });
 };
@@ -69,7 +73,11 @@ const writeSummary = () => {
 };
 
 /** One line, no control characters: safe for a GITHUB_OUTPUT key=value pair. */
-const oneLine = (value) => String(value).replace(/[\r\n]+/g, " ").trim().slice(0, 400);
+const oneLine = (value) =>
+  String(value)
+    .replace(/[\r\n]+/g, " ")
+    .trim()
+    .slice(0, 400);
 
 const setOutput = (mode) => {
   if (DRY_RUN) return;
@@ -84,8 +92,12 @@ const setOutput = (mode) => {
     out.push(`denied_reason=${oneLine(first.message)}\n`);
     // Multiline detail for the notification body, via the delimiter syntax.
     const delimiter = `RLSGATE_${Date.now()}`;
-    const detail = problems.map((p) => `- **${p.title}**: ${p.message}`).join("\n");
-    out.push(`denied_details<<${delimiter}\n${detail || "- (no detail captured)"}\n${delimiter}\n`);
+    const detail = problems
+      .map((p) => `- **${p.title}**: ${p.message}`)
+      .join("\n");
+    out.push(
+      `denied_details<<${delimiter}\n${detail || "- (no detail captured)"}\n${delimiter}\n`,
+    );
   }
   appendFileSync(env.GITHUB_OUTPUT, out.join(""));
 };
@@ -106,11 +118,12 @@ const finish = (code, mode) => {
   process.exit(code);
 };
 
-
 const present = (value) => (value ? "present" : "MISSING");
 
 if (DRY_RUN) {
-  log("Dry run: reporting only. No output files, no annotations, no network calls.");
+  log(
+    "Dry run: reporting only. No output files, no annotations, no network calls.",
+  );
   log("");
 }
 
@@ -166,7 +179,9 @@ for (const t of TENANTS) {
     ["PASSWORD", t.password],
     ["ID", t.tenantId],
   ];
-  const missing = parts.filter(([, v]) => !v).map(([n]) => `RLS_TEST_TENANT_${t.letter}_${n}`);
+  const missing = parts
+    .filter(([, v]) => !v)
+    .map(([n]) => `RLS_TEST_TENANT_${t.letter}_${n}`);
   if (missing.length > 0 && missing.length < parts.length) {
     problem(
       `Tenant ${t.letter} credentials are incomplete`,
@@ -176,7 +191,9 @@ for (const t of TENANTS) {
   }
 }
 
-const tenantConfigured = TENANTS.map((t) => Boolean(t.email && t.password && t.tenantId));
+const tenantConfigured = TENANTS.map((t) =>
+  Boolean(t.email && t.password && t.tenantId),
+);
 if (tenantConfigured[0] !== tenantConfigured[1]) {
   problem(
     "Only one test tenant is configured",
@@ -190,7 +207,10 @@ const envCredsComplete = tenantConfigured.every(Boolean);
 if (!envCredsComplete && !SERVICE) {
   log("");
   // On protected branches an offline-only gate is a hole, not a skip.
-  if (env.RLS_GATE_REQUIRE_LIVE === "1" || env.RLS_GATE_REQUIRE_LIVE === "true") {
+  if (
+    env.RLS_GATE_REQUIRE_LIVE === "1" ||
+    env.RLS_GATE_REQUIRE_LIVE === "true"
+  ) {
     problem(
       "RLS/CORS gate requires live coverage here",
       "RLS_GATE_REQUIRE_LIVE is set, but no tenant credentials (RLS_TEST_TENANT_A/B_*) and no SUPABASE_SERVICE_ROLE_KEY are configured, so no cross-tenant isolation would be asserted.",
@@ -209,13 +229,19 @@ if (!envCredsComplete && !SERVICE) {
 
 if (DRY_RUN) {
   log("");
-  log("Static configuration checks passed. A real run would now verify, over the network:");
+  log(
+    "Static configuration checks passed. A real run would now verify, over the network:",
+  );
   if (envCredsComplete) {
     for (const t of TENANTS) {
-      log(`  - tenant ${t.letter}: password sign-in, then reading its own membership row`);
+      log(
+        `  - tenant ${t.letter}: password sign-in, then reading its own membership row`,
+      );
     }
   } else {
-    log("  - the service role key can list users to auto-provision the test tenants");
+    log(
+      "  - the service role key can list users to auto-provision the test tenants",
+    );
   }
   finish(0, "live");
 }
@@ -228,12 +254,19 @@ const call = async (path, init = {}) => {
     const res = await fetch(`${URL_.replace(/\/$/, "")}${path}`, {
       ...init,
       signal: controller.signal,
-      headers: { apikey: ANON, "Content-Type": "application/json", ...(init.headers || {}) },
+      headers: {
+        apikey: ANON,
+        "Content-Type": "application/json",
+        ...(init.headers || {}),
+      },
     });
     const text = await res.text();
     return { status: res.status, text };
   } catch (err) {
-    return { status: 0, text: err instanceof Error ? err.message : String(err) };
+    return {
+      status: 0,
+      text: err instanceof Error ? err.message : String(err),
+    };
   } finally {
     clearTimeout(timer);
   }
@@ -242,7 +275,13 @@ const call = async (path, init = {}) => {
 const shortReason = (text) => {
   try {
     const body = JSON.parse(text);
-    return body.message || body.error_description || body.msg || body.error || text.slice(0, 200);
+    return (
+      body.message ||
+      body.error_description ||
+      body.msg ||
+      body.error ||
+      text.slice(0, 200)
+    );
   } catch {
     return (text || "(empty response)").slice(0, 200);
   }
@@ -303,7 +342,9 @@ if (envCredsComplete) {
   }
   if (denied) {
     log("");
-    log("Failing fast: the gate cannot verify isolation without tenant access.");
+    log(
+      "Failing fast: the gate cannot verify isolation without tenant access.",
+    );
     finish(1, "denied");
   }
   log("");

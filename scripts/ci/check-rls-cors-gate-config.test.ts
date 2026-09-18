@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, readFileSync, cpSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  rmSync,
+  readFileSync,
+  cpSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 
@@ -9,9 +16,13 @@ const SCRIPT = join(ROOT, "scripts/ci/check-rls-cors-gate-config.mjs");
 const WORKFLOW = ".github/workflows/rls-cors-gate.yml";
 
 function run(root: string, workflow = WORKFLOW) {
-  const res = spawnSync("node", [SCRIPT, "--root", root, "--workflow", workflow], {
-    encoding: "utf8",
-  });
+  const res = spawnSync(
+    "node",
+    [SCRIPT, "--root", root, "--workflow", workflow],
+    {
+      encoding: "utf8",
+    },
+  );
   return { code: res.status ?? -1, stdout: res.stdout, stderr: res.stderr };
 }
 
@@ -21,14 +32,19 @@ function makeFixture(transform: (yml: string) => string) {
   const yml = transform(readFileSync(join(ROOT, WORKFLOW), "utf8"));
   mkdirSync(join(dir, ".github/workflows"), { recursive: true });
   writeFileSync(join(dir, WORKFLOW), yml);
-  writeFileSync(join(dir, "vitest.security-live.config.ts"), "export default {};\n");
+  writeFileSync(
+    join(dir, "vitest.security-live.config.ts"),
+    "export default {};\n",
+  );
   mkdirSync(join(dir, "scripts/ci"), { recursive: true });
   cpSync(SCRIPT, join(dir, "scripts/ci/check-rls-cors-gate-config.mjs"));
   cpSync(
     join(ROOT, "scripts/ci/rls-cors-gate-preflight.mjs"),
     join(dir, "scripts/ci/rls-cors-gate-preflight.mjs"),
   );
-  for (const match of new Set(yml.match(/src\/test\/security\/[\w.-]+\.test\.ts/g) ?? [])) {
+  for (const match of new Set(
+    yml.match(/src\/test\/security\/[\w.-]+\.test\.ts/g) ?? [],
+  )) {
     const file = join(dir, match);
     mkdirSync(dirname(file), { recursive: true });
     writeFileSync(file, "");
@@ -65,25 +81,39 @@ describe("check-rls-cors-gate-config", () => {
   });
 
   it("fails when a required secret is no longer wired", () => {
-    const r = run(fixture((y) => y.replaceAll("secrets.RLS_TEST_TENANT_B_PASSWORD", "''")));
+    const r = run(
+      fixture((y) => y.replaceAll("secrets.RLS_TEST_TENANT_B_PASSWORD", "''")),
+    );
     expect(r.code).toBe(1);
-    expect(r.stdout).toContain("Gate input RLS_TEST_TENANT_B_PASSWORD not wired");
+    expect(r.stdout).toContain(
+      "Gate input RLS_TEST_TENANT_B_PASSWORD not wired",
+    );
   });
 
   it("fails when the advisor secrets are dropped", () => {
-    const r = run(fixture((y) => y.replaceAll("secrets.SUPABASE_ACCESS_TOKEN", "''")));
+    const r = run(
+      fixture((y) => y.replaceAll("secrets.SUPABASE_ACCESS_TOKEN", "''")),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Advisor input SUPABASE_ACCESS_TOKEN not wired");
   });
 
   it("fails when the run logs are no longer uploaded", () => {
-    const r = run(fixture((y) => y.replaceAll("actions/upload-artifact@v4", "actions/checkout@v5")));
+    const r = run(
+      fixture((y) =>
+        y.replaceAll("actions/upload-artifact@v4", "actions/checkout@v5"),
+      ),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Gate uploads no run logs");
   });
 
   it("fails when the log artifact is renamed", () => {
-    const r = run(fixture((y) => y.replaceAll("name: rls-cors-gate-logs\n", "name: something-else\n")));
+    const r = run(
+      fixture((y) =>
+        y.replaceAll("name: rls-cors-gate-logs\n", "name: something-else\n"),
+      ),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Run log artifact renamed or removed");
   });
@@ -108,27 +138,45 @@ describe("check-rls-cors-gate-config", () => {
   });
 
   it("fails when a test step stops writing its own log file", () => {
-    const r = run(fixture((y) => y.replaceAll("test-reports/logs/05-cors-offline.log", "/dev/null")));
+    const r = run(
+      fixture((y) =>
+        y.replaceAll("test-reports/logs/05-cors-offline.log", "/dev/null"),
+      ),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Gate step does not persist its output");
   });
 
   it("fails when the preflight step is removed", () => {
-    const r = run(fixture((y) => y.replaceAll("scripts/ci/rls-cors-gate-preflight.mjs", "true")));
+    const r = run(
+      fixture((y) =>
+        y.replaceAll("scripts/ci/rls-cors-gate-preflight.mjs", "true"),
+      ),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Preflight step missing");
   });
 
   it("fails when the all-skipped guard is removed", () => {
-    const r = run(fixture((y) => y.replace("steps.preflight.outputs.mode == 'live'", "always()")));
+    const r = run(
+      fixture((y) =>
+        y.replace("steps.preflight.outputs.mode == 'live'", "always()"),
+      ),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("All-skipped runs are not treated as failures");
   });
 
   it("fails when a required RLS/CORS test is no longer run", () => {
-    const r = run(fixture((y) => y.replaceAll("src/test/security/cors-validation.test.ts", "")));
+    const r = run(
+      fixture((y) =>
+        y.replaceAll("src/test/security/cors-validation.test.ts", ""),
+      ),
+    );
     expect(r.code).toBe(1);
-    expect(r.stdout).toContain("Gate no longer runs src/test/security/cors-validation.test.ts");
+    expect(r.stdout).toContain(
+      "Gate no longer runs src/test/security/cors-validation.test.ts",
+    );
   });
 
   it("fails when a referenced test file does not exist", () => {
@@ -140,25 +188,35 @@ describe("check-rls-cors-gate-config", () => {
   });
 
   it("fails when the live Vitest config is not used", () => {
-    const r = run(fixture((y) => y.replaceAll("vitest.security-live.config.ts", "vitest.config.ts")));
+    const r = run(
+      fixture((y) =>
+        y.replaceAll("vitest.security-live.config.ts", "vitest.config.ts"),
+      ),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Live Vitest config not used");
   });
 
   it("fails when a live step loses its fetch timeout", () => {
-    const r = run(fixture((y) => y.replaceAll("LIVE_FETCH_TIMEOUT_MS", "UNUSED_TIMEOUT")));
+    const r = run(
+      fixture((y) => y.replaceAll("LIVE_FETCH_TIMEOUT_MS", "UNUSED_TIMEOUT")),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Live steps missing LIVE_FETCH_TIMEOUT_MS");
   });
 
   it("fails when the gate no longer runs on pull requests", () => {
-    const r = run(fixture((y) => y.replace("\n  pull_request:\n    branches: [main]", "")));
+    const r = run(
+      fixture((y) => y.replace("\n  pull_request:\n    branches: [main]", "")),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Gate does not run on pull requests");
   });
 
   it("fails when a required job is deleted", () => {
-    const r = run(fixture((y) => y.replace("\n  rls-advisor-gate:", "\n  something-else:")));
+    const r = run(
+      fixture((y) => y.replace("\n  rls-advisor-gate:", "\n  something-else:")),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain('Gate job "rls-advisor-gate" missing');
   });
@@ -173,11 +231,17 @@ describe("check-rls-cors-gate-config", () => {
       ),
     );
     expect(r.code).toBe(1);
-    expect(r.stdout).toContain('gate-summary does not depend on "rls-advisor-gate"');
+    expect(r.stdout).toContain(
+      'gate-summary does not depend on "rls-advisor-gate"',
+    );
   });
 
   it("fails when the denial notification job is deleted", () => {
-    const r = run(fixture((y) => y.replace("\n  notify-tenant-denial:", "\n  something-else:")));
+    const r = run(
+      fixture((y) =>
+        y.replace("\n  notify-tenant-denial:", "\n  something-else:"),
+      ),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain('Gate job "notify-tenant-denial" missing');
   });
@@ -211,17 +275,25 @@ describe("check-rls-cors-gate-config", () => {
   it("fails when the preflight result is not exposed to the notification", () => {
     const r = run(
       fixture((y) =>
-        y.replace("tenant_access: ${{ steps.preflight.outputs.mode }}", "tenant_access: 'live'"),
+        y.replace(
+          "tenant_access: ${{ steps.preflight.outputs.mode }}",
+          "tenant_access: 'live'",
+        ),
       ),
     );
     expect(r.code).toBe(1);
-    expect(r.stdout).toContain("Preflight result is not exposed to the notification");
+    expect(r.stdout).toContain(
+      "Preflight result is not exposed to the notification",
+    );
   });
 
   it("fails when the denial reason is no longer reported", () => {
     const r = run(
       fixture((y) =>
-        y.replace("denied_reason: ${{ steps.preflight.outputs.denied_reason }}", ""),
+        y.replace(
+          "denied_reason: ${{ steps.preflight.outputs.denied_reason }}",
+          "",
+        ),
       ),
     );
     expect(r.code).toBe(1);
@@ -229,12 +301,15 @@ describe("check-rls-cors-gate-config", () => {
   });
 
   it("fails when the reporting step is removed", () => {
-    const r = run(fixture((y) => y.replace("actions/github-script@v7", "actions/checkout@v5")));
+    const r = run(
+      fixture((y) =>
+        y.replace("actions/github-script@v7", "actions/checkout@v5"),
+      ),
+    );
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("Denial notification has no reporting step");
   });
 });
-
 
 describe("rls-cors-gate-preflight misconfiguration", () => {
   const PREFLIGHT = join(ROOT, "scripts/ci/rls-cors-gate-preflight.mjs");
@@ -256,19 +331,30 @@ describe("rls-cors-gate-preflight misconfiguration", () => {
   });
 
   it("fails fast on a malformed project URL", () => {
-    const r = runPreflight({ ...base, VITE_SUPABASE_URL: "example.supabase.co/rest" });
+    const r = runPreflight({
+      ...base,
+      VITE_SUPABASE_URL: "example.supabase.co/rest",
+    });
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("VITE_SUPABASE_URL is misconfigured");
   });
 
   it("fails fast on a truncated publishable key", () => {
-    const r = runPreflight({ ...base, VITE_SUPABASE_PUBLISHABLE_KEY: "not-a-jwt" });
+    const r = runPreflight({
+      ...base,
+      VITE_SUPABASE_PUBLISHABLE_KEY: "not-a-jwt",
+    });
     expect(r.code).toBe(1);
-    expect(r.stdout).toContain("VITE_SUPABASE_PUBLISHABLE_KEY is misconfigured");
+    expect(r.stdout).toContain(
+      "VITE_SUPABASE_PUBLISHABLE_KEY is misconfigured",
+    );
   });
 
   it("fails fast when the service role key equals the publishable key", () => {
-    const r = runPreflight({ ...base, SUPABASE_SERVICE_ROLE_KEY: base.VITE_SUPABASE_PUBLISHABLE_KEY });
+    const r = runPreflight({
+      ...base,
+      SUPABASE_SERVICE_ROLE_KEY: base.VITE_SUPABASE_PUBLISHABLE_KEY,
+    });
     expect(r.code).toBe(1);
     expect(r.stdout).toContain("identical");
   });
@@ -317,7 +403,6 @@ describe("rls-cors-gate-preflight misconfiguration", () => {
     expect(out).toMatch(/denied_reason=.+/);
     expect(out).toContain("denied_details<<");
   });
-
 
   it("skips (exit 0) offline when nothing is configured and live is not required", () => {
     const r = runPreflight(base);

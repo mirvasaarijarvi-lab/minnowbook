@@ -7,7 +7,16 @@ import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useTierGate } from "@/hooks/useTierGate";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link2, Copy, ExternalLink, Building2, Home, UtensilsCrossed, HeartPulse, Sparkles } from "lucide-react";
+import {
+  Link2,
+  Copy,
+  ExternalLink,
+  Building2,
+  Home,
+  UtensilsCrossed,
+  HeartPulse,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 import DashboardTooltip from "./DashboardTooltip";
 import { siteOrigin } from "@/lib/site-origin";
@@ -21,7 +30,15 @@ const TYPE_ICONS: Record<string, React.ElementType> = {
   custom: Sparkles,
 };
 
-const LinkRow = ({ url, icon: Icon, copyLink }: { url: string; icon: React.ElementType; copyLink: (u: string) => void }) => (
+const LinkRow = ({
+  url,
+  icon: Icon,
+  copyLink,
+}: {
+  url: string;
+  icon: React.ElementType;
+  copyLink: (u: string) => void;
+}) => (
   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
     <div className="flex items-center gap-2 min-w-0 flex-1">
       <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -30,7 +47,12 @@ const LinkRow = ({ url, icon: Icon, copyLink }: { url: string; icon: React.Eleme
       </code>
     </div>
     <div className="flex items-center gap-2 shrink-0">
-      <Button variant="outline" size="sm" onClick={() => copyLink(url)} className="gap-1.5 flex-1 sm:flex-none">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => copyLink(url)}
+        className="gap-1.5 flex-1 sm:flex-none"
+      >
         <Copy className="h-3.5 w-3.5" />
         Copy
       </Button>
@@ -78,7 +100,8 @@ const BookingLinksCard = () => {
     toast.success(t("dashboard.linkCopied"));
   };
 
-  const showSiteLinks = isBusiness && (sites?.length ?? 0) > 0 && !selectedSiteId;
+  const showSiteLinks =
+    isBusiness && (sites?.length ?? 0) > 0 && !selectedSiteId;
 
   return (
     <Card className="border-primary/20 bg-primary/5">
@@ -90,7 +113,9 @@ const BookingLinksCard = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">{t("dashboard.bookingLinkDesc")}</p>
+        <p className="text-sm text-muted-foreground">
+          {t("dashboard.bookingLinkDesc")}
+        </p>
 
         {/* Main booking page link (all services, all sites) */}
         {allowedTypes.length > 0 && (
@@ -115,7 +140,9 @@ const BookingLinksCard = () => {
             {shareableTypes.map((type: string) => {
               const url = `${baseUrl}?type=${type}`;
               const Icon = TYPE_ICONS[type] ?? Link2;
-              return <LinkRow key={type} url={url} icon={Icon} copyLink={copyLink} />;
+              return (
+                <LinkRow key={type} url={url} icon={Icon} copyLink={copyLink} />
+              );
             })}
           </div>
         )}
@@ -129,7 +156,12 @@ const BookingLinksCard = () => {
               </span>
             </div>
             {sites!.map((site) => (
-              <LinkRow key={site.id} url={`${baseUrl}?site=${site.slug}`} icon={Building2} copyLink={copyLink} />
+              <LinkRow
+                key={site.id}
+                url={`${baseUrl}?site=${site.slug}`}
+                icon={Building2}
+                copyLink={copyLink}
+              />
             ))}
           </div>
         )}

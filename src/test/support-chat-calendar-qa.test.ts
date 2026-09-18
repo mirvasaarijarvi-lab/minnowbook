@@ -18,7 +18,9 @@ describe("support-chat — Calendar Sync Q&A flow", () => {
     expect(section).toContain("Always ask first");
     expect(section).toMatch(/iCal subscription/i);
     expect(section).toMatch(/Google Calendar/i);
-    expect(section).toContain("Wait for their answer before showing instructions");
+    expect(section).toContain(
+      "Wait for their answer before showing instructions",
+    );
   });
 
   it("references Settings → Calendar Sync as the source of the feed URL", () => {
@@ -82,7 +84,7 @@ describe("support-chat — Calendar Sync Q&A flow", () => {
     // step marker appears in order. We check the first character of each
     // top-level numbered line to avoid matching nested "1." sub-steps.
     const topLevelSteps = Array.from(section.matchAll(/^\d+\. /gm)).map(
-      (m) => m[0]
+      (m) => m[0],
     );
     expect(topLevelSteps.slice(0, 6)).toEqual([
       "1. ",

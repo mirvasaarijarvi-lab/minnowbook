@@ -9,7 +9,10 @@
  * amount for every stay.
  */
 
-import { reportAmounts, type ReportPricingRow } from "./report-pricing-accessor";
+import {
+  reportAmounts,
+  type ReportPricingRow,
+} from "./report-pricing-accessor";
 
 export interface ExportPriceCells {
   /** Room / price column. */
@@ -31,7 +34,8 @@ export const csvPriceCells = (
   r: ReportPricingRow,
   labels: { breakfast: string },
 ): ExportPriceCells => {
-  const { charged, room, breakfast, isAccommodation, hasAmount } = reportAmounts(r);
+  const { charged, room, breakfast, isAccommodation, hasAmount } =
+    reportAmounts(r);
   // A booking with no amount shows a placeholder in both exports, never 0.00,
   // so a spreadsheet cannot read "priced at zero" where staff still owe a price.
   if (!hasAmount) return { price: CSV_NO_AMOUNT, total: CSV_NO_AMOUNT };
@@ -52,7 +56,8 @@ export const printPriceCells = (
   labels: { breakfast: string },
   fmtEur: (v: number) => string,
 ): ExportPriceCells => {
-  const { charged, room, breakfast, isAccommodation, hasAmount } = reportAmounts(r);
+  const { charged, room, breakfast, isAccommodation, hasAmount } =
+    reportAmounts(r);
   const price = isAccommodation
     ? fmtEur(room)
     : hasAmount
@@ -91,7 +96,11 @@ export const PDF_NO_AMOUNT = "-";
 export const pdfPriceCells = (r: ReportPricingRow): PdfPriceCells => {
   const { charged, room, breakfast, hasAmount } = reportAmounts(r);
   if (!hasAmount) {
-    return { room: PDF_NO_AMOUNT, breakfast: PDF_NO_AMOUNT, total: PDF_NO_AMOUNT };
+    return {
+      room: PDF_NO_AMOUNT,
+      breakfast: PDF_NO_AMOUNT,
+      total: PDF_NO_AMOUNT,
+    };
   }
   return {
     room: csvNum(room),

@@ -22,13 +22,16 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
+const canRun = Boolean(
+  SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY,
+);
 
 const newService = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -105,7 +108,8 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (rErr || !res) throw rErr ?? new Error(`resource insert failed for ${label}`);
+        if (rErr || !res)
+          throw rErr ?? new Error(`resource insert failed for ${label}`);
         const imageUrl = `https://example.invalid/xt2-a-${label}-${stamp}-${rand}.jpg`;
         const { data: img, error: iErr } = await service
           .from("resource_images")
@@ -117,8 +121,13 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (iErr || !img) throw iErr ?? new Error(`image insert failed for ${label}`);
-        return { resourceId: res.id as string, imageId: img.id as string, imageUrl };
+        if (iErr || !img)
+          throw iErr ?? new Error(`image insert failed for ${label}`);
+        return {
+          resourceId: res.id as string,
+          imageId: img.id as string,
+          imageUrl,
+        };
       }
 
       const pub = await seedResourceWithImage("public", true, "approved");
@@ -141,21 +150,21 @@ describe.runIf(canRun)(
 
       const email = `ci-resimg-xt2-b+${stamp}-${rand}@example.invalid`;
       const password = `Pw!${rand}${stamp}${rand}`;
-      const { data: created, error: createErr } = await service.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
-      if (createErr || !created?.user) throw createErr ?? new Error("auth user create failed");
-
-      const { error: tuErr } = await service
-        .from("tenant_users")
-        .insert({
-          tenant_id: tenantBId,
-          user_id: created.user.id,
-          role: "staff",
-          is_approved: true,
+      const { data: created, error: createErr } =
+        await service.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
         });
+      if (createErr || !created?.user)
+        throw createErr ?? new Error("auth user create failed");
+
+      const { error: tuErr } = await service.from("tenant_users").insert({
+        tenant_id: tenantBId,
+        user_id: created.user.id,
+        role: "staff",
+        is_approved: true,
+      });
       if (tuErr) throw tuErr;
 
       tenantBMember = newAnon();
@@ -190,8 +199,14 @@ describe.runIf(canRun)(
         .from("resources")
         .delete()
         .in("id", [seeded.a.publicResourceId, seeded.a.privateResourceId]);
-      await service.from("tenant_users").delete().eq("user_id", seeded.b.userId);
-      await service.from("tenants").delete().in("id", [seeded.a.tenantId, seeded.b.tenantId]);
+      await service
+        .from("tenant_users")
+        .delete()
+        .eq("user_id", seeded.b.userId);
+      await service
+        .from("tenants")
+        .delete()
+        .in("id", [seeded.a.tenantId, seeded.b.tenantId]);
       await service.auth.admin.deleteUser(seeded.b.userId).catch(() => {});
     }, 60_000);
 

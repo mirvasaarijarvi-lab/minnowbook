@@ -31,7 +31,12 @@ const weekdayRows: OpeningHourRow[] = [
   { day_of_week: 4, open_time: "09:00:00", close_time: "17:00:00" },
   { day_of_week: 5, open_time: "10:00:00", close_time: "19:00:00" },
   { day_of_week: 6, open_time: null, close_time: null },
-  { day_of_week: 0, is_closed: true, open_time: "10:00:00", close_time: "14:00:00" },
+  {
+    day_of_week: 0,
+    is_closed: true,
+    open_time: "10:00:00",
+    close_time: "14:00:00",
+  },
 ];
 
 describe("required fields", () => {
@@ -39,7 +44,9 @@ describe("required fields", () => {
     const schema = buildLocalBusinessSchema(base)!;
     expect(schema["@context"]).toBe("https://schema.org");
     expect(schema["@type"]).toBe("HairSalon");
-    expect(schema["@id"]).toBe("https://mimmobook.com/book/salon-mimmi#business");
+    expect(schema["@id"]).toBe(
+      "https://mimmobook.com/book/salon-mimmi#business",
+    );
     expect(schema.name).toBe("Salon Mimmi");
     expect(schema.url).toBe("https://mimmobook.com/book/salon-mimmi");
     expect(schema.telephone).toBe("+358 40 123 4567");
@@ -93,14 +100,21 @@ describe("required fields", () => {
   });
 
   it("marks the page as the place to book", () => {
-    const action = buildLocalBusinessSchema(base)!.potentialAction as Record<string, any>;
+    const action = buildLocalBusinessSchema(base)!.potentialAction as Record<
+      string,
+      any
+    >;
     expect(action["@type"]).toBe("ReserveAction");
-    expect(action.target.urlTemplate).toBe("https://mimmobook.com/book/salon-mimmi");
+    expect(action.target.urlTemplate).toBe(
+      "https://mimmobook.com/book/salon-mimmi",
+    );
     expect(action.result["@type"]).toBe("Reservation");
   });
 
   it("serialises to valid JSON", () => {
-    expect(() => JSON.parse(JSON.stringify(buildLocalBusinessSchema(base)))).not.toThrow();
+    expect(() =>
+      JSON.parse(JSON.stringify(buildLocalBusinessSchema(base))),
+    ).not.toThrow();
   });
 });
 
@@ -108,16 +122,27 @@ describe("multilingual pages", () => {
   it("declares every language the booking page is offered in", () => {
     const schema = buildLocalBusinessSchema(base)!;
     expect(schema.availableLanguage).toEqual(["en", "fi", "sv"]);
-    expect((schema.potentialAction as any).target.inLanguage).toEqual(["en", "fi", "sv"]);
+    expect((schema.potentialAction as any).target.inLanguage).toEqual([
+      "en",
+      "fi",
+      "sv",
+    ]);
   });
 
   it("falls back to all three languages when none are given", () => {
     const schema = buildLocalBusinessSchema({ ...base, languages: null })!;
-    expect((schema.potentialAction as any).target.inLanguage).toEqual(["en", "fi", "sv"]);
+    expect((schema.potentialAction as any).target.inLanguage).toEqual([
+      "en",
+      "fi",
+      "sv",
+    ]);
   });
 
   it("drops empty language codes", () => {
-    const schema = buildLocalBusinessSchema({ ...base, languages: ["fi", "", "sv"] })!;
+    const schema = buildLocalBusinessSchema({
+      ...base,
+      languages: ["fi", "", "sv"],
+    })!;
     expect(schema.availableLanguage).toEqual(["fi", "sv"]);
   });
 
@@ -140,7 +165,10 @@ describe("multilingual pages", () => {
 
   it("keeps the same business identity regardless of the page language", () => {
     const fi = buildLocalBusinessSchema(base)!;
-    const sv = buildLocalBusinessSchema({ ...base, languages: ["sv", "en", "fi"] })!;
+    const sv = buildLocalBusinessSchema({
+      ...base,
+      languages: ["sv", "en", "fi"],
+    })!;
     expect(sv["@id"]).toBe(fi["@id"]);
     expect(sv["@type"]).toBe(fi["@type"]);
     expect(sv.name).toBe(fi.name);
@@ -168,7 +196,9 @@ describe("opening hours", () => {
 
   it("normalises times to HH:MM and rejects nonsense", () => {
     expect(
-      buildOpeningHoursSpecification([{ day_of_week: 3, open_time: "9:30", close_time: "18:05:30" }]),
+      buildOpeningHoursSpecification([
+        { day_of_week: 3, open_time: "9:30", close_time: "18:05:30" },
+      ]),
     ).toEqual([
       {
         "@type": "OpeningHoursSpecification",
@@ -198,8 +228,9 @@ describe("opening hours", () => {
   });
 
   it("attaches the hours to the business only when there are any", () => {
-    expect(buildLocalBusinessSchema({ ...base, openingHours: weekdayRows })!)
-      .toHaveProperty("openingHoursSpecification");
+    expect(
+      buildLocalBusinessSchema({ ...base, openingHours: weekdayRows })!,
+    ).toHaveProperty("openingHoursSpecification");
     expect(
       buildLocalBusinessSchema({
         ...base,
@@ -270,7 +301,10 @@ describe("service pricing", () => {
 
   it("caps the catalogue at 30 offers", () => {
     const cat = catalog({
-      services: Array.from({ length: 42 }, (_, i) => ({ name: `Service ${i + 1}`, priceEur: i + 1 })),
+      services: Array.from({ length: 42 }, (_, i) => ({
+        name: `Service ${i + 1}`,
+        priceEur: i + 1,
+      })),
     });
     expect(cat.itemListElement).toHaveLength(30);
     expect(cat.itemListElement[0].itemOffered.name).toBe("Service 1");

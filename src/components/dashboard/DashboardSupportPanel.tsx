@@ -34,18 +34,95 @@ interface GuideArticle {
 }
 
 const articleDefs: GuideArticle[] = [
-  { titleKey: "help.art1Title", descKey: "help.art1Desc", icon: BookOpen, contentKeys: ["help.art1C1", "help.art1C2", "help.art1C3", "help.art1C4"] },
-  { titleKey: "help.art2Title", descKey: "help.art2Desc", icon: CalendarDays, contentKeys: ["help.art2C1", "help.art2C2", "help.art2C3", "help.art2C4"] },
-  { titleKey: "help.art3Title", descKey: "help.art3Desc", icon: Mail, contentKeys: ["help.art3C1", "help.art3C2", "help.art3C3", "help.art3C4"] },
-  { titleKey: "help.art4Title", descKey: "help.art4Desc", icon: Palette, contentKeys: ["help.art4C1", "help.art4C2", "help.art4C3", "help.art4C4"] },
-  { titleKey: "help.art5Title", descKey: "help.art5Desc", icon: Clock, contentKeys: ["help.art5C1", "help.art5C2", "help.art5C3", "help.art5C4"] },
-  { titleKey: "help.art6Title", descKey: "help.art6Desc", icon: Settings, contentKeys: ["help.art6C1", "help.art6C2", "help.art6C3", "help.art6C4"] },
-  { titleKey: "help.art7Title", descKey: "help.art7Desc", icon: Users, contentKeys: ["help.art7C1", "help.art7C2", "help.art7C3", "help.art7C4"] },
-  { titleKey: "help.art8Title", descKey: "help.art8Desc", icon: CreditCard, contentKeys: ["help.art8C1", "help.art8C2", "help.art8C3", "help.art8C4"] },
-  { titleKey: "help.art9Title", descKey: "help.art9Desc", icon: HelpCircle, contentKeys: ["help.art9C1", "help.art9C2", "help.art9C3", "help.art9C4"] },
-  { titleKey: "help.art10Title", descKey: "help.art10Desc", icon: Sparkles, contentKeys: ["help.art10C1", "help.art10C2", "help.art10C3", "help.art10C4", "help.art10C5", "help.art10C6"] },
-  { titleKey: "help.art11Title", descKey: "help.art11Desc", icon: BookOpen, contentKeys: ["help.art11C1", "help.art11C2", "help.art11C3", "help.art11C4"] },
-  { titleKey: "help.art12Title", descKey: "help.art12Desc", icon: Sparkles, contentKeys: ["help.art12C1", "help.art12C2", "help.art12C3", "help.art12C4"] },
+  {
+    titleKey: "help.art1Title",
+    descKey: "help.art1Desc",
+    icon: BookOpen,
+    contentKeys: ["help.art1C1", "help.art1C2", "help.art1C3", "help.art1C4"],
+  },
+  {
+    titleKey: "help.art2Title",
+    descKey: "help.art2Desc",
+    icon: CalendarDays,
+    contentKeys: ["help.art2C1", "help.art2C2", "help.art2C3", "help.art2C4"],
+  },
+  {
+    titleKey: "help.art3Title",
+    descKey: "help.art3Desc",
+    icon: Mail,
+    contentKeys: ["help.art3C1", "help.art3C2", "help.art3C3", "help.art3C4"],
+  },
+  {
+    titleKey: "help.art4Title",
+    descKey: "help.art4Desc",
+    icon: Palette,
+    contentKeys: ["help.art4C1", "help.art4C2", "help.art4C3", "help.art4C4"],
+  },
+  {
+    titleKey: "help.art5Title",
+    descKey: "help.art5Desc",
+    icon: Clock,
+    contentKeys: ["help.art5C1", "help.art5C2", "help.art5C3", "help.art5C4"],
+  },
+  {
+    titleKey: "help.art6Title",
+    descKey: "help.art6Desc",
+    icon: Settings,
+    contentKeys: ["help.art6C1", "help.art6C2", "help.art6C3", "help.art6C4"],
+  },
+  {
+    titleKey: "help.art7Title",
+    descKey: "help.art7Desc",
+    icon: Users,
+    contentKeys: ["help.art7C1", "help.art7C2", "help.art7C3", "help.art7C4"],
+  },
+  {
+    titleKey: "help.art8Title",
+    descKey: "help.art8Desc",
+    icon: CreditCard,
+    contentKeys: ["help.art8C1", "help.art8C2", "help.art8C3", "help.art8C4"],
+  },
+  {
+    titleKey: "help.art9Title",
+    descKey: "help.art9Desc",
+    icon: HelpCircle,
+    contentKeys: ["help.art9C1", "help.art9C2", "help.art9C3", "help.art9C4"],
+  },
+  {
+    titleKey: "help.art10Title",
+    descKey: "help.art10Desc",
+    icon: Sparkles,
+    contentKeys: [
+      "help.art10C1",
+      "help.art10C2",
+      "help.art10C3",
+      "help.art10C4",
+      "help.art10C5",
+      "help.art10C6",
+    ],
+  },
+  {
+    titleKey: "help.art11Title",
+    descKey: "help.art11Desc",
+    icon: BookOpen,
+    contentKeys: [
+      "help.art11C1",
+      "help.art11C2",
+      "help.art11C3",
+      "help.art11C4",
+    ],
+  },
+  {
+    titleKey: "help.art12Title",
+    descKey: "help.art12Desc",
+    icon: Sparkles,
+    contentKeys: [
+      "help.art12C1",
+      "help.art12C2",
+      "help.art12C3",
+      "help.art12C4",
+    ],
+  },
 ];
 
 interface ChatMessage {
@@ -75,14 +152,25 @@ const DashboardSupportPanel = () => {
     const q = search.toLowerCase();
     return articleDefs.filter(
       (a) =>
-        t(a.titleKey as TranslationKey).toLowerCase().includes(q) ||
-        t(a.descKey as TranslationKey).toLowerCase().includes(q) ||
-        a.contentKeys.some((c) => t(c as TranslationKey).toLowerCase().includes(q))
+        t(a.titleKey as TranslationKey)
+          .toLowerCase()
+          .includes(q) ||
+        t(a.descKey as TranslationKey)
+          .toLowerCase()
+          .includes(q) ||
+        a.contentKeys.some((c) =>
+          t(c as TranslationKey)
+            .toLowerCase()
+            .includes(q),
+        ),
     );
   }, [search, t]);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [chatMessages]);
 
   const quickGuides = GUIDE_KEYS.map((n) => ({
@@ -127,10 +215,15 @@ const DashboardSupportPanel = () => {
         });
 
         if (!resp.ok) {
-          const err = await resp.json().catch(() => ({ error: t("help.errorConnect" as TranslationKey) }));
+          const err = await resp
+            .json()
+            .catch(() => ({ error: t("help.errorConnect" as TranslationKey) }));
           setChatMessages((prev) => [
             ...prev,
-            { role: "assistant", content: err.error || t("help.errorConnect" as TranslationKey) },
+            {
+              role: "assistant",
+              content: err.error || t("help.errorConnect" as TranslationKey),
+            },
           ]);
           setIsLoading(false);
           return;
@@ -161,14 +254,17 @@ const DashboardSupportPanel = () => {
 
             try {
               const parsed = JSON.parse(jsonStr);
-              const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+              const content = parsed.choices?.[0]?.delta?.content as
+                string | undefined;
               if (content) {
                 assistantSoFar += content;
                 const current = assistantSoFar;
                 setChatMessages((prev) => {
                   const last = prev[prev.length - 1];
                   if (last?.role === "assistant") {
-                    return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: current } : m));
+                    return prev.map((m, i) =>
+                      i === prev.length - 1 ? { ...m, content: current } : m,
+                    );
                   }
                   return [...prev, { role: "assistant", content: current }];
                 });
@@ -183,13 +279,16 @@ const DashboardSupportPanel = () => {
         console.error("Support chat error:", e);
         setChatMessages((prev) => [
           ...prev,
-          { role: "assistant", content: t("help.errorConnect" as TranslationKey) },
+          {
+            role: "assistant",
+            content: t("help.errorConnect" as TranslationKey),
+          },
         ]);
       }
 
       setIsLoading(false);
     },
-    [chatMessages, session, t]
+    [chatMessages, session, t],
   );
 
   const handleSend = () => {
@@ -219,8 +318,14 @@ const DashboardSupportPanel = () => {
 
       setChatMessages((prev) => [
         ...prev,
-        { role: "user", content: `📋 **${t("help.requestSubmitted" as TranslationKey)}:** ${escalateSubject.trim()}\n${chatInput.trim()}` },
-        { role: "assistant", content: t("help.requestSubmittedDetail" as TranslationKey) },
+        {
+          role: "user",
+          content: `📋 **${t("help.requestSubmitted" as TranslationKey)}:** ${escalateSubject.trim()}\n${chatInput.trim()}`,
+        },
+        {
+          role: "assistant",
+          content: t("help.requestSubmittedDetail" as TranslationKey),
+        },
       ]);
       setChatInput("");
       setEscalateSubject("");
@@ -234,8 +339,12 @@ const DashboardSupportPanel = () => {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-serif font-bold text-foreground mb-1">{t("help.title" as TranslationKey)}</h2>
-        <p className="text-muted-foreground text-sm">{t("help.subtitle" as TranslationKey)}</p>
+        <h2 className="text-2xl font-serif font-bold text-foreground mb-1">
+          {t("help.title" as TranslationKey)}
+        </h2>
+        <p className="text-muted-foreground text-sm">
+          {t("help.subtitle" as TranslationKey)}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -280,7 +389,10 @@ const DashboardSupportPanel = () => {
                     <div className="px-4 pb-4 pt-0 animate-fade-in">
                       <ul className="space-y-1.5 ml-12">
                         {article.contentKeys.map((key, i) => (
-                          <li key={i} className="text-xs text-foreground/80 leading-relaxed flex items-start gap-1.5">
+                          <li
+                            key={i}
+                            className="text-xs text-foreground/80 leading-relaxed flex items-start gap-1.5"
+                          >
                             <span className="text-accent mt-0.5">•</span>
                             {t(key as TranslationKey)}
                           </li>
@@ -300,8 +412,12 @@ const DashboardSupportPanel = () => {
             <div className="gradient-hero px-4 py-3 text-primary-foreground">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-serif font-semibold text-sm">{t("help.aiTitle" as TranslationKey)}</h3>
-                  <p className="text-xs text-primary-foreground/70">{t("help.aiSubtitle" as TranslationKey)}</p>
+                  <h3 className="font-serif font-semibold text-sm">
+                    {t("help.aiTitle" as TranslationKey)}
+                  </h3>
+                  <p className="text-xs text-primary-foreground/70">
+                    {t("help.aiSubtitle" as TranslationKey)}
+                  </p>
                 </div>
                 {businessTier && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary-foreground/20 text-primary-foreground border border-primary-foreground/20">
@@ -312,7 +428,10 @@ const DashboardSupportPanel = () => {
               </div>
             </div>
 
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
+            <div
+              ref={scrollRef}
+              className="flex-1 overflow-y-auto p-3 space-y-3"
+            >
               {chatMessages.length === 0 && (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground text-center mb-3">
@@ -337,16 +456,18 @@ const DashboardSupportPanel = () => {
                     "text-sm px-3 py-2 rounded-xl max-w-[85%]",
                     msg.role === "user"
                       ? "ml-auto bg-accent text-accent-foreground"
-                      : "bg-secondary text-secondary-foreground"
+                      : "bg-secondary text-secondary-foreground",
                   )}
                 >
-                  {msg.content.split("**").map((part, pi) =>
-                    pi % 2 === 1 ? (
-                      <strong key={pi}>{part}</strong>
-                    ) : (
-                      <span key={pi}>{part}</span>
-                    )
-                  )}
+                  {msg.content
+                    .split("**")
+                    .map((part, pi) =>
+                      pi % 2 === 1 ? (
+                        <strong key={pi}>{part}</strong>
+                      ) : (
+                        <span key={pi}>{part}</span>
+                      ),
+                    )}
                 </div>
               ))}
 
@@ -367,11 +488,13 @@ const DashboardSupportPanel = () => {
                     "flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors",
                     escalateMode
                       ? "bg-accent/10 text-accent border-accent/30"
-                      : "text-muted-foreground border-border hover:bg-secondary/50"
+                      : "text-muted-foreground border-border hover:bg-secondary/50",
                   )}
                 >
                   <Flag className="h-3 w-3" />
-                  {escalateMode ? t("help.cancelRequest" as TranslationKey) : t("help.submitRequest" as TranslationKey)}
+                  {escalateMode
+                    ? t("help.cancelRequest" as TranslationKey)
+                    : t("help.submitRequest" as TranslationKey)}
                 </button>
               </div>
             )}
@@ -390,7 +513,9 @@ const DashboardSupportPanel = () => {
                   <textarea
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
-                    placeholder={t("help.describePlaceholder" as TranslationKey)}
+                    placeholder={t(
+                      "help.describePlaceholder" as TranslationKey,
+                    )}
                     rows={2}
                     className="w-full text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-ring resize-none"
                   />
@@ -420,7 +545,13 @@ const DashboardSupportPanel = () => {
                     className="flex-1 text-sm bg-secondary/30 border border-border rounded-lg px-3 py-2 text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
                     disabled={isLoading}
                   />
-                  <Button type="submit" size="sm" variant="default" disabled={!chatInput.trim() || isLoading} className="shrink-0">
+                  <Button
+                    type="submit"
+                    size="sm"
+                    variant="default"
+                    disabled={!chatInput.trim() || isLoading}
+                    className="shrink-0"
+                  >
                     <Send className="h-3.5 w-3.5" />
                   </Button>
                 </form>

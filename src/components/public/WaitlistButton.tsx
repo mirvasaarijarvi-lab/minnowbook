@@ -4,7 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Bell, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
@@ -17,7 +22,13 @@ interface WaitlistButtonProps {
   accentColor: string;
 }
 
-const WaitlistButton = ({ tenantId, siteId, date, reservationType, accentColor }: WaitlistButtonProps) => {
+const WaitlistButton = ({
+  tenantId,
+  siteId,
+  date,
+  reservationType,
+  accentColor,
+}: WaitlistButtonProps) => {
   const t = useT();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -38,11 +49,17 @@ const WaitlistButton = ({ tenantId, siteId, date, reservationType, accentColor }
     },
     onSuccess: () => {
       setSubmitted(true);
-      toast.success(t("booking.waitlistJoined" as any) || "You've been added to the waitlist!");
+      toast.success(
+        t("booking.waitlistJoined" as any) ||
+          "You've been added to the waitlist!",
+      );
     },
     onError: (err: any) => {
       if (err.message?.includes("duplicate")) {
-        toast.error(t("booking.waitlistAlready" as any) || "You're already on the waitlist for this date.");
+        toast.error(
+          t("booking.waitlistAlready" as any) ||
+            "You're already on the waitlist for this date.",
+        );
       } else {
         toast.error(err.message || "Failed to join waitlist");
       }
@@ -80,16 +97,28 @@ const WaitlistButton = ({ tenantId, siteId, date, reservationType, accentColor }
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            {t("booking.waitlistDesc" as any) || "We'll notify you by email if a spot opens up for this date."}
+            {t("booking.waitlistDesc" as any) ||
+              "We'll notify you by email if a spot opens up for this date."}
           </p>
           <div className="space-y-3 pt-2">
             <div className="space-y-1.5">
               <Label htmlFor="wl-name">{t("common.name" as any)}</Label>
-              <Input id="wl-name" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Input
+                id="wl-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="wl-email">{t("common.email" as any)}</Label>
-              <Input id="wl-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                id="wl-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
             <Button
               onClick={() => joinMutation.mutate()}
@@ -97,7 +126,11 @@ const WaitlistButton = ({ tenantId, siteId, date, reservationType, accentColor }
               className="w-full text-white"
               style={{ backgroundColor: accentColor }}
             >
-              {joinMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : (t("booking.joinWaitlist" as any) || "Join Waitlist")}
+              {joinMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                t("booking.joinWaitlist" as any) || "Join Waitlist"
+              )}
             </Button>
           </div>
         </DialogContent>

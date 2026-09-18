@@ -60,7 +60,9 @@ const cache = new Map<string, CacheEntry>();
  * URL or an already-relative path. Returns null if the input doesn't
  * look like a `tenant-branding` object.
  */
-export function extractBrandingObjectPath(input: string | null | undefined): string | null {
+export function extractBrandingObjectPath(
+  input: string | null | undefined,
+): string | null {
   if (!input || typeof input !== "string") return null;
   const trimmed = input.trim();
   if (!trimmed) return null;
@@ -87,18 +89,25 @@ async function mintSignedUrl(path: string, ttl: number): Promise<string> {
     .from(TENANT_BRANDING_BUCKET)
     .createSignedUrl(safePath, ttl);
   if (error || !data?.signedUrl) {
-    throw new Error(`Failed to sign tenant-branding/${safePath}: ${error?.message ?? "unknown"}`);
+    throw new Error(
+      `Failed to sign tenant-branding/${safePath}: ${error?.message ?? "unknown"}`,
+    );
   }
   return data.signedUrl;
 }
 
-async function getOrMint(path: string, ttl: number, forceRefresh = false): Promise<string> {
+async function getOrMint(
+  path: string,
+  ttl: number,
+  forceRefresh = false,
+): Promise<string> {
   const key = `${path}::${ttl}`;
   const now = Date.now();
   const existing = cache.get(key);
   if (!forceRefresh && existing) {
     if (existing.inFlight) return existing.inFlight;
-    if (existing.expiresAtMs - RENEWAL_WINDOW_SECONDS * 1000 > now) return existing.url;
+    if (existing.expiresAtMs - RENEWAL_WINDOW_SECONDS * 1000 > now)
+      return existing.url;
   }
   const inFlight = (async () => {
     const url = await mintSignedUrl(path, ttl);
@@ -119,7 +128,10 @@ async function getOrMint(path: string, ttl: number, forceRefresh = false): Promi
 }
 
 /** Drop a single cached entry (e.g., after a 403 from an expired URL). */
-export function invalidateBrandingSignedUrl(path: string, ttlSeconds = BRANDING_SIGNED_URL_TTL_SECONDS): void {
+export function invalidateBrandingSignedUrl(
+  path: string,
+  ttlSeconds = BRANDING_SIGNED_URL_TTL_SECONDS,
+): void {
   cache.delete(`${path}::${ttlSeconds}`);
 }
 
@@ -159,9 +171,13 @@ let defaultFallbackCacheTtlMs = DEFAULT_FALLBACK_CACHE_TTL_MS;
  * keep their original expiry; only new `rememberFallback()` calls
  * pick up the new value.
  */
-export function setDefaultBrandingFallbackCacheTtlMs(ttlMs: number | null | undefined): void {
+export function setDefaultBrandingFallbackCacheTtlMs(
+  ttlMs: number | null | undefined,
+): void {
   defaultFallbackCacheTtlMs =
-    typeof ttlMs === "number" && ttlMs > 0 ? ttlMs : DEFAULT_FALLBACK_CACHE_TTL_MS;
+    typeof ttlMs === "number" && ttlMs > 0
+      ? ttlMs
+      : DEFAULT_FALLBACK_CACHE_TTL_MS;
 }
 export function getDefaultBrandingFallbackCacheTtlMs(): number {
   return defaultFallbackCacheTtlMs;
@@ -206,7 +222,9 @@ function hydrateFallbackCacheFromStorage(): void {
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return;
     const now = Date.now();
-    for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
+    for (const [key, value] of Object.entries(
+      parsed as Record<string, unknown>,
+    )) {
       if (typeof value !== "number" || !Number.isFinite(value)) continue;
       if (value <= now) continue;
       fallbackCache.set(key, value);
@@ -245,10 +263,18 @@ function persistFallbackCacheToStorage(): void {
 // mount on a fresh page can short-circuit straight to the fallback UI.
 hydrateFallbackCacheFromStorage();
 
-function scopedKey(tenantId: string | null | undefined, path: string, ttlSeconds: number): string {
+function scopedKey(
+  tenantId: string | null | undefined,
+  path: string,
+  ttlSeconds: number,
+): string {
   return `${tenantId ?? "_"}::${path}::${ttlSeconds}`;
 }
-function isFallbackCached(tenantId: string | null | undefined, path: string, ttlSeconds: number): boolean {
+function isFallbackCached(
+  tenantId: string | null | undefined,
+  path: string,
+  ttlSeconds: number,
+): boolean {
   const key = scopedKey(tenantId, path, ttlSeconds);
   const expiresAt = fallbackCache.get(key);
   if (!expiresAt) return false;
@@ -311,7 +337,9 @@ let brandingLogger: BrandingLogger = defaultBrandingLogger;
  * Swap the logger used for fallback short-circuit events. Pass `null`
  * or `undefined` to restore the default `console.info` logger.
  */
-export function setBrandingLogger(logger: BrandingLogger | null | undefined): void {
+export function setBrandingLogger(
+  logger: BrandingLogger | null | undefined,
+): void {
   brandingLogger = logger ?? defaultBrandingLogger;
 }
 
@@ -321,7 +349,11 @@ function logFallbackShortCircuit(
   ttlSeconds: number,
   source: BrandingFallbackShortCircuitLog["source"],
 ): void {
-  const remainingTtlMs = getBrandingFallbackRemainingTtlMs(tenantId, path, ttlSeconds);
+  const remainingTtlMs = getBrandingFallbackRemainingTtlMs(
+    tenantId,
+    path,
+    ttlSeconds,
+  );
   try {
     brandingLogger({
       event: "branding.fallback.short_circuit",
@@ -343,7 +375,10 @@ function rememberFallback(
   ttlSeconds: number,
   fallbackCacheTtlMs: number,
 ): void {
-  fallbackCache.set(scopedKey(tenantId, path, ttlSeconds), Date.now() + fallbackCacheTtlMs);
+  fallbackCache.set(
+    scopedKey(tenantId, path, ttlSeconds),
+    Date.now() + fallbackCacheTtlMs,
+  );
   persistFallbackCacheToStorage();
 }
 export function clearBrandingFallback(
@@ -377,16 +412,28 @@ interface RetryLock {
 const retryLocks = new Map<string, RetryLock>();
 const attemptCounters = new Map<string, number>();
 
-function getSharedAttempt(tenantId: string | null | undefined, path: string, ttlSeconds: number): number {
+function getSharedAttempt(
+  tenantId: string | null | undefined,
+  path: string,
+  ttlSeconds: number,
+): number {
   return attemptCounters.get(scopedKey(tenantId, path, ttlSeconds)) ?? 0;
 }
-function consumeSharedAttempt(tenantId: string | null | undefined, path: string, ttlSeconds: number): number {
+function consumeSharedAttempt(
+  tenantId: string | null | undefined,
+  path: string,
+  ttlSeconds: number,
+): number {
   const key = scopedKey(tenantId, path, ttlSeconds);
   const current = attemptCounters.get(key) ?? 0;
   attemptCounters.set(key, current + 1);
   return current;
 }
-function resetSharedRetry(tenantId: string | null | undefined, path: string, ttlSeconds: number): void {
+function resetSharedRetry(
+  tenantId: string | null | undefined,
+  path: string,
+  ttlSeconds: number,
+): void {
   attemptCounters.delete(scopedKey(tenantId, path, ttlSeconds));
 }
 /**
@@ -460,7 +507,8 @@ export function useBrandingSignedUrlState(
 ): BrandingUrlState {
   const tenantId = options?.tenantId ?? null;
   const fallbackCacheTtlMs =
-    typeof options?.fallbackCacheTtlMs === "number" && options.fallbackCacheTtlMs > 0
+    typeof options?.fallbackCacheTtlMs === "number" &&
+    options.fallbackCacheTtlMs > 0
       ? options.fallbackCacheTtlMs
       : defaultFallbackCacheTtlMs;
   const [url, setUrl] = useState<string>("");

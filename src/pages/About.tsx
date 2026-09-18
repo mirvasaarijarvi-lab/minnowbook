@@ -4,26 +4,69 @@ import { Link } from "@/lib/router-compat";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Target, Users, Zap, Shield, Globe, Heart,
-  Lightbulb, TrendingUp, ArrowRight,
+  Target,
+  Users,
+  Zap,
+  Shield,
+  Globe,
+  Heart,
+  Lightbulb,
+  TrendingUp,
+  ArrowRight,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import { useT } from "@/contexts/I18nContext";
 import { TranslationKey } from "@/i18n/translations";
 
-const values: { icon: React.ElementType; titleKey: TranslationKey; descKey: TranslationKey }[] = [
-  { icon: Target, titleKey: "about.valuePrecision", descKey: "about.valuePrecisionDesc" },
-  { icon: Lightbulb, titleKey: "about.valueInnovation", descKey: "about.valueInnovationDesc" },
-  { icon: Users, titleKey: "about.valueCollaboration", descKey: "about.valueCollaborationDesc" },
-  { icon: Shield, titleKey: "about.valueTrust", descKey: "about.valueTrustDesc" },
-  { icon: Heart, titleKey: "about.valuePassion", descKey: "about.valuePassionDesc" },
-  { icon: Globe, titleKey: "about.valueGlobal", descKey: "about.valueGlobalDesc" },
+const values: {
+  icon: React.ElementType;
+  titleKey: TranslationKey;
+  descKey: TranslationKey;
+}[] = [
+  {
+    icon: Target,
+    titleKey: "about.valuePrecision",
+    descKey: "about.valuePrecisionDesc",
+  },
+  {
+    icon: Lightbulb,
+    titleKey: "about.valueInnovation",
+    descKey: "about.valueInnovationDesc",
+  },
+  {
+    icon: Users,
+    titleKey: "about.valueCollaboration",
+    descKey: "about.valueCollaborationDesc",
+  },
+  {
+    icon: Shield,
+    titleKey: "about.valueTrust",
+    descKey: "about.valueTrustDesc",
+  },
+  {
+    icon: Heart,
+    titleKey: "about.valuePassion",
+    descKey: "about.valuePassionDesc",
+  },
+  {
+    icon: Globe,
+    titleKey: "about.valueGlobal",
+    descKey: "about.valueGlobalDesc",
+  },
 ];
 
-const points: { icon: React.ElementType; titleKey: TranslationKey; descKey: TranslationKey }[] = [
+const points: {
+  icon: React.ElementType;
+  titleKey: TranslationKey;
+  descKey: TranslationKey;
+}[] = [
   { icon: Zap, titleKey: "about.point1Title", descKey: "about.point1Desc" },
-  { icon: TrendingUp, titleKey: "about.point2Title", descKey: "about.point2Desc" },
+  {
+    icon: TrendingUp,
+    titleKey: "about.point2Title",
+    descKey: "about.point2Desc",
+  },
   { icon: Users, titleKey: "about.point3Title", descKey: "about.point3Desc" },
 ];
 
@@ -90,8 +133,12 @@ const About = () => {
                     <p.icon className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">{t(p.titleKey)}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">{t(p.descKey)}</p>
+                    <h3 className="font-semibold text-foreground">
+                      {t(p.titleKey)}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {t(p.descKey)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -115,12 +162,19 @@ const About = () => {
             {values.map((v) => {
               const Icon = v.icon;
               return (
-                <div key={v.titleKey} className="bg-card border border-border rounded-xl p-6 hover:shadow-hover transition-shadow">
+                <div
+                  key={v.titleKey}
+                  className="bg-card border border-border rounded-xl p-6 hover:shadow-hover transition-shadow"
+                >
                   <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
                     <Icon className="h-5 w-5 text-accent" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">{t(v.titleKey)}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{t(v.descKey)}</p>
+                  <h3 className="font-semibold text-foreground mb-2">
+                    {t(v.titleKey)}
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {t(v.descKey)}
+                  </p>
                 </div>
               );
             })}
@@ -145,7 +199,9 @@ const About = () => {
               </Button>
             </Link>
             <Link to="/pricing">
-              <Button variant="outline" size="lg">{t("hero.viewPricing")}</Button>
+              <Button variant="outline" size="lg">
+                {t("hero.viewPricing")}
+              </Button>
             </Link>
           </div>
         </div>

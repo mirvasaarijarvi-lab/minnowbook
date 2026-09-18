@@ -39,7 +39,10 @@ afterEach(() => {
 describe("Tenant Table Manifest — migration SQL lag", () => {
   describe("tablesDeclaredInMigrations", () => {
     it("collects tables across files, nested dirs, quoting and IF NOT EXISTS", () => {
-      writeMigration("0001_a.sql", `CREATE TABLE public.reservations (id uuid primary key);`);
+      writeMigration(
+        "0001_a.sql",
+        `CREATE TABLE public.reservations (id uuid primary key);`,
+      );
       writeMigration(
         "0002_b.sql",
         `create table if not exists "public"."booking_idempotency" (\n  id uuid primary key\n);\ncreate table sites (id uuid);`,
@@ -51,7 +54,11 @@ describe("Tenant Table Manifest — migration SQL lag", () => {
         "utf8",
       );
       // Non-SQL files are ignored.
-      fs.writeFileSync(path.join(tmpRoot, "notes.md"), "create table ignored_me (x int);", "utf8");
+      fs.writeFileSync(
+        path.join(tmpRoot, "notes.md"),
+        "create table ignored_me (x int);",
+        "utf8",
+      );
 
       const declared = tablesDeclaredInMigrations(tmpRoot);
 
@@ -65,11 +72,16 @@ describe("Tenant Table Manifest — migration SQL lag", () => {
     });
 
     it("returns an empty set when the migrations directory is absent", () => {
-      expect(tablesDeclaredInMigrations(path.join(tmpRoot, "missing"))).toEqual(new Set());
+      expect(tablesDeclaredInMigrations(path.join(tmpRoot, "missing"))).toEqual(
+        new Set(),
+      );
     });
 
     it("is repeatable across calls (regex state is reset)", () => {
-      writeMigration("0001_a.sql", `create table alpha (id uuid);\ncreate table beta (id uuid);`);
+      writeMigration(
+        "0001_a.sql",
+        `create table alpha (id uuid);\ncreate table beta (id uuid);`,
+      );
       const first = tablesDeclaredInMigrations(tmpRoot);
       const second = tablesDeclaredInMigrations(tmpRoot);
       expect([...second].sort()).toEqual([...first].sort());
@@ -79,7 +91,10 @@ describe("Tenant Table Manifest — migration SQL lag", () => {
 
   describe("classifyManifestDrift", () => {
     it("tolerates a lagging database: missing table is created by a migration", () => {
-      writeMigration("0001_idem.sql", `create table public.booking_idempotency (id uuid);`);
+      writeMigration(
+        "0001_idem.sql",
+        `create table public.booking_idempotency (id uuid);`,
+      );
 
       const drift = classifyManifestDrift({
         manifestTables: ["reservations", "sites", "booking_idempotency"],
@@ -94,7 +109,10 @@ describe("Tenant Table Manifest — migration SQL lag", () => {
     });
 
     it("still fails on a truly dropped table that no migration creates", () => {
-      writeMigration("0001_base.sql", `create table public.reservations (id uuid);`);
+      writeMigration(
+        "0001_base.sql",
+        `create table public.reservations (id uuid);`,
+      );
 
       const drift = classifyManifestDrift({
         manifestTables: ["reservations", "legacy_bookings"],
@@ -113,7 +131,12 @@ describe("Tenant Table Manifest — migration SQL lag", () => {
       );
 
       const drift = classifyManifestDrift({
-        manifestTables: ["reservations", "booking_idempotency", "legacy_bookings", "old_offers"],
+        manifestTables: [
+          "reservations",
+          "booking_idempotency",
+          "legacy_bookings",
+          "old_offers",
+        ],
         liveTables: ["reservations"],
         declaredInMigrations: tablesDeclaredInMigrations(tmpRoot),
       });
@@ -146,7 +169,10 @@ describe("Tenant Table Manifest — migration SQL lag", () => {
 
   describe("operator messages", () => {
     it("warning names the pending tables and the remediation", () => {
-      const warning = pendingMigrationWarning(["booking_idempotency", "kitchen_orders"]);
+      const warning = pendingMigrationWarning([
+        "booking_idempotency",
+        "kitchen_orders",
+      ]);
       expect(warning).toContain("2 manifest table(s)");
       expect(warning).toContain("booking_idempotency, kitchen_orders");
       expect(warning).toContain("Apply the pending migrations");

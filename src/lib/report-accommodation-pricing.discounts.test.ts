@@ -30,7 +30,9 @@ const cents = (n: number) => Math.round(n * 100);
 /** Room + breakfast must equal the charged total, to the cent. */
 const expectSplitMatches = (r: DiscountRow) => {
   const total = effectiveChargedTotal(r);
-  expect(cents(calcRoomPrice(r)) + cents(calcBreakfastPrice(r))).toBe(cents(total));
+  expect(cents(calcRoomPrice(r)) + cents(calcBreakfastPrice(r))).toBe(
+    cents(total),
+  );
   expect(calcRoomPrice(r)).toBeGreaterThanOrEqual(0);
   expect(calcBreakfastPrice(r)).toBeGreaterThanOrEqual(0);
   return total;
@@ -140,7 +142,11 @@ describe("accommodation totals with discounts, coupons and manual adjustments", 
   });
 
   it("follows a manual price adjustment, up or down", () => {
-    const down = stay({ price_eur: 210, original_price_eur: 297, discount_reason: "Manual adjustment" });
+    const down = stay({
+      price_eur: 210,
+      original_price_eur: 297,
+      discount_reason: "Manual adjustment",
+    });
     expect(expectSplitMatches(down)).toBe(210);
     expect(calcRoomPrice(down)).toBe(138);
 
@@ -151,7 +157,11 @@ describe("accommodation totals with discounts, coupons and manual adjustments", 
   });
 
   it("uses the saved breakfast rate on discounted stays, falling back to the default", () => {
-    const saved = stay({ price_eur: 222.75, original_price_eur: 297, breakfast_price_per_person: 12 });
+    const saved = stay({
+      price_eur: 222.75,
+      original_price_eur: 297,
+      breakfast_price_per_person: 12,
+    });
     expect(calcBreakfastPrice(saved)).toBe(72);
 
     const noRate = stay({
@@ -159,28 +169,63 @@ describe("accommodation totals with discounts, coupons and manual adjustments", 
       original_price_eur: 297,
       breakfast_price_per_person: null,
     });
-    expect(calcBreakfastPrice(noRate)).toBe(DEFAULT_BREAKFAST_PRICE_PER_PERSON * 2 * 3);
+    expect(calcBreakfastPrice(noRate)).toBe(
+      DEFAULT_BREAKFAST_PRICE_PER_PERSON * 2 * 3,
+    );
     expectSplitMatches(noRate);
 
-    const noBreakfast = stay({ breakfast_included: false, price_eur: 168.75, original_price_eur: 225 });
+    const noBreakfast = stay({
+      breakfast_included: false,
+      price_eur: 168.75,
+      original_price_eur: 225,
+    });
     expect(calcBreakfastPrice(noBreakfast)).toBe(0);
     expect(calcRoomPrice(noBreakfast)).toBe(168.75);
   });
 
   it("makes the period total equal the sum of charged amounts, and the discount saving the difference from list prices", () => {
     const rows: DiscountRow[] = [
-      stay({ price_eur: 222.75, original_price_eur: 297, discount_type: "percentage", discount_value: 25 }),
-      stay({ price_eur: 247, original_price_eur: 297, discount_type: "fixed", discount_value: 50 }),
+      stay({
+        price_eur: 222.75,
+        original_price_eur: 297,
+        discount_type: "percentage",
+        discount_value: 25,
+      }),
+      stay({
+        price_eur: 247,
+        original_price_eur: 297,
+        discount_type: "fixed",
+        discount_value: 50,
+      }),
       stay({ price_eur: 297 }), // no discount
-      stay({ reservation_type: "hotel", price_eur: 89.9, original_price_eur: 129.9, breakfast_price_per_person: 19.99 }),
-      stay({ price_eur: 0, original_price_eur: 297, discount_type: "percentage", discount_value: 100 }),
+      stay({
+        reservation_type: "hotel",
+        price_eur: 89.9,
+        original_price_eur: 129.9,
+        breakfast_price_per_person: 19.99,
+      }),
+      stay({
+        price_eur: 0,
+        original_price_eur: 297,
+        discount_type: "percentage",
+        discount_value: 100,
+      }),
     ];
 
-    const chargedC = rows.reduce((s, r) => s + cents(effectiveChargedTotal(r)), 0);
-    const linesC = rows.reduce((s, r) => s + cents(calcRoomPrice(r)) + cents(calcBreakfastPrice(r)), 0);
+    const chargedC = rows.reduce(
+      (s, r) => s + cents(effectiveChargedTotal(r)),
+      0,
+    );
+    const linesC = rows.reduce(
+      (s, r) => s + cents(calcRoomPrice(r)) + cents(calcBreakfastPrice(r)),
+      0,
+    );
     expect(linesC).toBe(chargedC);
 
-    const listC = rows.reduce((s, r) => s + cents(r.original_price_eur ?? r.price_eur ?? 0), 0);
+    const listC = rows.reduce(
+      (s, r) => s + cents(r.original_price_eur ?? r.price_eur ?? 0),
+      0,
+    );
     expect(listC - chargedC).toBe(cents(74.25 + 50 + 40 + 297));
   });
 });

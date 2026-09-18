@@ -24,11 +24,17 @@ import {
 
 const LABELS = { breakfast: "Breakfast" };
 const fmtEur = (v: number) =>
-  v.toLocaleString("fi-FI", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  v.toLocaleString("fi-FI", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }) + " €";
 
 type MenuRow = ReportPricingRow & { label: string };
 
-const menuRow = (label: string, over: Partial<ReportPricingRow> = {}): MenuRow => ({
+const menuRow = (
+  label: string,
+  over: Partial<ReportPricingRow> = {},
+): MenuRow => ({
   label,
   reservation_type: "restaurant",
   pricing_type: "menu",
@@ -93,8 +99,18 @@ describe("menu-priced bookings with discounts", () => {
       // The discounted amount stored on the booking never leaks into a cell.
       const stored = row.price_eur;
       if (stored) {
-        for (const cell of [csv.price, csv.total, print.price, print.total, pdf.room, pdf.total]) {
-          expect(cell.includes(stored.toFixed(2)), `${row.label}: ${cell}`).toBe(false);
+        for (const cell of [
+          csv.price,
+          csv.total,
+          print.price,
+          print.total,
+          pdf.room,
+          pdf.total,
+        ]) {
+          expect(
+            cell.includes(stored.toFixed(2)),
+            `${row.label}: ${cell}`,
+          ).toBe(false);
         }
       }
     }
@@ -139,14 +155,21 @@ describe("menu-priced bookings with discounts", () => {
     ];
 
     const withoutMenu = sumReportAmounts(realBookings);
-    const withMenu = sumReportAmounts([...realBookings, ...DISCOUNTED_MENU_ROWS]);
+    const withMenu = sumReportAmounts([
+      ...realBookings,
+      ...DISCOUNTED_MENU_ROWS,
+    ]);
 
     expect(withMenu.charged).toBe(withoutMenu.charged);
     expect(withMenu.room).toBe(withoutMenu.room);
     expect(withMenu.breakfast).toBe(withoutMenu.breakfast);
-    expect(withMenu.count).toBe(realBookings.length + DISCOUNTED_MENU_ROWS.length);
+    expect(withMenu.count).toBe(
+      realBookings.length + DISCOUNTED_MENU_ROWS.length,
+    );
     // The period still balances: room + breakfast equals the charged total.
-    expect(roundCents(withMenu.room + withMenu.breakfast)).toBe(withMenu.charged);
+    expect(roundCents(withMenu.room + withMenu.breakfast)).toBe(
+      withMenu.charged,
+    );
     expect(withMenu.charged).toBe(roundCents(222.75 + 346 + 480));
   });
 

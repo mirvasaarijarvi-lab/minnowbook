@@ -7,18 +7,49 @@ import MarketingFooter from "@/components/MarketingFooter";
 import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
 import ProtectedEmail from "@/components/ProtectedEmail";
 
-
 const subprocessors = [
-  { name: "Supabase (via Lovable Cloud)", purpose: "Database, authentication, file storage, edge functions", data: "All application data, account credentials, uploaded files", region: "European Union (Frankfurt)" },
-  { name: "Resend", purpose: "Transactional and notification email delivery", data: "Recipient email, subject, message body", region: "European Union and United States (SCCs in place)" },
-  { name: "Stripe", purpose: "Subscription billing and payments", data: "Billing name, address, payment method metadata (no card data ever reaches MimmoBook)", region: "European Union and United States (SCCs in place)" },
-  { name: "Google (Search Console, Analytics 4, Tag Manager)", purpose: "Aggregated traffic analytics and SEO", data: "Anonymised page views, device, country (loaded only after analytics consent)", region: "European Union and United States (SCCs in place)" },
-  { name: "Lovable AI Gateway", purpose: "Optional AI features inside the product", data: "Only the prompts the user explicitly submits", region: "European Union and United States" },
-  { name: "Lovable (hosting and CDN)", purpose: "Static site hosting and CDN delivery", data: "HTTP request metadata", region: "Global edge network" },
+  {
+    name: "Supabase (via Lovable Cloud)",
+    purpose: "Database, authentication, file storage, edge functions",
+    data: "All application data, account credentials, uploaded files",
+    region: "European Union (Frankfurt)",
+  },
+  {
+    name: "Resend",
+    purpose: "Transactional and notification email delivery",
+    data: "Recipient email, subject, message body",
+    region: "European Union and United States (SCCs in place)",
+  },
+  {
+    name: "Stripe",
+    purpose: "Subscription billing and payments",
+    data: "Billing name, address, payment method metadata (no card data ever reaches MimmoBook)",
+    region: "European Union and United States (SCCs in place)",
+  },
+  {
+    name: "Google (Search Console, Analytics 4, Tag Manager)",
+    purpose: "Aggregated traffic analytics and SEO",
+    data: "Anonymised page views, device, country (loaded only after analytics consent)",
+    region: "European Union and United States (SCCs in place)",
+  },
+  {
+    name: "Lovable AI Gateway",
+    purpose: "Optional AI features inside the product",
+    data: "Only the prompts the user explicitly submits",
+    region: "European Union and United States",
+  },
+  {
+    name: "Lovable (hosting and CDN)",
+    purpose: "Static site hosting and CDN delivery",
+    data: "HTTP request metadata",
+    region: "Global edge network",
+  },
 ];
 
 const Subprocessors = () => {
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -28,25 +59,42 @@ const Subprocessors = () => {
         path="/legal/subprocessors"
         jsonLd={breadcrumbSchema([
           { name: "Home", url: "https://mimmobook.com/" },
-          { name: "Subprocessors", url: "https://mimmobook.com/legal/subprocessors" },
+          {
+            name: "Subprocessors",
+            url: "https://mimmobook.com/legal/subprocessors",
+          },
         ])}
       />
       <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-lg">
         <div className="max-w-4xl mx-auto flex items-center justify-between px-6 py-4">
-          <Link to="/"><Logo variant="color" size="sm" /></Link>
-          <Link to="/"><Button variant="ghost" size="sm" className="gap-1.5"><ArrowLeft className="h-4 w-4" /> Back</Button></Link>
+          <Link to="/">
+            <Logo variant="color" size="sm" />
+          </Link>
+          <Link to="/">
+            <Button variant="ghost" size="sm" className="gap-1.5">
+              <ArrowLeft className="h-4 w-4" /> Back
+            </Button>
+          </Link>
         </div>
       </nav>
 
       <main className="max-w-3xl mx-auto px-6 py-16 flex-1">
-        <h1 className="text-3xl sm:text-4xl font-serif font-bold mb-2">Subprocessor Inventory</h1>
+        <h1 className="text-3xl sm:text-4xl font-serif font-bold mb-2">
+          Subprocessor Inventory
+        </h1>
         <p className="text-sm text-muted-foreground mb-8">
-          Last updated: {new Date().toLocaleDateString("en-GB", { month: "long", day: "numeric", year: "numeric" })}
+          Last updated:{" "}
+          {new Date().toLocaleDateString("en-GB", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })}
         </p>
         <p className="text-muted-foreground leading-relaxed mb-8">
-          MimmoBook relies on a small number of carefully selected subprocessors to deliver the service.
-          Each one is bound by a written data processing agreement that requires the same level of
-          protection we owe to you under GDPR. Transfers outside the European Economic Area are covered
+          MimmoBook relies on a small number of carefully selected subprocessors
+          to deliver the service. Each one is bound by a written data processing
+          agreement that requires the same level of protection we owe to you
+          under GDPR. Transfers outside the European Economic Area are covered
           by the European Commission Standard Contractual Clauses (SCCs).
         </p>
 
@@ -73,15 +121,22 @@ const Subprocessors = () => {
           </table>
         </div>
 
-        <h2 className="text-xl font-serif font-bold mt-10 mb-2">Notifications of changes</h2>
+        <h2 className="text-xl font-serif font-bold mt-10 mb-2">
+          Notifications of changes
+        </h2>
         <p className="text-muted-foreground leading-relaxed">
-          We notify customers by email at least 30 days before adding or replacing a subprocessor that
-          handles personal data. If you want to receive these notifications, email our privacy contact{" "}
-          <ProtectedEmail user="privacy" subject="Subprocessor change list" className="text-accent hover:underline font-medium" />{" "}
-          and ask to be added to the subprocessor change list. The address is hidden from automated
-          crawlers and revealed on click, so please use the button rather than guessing it.
+          We notify customers by email at least 30 days before adding or
+          replacing a subprocessor that handles personal data. If you want to
+          receive these notifications, email our privacy contact{" "}
+          <ProtectedEmail
+            user="privacy"
+            subject="Subprocessor change list"
+            className="text-accent hover:underline font-medium"
+          />{" "}
+          and ask to be added to the subprocessor change list. The address is
+          hidden from automated crawlers and revealed on click, so please use
+          the button rather than guessing it.
         </p>
-
       </main>
       <MarketingFooter />
     </div>

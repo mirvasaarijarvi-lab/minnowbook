@@ -9,7 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import CollapsibleSection from "@/components/dashboard/CollapsibleSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { fi as fiFns, enUS, sv as svFns, type Locale } from "date-fns/locale";
@@ -29,11 +34,18 @@ interface CalendarSectionProps {
   onSelectDate?: (date: Date | undefined) => void;
 }
 
-const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate }: CalendarSectionProps) => {
+const CalendarSection = ({
+  title,
+  reservationTypes,
+  resourceTypes,
+  onSelectDate,
+}: CalendarSectionProps) => {
   const { tenantId } = useTenant();
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date(),
+  );
   const [month, setMonth] = useState(new Date());
   const [blockDialogOpen, setBlockDialogOpen] = useState(false);
   const [blockReason, setBlockReason] = useState("");
@@ -49,13 +61,24 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   const monthEnd = format(endOfMonth(month), "yyyy-MM-dd");
 
   const { data: reservations } = useQuery({
-    queryKey: ["calendar-reservations", tenantId, selectedSiteId, siteIds, monthStart, monthEnd, reservationTypes],
+    queryKey: [
+      "calendar-reservations",
+      tenantId,
+      selectedSiteId,
+      siteIds,
+      monthStart,
+      monthEnd,
+      reservationTypes,
+    ],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase
-        .from("reservations").select("*").eq("tenant_id", tenantId)
+        .from("reservations")
+        .select("*")
+        .eq("tenant_id", tenantId)
         .in("reservation_type", reservationTypes)
-        .gte("date", monthStart).lte("date", monthEnd)
+        .gte("date", monthStart)
+        .lte("date", monthEnd)
         .order("start_time", { ascending: true });
       query = applySiteFilter(query, selectedSiteId);
       const { data, error } = await query;
@@ -66,7 +89,15 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   });
 
   const { data: blockedSlots } = useQuery({
-    queryKey: ["calendar-blocked-slots", tenantId, selectedSiteId, siteIds, monthStart, monthEnd, resourceTypes],
+    queryKey: [
+      "calendar-blocked-slots",
+      tenantId,
+      selectedSiteId,
+      siteIds,
+      monthStart,
+      monthEnd,
+      resourceTypes,
+    ],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase
@@ -74,7 +105,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
         .select("*, resource:resources(name)")
         .eq("tenant_id", tenantId)
         .in("resource_type", resourceTypes)
-        .gte("date", monthStart).lte("date", monthEnd)
+        .gte("date", monthStart)
+        .lte("date", monthEnd)
         .order("date");
       query = applySiteFilter(query, selectedSiteId);
       const { data, error } = await query;
@@ -85,7 +117,13 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   });
 
   const { data: recurringBlocks } = useQuery({
-    queryKey: ["calendar-recurring-blocks", tenantId, selectedSiteId, siteIds, resourceTypes],
+    queryKey: [
+      "calendar-recurring-blocks",
+      tenantId,
+      selectedSiteId,
+      siteIds,
+      resourceTypes,
+    ],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase
@@ -104,7 +142,13 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   });
 
   const { data: resources } = useQuery({
-    queryKey: ["resources-for-blocking", tenantId, selectedSiteId, siteIds, resourceTypes],
+    queryKey: [
+      "resources-for-blocking",
+      tenantId,
+      selectedSiteId,
+      siteIds,
+      resourceTypes,
+    ],
     queryFn: async () => {
       if (!tenantId) return [];
       let query = supabase
@@ -123,11 +167,15 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   });
 
   // Which resource IDs are already blocked on selected date (full-day, no specific resource = all blocked)
-  const selectedDateStr = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
+  const selectedDateStr = selectedDate
+    ? format(selectedDate, "yyyy-MM-dd")
+    : "";
 
   const blockedResourceIds = useMemo(() => {
     if (!selectedDateStr || !blockedSlots) return new Set<string>();
-    const dayBlocks = blockedSlots.filter((b: any) => b.date === selectedDateStr);
+    const dayBlocks = blockedSlots.filter(
+      (b: any) => b.date === selectedDateStr,
+    );
     const set = new Set<string>();
     dayBlocks.forEach((b: any) => {
       if (b.resource_id) {
@@ -140,12 +188,16 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   // Check if there's a "block all" entry (no resource_id) for any of the resource types
   const isAllBlocked = useMemo(() => {
     if (!selectedDateStr || !blockedSlots) return false;
-    return blockedSlots.some((b: any) => b.date === selectedDateStr && !b.resource_id);
+    return blockedSlots.some(
+      (b: any) => b.date === selectedDateStr && !b.resource_id,
+    );
   }, [selectedDateStr, blockedSlots]);
 
   const reservationDates = useMemo(() => {
     const map = new Map<string, number>();
-    reservations?.forEach((r) => { map.set(r.date, (map.get(r.date) ?? 0) + 1); });
+    reservations?.forEach((r) => {
+      map.set(r.date, (map.get(r.date) ?? 0) + 1);
+    });
     return map;
   }, [reservations]);
 
@@ -158,8 +210,13 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   const recurringDatesSet = useMemo(() => {
     const set = new Set<string>();
     if (!recurringBlocks?.length) return set;
-    const days = eachDayOfInterval({ start: startOfMonth(month), end: endOfMonth(month) });
-    const recurringDaysOfWeek = new Set(recurringBlocks.map((b: any) => b.day_of_week));
+    const days = eachDayOfInterval({
+      start: startOfMonth(month),
+      end: endOfMonth(month),
+    });
+    const recurringDaysOfWeek = new Set(
+      recurringBlocks.map((b: any) => b.day_of_week),
+    );
     days.forEach((d) => {
       if (recurringDaysOfWeek.has(d.getDay())) set.add(format(d, "yyyy-MM-dd"));
     });
@@ -168,17 +225,23 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
 
   const selectedDayReservations = useMemo(() => {
     if (!selectedDate || !reservations) return [];
-    return reservations.filter((r) => r.date === format(selectedDate, "yyyy-MM-dd"));
+    return reservations.filter(
+      (r) => r.date === format(selectedDate, "yyyy-MM-dd"),
+    );
   }, [selectedDate, reservations]);
 
   const selectedDayBlocks = useMemo(() => {
     if (!selectedDate || !blockedSlots) return [];
-    return blockedSlots.filter((b: any) => b.date === format(selectedDate, "yyyy-MM-dd"));
+    return blockedSlots.filter(
+      (b: any) => b.date === format(selectedDate, "yyyy-MM-dd"),
+    );
   }, [selectedDate, blockedSlots]);
 
   const selectedDayRecurring = useMemo(() => {
     if (!selectedDate || !recurringBlocks) return [];
-    return recurringBlocks.filter((b: any) => b.day_of_week === selectedDate.getDay());
+    return recurringBlocks.filter(
+      (b: any) => b.day_of_week === selectedDate.getDay(),
+    );
   }, [selectedDate, recurringBlocks]);
 
   const hasAnyBlocks = (date: Date) => {
@@ -195,7 +258,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
   const toggleResourceBlock = useMutation({
     mutationFn: async (resourceId: string) => {
       if (!tenantId || !selectedDateStr) return;
-      const resource = resources?.find(r => r.id === resourceId);
+      const resource = resources?.find((r) => r.id === resourceId);
       if (!resource) return;
 
       if (blockedResourceIds.has(resourceId)) {
@@ -209,15 +272,13 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
         if (error) throw error;
       } else {
         // Block: insert
-        const { error } = await supabase
-          .from("blocked_slots")
-          .insert({
-            tenant_id: tenantId,
-            date: selectedDateStr,
-            resource_type: resource.resource_type,
-            resource_id: resourceId,
-            reason: blockReason || null,
-          });
+        const { error } = await supabase.from("blocked_slots").insert({
+          tenant_id: tenantId,
+          date: selectedDateStr,
+          resource_type: resource.resource_type,
+          resource_id: resourceId,
+          reason: blockReason || null,
+        });
         if (error) throw error;
       }
     },
@@ -226,7 +287,11 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
       queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -252,7 +317,7 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
           .eq("date", selectedDateStr)
           .in("resource_type", resourceTypes);
 
-        const rows = resourceTypes.map(rt => ({
+        const rows = resourceTypes.map((rt) => ({
           tenant_id: tenantId,
           date: selectedDateStr,
           resource_type: rt,
@@ -266,26 +331,44 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["calendar-blocked-slots"] });
       queryClient.invalidateQueries({ queryKey: ["blocked-slots"] });
-      toast({ title: isAllBlocked ? t("dashboard.unblockAll") : t("dashboard.blockDay") });
+      toast({
+        title: isAllBlocked
+          ? t("dashboard.unblockAll")
+          : t("dashboard.blockDay"),
+      });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
-  const isRestaurant = resourceTypes.includes("restaurant") && resourceTypes.length === 1;
+  const isRestaurant =
+    resourceTypes.includes("restaurant") && resourceTypes.length === 1;
 
   const { typeLabel: getResourceTypeLabel } = useResourceTypeLabel();
 
   return (
     <div className="space-y-2">
-      <h3 className="text-lg font-serif font-semibold text-foreground">{title}</h3>
-      <div data-tour="calendar-grid" className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-4">
+      <h3 className="text-lg font-serif font-semibold text-foreground">
+        {title}
+      </h3>
+      <div
+        data-tour="calendar-grid"
+        className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-4"
+      >
         <Card>
           <CardContent className="p-4">
             <Calendar
-              mode="single" selected={selectedDate} onSelect={handleSelect}
-              month={month} onMonthChange={setMonth} locale={dateFnsLocale}
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleSelect}
+              month={month}
+              onMonthChange={setMonth}
+              locale={dateFnsLocale}
               className={cn("p-3 pointer-events-auto")}
               modifiers={{
                 hasReservation: (date) => {
@@ -294,15 +377,27 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                 },
                 isBlocked: (date) => {
                   const key = format(date, "yyyy-MM-dd");
-                  return blockedDatesSet.has(key) && !reservationDates.has(key) && !recurringDatesSet.has(key);
+                  return (
+                    blockedDatesSet.has(key) &&
+                    !reservationDates.has(key) &&
+                    !recurringDatesSet.has(key)
+                  );
                 },
                 isRecurring: (date) => {
                   const key = format(date, "yyyy-MM-dd");
-                  return recurringDatesSet.has(key) && !blockedDatesSet.has(key) && !reservationDates.has(key);
+                  return (
+                    recurringDatesSet.has(key) &&
+                    !blockedDatesSet.has(key) &&
+                    !reservationDates.has(key)
+                  );
                 },
                 isRecurringAndBlocked: (date) => {
                   const key = format(date, "yyyy-MM-dd");
-                  return recurringDatesSet.has(key) && blockedDatesSet.has(key) && !reservationDates.has(key);
+                  return (
+                    recurringDatesSet.has(key) &&
+                    blockedDatesSet.has(key) &&
+                    !reservationDates.has(key)
+                  );
                 },
                 hasBoth: (date) => {
                   const key = format(date, "yyyy-MM-dd");
@@ -311,10 +406,14 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
               }}
               modifiersClassNames={{
                 hasReservation: "bg-accent/20 font-bold text-accent-foreground",
-                isBlocked: "bg-destructive/15 text-destructive font-bold ring-1 ring-inset ring-destructive/30",
-                isRecurring: "bg-primary/10 text-primary font-bold border border-dashed border-primary/40",
-                isRecurringAndBlocked: "bg-destructive/15 text-destructive font-bold border-2 border-dashed border-primary/40",
-                hasBoth: "bg-accent/20 font-bold text-accent-foreground ring-2 ring-inset ring-destructive/40",
+                isBlocked:
+                  "bg-destructive/15 text-destructive font-bold ring-1 ring-inset ring-destructive/30",
+                isRecurring:
+                  "bg-primary/10 text-primary font-bold border border-dashed border-primary/40",
+                isRecurringAndBlocked:
+                  "bg-destructive/15 text-destructive font-bold border-2 border-dashed border-primary/40",
+                hasBoth:
+                  "bg-accent/20 font-bold text-accent-foreground ring-2 ring-inset ring-destructive/40",
               }}
             />
           </CardContent>
@@ -324,7 +423,11 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-serif">
-                {selectedDate ? format(selectedDate, "EEEE, MMMM d, yyyy", { locale: dateFnsLocale }) : t("dashboard.selectDate")}
+                {selectedDate
+                  ? format(selectedDate, "EEEE, MMMM d, yyyy", {
+                      locale: dateFnsLocale,
+                    })
+                  : t("dashboard.selectDate")}
               </CardTitle>
               {isAdmin && selectedDate && (
                 <Button
@@ -333,8 +436,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                   className="gap-1.5 text-destructive border-destructive/30 hover:bg-destructive/10"
                   onClick={() => setBlockDialogOpen(true)}
                 >
-                   <Ban className="h-4 w-4" />
-                   {t("dashboard.blockDay")}
+                  <Ban className="h-4 w-4" />
+                  {t("dashboard.blockDay")}
                 </Button>
               )}
             </div>
@@ -343,27 +446,52 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             {/* Recurring blocks */}
             {selectedDayRecurring.length > 0 && (
               <div className="space-y-2">
-                 <p className="text-xs font-medium text-primary uppercase tracking-wide flex items-center gap-1.5">
-                   <RefreshCw className="h-3.5 w-3.5" /> {t("dashboard.recurringBlocks")}
+                <p className="text-xs font-medium text-primary uppercase tracking-wide flex items-center gap-1.5">
+                  <RefreshCw className="h-3.5 w-3.5" />{" "}
+                  {t("dashboard.recurringBlocks")}
                 </p>
                 {selectedDayRecurring.map((block: any) => (
-                  <div key={block.id} className="flex items-center justify-between p-3 rounded-md bg-primary/5 border border-dashed border-primary/30">
+                  <div
+                    key={block.id}
+                    className="flex items-center justify-between p-3 rounded-md bg-primary/5 border border-dashed border-primary/30"
+                  >
                     <div>
-                       <div className="flex items-center gap-2">
-                         <span className="font-medium text-foreground">{t("dashboard.every")} {format(new Date(2024, 0, block.day_of_week === 0 ? 7 : block.day_of_week), "EEEE", { locale: dateFnsLocale })}</span>
-                        <Badge variant="secondary" className="text-xs capitalize">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-foreground">
+                          {t("dashboard.every")}{" "}
+                          {format(
+                            new Date(
+                              2024,
+                              0,
+                              block.day_of_week === 0 ? 7 : block.day_of_week,
+                            ),
+                            "EEEE",
+                            { locale: dateFnsLocale },
+                          )}
+                        </span>
+                        <Badge
+                          variant="secondary"
+                          className="text-xs capitalize"
+                        >
                           {getResourceTypeLabel(block.resource_type)}
                         </Badge>
-                        {block.resource?.name && <Badge variant="outline" className="text-xs">{block.resource.name}</Badge>}
+                        {block.resource?.name && (
+                          <Badge variant="outline" className="text-xs">
+                            {block.resource.name}
+                          </Badge>
+                        )}
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {block.start_time && block.end_time ? (
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {block.start_time.slice(0, 5)} – {block.end_time.slice(0, 5)}
+                            {block.start_time.slice(0, 5)} –{" "}
+                            {block.end_time.slice(0, 5)}
                           </span>
-                         ) : t("dashboard.allDay")}
-                         {block.reason && `, ${block.reason}`}
+                        ) : (
+                          t("dashboard.allDay")
+                        )}
+                        {block.reason && `, ${block.reason}`}
                       </p>
                     </div>
                   </div>
@@ -374,25 +502,32 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             {/* One-off blocks */}
             {selectedDayBlocks.length > 0 && (
               <div className="space-y-2">
-                 <p className="text-xs font-medium text-destructive uppercase tracking-wide flex items-center gap-1.5">
-                   <Ban className="h-3.5 w-3.5" /> {t("dashboard.blocked")}
+                <p className="text-xs font-medium text-destructive uppercase tracking-wide flex items-center gap-1.5">
+                  <Ban className="h-3.5 w-3.5" /> {t("dashboard.blocked")}
                 </p>
                 {selectedDayBlocks.map((block: any) => (
-                  <div key={block.id} className="flex items-center justify-between p-3 rounded-md bg-destructive/10 border border-destructive/20">
+                  <div
+                    key={block.id}
+                    className="flex items-center justify-between p-3 rounded-md bg-destructive/10 border border-destructive/20"
+                  >
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium text-foreground">
-                          {block.resource?.name ?? getResourceTypeLabel(block.resource_type)}
+                          {block.resource?.name ??
+                            getResourceTypeLabel(block.resource_type)}
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {block.start_time && block.end_time ? (
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
-                            {block.start_time.slice(0, 5)} – {block.end_time.slice(0, 5)}
+                            {block.start_time.slice(0, 5)} –{" "}
+                            {block.end_time.slice(0, 5)}
                           </span>
-                         ) : t("dashboard.allDay")}
-                         {block.reason && ` · ${block.reason}`}
+                        ) : (
+                          t("dashboard.allDay")
+                        )}
+                        {block.reason && ` · ${block.reason}`}
                       </p>
                     </div>
                   </div>
@@ -401,8 +536,12 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             )}
 
             {/* Reservations */}
-            {selectedDayReservations.length === 0 && selectedDayBlocks.length === 0 && selectedDayRecurring.length === 0 ? (
-              <p className="text-muted-foreground text-sm">{t("dashboard.noReservationsDay")}</p>
+            {selectedDayReservations.length === 0 &&
+            selectedDayBlocks.length === 0 &&
+            selectedDayRecurring.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                {t("dashboard.noReservationsDay")}
+              </p>
             ) : selectedDayReservations.length > 0 ? (
               <CollapsibleSection
                 title={t("dashboard.reservationsLabel")}
@@ -411,27 +550,42 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                 className="space-y-2"
               >
                 <div className="space-y-2">
-                {selectedDayReservations.map((r) => (
-                  <div key={r.id} className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-border">
-                    <div>
-                      <p className="font-medium text-foreground">{r.guest_name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {r.start_time?.slice(0, 5)}
-                        {r.end_time && ` – ${r.end_time.slice(0, 5)}`}
-                        {r.guests_count && ` · ${r.guests_count} ${t("common.guests")}`}
-                      </p>
+                  {selectedDayReservations.map((r) => (
+                    <div
+                      key={r.id}
+                      className="flex items-center justify-between p-3 rounded-md bg-secondary/50 border border-border"
+                    >
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {r.guest_name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {r.start_time?.slice(0, 5)}
+                          {r.end_time && ` – ${r.end_time.slice(0, 5)}`}
+                          {r.guests_count &&
+                            ` · ${r.guests_count} ${t("common.guests")}`}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="capitalize text-xs">
+                          {getResourceTypeLabel(r.reservation_type)}
+                        </Badge>
+                        <Badge
+                          className={cn(
+                            "text-xs",
+                            r.status === "confirmed" &&
+                              "bg-success/20 text-success-foreground border border-success/30",
+                            r.status === "pending" &&
+                              "bg-accent/20 text-accent-foreground border border-accent/30",
+                            r.status === "cancelled" &&
+                              "bg-destructive/20 text-destructive border border-destructive/30",
+                          )}
+                        >
+                          {tDynamic(`dashboard.${r.status ?? "pending"}`)}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="capitalize text-xs">{getResourceTypeLabel(r.reservation_type)}</Badge>
-                      <Badge className={cn(
-                        "text-xs",
-                        r.status === "confirmed" && "bg-success/20 text-success-foreground border border-success/30",
-                        r.status === "pending" && "bg-accent/20 text-accent-foreground border border-accent/30",
-                        r.status === "cancelled" && "bg-destructive/20 text-destructive border border-destructive/30",
-                      )}>{tDynamic(`dashboard.${r.status ?? "pending"}`)}</Badge>
-                    </div>
-                  </div>
-                ))}
+                  ))}
                 </div>
               </CollapsibleSection>
             ) : null}
@@ -443,11 +597,14 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
       <Dialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-             <DialogTitle className="font-serif">
-               {t("dashboard.blockTitle")} {title}
-             </DialogTitle>
-             <p className="text-sm text-muted-foreground">
-               {selectedDate && format(selectedDate, "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })}
+            <DialogTitle className="font-serif">
+              {t("dashboard.blockTitle")} {title}
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              {selectedDate &&
+                format(selectedDate, "EEEE, MMMM d, yyyy", {
+                  locale: dateFnsLocale,
+                })}
             </p>
           </DialogHeader>
 
@@ -456,7 +613,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
             {!isRestaurant && resources && resources.length > 0 && (
               <div className="space-y-2">
                 {resources.map((resource) => {
-                  const isBlocked = blockedResourceIds.has(resource.id) || isAllBlocked;
+                  const isBlocked =
+                    blockedResourceIds.has(resource.id) || isAllBlocked;
                   return (
                     <div
                       key={resource.id}
@@ -464,13 +622,17 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                         "flex items-center justify-between p-3 rounded-md border transition-colors",
                         isBlocked
                           ? "bg-destructive/10 border-destructive/30"
-                          : "bg-card border-border"
+                          : "bg-card border-border",
                       )}
                     >
                       <div>
-                        <p className="font-medium text-foreground text-sm">{resource.name}</p>
+                        <p className="font-medium text-foreground text-sm">
+                          {resource.name}
+                        </p>
                         {resource.capacity && (
-                          <p className="text-xs text-muted-foreground">{resource.capacity} {t("common.guests")}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {resource.capacity} {t("common.guests")}
+                          </p>
                         )}
                       </div>
                       <Button
@@ -480,10 +642,16 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
                         onClick={() => toggleResourceBlock.mutate(resource.id)}
                         disabled={toggleResourceBlock.isPending || isAllBlocked}
                       >
-                         {isBlocked ? (
-                           <><Lock className="h-3 w-3" /> {t("dashboard.blockedLabel")}</>
-                         ) : (
-                           <><Unlock className="h-3 w-3" /> {t("dashboard.blockLabel")}</>
+                        {isBlocked ? (
+                          <>
+                            <Lock className="h-3 w-3" />{" "}
+                            {t("dashboard.blockedLabel")}
+                          </>
+                        ) : (
+                          <>
+                            <Unlock className="h-3 w-3" />{" "}
+                            {t("dashboard.blockLabel")}
+                          </>
                         )}
                       </Button>
                     </div>
@@ -494,8 +662,8 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
 
             {/* Reason input */}
             <div>
-               <Input
-                 placeholder={t("dashboard.blockReason")}
+              <Input
+                placeholder={t("dashboard.blockReason")}
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
               />
@@ -509,12 +677,11 @@ const CalendarSection = ({ title, reservationTypes, resourceTypes, onSelectDate 
               disabled={blockAllMutation.isPending}
             >
               <Ban className="h-4 w-4" />
-               {isAllBlocked
-                 ? t("dashboard.unblockAll")
-                 : isRestaurant
-                   ? t("dashboard.blockRestaurantDay")
-                   : `${t("dashboard.blockAllTitle")} ${title.toLowerCase()}`
-               }
+              {isAllBlocked
+                ? t("dashboard.unblockAll")
+                : isRestaurant
+                  ? t("dashboard.blockRestaurantDay")
+                  : `${t("dashboard.blockAllTitle")} ${title.toLowerCase()}`}
             </Button>
           </div>
         </DialogContent>

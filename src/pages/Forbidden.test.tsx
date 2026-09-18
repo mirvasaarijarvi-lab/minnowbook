@@ -73,7 +73,9 @@ beforeEach(() => {
 });
 
 // Render harness — Forbidden uses <Link>, which requires a Router context.
-const renderForbidden = (props: React.ComponentProps<typeof Forbidden> = {}) => {
+const renderForbidden = (
+  props: React.ComponentProps<typeof Forbidden> = {},
+) => {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -141,7 +143,10 @@ describe("Forbidden page (UI surface for non-admin roles)", () => {
 
       // 3. The H1 is stable and accessible.
       expect(
-        screen.getByRole("heading", { level: 1, name: /you don't have access/i }),
+        screen.getByRole("heading", {
+          level: 1,
+          name: /you don't have access/i,
+        }),
       ).toBeInTheDocument();
 
       // 4. The document title is the canonical 403 title — synthetic
@@ -181,7 +186,9 @@ describe("Forbidden page (UI surface for non-admin roles)", () => {
       document.querySelector('meta[name="robots"]')?.getAttribute("content"),
     ).toBe("noindex, nofollow");
     expect(
-      document.querySelector('meta[http-equiv="Status"]')?.getAttribute("content"),
+      document
+        .querySelector('meta[http-equiv="Status"]')
+        ?.getAttribute("content"),
     ).toBe("403 Forbidden");
   });
 

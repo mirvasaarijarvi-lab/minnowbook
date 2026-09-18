@@ -6,6 +6,6 @@ export const useDateLocale = (): Locale => {
   const { language } = useLanguage();
   return useMemo(
     () => (language === "fi" ? fiFns : language === "sv" ? svFns : enUS),
-    [language]
+    [language],
   );
 };

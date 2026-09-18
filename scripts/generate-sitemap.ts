@@ -12,7 +12,8 @@ const BASE_URL = "https://mimmobook.com";
 interface SitemapEntry {
   path: string;
   lastmod?: string;
-  changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
+  changefreq?:
+    "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   priority?: string;
 }
 
@@ -26,13 +27,41 @@ const staticEntries: SitemapEntry[] = [
   { path: "/use-cases", changefreq: "monthly", priority: "0.9" },
   { path: "/pricing", changefreq: "monthly", priority: "0.9" },
   { path: "/blog", changefreq: "weekly", priority: "0.8" },
-  { path: "/blog/reservation-challenges-small-hospitality", changefreq: "monthly", priority: "0.7" },
-  { path: "/blog/why-spreadsheets-fail-for-bookings", changefreq: "monthly", priority: "0.7" },
-  { path: "/blog/branded-booking-pages-matter", changefreq: "monthly", priority: "0.7" },
-  { path: "/blog/multi-site-management-hospitality", changefreq: "monthly", priority: "0.7" },
-  { path: "/blog/best-restaurant-reservation-apps", changefreq: "monthly", priority: "0.8" },
-  { path: "/blog/comparison-resy-tock-mimmobook", changefreq: "monthly", priority: "0.8" },
-  { path: "/blog/booking-software-for-service-professionals", changefreq: "monthly", priority: "0.8" },
+  {
+    path: "/blog/reservation-challenges-small-hospitality",
+    changefreq: "monthly",
+    priority: "0.7",
+  },
+  {
+    path: "/blog/why-spreadsheets-fail-for-bookings",
+    changefreq: "monthly",
+    priority: "0.7",
+  },
+  {
+    path: "/blog/branded-booking-pages-matter",
+    changefreq: "monthly",
+    priority: "0.7",
+  },
+  {
+    path: "/blog/multi-site-management-hospitality",
+    changefreq: "monthly",
+    priority: "0.7",
+  },
+  {
+    path: "/blog/best-restaurant-reservation-apps",
+    changefreq: "monthly",
+    priority: "0.8",
+  },
+  {
+    path: "/blog/comparison-resy-tock-mimmobook",
+    changefreq: "monthly",
+    priority: "0.8",
+  },
+  {
+    path: "/blog/booking-software-for-service-professionals",
+    changefreq: "monthly",
+    priority: "0.8",
+  },
   { path: "/about", changefreq: "monthly", priority: "0.7" },
   { path: "/support", changefreq: "monthly", priority: "0.6" },
   { path: "/beta-guide", changefreq: "monthly", priority: "0.6" },
@@ -50,7 +79,9 @@ async function fetchTenantEntries(): Promise<SitemapEntry[]> {
   const url = process.env.VITE_SUPABASE_URL;
   const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) {
-    console.warn("[sitemap] Supabase env vars missing, skipping tenant landing pages");
+    console.warn(
+      "[sitemap] Supabase env vars missing, skipping tenant landing pages",
+    );
     return [];
   }
 
@@ -66,7 +97,10 @@ async function fetchTenantEntries(): Promise<SitemapEntry[]> {
   }
 
   return (data ?? [])
-    .filter((t): t is { slug: string } => typeof t?.slug === "string" && t.slug.length > 0)
+    .filter(
+      (t): t is { slug: string } =>
+        typeof t?.slug === "string" && t.slug.length > 0,
+    )
     .map((t) => ({
       path: `/book/${t.slug}`,
       lastmod: today,

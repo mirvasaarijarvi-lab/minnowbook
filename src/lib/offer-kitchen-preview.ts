@@ -73,10 +73,10 @@ export function buildKitchenPreview(inputs: PreviewLegInput[]): KitchenPreview {
       name: input.name,
       lines,
       targetKey,
-      targetName: targetKey ? nameByKey.get(targetKey) ?? null : null,
+      targetName: targetKey ? (nameByKey.get(targetKey) ?? null) : null,
       staysHere: targetKey === input.key,
       routeKey,
-      routeName: routeKey ? nameByKey.get(routeKey) ?? null : null,
+      routeName: routeKey ? (nameByKey.get(routeKey) ?? null) : null,
       ownKitchenOrder: routeKey === input.key,
     };
   });

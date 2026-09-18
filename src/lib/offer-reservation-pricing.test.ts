@@ -63,7 +63,9 @@ describe("resolveOfferReservationPrice", () => {
   });
 
   it("returns null without a resource or price", () => {
-    expect(resolveOfferReservationPrice({ reservation_type: "venue" })).toBeNull();
+    expect(
+      resolveOfferReservationPrice({ reservation_type: "venue" }),
+    ).toBeNull();
     expect(
       resolveOfferReservationPrice({
         reservation_type: "guesthouse",
@@ -80,14 +82,22 @@ describe("pickOfferResource", () => {
   ];
 
   it("prefers an exact name match", () => {
-    expect(pickOfferResource(resources, { name: "sauna", reservation_type: "venue" })?.name).toBe("Sauna");
+    expect(
+      pickOfferResource(resources, { name: "sauna", reservation_type: "venue" })
+        ?.name,
+    ).toBe("Sauna");
   });
 
   it("falls back to the reservation type", () => {
-    expect(pickOfferResource(resources, { name: null, reservation_type: "venue" })?.name).toBe("Main Hall");
+    expect(
+      pickOfferResource(resources, { name: null, reservation_type: "venue" })
+        ?.name,
+    ).toBe("Main Hall");
   });
 
   it("returns null when nothing matches", () => {
-    expect(pickOfferResource(resources, { name: "x", reservation_type: "hotel" })).toBeNull();
+    expect(
+      pickOfferResource(resources, { name: "x", reservation_type: "hotel" }),
+    ).toBeNull();
   });
 });

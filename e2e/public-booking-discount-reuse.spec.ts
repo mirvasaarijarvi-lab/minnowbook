@@ -38,7 +38,10 @@ test.describe("Reusing a single-use discount code", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("counts the code as used once and leaves the first booking's price unchanged", async ({
     ephemeralTenant,
@@ -127,11 +130,14 @@ test.describe("Reusing a single-use discount code", () => {
     const readBooking = async (guestEmail: string) =>
       admin
         .from("reservations")
-        .select("id, price_eur, original_price_eur, discount_value, discount_code_id, updated_at")
+        .select(
+          "id, price_eur, original_price_eur, discount_value, discount_code_id, updated_at",
+        )
         .eq("tenant_id", tenantId)
         .eq("guest_email", guestEmail);
 
-    const { data: firstRows, error: firstRowsErr } = await readBooking(firstEmail);
+    const { data: firstRows, error: firstRowsErr } =
+      await readBooking(firstEmail);
     expect(firstRowsErr, firstRowsErr?.message).toBeNull();
     expect(firstRows).toHaveLength(1);
     const firstRow = firstRows![0];
@@ -145,7 +151,10 @@ test.describe("Reusing a single-use discount code", () => {
       .eq("id", codeId)
       .single();
     expect(afterFirstErr, afterFirstErr?.message).toBeNull();
-    expect(afterFirst!.used_count, "the first claim must count exactly once").toBe(1);
+    expect(
+      afterFirst!.used_count,
+      "the first claim must count exactly once",
+    ).toBe(1);
 
     // 4. Second attempt with the SAME code: rejected.
     const second = await book(`TEST CI Reuse Second ${stamp}`, secondEmail);
@@ -161,7 +170,8 @@ test.describe("Reusing a single-use discount code", () => {
     expect(secondBody).toMatch(/promo code/i);
 
     // 5. Nothing was stored for the second attempt.
-    const { data: secondRows, error: secondRowsErr } = await readBooking(secondEmail);
+    const { data: secondRows, error: secondRowsErr } =
+      await readBooking(secondEmail);
     expect(secondRowsErr, secondRowsErr?.message).toBeNull();
     expect(
       secondRows ?? [],
@@ -175,10 +185,14 @@ test.describe("Reusing a single-use discount code", () => {
       .eq("id", codeId)
       .single();
     expect(afterSecondErr, afterSecondErr?.message).toBeNull();
-    expect(afterSecond!.used_count, "a refused claim must not bump used_count").toBe(1);
+    expect(
+      afterSecond!.used_count,
+      "a refused claim must not bump used_count",
+    ).toBe(1);
 
     // 7. The first booking's money is byte-for-byte untouched.
-    const { data: firstAgain, error: firstAgainErr } = await readBooking(firstEmail);
+    const { data: firstAgain, error: firstAgainErr } =
+      await readBooking(firstEmail);
     expect(firstAgainErr, firstAgainErr?.message).toBeNull();
     expect(firstAgain).toHaveLength(1);
     expect(Number(firstAgain![0].price_eur)).toBe(FINAL_EUR);

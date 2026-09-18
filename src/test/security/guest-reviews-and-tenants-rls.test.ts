@@ -35,7 +35,8 @@ import {
 } from "./fixtures/tenant-pair";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
@@ -108,7 +109,10 @@ describe("guest_reviews + tenants RLS regression", () => {
       // Selecting the private columns explicitly must fail at the
       // PostgREST layer because the view does not project them.
       for (const col of TENANTS_PRIVATE_COLUMNS) {
-        const { error } = await anon.from("tenants_public").select(col).limit(1);
+        const { error } = await anon
+          .from("tenants_public")
+          .select(col)
+          .limit(1);
         expect(
           error,
           `tenants_public must NOT expose column "${col}" (got no error → column leaked)`,
@@ -117,7 +121,10 @@ describe("guest_reviews + tenants RLS regression", () => {
     });
 
     it("anon SELECT on guest_reviews returns no rows (RLS enforced)", async () => {
-      const { data, error } = await anon.from("guest_reviews").select("id").limit(5);
+      const { data, error } = await anon
+        .from("guest_reviews")
+        .select("id")
+        .limit(5);
       if (!error) {
         expectReadDenied(
           {
@@ -145,7 +152,10 @@ describe("guest_reviews + tenants RLS regression", () => {
         rating: 5,
         comment: "Should never land",
       };
-      const { data, error } = await anon.from("guest_reviews").insert(payload).select();
+      const { data, error } = await anon
+        .from("guest_reviews")
+        .insert(payload)
+        .select();
       expectWriteDenied(
         {
           table: "guest_reviews",
@@ -170,7 +180,10 @@ describe("guest_reviews + tenants RLS regression", () => {
         rating: 5,
         review_token: "not-a-real-token-" + Date.now(),
       };
-      const { data, error } = await anon.from("guest_reviews").insert(payload).select();
+      const { data, error } = await anon
+        .from("guest_reviews")
+        .insert(payload)
+        .select();
       expectWriteDenied(
         {
           table: "guest_reviews",
@@ -265,22 +278,28 @@ describe("guest_reviews + tenants RLS regression", () => {
     },
   );
 
-  describe.runIf(hasServiceRole)("System admin role (service role bypass)", () => {
-    let svc: SupabaseClient;
-    beforeAll(() => {
-      svc = newServiceClient();
-    });
+  describe.runIf(hasServiceRole)(
+    "System admin role (service role bypass)",
+    () => {
+      let svc: SupabaseClient;
+      beforeAll(() => {
+        svc = newServiceClient();
+      });
 
-    it("service role CAN read tenants base table (positive control)", async () => {
-      const { data, error } = await svc.from("tenants").select("id").limit(1);
-      expect(error).toBeNull();
-      expect(Array.isArray(data)).toBe(true);
-    });
+      it("service role CAN read tenants base table (positive control)", async () => {
+        const { data, error } = await svc.from("tenants").select("id").limit(1);
+        expect(error).toBeNull();
+        expect(Array.isArray(data)).toBe(true);
+      });
 
-    it("service role CAN read guest_reviews (positive control)", async () => {
-      const { data, error } = await svc.from("guest_reviews").select("id").limit(1);
-      expect(error).toBeNull();
-      expect(Array.isArray(data)).toBe(true);
-    });
-  });
+      it("service role CAN read guest_reviews (positive control)", async () => {
+        const { data, error } = await svc
+          .from("guest_reviews")
+          .select("id")
+          .limit(1);
+        expect(error).toBeNull();
+        expect(Array.isArray(data)).toBe(true);
+      });
+    },
+  );
 });

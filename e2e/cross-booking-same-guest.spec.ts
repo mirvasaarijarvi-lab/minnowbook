@@ -18,7 +18,6 @@ const harPathByTest = new Map<string, string>();
  * context before attaching it to the report.
  */
 const test = baseTest.extend({
-  // eslint-disable-next-line no-empty-pattern
   context: async ({ browser }, useFixture, testInfo) => {
     const harPath = path.join(testInfo.outputDir, "network.har");
     const context = await browser.newContext({
@@ -41,7 +40,10 @@ const test = baseTest.extend({
 });
 
 import { createClient } from "@supabase/supabase-js";
-import { gotoAndWaitForSpa, assertPublicBookingReady } from "./fixtures/spa-waits";
+import {
+  gotoAndWaitForSpa,
+  assertPublicBookingReady,
+} from "./fixtures/spa-waits";
 import {
   callPublicBooking,
   validatePublicBookingErrorShape,
@@ -127,13 +129,19 @@ interface IndexArtifact {
  * the reviewer should look for in the same report panel.
  */
 function renderFailureIndexHtml(
-  testInfo: { title: string; retry: number; duration: number; outputDir: string },
+  testInfo: {
+    title: string;
+    retry: number;
+    duration: number;
+    outputDir: string;
+  },
   summary: Record<string, unknown>,
   artifacts: IndexArtifact[],
 ): string {
   const screenshot = artifacts.find((a) => a.name === "failure-screenshot.png");
   const others = artifacts.filter((a) => a.name !== "failure-screenshot.png");
-  const correlationIds = (summary.correlation_ids as string[] | undefined) ?? [];
+  const correlationIds =
+    (summary.correlation_ids as string[] | undefined) ?? [];
 
   const summaryRows = Object.entries(summary)
     .filter(([k]) => k !== "correlation_ids")
@@ -155,7 +163,9 @@ function renderFailureIndexHtml(
     )
     .join("");
 
-  const inlineSummary = artifacts.find((a) => a.name === "failure-summary.json");
+  const inlineSummary = artifacts.find(
+    (a) => a.name === "failure-summary.json",
+  );
 
   return `<!doctype html>
 <html lang="en">
@@ -229,7 +239,6 @@ function renderFailureIndexHtml(
 </html>`;
 }
 
-
 test.describe("Cross-booking: same guest, multiple resources/services", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     const logs: BrowserLogEntry[] = [];
@@ -301,14 +310,21 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       opts: { embedAsDataUri?: boolean; embedAsText?: boolean } = {},
     ) => {
       await testInfo.attach(name, { body, contentType });
-      const sizeBytes = typeof body === "string" ? Buffer.byteLength(body) : body.byteLength;
-      const record: ArtifactRecord = { name, contentType, sizeBytes, description };
+      const sizeBytes =
+        typeof body === "string" ? Buffer.byteLength(body) : body.byteLength;
+      const record: ArtifactRecord = {
+        name,
+        contentType,
+        sizeBytes,
+        description,
+      };
       if (opts.embedAsDataUri) {
         const buf = typeof body === "string" ? Buffer.from(body) : body;
         record.dataUri = `data:${contentType};base64,${buf.toString("base64")}`;
       }
       if (opts.embedAsText) {
-        record.inlineText = typeof body === "string" ? body : body.toString("utf8");
+        record.inlineText =
+          typeof body === "string" ? body : body.toString("utf8");
       }
       artifacts.push(record);
     };
@@ -433,9 +449,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       failureSummary.trace_path = tracePath;
     } catch (err) {
       failureSummary.trace_capture =
-        err instanceof Error
-          ? `unavailable: ${err.message}`
-          : "unavailable";
+        err instanceof Error ? `unavailable: ${err.message}` : "unavailable";
     }
 
     // Browser console + pageerror capture. We attach BOTH a structured
@@ -476,7 +490,9 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         ...logs.map(
           (l) =>
             `[${l.timestamp}] [${l.type}] correlation_id=${l.correlation_id ?? "-"} ${l.text}` +
-            (l.location?.url ? ` (${l.location.url}:${l.location.lineNumber ?? "?"})` : ""),
+            (l.location?.url
+              ? ` (${l.location.url}:${l.location.lineNumber ?? "?"})`
+              : ""),
         ),
       ];
       await attachArtifact(
@@ -504,26 +520,34 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     // artifact above. Open it from the Playwright HTML report and you
     // get a single dashboard for triaging the failure.
     try {
-      const indexHtml = renderFailureIndexHtml(testInfo, failureSummary, artifacts);
+      const indexHtml = renderFailureIndexHtml(
+        testInfo,
+        failureSummary,
+        artifacts,
+      );
       await testInfo.attach("failure-index.html", {
         body: indexHtml,
         contentType: "text/html",
       });
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error(
         `${LOG_PREFIX} failed to render failure-index.html: ${
           err instanceof Error ? err.message : String(err)
         }`,
       );
     }
-    // eslint-disable-next-line no-console
+
     console.error(`${LOG_PREFIX} FAILURE ${JSON.stringify(failureSummary)}`);
   });
 
-  test("public booking page for the test tenant loads", async ({ page, tenant }, testInfo) => {
+  test("public booking page for the test tenant loads", async ({
+    page,
+    tenant,
+  }, testInfo) => {
     test.setTimeout(60_000);
-    await captureCheckpoint(page, testInfo, "smoke: before goto", { screenshot: false });
+    await captureCheckpoint(page, testInfo, "smoke: before goto", {
+      screenshot: false,
+    });
     await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
     await assertPublicBookingReady(page);
     await captureCheckpoint(page, testInfo, "smoke: after booking form ready", {
@@ -531,7 +555,11 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     });
   });
 
-  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({ request, page, tenant }, testInfo) => {
+  test("creates restaurant + guesthouse + venue reservations for the same guest", async ({
+    request,
+    page,
+    tenant,
+  }, testInfo) => {
     const date = futureDate(60);
     const checkOut = futureDate(62);
 
@@ -546,11 +574,14 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     const flowCorrelationId = `cross-booking/${testInfo.project.name || "default"}/retry-${testInfo.retry}/${
       globalThis.crypto?.randomUUID?.() ?? Date.now().toString(36)
     }`;
-    // eslint-disable-next-line no-console
+
     console.log(`${LOG_PREFIX} HAR will be written to ${harPath}`);
-    // eslint-disable-next-line no-console
+
     console.log(`${LOG_PREFIX} flow correlation_id=${flowCorrelationId}`);
-    testInfo.annotations.push({ type: "correlation_id", description: flowCorrelationId });
+    testInfo.annotations.push({
+      type: "correlation_id",
+      description: flowCorrelationId,
+    });
     // Register so any subsequent browser console message / pageerror is
     // tagged with this id in the failure-browser-diagnostics attachment.
     const corrIds = correlationByTest.get(testInfo.testId) ?? [];
@@ -578,7 +609,6 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         if (page.isClosed()) return;
         await page.evaluate(
           ({ prefix, payload, label }) => {
-            // eslint-disable-next-line no-console
             console.log(`${prefix} MARK ${JSON.stringify(payload)}`);
             try {
               const id = "__mimmobook_e2e_marker__";
@@ -637,7 +667,9 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         result.status,
         `${label} booking failed: ${JSON.stringify(result.diagnostic, null, 2)}`,
       ).toBeLessThan(400);
-      expect(result.body, `${label} response shape`).toMatchObject({ success: true });
+      expect(result.body, `${label} response shape`).toMatchObject({
+        success: true,
+      });
       extraShapeAssert?.(result.body);
     };
 
@@ -668,15 +700,26 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       ).toBeGreaterThanOrEqual(guestsCount);
       await captureCheckpoint(page, testInfo, `${label}: before SPA reload`, {
         screenshot: false,
-        extra: { current_load: cap.current_load, capacity_total: cap.capacity_total ?? null },
+        extra: {
+          current_load: cap.current_load,
+          capacity_total: cap.capacity_total ?? null,
+        },
       });
       await gotoAndWaitForSpa(page, `/book/${tenant.slug}`);
       await assertPublicBookingReady(page);
-      await captureCheckpoint(page, testInfo, `${label}: after booking form ready`, {
-        probeSelectors: ["#root", "main", "h1", "#guest_name", "form"],
-        extra: { current_load: cap.current_load, capacity_total: cap.capacity_total ?? null },
-      });
-      // eslint-disable-next-line no-console
+      await captureCheckpoint(
+        page,
+        testInfo,
+        `${label}: after booking form ready`,
+        {
+          probeSelectors: ["#root", "main", "h1", "#guest_name", "form"],
+          extra: {
+            current_load: cap.current_load,
+            capacity_total: cap.capacity_total ?? null,
+          },
+        },
+      );
+
       console.log(
         `${LOG_PREFIX} ${label}: verified in public booking UI ` +
           `(current_load=${cap.current_load}, capacity_total=${cap.capacity_total ?? "n/a"})`,
@@ -711,7 +754,7 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       error: warmupError,
       correlation_id: flowCorrelationId,
     };
-    // eslint-disable-next-line no-console
+
     console.log(`${LOG_PREFIX} warmup result ${JSON.stringify(warmupSummary)}`);
     testInfo.annotations.push({
       type: "warmup",
@@ -724,10 +767,12 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     // Soft assertion: never fail the test on a cold start, but make the
     // skipped/failed path explicit in the report so it can't be silently
     // swallowed in CI.
-    expect.soft(
-      ["ok", "http_error", "threw"],
-      "warmup outcome must be one of the known observable states",
-    ).toContain(warmupOutcome);
+    expect
+      .soft(
+        ["ok", "http_error", "threw"],
+        "warmup outcome must be one of the known observable states",
+      )
+      .toContain(warmupOutcome);
 
     await captureCheckpoint(page, testInfo, "post-warmup", {
       screenshot: false,
@@ -808,12 +853,14 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
       if (isPlatformDegraded(rejected.status, rejected.body)) {
         // Supabase edge runtime answered before our function booted, so the
         // body is a platform envelope, not the function's error contract.
-        // eslint-disable-next-line no-console
+
         console.warn(
           `[cross-booking] skipping error-shape assertion: platform degraded (HTTP ${rejected.status})`,
         );
       } else {
-        const rejectedShapeProblems = validatePublicBookingErrorShape(rejected.body);
+        const rejectedShapeProblems = validatePublicBookingErrorShape(
+          rejected.body,
+        );
         expect(
           rejectedShapeProblems,
           `foreign-tenant-negative error body does not match expected schema { error: string }.\n` +
@@ -821,7 +868,6 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
             `Received body:\n${JSON.stringify(rejected.body, null, 2)}`,
         ).toEqual([]);
       }
-
 
       // RLS / tenant-isolation verification (best-effort, requires service role).
       const serviceRoleKey = process.env.E2E_SUPABASE_SERVICE_ROLE_KEY;
@@ -833,7 +879,10 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
           .from("reservations")
           .select("id, tenant_id, reservation_type, resource_id, guest_email")
           .eq("guest_email", GUEST.guest_email);
-        expect(queryErr, `reservations lookup failed: ${queryErr?.message}`).toBeNull();
+        expect(
+          queryErr,
+          `reservations lookup failed: ${queryErr?.message}`,
+        ).toBeNull();
         expect(
           rows?.length,
           `expected exactly 3 reservations for ${GUEST.guest_email}, got ${rows?.length}`,
@@ -846,15 +895,16 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
         }
         const types = (rows ?? []).map((r) => r.reservation_type).sort();
         expect(types).toEqual(["guesthouse", "restaurant", "venue"]);
-        await admin.from("reservations").delete().eq("guest_email", GUEST.guest_email);
+        await admin
+          .from("reservations")
+          .delete()
+          .eq("guest_email", GUEST.guest_email);
       } else {
-        // eslint-disable-next-line no-console
         console.warn(
           `${LOG_PREFIX} E2E_SUPABASE_SERVICE_ROLE_KEY not set; skipping RLS / tenant-isolation DB verification.`,
         );
       }
 
-      // eslint-disable-next-line no-console
       console.log(
         `${LOG_PREFIX} created reservations for guest "${GUEST.guest_name}" (${GUEST.guest_email})`,
       );

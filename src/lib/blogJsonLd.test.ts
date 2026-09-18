@@ -22,17 +22,17 @@ describe("blogJsonLd — buildAuthorField (missing author data)", () => {
   });
 
   it("returns the default Organization when every author entry is blank", () => {
-    const authors: BlogAuthor[] = [
-      { name: "" },
-      { name: "", url: "" },
-    ];
+    const authors: BlogAuthor[] = [{ name: "" }, { name: "", url: "" }];
     expect(buildAuthorField(authors)).toEqual(defaultOrgAuthor);
   });
 
   it("falls back to editorial name/url when a kept entry is missing name and url", () => {
     // Filter keeps entries that have EITHER name or url; here url is
     // present so the entry survives, and the name falls back.
-    const node = buildAuthor({ name: "   ", url: "https://mimmobook.com/team/anna" });
+    const node = buildAuthor({
+      name: "   ",
+      url: "https://mimmobook.com/team/anna",
+    });
     expect(node).toMatchObject({
       "@type": "Person",
       name: FALLBACK_AUTHOR_NAME,
@@ -68,7 +68,11 @@ describe("blogJsonLd — buildAuthorField (multiple authors)", () => {
   it("returns an array of nodes for multiple authors, preserving order", () => {
     const authors: BlogAuthor[] = [
       { name: "Anna Virtanen", url: "https://mimmobook.com/team/anna" },
-      { name: "Ben Laine", url: "https://mimmobook.com/team/ben", jobTitle: "Editor" },
+      {
+        name: "Ben Laine",
+        url: "https://mimmobook.com/team/ben",
+        jobTitle: "Editor",
+      },
       {
         type: "Organization",
         name: "MimmoBook Research",
@@ -79,7 +83,10 @@ describe("blogJsonLd — buildAuthorField (multiple authors)", () => {
     expect(Array.isArray(result)).toBe(true);
     const nodes = result as Record<string, unknown>[];
     expect(nodes).toHaveLength(3);
-    expect(nodes[0]).toMatchObject({ name: "Anna Virtanen", "@type": "Person" });
+    expect(nodes[0]).toMatchObject({
+      name: "Anna Virtanen",
+      "@type": "Person",
+    });
     expect(nodes[1]).toMatchObject({ name: "Ben Laine", jobTitle: "Editor" });
     expect(nodes[2]).toMatchObject({
       "@type": "Organization",
@@ -158,8 +165,6 @@ describe("blogJsonLd — resolveDateModified (updatedKey behavior)", () => {
   });
 });
 
-
-
 describe("blogJsonLd — comparison post regression snapshot", () => {
   // Deterministic translator: mirrors the i18n resolver by echoing the key.
   // Snapshotting the raw shape (not translated copy) keeps the test stable
@@ -192,8 +197,7 @@ describe("blogJsonLd — comparison post regression snapshot", () => {
   it("keeps the about/mentions entity nodes stable", () => {
     const graph = buildBlogPostJsonLd(post, echo);
     const article = graph.find((n) => n["@type"] === "Article") as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     expect(article).toBeDefined();
     const about = article!.about as Array<Record<string, unknown>>;
     const mentions = article!.mentions as Array<Record<string, unknown>>;
@@ -204,4 +208,3 @@ describe("blogJsonLd — comparison post regression snapshot", () => {
     ]);
   });
 });
-

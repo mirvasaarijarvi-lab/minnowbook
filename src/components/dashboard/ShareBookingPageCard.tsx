@@ -9,7 +9,15 @@ import { toast } from "sonner";
 import DashboardTooltip from "./DashboardTooltip";
 import { siteOrigin } from "@/lib/site-origin";
 
-const Snippet = ({ code, onCopy, label }: { code: string; onCopy: () => void; label: string }) => (
+const Snippet = ({
+  code,
+  onCopy,
+  label,
+}: {
+  code: string;
+  onCopy: () => void;
+  label: string;
+}) => (
   <div className="space-y-2">
     <pre className="max-w-full overflow-x-auto rounded-md bg-muted px-3 py-2 text-xs font-mono text-foreground whitespace-pre-wrap break-all">
       {code}
@@ -59,7 +67,9 @@ const ShareBookingPageCard = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">{t("dashboard.shareDesc")}</p>
+        <p className="text-sm text-muted-foreground">
+          {t("dashboard.shareDesc")}
+        </p>
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="flex flex-wrap h-auto">
@@ -78,26 +88,50 @@ const ShareBookingPageCard = () => {
           </TabsList>
 
           <TabsContent value="embed" className="space-y-3 pt-4">
-            <p className="text-sm text-muted-foreground">{t("dashboard.shareEmbedDesc")}</p>
-            <Snippet code={embedCode} onCopy={() => copy(embedCode)} label={copyLabel} />
-            <p className="text-xs text-muted-foreground">{t("dashboard.shareEmbedHint")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("dashboard.shareEmbedDesc")}
+            </p>
+            <Snippet
+              code={embedCode}
+              onCopy={() => copy(embedCode)}
+              label={copyLabel}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("dashboard.shareEmbedHint")}
+            </p>
           </TabsContent>
 
           <TabsContent value="button" className="space-y-3 pt-4">
-            <p className="text-sm text-muted-foreground">{t("dashboard.shareButtonDesc")}</p>
-            <Snippet code={buttonCode} onCopy={() => copy(buttonCode)} label={copyLabel} />
-            <p className="text-xs text-muted-foreground">{t("dashboard.shareButtonHint")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("dashboard.shareButtonDesc")}
+            </p>
+            <Snippet
+              code={buttonCode}
+              onCopy={() => copy(buttonCode)}
+              label={copyLabel}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("dashboard.shareButtonHint")}
+            </p>
           </TabsContent>
 
           <TabsContent value="domain" className="space-y-3 pt-4">
-            <p className="text-sm text-muted-foreground">{t("dashboard.shareDomainDesc")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("dashboard.shareDomainDesc")}
+            </p>
             <ol className="space-y-1.5 pl-5 list-decimal text-sm text-muted-foreground">
               <li>{t("dashboard.shareDomainStep1")}</li>
               <li>{t("dashboard.shareDomainStep2")}</li>
               <li>{t("dashboard.shareDomainStep3")}</li>
             </ol>
-            <Snippet code={bookingUrl} onCopy={() => copy(bookingUrl)} label={t("dashboard.shareCopyAddress")} />
-            <p className="text-xs text-muted-foreground">{t("dashboard.shareDomainHint")}</p>
+            <Snippet
+              code={bookingUrl}
+              onCopy={() => copy(bookingUrl)}
+              label={t("dashboard.shareCopyAddress")}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("dashboard.shareDomainHint")}
+            </p>
           </TabsContent>
         </Tabs>
       </CardContent>

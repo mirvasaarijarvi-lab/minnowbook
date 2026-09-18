@@ -33,7 +33,8 @@ const NoTenantState = ({ attemptedArea = "generic" }: NoTenantStateProps) => {
     } catch {
       // sessionStorage may be unavailable (private mode) — non-fatal
     }
-    const currentPath = typeof window !== "undefined" ? window.location.pathname : null;
+    const currentPath =
+      typeof window !== "undefined" ? window.location.pathname : null;
     // Prefer the explicit guard stash; otherwise use the current path so the
     // user still sees what they were trying to reach.
     const resolved = stashed && stashed !== "/" ? stashed : currentPath;
@@ -47,7 +48,8 @@ const NoTenantState = ({ attemptedArea = "generic" }: NoTenantStateProps) => {
     toastShownRef.current = true;
     if (attemptedArea === "dashboard") {
       toast.info("Dashboard unavailable", {
-        description: "Your account isn't linked to an organization yet. Complete setup to continue.",
+        description:
+          "Your account isn't linked to an organization yet. Complete setup to continue.",
         duration: 6000,
       });
     } else if (attemptedArea === "superadmin") {
@@ -58,13 +60,12 @@ const NoTenantState = ({ attemptedArea = "generic" }: NoTenantStateProps) => {
     }
   }, [attemptedArea]);
 
-
   const headline =
     attemptedArea === "superadmin"
       ? "Superadmin area unavailable"
       : attemptedArea === "dashboard"
-      ? "Your dashboard isn't set up yet"
-      : "No organization linked to your account";
+        ? "Your dashboard isn't set up yet"
+        : "No organization linked to your account";
 
   const description =
     attemptedArea === "superadmin"
@@ -115,7 +116,9 @@ const NoTenantState = ({ attemptedArea = "generic" }: NoTenantStateProps) => {
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
-            <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {description}
+            </p>
 
             {attemptedPath && attemptedPath !== "/onboarding" && (
               <div
@@ -128,22 +131,24 @@ const NoTenantState = ({ attemptedArea = "generic" }: NoTenantStateProps) => {
                   <code className="block font-mono text-foreground break-all mt-0.5">
                     {attemptedPath}
                   </code>
-                  <div className="mt-1">We'll bring you back here once setup is complete.</div>
+                  <div className="mt-1">
+                    We'll bring you back here once setup is complete.
+                  </div>
                 </div>
               </div>
             )}
 
             {user?.email && (
               <div className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                Signed in as <span className="font-medium text-foreground">{user.email}</span>
+                Signed in as{" "}
+                <span className="font-medium text-foreground">
+                  {user.email}
+                </span>
               </div>
             )}
 
             <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                onClick={handleStartSetup}
-                className="gap-1.5 flex-1"
-              >
+              <Button onClick={handleStartSetup} className="gap-1.5 flex-1">
                 Complete setup
                 <ArrowRight className="h-4 w-4" />
               </Button>

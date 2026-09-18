@@ -22,7 +22,10 @@ const HAS_SERVICE_ROLE = Boolean(
   process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
 
-test.skip(!HAS_SERVICE_ROLE || !SUPABASE_ANON_KEY, "guest portal e2e needs backend keys");
+test.skip(
+  !HAS_SERVICE_ROLE || !SUPABASE_ANON_KEY,
+  "guest portal e2e needs backend keys",
+);
 
 /** `YYYY-MM-DD`, `offsetDays` from today. */
 function futureDate(offsetDays: number): string {
@@ -31,7 +34,12 @@ function futureDate(offsetDays: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-type SeededBooking = { reservationId: string; token: string; guestName: string; guestEmail: string };
+type SeededBooking = {
+  reservationId: string;
+  token: string;
+  guestName: string;
+  guestEmail: string;
+};
 
 /** Create a confirmed booking plus the portal token the guest would receive. */
 async function seedBooking(
@@ -77,7 +85,10 @@ async function seedBooking(
 }
 
 /** Throwaway staff account inside the ephemeral tenant, returns its access token. */
-async function signInStaff(admin: SupabaseClient, tenantId: string): Promise<string> {
+async function signInStaff(
+  admin: SupabaseClient,
+  tenantId: string,
+): Promise<string> {
   const email = `ci+staff-${randomUUID().slice(0, 8)}@mimmobook.test`;
   const password = `Ci-Staff-${randomUUID()}-Z9!`;
   const { data: created, error: userErr } = await admin.auth.admin.createUser({
@@ -85,7 +96,8 @@ async function signInStaff(admin: SupabaseClient, tenantId: string): Promise<str
     password,
     email_confirm: true,
   });
-  if (userErr || !created.user) throw userErr ?? new Error("staff createUser failed");
+  if (userErr || !created.user)
+    throw userErr ?? new Error("staff createUser failed");
 
   const { error: memberErr } = await admin.from("tenant_users").insert({
     tenant_id: tenantId,
@@ -93,7 +105,8 @@ async function signInStaff(admin: SupabaseClient, tenantId: string): Promise<str
     role: "admin",
     is_approved: true,
   });
-  if (memberErr) throw new Error(`staff membership failed: ${memberErr.message}`);
+  if (memberErr)
+    throw new Error(`staff membership failed: ${memberErr.message}`);
 
   const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
     method: "POST",
@@ -102,7 +115,9 @@ async function signInStaff(admin: SupabaseClient, tenantId: string): Promise<str
   });
   const body = await res.json();
   if (!res.ok || !body?.access_token) {
-    throw new Error(`staff sign-in failed (${res.status}): ${JSON.stringify(body).slice(0, 200)}`);
+    throw new Error(
+      `staff sign-in failed (${res.status}): ${JSON.stringify(body).slice(0, 200)}`,
+    );
   }
   return body.access_token as string;
 }
@@ -137,19 +152,25 @@ test.describe("guest self-service flow", () => {
     await page.getByRole("button", { name: /send|lähetä|skicka/i }).click();
     // The lookup always answers 200 (it must not reveal whether the address
     // exists), so the confirmation panel is the observable outcome.
-    await expect(page.getByRole("button", { name: /another|toinen|annan/i })).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: /another|toinen|annan/i }),
+    ).toBeVisible({
       timeout: 30_000,
     });
 
     // --- 2. Portal opens with the seeded booking ------------------------------
     await page.goto(`/my-booking/${booking.token}`);
-    await expect(page.getByText(booking.guestName)).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText(booking.guestName)).toBeVisible({
+      timeout: 30_000,
+    });
 
     // --- 3. Guest requests a new date ----------------------------------------
     const requestedDate = futureDate(45);
     await page.locator("#reschedule-date").fill(requestedDate);
     await page.locator("#reschedule-time").fill("17:30");
-    await page.locator("#reschedule-note").fill("TEST CI please move us earlier");
+    await page
+      .locator("#reschedule-note")
+      .fill("TEST CI please move us earlier");
     await page.getByRole("button", { name: /request|pyydä|begär/i }).click();
 
     await expect
@@ -162,7 +183,10 @@ test.describe("guest self-service flow", () => {
             .maybeSingle();
           return data?.status ?? null;
         },
-        { timeout: 30_000, message: "reschedule request was never stored as pending" },
+        {
+          timeout: 30_000,
+          message: "reschedule request was never stored as pending",
+        },
       )
       .toBe("pending");
 
@@ -175,23 +199,39 @@ test.describe("guest self-service flow", () => {
 
     // --- 4. Staff review ------------------------------------------------------
     // Unauthenticated review attempts must never move a booking.
-    const anon = await request.post(`${SUPABASE_URL}/functions/v1/reschedule-review`, {
-      headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
-      data: { request_id: pending!.id, decision: "approved" },
-      timeout: 30_000,
-    });
-    expect(anon.status(), "review without a session must be rejected").toBeGreaterThanOrEqual(400);
+    const anon = await request.post(
+      `${SUPABASE_URL}/functions/v1/reschedule-review`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+        },
+        data: { request_id: pending!.id, decision: "approved" },
+        timeout: 30_000,
+      },
+    );
+    expect(
+      anon.status(),
+      "review without a session must be rejected",
+    ).toBeGreaterThanOrEqual(400);
 
     const staffToken = await signInStaff(admin, tenantId);
-    const approve = await request.post(`${SUPABASE_URL}/functions/v1/reschedule-review`, {
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${staffToken}`,
+    const approve = await request.post(
+      `${SUPABASE_URL}/functions/v1/reschedule-review`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${staffToken}`,
+        },
+        data: {
+          request_id: pending!.id,
+          decision: "approved",
+          staff_note: "TEST CI approved",
+        },
+        timeout: 30_000,
       },
-      data: { request_id: pending!.id, decision: "approved", staff_note: "TEST CI approved" },
-      timeout: 30_000,
-    });
+    );
     expect(approve.status(), await approve.text()).toBe(200);
 
     const { data: moved } = await admin
@@ -212,8 +252,12 @@ test.describe("guest self-service flow", () => {
     // --- 5. Cancel path -------------------------------------------------------
     const second = await seedBooking(admin, tenantId, "cancel");
     await page.goto(`/my-booking/${second.token}`);
-    await expect(page.getByText(second.guestName)).toBeVisible({ timeout: 30_000 });
-    await page.getByRole("button", { name: /cancel booking|peruuta varaus|avboka/i }).click();
+    await expect(page.getByText(second.guestName)).toBeVisible({
+      timeout: 30_000,
+    });
+    await page
+      .getByRole("button", { name: /cancel booking|peruuta varaus|avboka/i })
+      .click();
     await page.getByRole("button", { name: /yes|kyllä|ja,/i }).click();
 
     await expect
@@ -226,7 +270,10 @@ test.describe("guest self-service flow", () => {
             .maybeSingle();
           return data?.status ?? null;
         },
-        { timeout: 30_000, message: "guest cancellation never reached the booking" },
+        {
+          timeout: 30_000,
+          message: "guest cancellation never reached the booking",
+        },
       )
       .toBe("cancelled");
 

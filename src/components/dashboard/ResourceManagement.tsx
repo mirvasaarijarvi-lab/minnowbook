@@ -8,14 +8,51 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, BedDouble, UtensilsCrossed, Building2, Upload, X, Loader2, ExternalLink, Lock, Copy, Clock, PlusCircle, MinusCircle, Sparkles, HeartPulse } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  BedDouble,
+  UtensilsCrossed,
+  Building2,
+  Upload,
+  X,
+  Loader2,
+  ExternalLink,
+  Lock,
+  Copy,
+  Clock,
+  PlusCircle,
+  MinusCircle,
+  Sparkles,
+  HeartPulse,
+} from "lucide-react";
 import { useState, useRef } from "react";
 import type { ResourceOpeningHoursEditorHandle } from "./ResourceOpeningHoursEditor";
 import type { ResourceOccasionalSlotsEditorHandle } from "./ResourceOccasionalSlotsEditor";
@@ -48,13 +85,38 @@ const typeIcons: Record<string, React.ElementType> = {
   custom: Sparkles,
 };
 
-type SubService = { id: string; name: string; price_eur: number | null; duration_min?: number | null };
+type SubService = {
+  id: string;
+  name: string;
+  price_eur: number | null;
+  duration_min?: number | null;
+};
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
 
-const ROOM_TYPES = ["single", "double", "twin", "double_double", "triple", "quad", "studio", "suite", "connecting", "entire"] as const;
-const BED_TYPES = ["twin_single", "bunk", "queen", "king", "california_king", "murphy", "sofa", "trundle"] as const;
+const ROOM_TYPES = [
+  "single",
+  "double",
+  "twin",
+  "double_double",
+  "triple",
+  "quad",
+  "studio",
+  "suite",
+  "connecting",
+  "entire",
+] as const;
+const BED_TYPES = [
+  "twin_single",
+  "bunk",
+  "queen",
+  "king",
+  "california_king",
+  "murphy",
+  "sofa",
+  "trundle",
+] as const;
 const FREE_TEXT_ROOM_TYPES = ["suite", "connecting", "entire"];
 
 type BedEntry = { type: string; count: number };
@@ -65,7 +127,8 @@ const ResourceManagement = () => {
   const { selectedSiteId } = useSiteContext();
   const { applySiteFilter, siteIds } = useUserSites();
   const { can } = usePermissions();
-  const { canCreateResourceCheck, effectiveTier, isSystemAdmin } = useTierGate();
+  const { canCreateResourceCheck, effectiveTier, isSystemAdmin } =
+    useTierGate();
   const canManage = can(PERM_RESOURCES_MANAGE);
   const { isPrivileged, getApprovalStatus } = useAutoApproval();
   const queryClient = useQueryClient();
@@ -85,7 +148,9 @@ const ResourceManagement = () => {
   // localized message; everything else falls back to the raw server text.
   const showError = (err: unknown) => {
     const tierErr = formatTierError(err);
-    const description = tierErr ? tierErr.message : (err as { message?: string })?.message;
+    const description = tierErr
+      ? tierErr.message
+      : (err as { message?: string })?.message;
     toast({ title: "Error", description, variant: "destructive" });
   };
   // Copy dialog state
@@ -96,21 +161,39 @@ const ResourceManagement = () => {
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [bulkRoomType, setBulkRoomType] = useState<string>("single");
   const [bulkQuantity, setBulkQuantity] = useState("1");
-  const [bulkBeds, setBulkBeds] = useState<BedEntry[]>([{ type: "twin_single", count: 1 }]);
+  const [bulkBeds, setBulkBeds] = useState<BedEntry[]>([
+    { type: "twin_single", count: 1 },
+  ]);
   const [bulkDescription, setBulkDescription] = useState("");
   const [bulkPrice, setBulkPrice] = useState("");
   const [bulkBreakfastPrice, setBulkBreakfastPrice] = useState("");
   const [bulkCapacity, setBulkCapacity] = useState("");
 
-  const defaultRoomPricing = { single: "1.0", double: "1.5", suite: "2.5", dorm: "0.6" };
+  const defaultRoomPricing = {
+    single: "1.0",
+    double: "1.5",
+    suite: "2.5",
+    dorm: "0.6",
+  };
   const [beds, setBeds] = useState<BedEntry[]>([]);
   const [subServices, setSubServices] = useState<SubService[]>([]);
   const [form, setForm] = useState({
-    name: "", resource_type: "restaurant", capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "",
-    room_type_pricing: { ...defaultRoomPricing }, is_active: true,
-    room_type: "" as string, room_description: "",
-    offers_catering: false, offers_popup: false,
-    offers_table_reservation: true, offers_quote: true, offers_set_menu: true,
+    name: "",
+    resource_type: "restaurant",
+    capacity: "",
+    price_per_night: "",
+    description: "",
+    image_url: "",
+    breakfast_price_per_person: "",
+    room_type_pricing: { ...defaultRoomPricing },
+    is_active: true,
+    room_type: "" as string,
+    room_description: "",
+    offers_catering: false,
+    offers_popup: false,
+    offers_table_reservation: true,
+    offers_quote: true,
+    offers_set_menu: true,
     site_id: "" as string,
     custom_type_label: "",
     timezone: "" as string,
@@ -120,7 +203,10 @@ const ResourceManagement = () => {
     queryKey: ["sites", tenantId],
     queryFn: async () => {
       if (!tenantId) return [];
-      const { data, error } = await supabase.from("sites").select("id, name").eq("tenant_id", tenantId);
+      const { data, error } = await supabase
+        .from("sites")
+        .select("id, name")
+        .eq("tenant_id", tenantId);
       if (error) throw error;
       return data ?? [];
     },
@@ -134,7 +220,10 @@ const ResourceManagement = () => {
     queryKey: ["resources", tenantId, selectedSiteId, siteIds],
     queryFn: async () => {
       if (!tenantId) return [];
-      let query = supabase.from("resources").select("*").eq("tenant_id", tenantId);
+      let query = supabase
+        .from("resources")
+        .select("*")
+        .eq("tenant_id", tenantId);
       query = applySiteFilter(query, selectedSiteId);
       const { data, error } = await query.order("resource_type").order("name");
       if (error) throw error;
@@ -144,7 +233,10 @@ const ResourceManagement = () => {
   });
 
   // Fetch resource opening hours for restaurant resources
-  const restaurantIds = resources?.filter((r: any) => r.resource_type === "restaurant").map((r: any) => r.id) ?? [];
+  const restaurantIds =
+    resources
+      ?.filter((r: any) => r.resource_type === "restaurant")
+      .map((r: any) => r.id) ?? [];
   const { data: allResourceHours } = useQuery({
     queryKey: ["resource-opening-hours-all", tenantId, restaurantIds],
     queryFn: async () => {
@@ -172,8 +264,13 @@ const ResourceManagement = () => {
     const openDays = hours.filter((h: any) => !h.is_closed);
     if (openDays.length === 0) return t("booking.closedDay");
     const first = openDays[0];
-    const allSame = openDays.every((h: any) => h.open_time?.slice(0, 5) === first.open_time?.slice(0, 5) && h.close_time?.slice(0, 5) === first.close_time?.slice(0, 5));
-    if (allSame) return `${first.open_time?.slice(0, 5)} – ${first.close_time?.slice(0, 5)}`;
+    const allSame = openDays.every(
+      (h: any) =>
+        h.open_time?.slice(0, 5) === first.open_time?.slice(0, 5) &&
+        h.close_time?.slice(0, 5) === first.close_time?.slice(0, 5),
+    );
+    if (allSame)
+      return `${first.open_time?.slice(0, 5)} – ${first.close_time?.slice(0, 5)}`;
     return t("resourceHours.perDay");
   };
 
@@ -181,24 +278,44 @@ const ResourceManagement = () => {
     const file = e.target.files?.[0];
     if (!file || !tenantId) return;
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      toast({ title: "Error", description: "Use PNG, JPG or WebP.", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Use PNG, JPG or WebP.",
+        variant: "destructive",
+      });
       return;
     }
     if (file.size > MAX_IMAGE_SIZE) {
-      toast({ title: "Error", description: "Max 5 MB.", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Max 5 MB.",
+        variant: "destructive",
+      });
       return;
     }
     setUploading(true);
     try {
-      const { sanitizeFileExtension, sanitizePathSegment } = await import("@/lib/sanitize-path");
-      const { assertSafeStorageObjectPath } = await import("@/lib/storage-path");
+      const { sanitizeFileExtension, sanitizePathSegment } =
+        await import("@/lib/sanitize-path");
+      const { assertSafeStorageObjectPath } =
+        await import("@/lib/storage-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
       const fileName = `resource-${Date.now()}.${ext}`;
       const safeTenant = sanitizePathSegment(tenantId!);
-      const filePath = assertSafeStorageObjectPath(`${safeTenant}/resources/${fileName}`, { callsite: "resource-management:image-upload", tenantId: tenantId ?? undefined });
-      const { error: uploadError } = await supabase.storage.from("tenant-assets").upload(filePath, file, { upsert: true });
+      const filePath = assertSafeStorageObjectPath(
+        `${safeTenant}/resources/${fileName}`,
+        {
+          callsite: "resource-management:image-upload",
+          tenantId: tenantId ?? undefined,
+        },
+      );
+      const { error: uploadError } = await supabase.storage
+        .from("tenant-assets")
+        .upload(filePath, file, { upsert: true });
       if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage.from("tenant-assets").getPublicUrl(filePath);
+      const { data: urlData } = supabase.storage
+        .from("tenant-assets")
+        .getPublicUrl(filePath);
       const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
       setForm((prev) => ({ ...prev, image_url: publicUrl }));
       toast({ title: t("dashboard.imageUploaded") });
@@ -221,66 +338,106 @@ const ResourceManagement = () => {
       if (!tenantId) throw new Error("No tenant");
 
       // Check per-type resource limit (superadmin bypass handled by useTierGate)
-      if (!editingId && !canCreateResourceCheck(form.resource_type, resources ?? [])) {
+      if (
+        !editingId &&
+        !canCreateResourceCheck(form.resource_type, resources ?? [])
+      ) {
         const tierLabel = tenant?.tier === "professional" ? "Pro" : "Basic";
         const { getTierLimits } = await import("@/lib/tier-limits");
         const tierLimits = getTierLimits(tenant?.tier);
-        if (tierLimits.maxResourcesTotal !== null && (resources ?? []).length >= tierLimits.maxResourcesTotal) {
-          throw new Error(`Your ${tierLabel} plan allows only ${tierLimits.maxResourcesTotal} resource(s) in total. Upgrade to add more.`);
+        if (
+          tierLimits.maxResourcesTotal !== null &&
+          (resources ?? []).length >= tierLimits.maxResourcesTotal
+        ) {
+          throw new Error(
+            `Your ${tierLabel} plan allows only ${tierLimits.maxResourcesTotal} resource(s) in total. Upgrade to add more.`,
+          );
         }
-        throw new Error(`Your ${tierLabel} plan allows only ${tierLimits.maxResourcesPerType ?? 1} resource(s) per type. Upgrade to Business for unlimited resources.`);
+        throw new Error(
+          `Your ${tierLabel} plan allows only ${tierLimits.maxResourcesPerType ?? 1} resource(s) per type. Upgrade to Business for unlimited resources.`,
+        );
       }
 
-      const isAccom = form.resource_type === "hotel" || form.resource_type === "guesthouse";
-      const roomPricing = isAccom ? Object.fromEntries(
-        Object.entries(form.room_type_pricing).map(([k, v]) => [k, parseFloat(v as string) || 1.0])
-      ) : undefined;
-      const bedConfig = isAccom && beds.length > 0
-        ? Object.fromEntries(beds.map((b) => [b.type, b.count]))
-        : null;
+      const isAccom =
+        form.resource_type === "hotel" || form.resource_type === "guesthouse";
+      const roomPricing = isAccom
+        ? Object.fromEntries(
+            Object.entries(form.room_type_pricing).map(([k, v]) => [
+              k,
+              parseFloat(v as string) || 1.0,
+            ]),
+          )
+        : undefined;
+      const bedConfig =
+        isAccom && beds.length > 0
+          ? Object.fromEntries(beds.map((b) => [b.type, b.count]))
+          : null;
       const payload: any = {
-        tenant_id: tenantId, name: form.name, resource_type: form.resource_type,
+        tenant_id: tenantId,
+        name: form.name,
+        resource_type: form.resource_type,
         capacity: form.capacity ? parseInt(form.capacity) : null,
-        price_per_night: form.price_per_night ? parseFloat(form.price_per_night) : null,
+        price_per_night: form.price_per_night
+          ? parseFloat(form.price_per_night)
+          : null,
         description: form.description || null,
         image_url: form.image_url || null,
         is_active: form.is_active,
-        breakfast_price_per_person: form.breakfast_price_per_person ? parseFloat(form.breakfast_price_per_person) : null,
+        breakfast_price_per_person: form.breakfast_price_per_person
+          ? parseFloat(form.breakfast_price_per_person)
+          : null,
         ...(isAccom && { room_type_pricing: roomPricing }),
-        room_type: isAccom ? (form.room_type || null) : null,
+        room_type: isAccom ? form.room_type || null : null,
         bed_configuration: isAccom ? bedConfig : null,
-        room_description: isAccom && FREE_TEXT_ROOM_TYPES.includes(form.room_type) ? (form.room_description || null) : null,
-        offers_catering: form.resource_type === "restaurant" ? form.offers_catering : false,
-        offers_popup: form.resource_type === "restaurant" ? form.offers_popup : false,
-        offers_table_reservation: form.resource_type === "restaurant" ? form.offers_table_reservation : true,
-        offers_quote: form.resource_type === "restaurant" ? form.offers_quote : true,
-        offers_set_menu: form.resource_type === "restaurant" ? form.offers_set_menu : true,
+        room_description:
+          isAccom && FREE_TEXT_ROOM_TYPES.includes(form.room_type)
+            ? form.room_description || null
+            : null,
+        offers_catering:
+          form.resource_type === "restaurant" ? form.offers_catering : false,
+        offers_popup:
+          form.resource_type === "restaurant" ? form.offers_popup : false,
+        offers_table_reservation:
+          form.resource_type === "restaurant"
+            ? form.offers_table_reservation
+            : true,
+        offers_quote:
+          form.resource_type === "restaurant" ? form.offers_quote : true,
+        offers_set_menu:
+          form.resource_type === "restaurant" ? form.offers_set_menu : true,
         approval_status: getApprovalStatus(),
         site_id: form.site_id || null,
-        custom_type_label: form.resource_type === "custom" ? (form.custom_type_label.trim() || form.name.trim() || null) : null,
+        custom_type_label:
+          form.resource_type === "custom"
+            ? form.custom_type_label.trim() || form.name.trim() || null
+            : null,
         timezone: form.timezone ? form.timezone : null,
-        sub_services: (form.resource_type === "custom" || form.resource_type === "wellness")
-          ? subServices
-              .filter((s) => s.name.trim().length > 0)
-              .map((s) => {
-                const base: any = {
-                  id: s.id,
-                  name: s.name.trim().slice(0, 100),
-                  price_eur: s.price_eur,
-                };
-                // duration_min is required for wellness, optional/ignored for custom.
-                if (form.resource_type === "wellness") {
-                  base.duration_min = s.duration_min ?? null;
-                } else if (s.duration_min != null) {
-                  base.duration_min = s.duration_min;
-                }
-                return base;
-              })
-          : [],
+        sub_services:
+          form.resource_type === "custom" || form.resource_type === "wellness"
+            ? subServices
+                .filter((s) => s.name.trim().length > 0)
+                .map((s) => {
+                  const base: any = {
+                    id: s.id,
+                    name: s.name.trim().slice(0, 100),
+                    price_eur: s.price_eur,
+                  };
+                  // duration_min is required for wellness, optional/ignored for custom.
+                  if (form.resource_type === "wellness") {
+                    base.duration_min = s.duration_min ?? null;
+                  } else if (s.duration_min != null) {
+                    base.duration_min = s.duration_min;
+                  }
+                  return base;
+                })
+            : [],
       };
       let resolvedId = editingId as string | null;
       if (editingId) {
-        const { error } = await supabase.from("resources").update(payload).eq("id", editingId);
+        const { error } = await supabase
+          .from("resources")
+          .update(payload)
+          .eq("id", editingId);
         if (error) throw error;
       } else {
         // Need the new id back so we can flush draft opening hours and
@@ -316,8 +473,15 @@ const ResourceManagement = () => {
       queryClient.invalidateQueries({ queryKey: ["approval-queue-count"] });
       setDialogOpen(false);
       resetForm();
-      const statusMsg = !isPrivileged ? ` (${t("sites.approvals").toLowerCase()})` : "";
-      toast({ title: (editingId ? t("dashboard.resourceUpdated") : t("dashboard.resourceCreated")) + statusMsg });
+      const statusMsg = !isPrivileged
+        ? ` (${t("sites.approvals").toLowerCase()})`
+        : "";
+      toast({
+        title:
+          (editingId
+            ? t("dashboard.resourceUpdated")
+            : t("dashboard.resourceCreated")) + statusMsg,
+      });
     },
     onError: (err: any) => {
       showError(err);
@@ -336,11 +500,22 @@ const ResourceManagement = () => {
   });
 
   const toggleActiveMutation = useMutation({
-    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase.from("resources").update({ is_active }).eq("id", id);
+    mutationFn: async ({
+      id,
+      is_active,
+    }: {
+      id: string;
+      is_active: boolean;
+    }) => {
+      const { error } = await supabase
+        .from("resources")
+        .update({ is_active })
+        .eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["resources", tenantId] }); },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["resources", tenantId] });
+    },
   });
 
   const copyMutation = useMutation({
@@ -385,9 +560,16 @@ const ResourceManagement = () => {
       const qty = Math.max(1, Math.min(50, parseInt(bulkQuantity) || 1));
       const isAccom = true; // bulk add is only for hotel/guesthouse
       const roomType = bulkRoomType;
-      const bedConfig = bulkBeds.length > 0 ? Object.fromEntries(bulkBeds.map((b) => [b.type, b.count])) : null;
+      const bedConfig =
+        bulkBeds.length > 0
+          ? Object.fromEntries(bulkBeds.map((b) => [b.type, b.count]))
+          : null;
       const roomTypeLabel = t(`dashboard.roomType.${roomType}` as any);
-      const resType = (tenant as any)?.allowed_reservation_types?.includes("hotel") ? "hotel" : "guesthouse";
+      const resType = (tenant as any)?.allowed_reservation_types?.includes(
+        "hotel",
+      )
+        ? "hotel"
+        : "guesthouse";
 
       const copies: any[] = [];
       for (let i = 1; i <= qty; i++) {
@@ -397,12 +579,18 @@ const ResourceManagement = () => {
           resource_type: resType,
           capacity: bulkCapacity ? parseInt(bulkCapacity) : null,
           price_per_night: bulkPrice ? parseFloat(bulkPrice) : null,
-          breakfast_price_per_person: bulkBreakfastPrice ? parseFloat(bulkBreakfastPrice) : null,
+          breakfast_price_per_person: bulkBreakfastPrice
+            ? parseFloat(bulkBreakfastPrice)
+            : null,
           is_active: true,
           room_type: roomType,
           bed_configuration: bedConfig,
-          room_description: FREE_TEXT_ROOM_TYPES.includes(roomType) ? (bulkDescription || null) : null,
-          description: !FREE_TEXT_ROOM_TYPES.includes(roomType) ? (bulkDescription || null) : null,
+          room_description: FREE_TEXT_ROOM_TYPES.includes(roomType)
+            ? bulkDescription || null
+            : null,
+          description: !FREE_TEXT_ROOM_TYPES.includes(roomType)
+            ? bulkDescription || null
+            : null,
           approval_status: getApprovalStatus(),
           site_id: selectedSiteId || null,
         });
@@ -434,7 +622,27 @@ const ResourceManagement = () => {
     setEditingSiteId(null);
     setBeds([]);
     setSubServices([]);
-    setForm({ name: "", resource_type: defaultType, capacity: "", price_per_night: "", description: "", image_url: "", breakfast_price_per_person: "", room_type_pricing: { ...defaultRoomPricing }, is_active: true, room_type: "", room_description: "", offers_catering: false, offers_popup: false, offers_table_reservation: true, offers_quote: true, offers_set_menu: true, site_id: selectedSiteId || "", custom_type_label: "", timezone: "" });
+    setForm({
+      name: "",
+      resource_type: defaultType,
+      capacity: "",
+      price_per_night: "",
+      description: "",
+      image_url: "",
+      breakfast_price_per_person: "",
+      room_type_pricing: { ...defaultRoomPricing },
+      is_active: true,
+      room_type: "",
+      room_description: "",
+      offers_catering: false,
+      offers_popup: false,
+      offers_table_reservation: true,
+      offers_quote: true,
+      offers_set_menu: true,
+      site_id: selectedSiteId || "",
+      custom_type_label: "",
+      timezone: "",
+    });
   };
 
   const openEdit = (r: any) => {
@@ -442,7 +650,14 @@ const ResourceManagement = () => {
     setEditingSiteId(r.site_id || null);
     const rtp = r.room_type_pricing ?? {};
     const bedConfig = r.bed_configuration as Record<string, number> | null;
-    setBeds(bedConfig ? Object.entries(bedConfig).map(([type, count]) => ({ type, count: count as number })) : []);
+    setBeds(
+      bedConfig
+        ? Object.entries(bedConfig).map(([type, count]) => ({
+            type,
+            count: count as number,
+          }))
+        : [],
+    );
     const ss = Array.isArray(r.sub_services) ? (r.sub_services as any[]) : [];
     setSubServices(
       ss.map((s) => ({
@@ -450,13 +665,17 @@ const ResourceManagement = () => {
         name: s.name ?? "",
         price_eur: s.price_eur != null ? Number(s.price_eur) : null,
         duration_min: s.duration_min != null ? Number(s.duration_min) : null,
-      }))
+      })),
     );
     setForm({
-      name: r.name, resource_type: r.resource_type,
-      capacity: r.capacity?.toString() ?? "", price_per_night: r.price_per_night?.toString() ?? "",
-      description: r.description ?? "", image_url: r.image_url ?? "",
-      breakfast_price_per_person: r.breakfast_price_per_person?.toString() ?? "",
+      name: r.name,
+      resource_type: r.resource_type,
+      capacity: r.capacity?.toString() ?? "",
+      price_per_night: r.price_per_night?.toString() ?? "",
+      description: r.description ?? "",
+      image_url: r.image_url ?? "",
+      breakfast_price_per_person:
+        r.breakfast_price_per_person?.toString() ?? "",
       is_active: r.is_active ?? true,
       room_type: r.room_type ?? "",
       room_description: r.room_description ?? "",
@@ -482,51 +701,94 @@ const ResourceManagement = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3" data-tour="resources-header">
+      <div
+        className="flex flex-col sm:flex-row sm:items-start justify-between gap-3"
+        data-tour="resources-header"
+      >
         <div className="min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("dashboard.resourceManagement")}</h2>
+            <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
+              {t("dashboard.resourceManagement")}
+            </h2>
             <DashboardTooltip text="Add rooms, tables, or venues here. Set capacity, pricing, and upload photos. Toggle resources active/inactive to control booking availability." />
             {(() => {
               if (isSystemAdmin) return null;
-              const allowed: string[] = (tenant as any)?.allowed_reservation_types ?? [];
+              const allowed: string[] =
+                (tenant as any)?.allowed_reservation_types ?? [];
               const max = getTierLimits(effectiveTier).maxReservationTypes;
               if (max === null) return null;
               const used = allowed.length;
               const remaining = Math.max(0, max - used);
               const atLimit = remaining === 0;
               return (
-                <Badge variant={atLimit ? "destructive" : "secondary"} className="font-normal">
-                  {used} / {max} types used {atLimit ? "(limit reached)" : `(${remaining} left)`}
+                <Badge
+                  variant={atLimit ? "destructive" : "secondary"}
+                  className="font-normal"
+                >
+                  {used} / {max} types used{" "}
+                  {atLimit ? "(limit reached)" : `(${remaining} left)`}
                 </Badge>
               );
             })()}
           </div>
-          <p className="text-sm text-muted-foreground">{t("dashboard.resourceManagementDesc")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("dashboard.resourceManagementDesc")}
+          </p>
         </div>
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
           {(tenant as any)?.slug && (
             <Button variant="outline" size="sm" className="gap-1.5" asChild>
-              <a href={`/book/${(tenant as any).slug}`} target="_blank" rel="noopener noreferrer">
+              <a
+                href={`/book/${(tenant as any).slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <ExternalLink className="h-4 w-4" />
-                <span className="hidden sm:inline">{t("dashboard.bookingLink")}</span>
+                <span className="hidden sm:inline">
+                  {t("dashboard.bookingLink")}
+                </span>
                 <span className="sm:hidden">Link</span>
               </a>
             </Button>
           )}
-          {canManage && ((tenant as any)?.allowed_reservation_types?.includes("hotel") || (tenant as any)?.allowed_reservation_types?.includes("guesthouse")) && (
-            <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setBulkDialogOpen(true)}>
-              <Plus className="h-4 w-4" /> <span className="hidden sm:inline">{t("dashboard.addModeBulk")}</span><span className="sm:hidden">Bulk</span>
-            </Button>
-          )}
+          {canManage &&
+            ((tenant as any)?.allowed_reservation_types?.includes("hotel") ||
+              (tenant as any)?.allowed_reservation_types?.includes(
+                "guesthouse",
+              )) && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => setBulkDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4" />{" "}
+                <span className="hidden sm:inline">
+                  {t("dashboard.addModeBulk")}
+                </span>
+                <span className="sm:hidden">Bulk</span>
+              </Button>
+            )}
           {canManage && (
-            <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
+            <Dialog
+              open={dialogOpen}
+              onOpenChange={(open) => {
+                setDialogOpen(open);
+                if (!open) resetForm();
+              }}
+            >
               <DialogTrigger asChild>
-                <Button size="sm" className="gap-1.5"><Plus className="h-4 w-4" /> {t("dashboard.addResource")}</Button>
+                <Button size="sm" className="gap-1.5">
+                  <Plus className="h-4 w-4" /> {t("dashboard.addResource")}
+                </Button>
               </DialogTrigger>
               <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle className="font-serif">{editingId ? t("dashboard.editResource") : t("dashboard.addResource")}</DialogTitle>
+                  <DialogTitle className="font-serif">
+                    {editingId
+                      ? t("dashboard.editResource")
+                      : t("dashboard.addResource")}
+                  </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-5 pt-2">
                   {/* Image upload (only when editing) */}
@@ -536,61 +798,135 @@ const ResourceManagement = () => {
                         <Label>{t("dashboard.uploadImage")}</Label>
                         {form.image_url ? (
                           <div className="relative">
-                            <img src={form.image_url} alt="" className="w-full h-40 rounded-lg object-cover border border-border" />
-                            <button type="button" onClick={() => setForm((prev) => ({ ...prev, image_url: "" }))} className="absolute top-2 right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center">
+                            <img
+                              src={form.image_url}
+                              alt=""
+                              className="w-full h-40 rounded-lg object-cover border border-border"
+                            />
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setForm((prev) => ({ ...prev, image_url: "" }))
+                              }
+                              className="absolute top-2 right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"
+                            >
                               <X className="h-3.5 w-3.5" />
                             </button>
                           </div>
                         ) : (
-                          <button type="button" onClick={() => imageInputRef.current?.click()} disabled={uploading} className="w-full h-32 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer">
-                            {uploading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : (
+                          <button
+                            type="button"
+                            onClick={() => imageInputRef.current?.click()}
+                            disabled={uploading}
+                            className="w-full h-32 rounded-lg border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 bg-secondary/30 hover:bg-secondary/50 transition-colors cursor-pointer"
+                          >
+                            {uploading ? (
+                              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            ) : (
                               <>
                                 <Upload className="h-6 w-6 text-muted-foreground" />
-                                <span className="text-sm text-muted-foreground">PNG, JPG, WebP · max 5 MB</span>
+                                <span className="text-sm text-muted-foreground">
+                                  PNG, JPG, WebP · max 5 MB
+                                </span>
                               </>
                             )}
                           </button>
                         )}
-                        <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleImageUpload} />
+                        <input
+                          ref={imageInputRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                        />
                       </div>
-                      {tenantId && <ResourceImageGallery resourceId={editingId} tenantId={tenantId} />}
+                      {tenantId && (
+                        <ResourceImageGallery
+                          resourceId={editingId}
+                          tenantId={tenantId}
+                        />
+                      )}
                     </>
                   )}
 
                   <div>
                     <Label>{t("common.name")} *</Label>
-                    <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder={t("dashboard.namePlaceholder")} />
+                    <Input
+                      value={form.name}
+                      onChange={(e) =>
+                        setForm({ ...form, name: e.target.value })
+                      }
+                      placeholder={t("dashboard.namePlaceholder")}
+                    />
                   </div>
 
                   <div>
                     <Label>{t("common.type")}</Label>
-                    <Select value={form.resource_type} onValueChange={(v) => setForm({ ...form, resource_type: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    <Select
+                      value={form.resource_type}
+                      onValueChange={(v) =>
+                        setForm({ ...form, resource_type: v })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
-                        {(tenant as any)?.allowed_reservation_types?.includes("restaurant") && (
-                          <SelectItem value="restaurant">{typeLabel("restaurant")}</SelectItem>
+                        {(tenant as any)?.allowed_reservation_types?.includes(
+                          "restaurant",
+                        ) && (
+                          <SelectItem value="restaurant">
+                            {typeLabel("restaurant")}
+                          </SelectItem>
                         )}
-                        {(tenant as any)?.allowed_reservation_types?.includes("venue") && (
-                          <SelectItem value="venue">{typeLabel("venue")}</SelectItem>
+                        {(tenant as any)?.allowed_reservation_types?.includes(
+                          "venue",
+                        ) && (
+                          <SelectItem value="venue">
+                            {typeLabel("venue")}
+                          </SelectItem>
                         )}
-                        {(tenant as any)?.allowed_reservation_types?.includes("guesthouse") && (
-                          <SelectItem value="guesthouse">{typeLabel("guesthouse")}</SelectItem>
+                        {(tenant as any)?.allowed_reservation_types?.includes(
+                          "guesthouse",
+                        ) && (
+                          <SelectItem value="guesthouse">
+                            {typeLabel("guesthouse")}
+                          </SelectItem>
                         )}
-                        {(tenant as any)?.allowed_reservation_types?.includes("hotel") && (
-                          <SelectItem value="hotel">{typeLabel("hotel")}</SelectItem>
+                        {(tenant as any)?.allowed_reservation_types?.includes(
+                          "hotel",
+                        ) && (
+                          <SelectItem value="hotel">
+                            {typeLabel("hotel")}
+                          </SelectItem>
                         )}
-                        {(tenant as any)?.allowed_reservation_types?.includes("wellness") && (
-                          <SelectItem value="wellness">{typeLabel("wellness")}</SelectItem>
+                        {(tenant as any)?.allowed_reservation_types?.includes(
+                          "wellness",
+                        ) && (
+                          <SelectItem value="wellness">
+                            {typeLabel("wellness")}
+                          </SelectItem>
                         )}
-                        {(tenant as any)?.allowed_reservation_types?.includes("custom") && (
-                          <SelectItem value="custom">{t("dashboard.custom")}</SelectItem>
+                        {(tenant as any)?.allowed_reservation_types?.includes(
+                          "custom",
+                        ) && (
+                          <SelectItem value="custom">
+                            {t("dashboard.custom")}
+                          </SelectItem>
                         )}
                         {/* Fallback if none match (shouldn't happen) */}
-                        {!(tenant as any)?.allowed_reservation_types?.length && (
+                        {!(tenant as any)?.allowed_reservation_types
+                          ?.length && (
                           <>
-                            <SelectItem value="restaurant">{typeLabel("restaurant")}</SelectItem>
-                            <SelectItem value="venue">{typeLabel("venue")}</SelectItem>
-                            <SelectItem value="guesthouse">{typeLabel("guesthouse")}</SelectItem>
+                            <SelectItem value="restaurant">
+                              {typeLabel("restaurant")}
+                            </SelectItem>
+                            <SelectItem value="venue">
+                              {typeLabel("venue")}
+                            </SelectItem>
+                            <SelectItem value="guesthouse">
+                              {typeLabel("guesthouse")}
+                            </SelectItem>
                           </>
                         )}
                       </SelectContent>
@@ -601,27 +937,55 @@ const ResourceManagement = () => {
                   {(sites?.length ?? 0) > 0 && (
                     <div>
                       <Label>Site</Label>
-                      <Select value={form.site_id || "__none__"} onValueChange={(v) => setForm({ ...form, site_id: v === "__none__" ? "" : v })}>
-                        <SelectTrigger><SelectValue placeholder="No site" /></SelectTrigger>
+                      <Select
+                        value={form.site_id || "__none__"}
+                        onValueChange={(v) =>
+                          setForm({
+                            ...form,
+                            site_id: v === "__none__" ? "" : v,
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="No site" />
+                        </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="__none__">— No site —</SelectItem>
                           {(sites ?? []).map((s) => (
-                            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                            <SelectItem key={s.id} value={s.id}>
+                              {s.name}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-xs text-muted-foreground mt-1">Assign this resource to a site/location</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Assign this resource to a site/location
+                      </p>
                     </div>
                   )}
 
                   <div>
                     <Label>{t("common.description")}</Label>
-                    <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder={t("dashboard.descriptionPlaceholder")} rows={3} />
+                    <Textarea
+                      value={form.description}
+                      onChange={(e) =>
+                        setForm({ ...form, description: e.target.value })
+                      }
+                      placeholder={t("dashboard.descriptionPlaceholder")}
+                      rows={3}
+                    />
                   </div>
 
                   <div>
                     <Label>{t("dashboard.capacity")}</Label>
-                    <Input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} placeholder={t("dashboard.capacityPlaceholder")} />
+                    <Input
+                      type="number"
+                      value={form.capacity}
+                      onChange={(e) =>
+                        setForm({ ...form, capacity: e.target.value })
+                      }
+                      placeholder={t("dashboard.capacityPlaceholder")}
+                    />
                   </div>
 
                   {/* Venue: space price */}
@@ -629,103 +993,206 @@ const ResourceManagement = () => {
                     <div>
                       <Label>{t("dashboard.venuePrice")}</Label>
                       <div className="relative">
-                        <Input type="number" step="0.01" value={form.price_per_night} onChange={(e) => setForm({ ...form, price_per_night: e.target.value })} placeholder={t("dashboard.pricePlaceholder")} className="pr-8" />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={form.price_per_night}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              price_per_night: e.target.value,
+                            })
+                          }
+                          placeholder={t("dashboard.pricePlaceholder")}
+                          className="pr-8"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                          €
+                        </span>
                       </div>
                     </div>
                   )}
 
                   {/* Guesthouse / Hotel: room type, bed config, prices */}
-                  {(form.resource_type === "hotel" || form.resource_type === "guesthouse") && (
+                  {(form.resource_type === "hotel" ||
+                    form.resource_type === "guesthouse") && (
                     <>
                       {/* Room type dropdown */}
                       <div>
                         <Label>{t("dashboard.roomTypeLabel")}</Label>
-                        <Select value={form.room_type} onValueChange={(v) => setForm({ ...form, room_type: v })}>
-                          <SelectTrigger><SelectValue placeholder={t("booking.selectRoomType")} /></SelectTrigger>
+                        <Select
+                          value={form.room_type}
+                          onValueChange={(v) =>
+                            setForm({ ...form, room_type: v })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue
+                              placeholder={t("booking.selectRoomType")}
+                            />
+                          </SelectTrigger>
                           <SelectContent>
                             {ROOM_TYPES.map((rt) => (
-                              <SelectItem key={rt} value={rt}>{t(`dashboard.roomType.${rt}` as any)}</SelectItem>
+                              <SelectItem key={rt} value={rt}>
+                                {t(`dashboard.roomType.${rt}` as any)}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
 
                       {/* Bed configuration (only for non-free-text room types) */}
-                      {form.room_type && !FREE_TEXT_ROOM_TYPES.includes(form.room_type) && (
-                        <div className="space-y-2 rounded-lg border border-border p-3">
-                          <Label className="font-medium">{t("dashboard.bedConfiguration")}</Label>
-                          {beds.map((bed, i) => (
-                            <div key={i} className="flex items-center gap-2">
-                              <Select value={bed.type} onValueChange={(v) => {
-                                const next = [...beds];
-                                next[i] = { ...next[i], type: v };
-                                setBeds(next);
-                              }}>
-                                <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                  {BED_TYPES.map((bt) => (
-                                    <SelectItem key={bt} value={bt}>{t(`dashboard.bedType.${bt}` as any)}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <Input
-                                type="number"
-                                min={1}
-                                max={20}
-                                className="w-20"
-                                value={bed.count}
-                                onChange={(e) => {
-                                  const next = [...beds];
-                                  next[i] = { ...next[i], count: Math.max(1, parseInt(e.target.value) || 1) };
-                                  setBeds(next);
-                                }}
-                              />
-                              <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setBeds(beds.filter((_, j) => j !== i))}>
-                                <MinusCircle className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                          <Button type="button" variant="outline" size="sm" className="gap-1" onClick={() => setBeds([...beds, { type: "twin_single", count: 1 }])}>
-                            <PlusCircle className="h-3.5 w-3.5" /> {t("dashboard.addBed")}
-                          </Button>
-                        </div>
-                      )}
+                      {form.room_type &&
+                        !FREE_TEXT_ROOM_TYPES.includes(form.room_type) && (
+                          <div className="space-y-2 rounded-lg border border-border p-3">
+                            <Label className="font-medium">
+                              {t("dashboard.bedConfiguration")}
+                            </Label>
+                            {beds.map((bed, i) => (
+                              <div key={i} className="flex items-center gap-2">
+                                <Select
+                                  value={bed.type}
+                                  onValueChange={(v) => {
+                                    const next = [...beds];
+                                    next[i] = { ...next[i], type: v };
+                                    setBeds(next);
+                                  }}
+                                >
+                                  <SelectTrigger className="flex-1">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {BED_TYPES.map((bt) => (
+                                      <SelectItem key={bt} value={bt}>
+                                        {t(`dashboard.bedType.${bt}` as any)}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Input
+                                  type="number"
+                                  min={1}
+                                  max={20}
+                                  className="w-20"
+                                  value={bed.count}
+                                  onChange={(e) => {
+                                    const next = [...beds];
+                                    next[i] = {
+                                      ...next[i],
+                                      count: Math.max(
+                                        1,
+                                        parseInt(e.target.value) || 1,
+                                      ),
+                                    };
+                                    setBeds(next);
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-destructive"
+                                  onClick={() =>
+                                    setBeds(beds.filter((_, j) => j !== i))
+                                  }
+                                >
+                                  <MinusCircle className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="gap-1"
+                              onClick={() =>
+                                setBeds([
+                                  ...beds,
+                                  { type: "twin_single", count: 1 },
+                                ])
+                              }
+                            >
+                              <PlusCircle className="h-3.5 w-3.5" />{" "}
+                              {t("dashboard.addBed")}
+                            </Button>
+                          </div>
+                        )}
 
                       {/* Free text description for suite/connecting/entire */}
-                      {form.room_type && FREE_TEXT_ROOM_TYPES.includes(form.room_type) && (
-                        <div>
-                          <Label>{t("dashboard.roomDescription")}</Label>
-                          <Textarea
-                            value={form.room_description}
-                            onChange={(e) => setForm({ ...form, room_description: e.target.value })}
-                            placeholder={t("dashboard.roomDescPlaceholder")}
-                            rows={3}
-                          />
-                        </div>
-                      )}
+                      {form.room_type &&
+                        FREE_TEXT_ROOM_TYPES.includes(form.room_type) && (
+                          <div>
+                            <Label>{t("dashboard.roomDescription")}</Label>
+                            <Textarea
+                              value={form.room_description}
+                              onChange={(e) =>
+                                setForm({
+                                  ...form,
+                                  room_description: e.target.value,
+                                })
+                              }
+                              placeholder={t("dashboard.roomDescPlaceholder")}
+                              rows={3}
+                            />
+                          </div>
+                        )}
 
                       <div>
                         <Label>{t("dashboard.roomPrice")}</Label>
                         <div className="relative">
-                          <Input type="number" step="0.01" value={form.price_per_night} onChange={(e) => setForm({ ...form, price_per_night: e.target.value })} placeholder={t("dashboard.pricePlaceholder")} className="pr-8" />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={form.price_per_night}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                price_per_night: e.target.value,
+                              })
+                            }
+                            placeholder={t("dashboard.pricePlaceholder")}
+                            className="pr-8"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                            €
+                          </span>
                         </div>
                       </div>
                       <div>
                         <Label>{t("dashboard.breakfastPrice")}</Label>
                         <div className="relative">
-                          <Input type="number" step="0.01" value={form.breakfast_price_per_person} onChange={(e) => setForm({ ...form, breakfast_price_per_person: e.target.value })} placeholder={t("dashboard.breakfastPlaceholder")} className="pr-8" />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={form.breakfast_price_per_person}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                breakfast_price_per_person: e.target.value,
+                              })
+                            }
+                            placeholder={t("dashboard.breakfastPlaceholder")}
+                            className="pr-8"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                            €
+                          </span>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">{t("dashboard.pricingHint")}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {t("dashboard.pricingHint")}
+                        </p>
                       </div>
                     </>
                   )}
 
                   {/* Active toggle */}
                   <div className="flex items-center gap-3">
-                    <Switch checked={form.is_active} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, is_active: checked }))} />
+                    <Switch
+                      checked={form.is_active}
+                      onCheckedChange={(checked) =>
+                        setForm((prev) => ({ ...prev, is_active: checked }))
+                      }
+                    />
                     <Label className="mb-0">{t("dashboard.active")}</Label>
                   </div>
 
@@ -734,38 +1201,79 @@ const ResourceManagement = () => {
                     <Label>{t("timezone.label")}</Label>
                     <Select
                       value={form.timezone || "__inherit__"}
-                      onValueChange={(v) => setForm({ ...form, timezone: v === "__inherit__" ? "" : v })}
+                      onValueChange={(v) =>
+                        setForm({
+                          ...form,
+                          timezone: v === "__inherit__" ? "" : v,
+                        })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="max-h-72">
                         <SelectItem value="__inherit__">
-                          {t("timezone.inheritTenant").replace("{tz}", tenantTz.tz)}
+                          {t("timezone.inheritTenant").replace(
+                            "{tz}",
+                            tenantTz.tz,
+                          )}
                         </SelectItem>
                         {listSupportedTimezones().map((zone) => (
-                          <SelectItem key={zone} value={zone}>{zone}</SelectItem>
+                          <SelectItem key={zone} value={zone}>
+                            {zone}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
 
-
                   {/* Restaurant service options */}
                   {form.resource_type === "restaurant" && (
                     <div className="space-y-3 rounded-lg border border-border p-3">
-                      <Label className="font-medium text-sm">{t("dashboard.dineInOptions")}</Label>
+                      <Label className="font-medium text-sm">
+                        {t("dashboard.dineInOptions")}
+                      </Label>
                       <div className="flex items-center gap-3">
-                        <Checkbox checked={form.offers_table_reservation} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_table_reservation: !!checked }))} />
-                        <Label className="mb-0 text-sm">{t("dashboard.offersTableReservation")}</Label>
+                        <Checkbox
+                          checked={form.offers_table_reservation}
+                          onCheckedChange={(checked) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              offers_table_reservation: !!checked,
+                            }))
+                          }
+                        />
+                        <Label className="mb-0 text-sm">
+                          {t("dashboard.offersTableReservation")}
+                        </Label>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Checkbox checked={form.offers_quote} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_quote: !!checked }))} />
-                        <Label className="mb-0 text-sm">{t("dashboard.offersQuote")}</Label>
+                        <Checkbox
+                          checked={form.offers_quote}
+                          onCheckedChange={(checked) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              offers_quote: !!checked,
+                            }))
+                          }
+                        />
+                        <Label className="mb-0 text-sm">
+                          {t("dashboard.offersQuote")}
+                        </Label>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Checkbox checked={form.offers_set_menu} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_set_menu: !!checked }))} />
-                        <Label className="mb-0 text-sm">{t("dashboard.offersSetMenu")}</Label>
+                        <Checkbox
+                          checked={form.offers_set_menu}
+                          onCheckedChange={(checked) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              offers_set_menu: !!checked,
+                            }))
+                          }
+                        />
+                        <Label className="mb-0 text-sm">
+                          {t("dashboard.offersSetMenu")}
+                        </Label>
                       </div>
                     </div>
                   )}
@@ -773,14 +1281,36 @@ const ResourceManagement = () => {
                   {/* Restaurant additional services */}
                   {form.resource_type === "restaurant" && (
                     <div className="space-y-3 rounded-lg border border-border p-3">
-                      <Label className="font-medium text-sm">{t("dashboard.serviceOptions")}</Label>
+                      <Label className="font-medium text-sm">
+                        {t("dashboard.serviceOptions")}
+                      </Label>
                       <div className="flex items-center gap-3">
-                        <Checkbox checked={form.offers_catering} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_catering: !!checked }))} />
-                        <Label className="mb-0 text-sm">{t("dashboard.offersCatering")}</Label>
+                        <Checkbox
+                          checked={form.offers_catering}
+                          onCheckedChange={(checked) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              offers_catering: !!checked,
+                            }))
+                          }
+                        />
+                        <Label className="mb-0 text-sm">
+                          {t("dashboard.offersCatering")}
+                        </Label>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Checkbox checked={form.offers_popup} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, offers_popup: !!checked }))} />
-                        <Label className="mb-0 text-sm">{t("dashboard.offersPopup")}</Label>
+                        <Checkbox
+                          checked={form.offers_popup}
+                          onCheckedChange={(checked) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              offers_popup: !!checked,
+                            }))
+                          }
+                        />
+                        <Label className="mb-0 text-sm">
+                          {t("dashboard.offersPopup")}
+                        </Label>
                       </div>
                     </div>
                   )}
@@ -808,10 +1338,10 @@ const ResourceManagement = () => {
                     </>
                   )}
 
-
                   {/* Custom OR Wellness type: sub-services editor.
                       Wellness adds a required duration_min column (5 min steps, 5 to 480). */}
-                  {(form.resource_type === "custom" || form.resource_type === "wellness") && (
+                  {(form.resource_type === "custom" ||
+                    form.resource_type === "wellness") && (
                     <div className="space-y-3 rounded-lg border border-border p-3">
                       {form.resource_type === "custom" && (
                         <div>
@@ -820,15 +1350,26 @@ const ResourceManagement = () => {
                             value={form.custom_type_label}
                             maxLength={50}
                             placeholder="Spa, Workshops, Tours..."
-                            onChange={(e) => setForm({ ...form, custom_type_label: e.target.value })}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                custom_type_label: e.target.value,
+                              })
+                            }
                           />
-                          <p className="text-xs text-muted-foreground mt-1">{t("dashboard.customTypeLabelHelp")}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {t("dashboard.customTypeLabelHelp")}
+                          </p>
                         </div>
                       )}
                       <div className="space-y-2">
-                        <Label className="font-medium">{t("dashboard.subServices")}</Label>
+                        <Label className="font-medium">
+                          {t("dashboard.subServices")}
+                        </Label>
                         {form.resource_type === "wellness" && (
-                          <p className="text-xs text-muted-foreground">{t("dashboard.wellnessServicesHint")}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {t("dashboard.wellnessServicesHint")}
+                          </p>
                         )}
                         {subServices.map((s, idx) => {
                           const isWellness = form.resource_type === "wellness";
@@ -845,7 +1386,10 @@ const ResourceManagement = () => {
                                 maxLength={100}
                                 onChange={(e) => {
                                   const next = [...subServices];
-                                  next[idx] = { ...next[idx], name: e.target.value };
+                                  next[idx] = {
+                                    ...next[idx],
+                                    name: e.target.value,
+                                  };
                                   setSubServices(next);
                                 }}
                               />
@@ -859,12 +1403,18 @@ const ResourceManagement = () => {
                                   onChange={(e) => {
                                     const v = e.target.value;
                                     const next = [...subServices];
-                                    next[idx] = { ...next[idx], price_eur: v === "" ? null : parseFloat(v) };
+                                    next[idx] = {
+                                      ...next[idx],
+                                      price_eur:
+                                        v === "" ? null : parseFloat(v),
+                                    };
                                     setSubServices(next);
                                   }}
                                   className="pr-7"
                                 />
-                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">€</span>
+                                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                                  €
+                                </span>
                               </div>
                               {isWellness && (
                                 <div className="relative">
@@ -873,24 +1423,41 @@ const ResourceManagement = () => {
                                     step={5}
                                     min={5}
                                     max={480}
-                                    placeholder={t("dashboard.subServiceDuration")}
+                                    placeholder={t(
+                                      "dashboard.subServiceDuration",
+                                    )}
                                     value={s.duration_min ?? ""}
                                     onChange={(e) => {
                                       const v = e.target.value;
                                       const next = [...subServices];
                                       // Snap to nearest 5-minute step, clamp [5, 480].
-                                      let parsed = v === "" ? null : parseInt(v, 10);
-                                      if (parsed != null && !Number.isNaN(parsed)) {
-                                        parsed = Math.max(5, Math.min(480, Math.round(parsed / 5) * 5));
+                                      let parsed =
+                                        v === "" ? null : parseInt(v, 10);
+                                      if (
+                                        parsed != null &&
+                                        !Number.isNaN(parsed)
+                                      ) {
+                                        parsed = Math.max(
+                                          5,
+                                          Math.min(
+                                            480,
+                                            Math.round(parsed / 5) * 5,
+                                          ),
+                                        );
                                       } else {
                                         parsed = null;
                                       }
-                                      next[idx] = { ...next[idx], duration_min: parsed };
+                                      next[idx] = {
+                                        ...next[idx],
+                                        duration_min: parsed,
+                                      };
                                       setSubServices(next);
                                     }}
                                     className="pr-10"
                                   />
-                                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">min</span>
+                                  <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                                    min
+                                  </span>
                                 </div>
                               )}
                               <Button
@@ -898,7 +1465,11 @@ const ResourceManagement = () => {
                                 variant="ghost"
                                 size="icon"
                                 className="h-8 w-8 text-destructive"
-                                onClick={() => setSubServices(subServices.filter((_, j) => j !== idx))}
+                                onClick={() =>
+                                  setSubServices(
+                                    subServices.filter((_, j) => j !== idx),
+                                  )
+                                }
                               >
                                 <MinusCircle className="h-4 w-4" />
                               </Button>
@@ -910,28 +1481,46 @@ const ResourceManagement = () => {
                           variant="outline"
                           size="sm"
                           className="gap-1"
-                          onClick={() => setSubServices([
-                            ...subServices,
-                            {
-                              id: crypto.randomUUID(),
-                              name: "",
-                              price_eur: null,
-                              // Default 30 min so the wellness DB trigger doesn't reject an empty row on save.
-                              duration_min: form.resource_type === "wellness" ? 30 : null,
-                            },
-                          ])}
+                          onClick={() =>
+                            setSubServices([
+                              ...subServices,
+                              {
+                                id: crypto.randomUUID(),
+                                name: "",
+                                price_eur: null,
+                                // Default 30 min so the wellness DB trigger doesn't reject an empty row on save.
+                                duration_min:
+                                  form.resource_type === "wellness" ? 30 : null,
+                              },
+                            ])
+                          }
                         >
-                          <PlusCircle className="h-3.5 w-3.5" /> {t("dashboard.addSubService")}
+                          <PlusCircle className="h-3.5 w-3.5" />{" "}
+                          {t("dashboard.addSubService")}
                         </Button>
                       </div>
                     </div>
                   )}
 
-
                   <div className="flex justify-end gap-2 pt-2">
-                    <Button variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>{t("common.cancel")}</Button>
-                    <Button onClick={() => upsertMutation.mutate()} disabled={!form.name || upsertMutation.isPending}>
-                      {upsertMutation.isPending ? t("common.saving") : editingId ? t("common.update") : t("common.save")}
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setDialogOpen(false);
+                        resetForm();
+                      }}
+                    >
+                      {t("common.cancel")}
+                    </Button>
+                    <Button
+                      onClick={() => upsertMutation.mutate()}
+                      disabled={!form.name || upsertMutation.isPending}
+                    >
+                      {upsertMutation.isPending
+                        ? t("common.saving")
+                        : editingId
+                          ? t("common.update")
+                          : t("common.save")}
                     </Button>
                   </div>
                 </div>
@@ -944,9 +1533,17 @@ const ResourceManagement = () => {
       <SiteTabs />
 
       {isLoading ? (
-        <Card><CardContent className="p-6"><div className="animate-pulse h-40" /></CardContent></Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="animate-pulse h-40" />
+          </CardContent>
+        </Card>
       ) : !resources?.length ? (
-        <Card><CardContent className="p-8 text-center text-muted-foreground">{t("dashboard.noResources")}</CardContent></Card>
+        <Card>
+          <CardContent className="p-8 text-center text-muted-foreground">
+            {t("dashboard.noResources")}
+          </CardContent>
+        </Card>
       ) : (
         <Card data-tour="resources-grid">
           <CardContent className="p-0 overflow-x-auto">
@@ -957,37 +1554,65 @@ const ResourceManagement = () => {
                   <TableHead>{t("common.name")}</TableHead>
                   <TableHead>{t("common.type")}</TableHead>
                   {showSiteColumn && <TableHead>Site</TableHead>}
-                  <TableHead className="hidden xl:table-cell">{t("common.description")}</TableHead>
-                  <TableHead className="text-center">{t("dashboard.capacity")}</TableHead>
-                  <TableHead className="text-right">{t("common.price")}</TableHead>
+                  <TableHead className="hidden xl:table-cell">
+                    {t("common.description")}
+                  </TableHead>
+                  <TableHead className="text-center">
+                    {t("dashboard.capacity")}
+                  </TableHead>
+                  <TableHead className="text-right">
+                    {t("common.price")}
+                  </TableHead>
                   <TableHead>{t("resourceHours.title")}</TableHead>
-                  <TableHead className="text-center">{t("common.status")}</TableHead>
-                  {canManage && <TableHead className="text-right">{t("dashboard.actions")}</TableHead>}
+                  <TableHead className="text-center">
+                    {t("common.status")}
+                  </TableHead>
+                  {canManage && (
+                    <TableHead className="text-right">
+                      {t("dashboard.actions")}
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {resources.map((r: any) => {
                   const Icon = typeIcons[r.resource_type] ?? Building2;
-                  const isAccom = r.resource_type === "hotel" || r.resource_type === "guesthouse";
+                  const isAccom =
+                    r.resource_type === "hotel" ||
+                    r.resource_type === "guesthouse";
                   const isActive = r.is_active ?? true;
                   return (
-                    <TableRow key={r.id} className={!isActive ? "opacity-50" : ""}>
+                    <TableRow
+                      key={r.id}
+                      className={!isActive ? "opacity-50" : ""}
+                    >
                       <TableCell>
                         <Icon className="h-5 w-5 text-muted-foreground" />
                       </TableCell>
                       <TableCell className="font-medium">
                         {r.name}
-                        {(r.resource_type === "hotel" || r.resource_type === "guesthouse") && r.room_type && (
-                          <div className="text-xs text-muted-foreground font-normal">{t(`dashboard.roomType.${r.room_type}` as any)}</div>
-                        )}
+                        {(r.resource_type === "hotel" ||
+                          r.resource_type === "guesthouse") &&
+                          r.room_type && (
+                            <div className="text-xs text-muted-foreground font-normal">
+                              {t(`dashboard.roomType.${r.room_type}` as any)}
+                            </div>
+                          )}
                       </TableCell>
                       <TableCell>{typeLabel(r.resource_type)}</TableCell>
                       {showSiteColumn && (
                         <TableCell>
                           {r.site_id && siteMap[r.site_id] ? (
-                            <Badge variant="outline" className="text-xs font-normal">{siteMap[r.site_id]}</Badge>
+                            <Badge
+                              variant="outline"
+                              className="text-xs font-normal"
+                            >
+                              {siteMap[r.site_id]}
+                            </Badge>
                           ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
+                            <span className="text-xs text-muted-foreground">
+                              —
+                            </span>
                           )}
                         </TableCell>
                       )}
@@ -1003,23 +1628,39 @@ const ResourceManagement = () => {
                           <span>–</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-center">{r.capacity ?? "–"}</TableCell>
+                      <TableCell className="text-center">
+                        {r.capacity ?? "–"}
+                      </TableCell>
                       <TableCell className="text-right">
-                        {r.price_per_night != null ? `${Number(r.price_per_night).toFixed(0)} €` : "–"}
+                        {r.price_per_night != null
+                          ? `${Number(r.price_per_night).toFixed(0)} €`
+                          : "–"}
                       </TableCell>
                       <TableCell>
-                        {r.resource_type === "restaurant" && formatResourceHours(r.id) ? (
+                        {r.resource_type === "restaurant" &&
+                        formatResourceHours(r.id) ? (
                           <div className="flex items-center gap-1 text-xs">
                             <Clock className="h-3 w-3 text-muted-foreground" />
                             <span>{formatResourceHours(r.id)}</span>
                           </div>
                         ) : (
-                          <span className="text-xs text-muted-foreground">–</span>
+                          <span className="text-xs text-muted-foreground">
+                            –
+                          </span>
                         )}
                       </TableCell>
                       <TableCell className="text-center">
-                        <Badge variant={isActive ? "default" : "secondary"} className={isActive ? "bg-primary/15 text-primary border-primary/30 hover:bg-primary/20" : ""}>
-                          {isActive ? t("dashboard.active") : t("dashboard.inactive")}
+                        <Badge
+                          variant={isActive ? "default" : "secondary"}
+                          className={
+                            isActive
+                              ? "bg-primary/15 text-primary border-primary/30 hover:bg-primary/20"
+                              : ""
+                          }
+                        >
+                          {isActive
+                            ? t("dashboard.active")
+                            : t("dashboard.inactive")}
                         </Badge>
                       </TableCell>
                       {canManage && (
@@ -1029,18 +1670,46 @@ const ResourceManagement = () => {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
-                              title={isActive ? t("dashboard.inactive") : t("dashboard.active")}
-                              onClick={() => toggleActiveMutation.mutate({ id: r.id, is_active: !isActive })}
+                              title={
+                                isActive
+                                  ? t("dashboard.inactive")
+                                  : t("dashboard.active")
+                              }
+                              onClick={() =>
+                                toggleActiveMutation.mutate({
+                                  id: r.id,
+                                  is_active: !isActive,
+                                })
+                              }
                             >
                               <Lock className="h-4 w-4 text-muted-foreground" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(r)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => openEdit(r)}
+                            >
                               <Pencil className="h-4 w-4 text-muted-foreground" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" title={t("dashboard.copyResource")} onClick={() => { setCopySource(r); setCopyDialogOpen(true); }}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              title={t("dashboard.copyResource")}
+                              onClick={() => {
+                                setCopySource(r);
+                                setCopyDialogOpen(true);
+                              }}
+                            >
                               <Copy className="h-4 w-4 text-muted-foreground" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteMutation.mutate(r.id)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive"
+                              onClick={() => deleteMutation.mutate(r.id)}
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1059,28 +1728,58 @@ const ResourceManagement = () => {
       {canManage && <SpecialOccasionsPanel />}
       {canManage && <BookingRejectionMonitor />}
 
-
       {/* Copy Resource Dialog */}
-      <Dialog open={copyDialogOpen} onOpenChange={(open) => { setCopyDialogOpen(open); if (!open) { setCopySource(null); setCopyCount("1"); } }}>
+      <Dialog
+        open={copyDialogOpen}
+        onOpenChange={(open) => {
+          setCopyDialogOpen(open);
+          if (!open) {
+            setCopySource(null);
+            setCopyCount("1");
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="font-serif">{t("dashboard.copyResource")}</DialogTitle>
+            <DialogTitle className="font-serif">
+              {t("dashboard.copyResource")}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <p className="text-sm text-muted-foreground">
-              {t("dashboard.copyResourceDesc")} <strong>{copySource?.name}</strong>
+              {t("dashboard.copyResourceDesc")}{" "}
+              <strong>{copySource?.name}</strong>
             </p>
             <div>
               <Label>{t("dashboard.copyCount")}</Label>
-              <Input type="number" min={1} max={50} value={copyCount} onChange={(e) => setCopyCount(e.target.value)} />
+              <Input
+                type="number"
+                min={1}
+                max={50}
+                value={copyCount}
+                onChange={(e) => setCopyCount(e.target.value)}
+              />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setCopyDialogOpen(false)}>{t("common.cancel")}</Button>
               <Button
-                onClick={() => copySource && copyMutation.mutate({ source: copySource, count: Math.max(1, Math.min(50, parseInt(copyCount) || 1)) })}
+                variant="outline"
+                onClick={() => setCopyDialogOpen(false)}
+              >
+                {t("common.cancel")}
+              </Button>
+              <Button
+                onClick={() =>
+                  copySource &&
+                  copyMutation.mutate({
+                    source: copySource,
+                    count: Math.max(1, Math.min(50, parseInt(copyCount) || 1)),
+                  })
+                }
                 disabled={copyMutation.isPending}
               >
-                {copyMutation.isPending ? t("common.saving") : t("dashboard.copyResource")}
+                {copyMutation.isPending
+                  ? t("common.saving")
+                  : t("dashboard.copyResource")}
               </Button>
             </div>
           </div>
@@ -1088,19 +1787,42 @@ const ResourceManagement = () => {
       </Dialog>
 
       {/* Bulk Add Rooms Dialog */}
-      <Dialog open={bulkDialogOpen} onOpenChange={(open) => { setBulkDialogOpen(open); if (!open) { setBulkRoomType("single"); setBulkQuantity("1"); setBulkBeds([{ type: "twin_single", count: 1 }]); setBulkDescription(""); setBulkPrice(""); setBulkBreakfastPrice(""); setBulkCapacity(""); } }}>
+      <Dialog
+        open={bulkDialogOpen}
+        onOpenChange={(open) => {
+          setBulkDialogOpen(open);
+          if (!open) {
+            setBulkRoomType("single");
+            setBulkQuantity("1");
+            setBulkBeds([{ type: "twin_single", count: 1 }]);
+            setBulkDescription("");
+            setBulkPrice("");
+            setBulkBreakfastPrice("");
+            setBulkCapacity("");
+          }
+        }}
+      >
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-serif">{t("dashboard.addModeBulk")}</DialogTitle>
+            <DialogTitle className="font-serif">
+              {t("dashboard.addModeBulk")}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
               <Label>{t("dashboard.bulkRoomType")} *</Label>
-              <Select value={bulkRoomType} onValueChange={(v) => setBulkRoomType(v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={bulkRoomType}
+                onValueChange={(v) => setBulkRoomType(v)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {ROOM_TYPES.map((rt) => (
-                    <SelectItem key={rt} value={rt}>{t(`dashboard.roomType.${rt}` as any)}</SelectItem>
+                    <SelectItem key={rt} value={rt}>
+                      {t(`dashboard.roomType.${rt}` as any)}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -1108,24 +1830,39 @@ const ResourceManagement = () => {
 
             <div>
               <Label>{t("dashboard.bulkQuantity")} *</Label>
-              <Input type="number" min={1} max={50} value={bulkQuantity} onChange={(e) => setBulkQuantity(e.target.value)} />
+              <Input
+                type="number"
+                min={1}
+                max={50}
+                value={bulkQuantity}
+                onChange={(e) => setBulkQuantity(e.target.value)}
+              />
             </div>
 
             {/* Bed configuration for non-free-text room types */}
             {!FREE_TEXT_ROOM_TYPES.includes(bulkRoomType) && (
               <div className="space-y-2 rounded-lg border border-border p-3">
-                <Label className="font-medium">{t("dashboard.bedConfiguration")}</Label>
+                <Label className="font-medium">
+                  {t("dashboard.bedConfiguration")}
+                </Label>
                 {bulkBeds.map((bed, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <Select value={bed.type} onValueChange={(v) => {
-                      const next = [...bulkBeds];
-                      next[i] = { ...next[i], type: v };
-                      setBulkBeds(next);
-                    }}>
-                      <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
+                    <Select
+                      value={bed.type}
+                      onValueChange={(v) => {
+                        const next = [...bulkBeds];
+                        next[i] = { ...next[i], type: v };
+                        setBulkBeds(next);
+                      }}
+                    >
+                      <SelectTrigger className="flex-1">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         {BED_TYPES.map((bt) => (
-                          <SelectItem key={bt} value={bt}>{t(`dashboard.bedType.${bt}` as any)}</SelectItem>
+                          <SelectItem key={bt} value={bt}>
+                            {t(`dashboard.bedType.${bt}` as any)}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -1137,16 +1874,38 @@ const ResourceManagement = () => {
                       value={bed.count}
                       onChange={(e) => {
                         const next = [...bulkBeds];
-                        next[i] = { ...next[i], count: Math.max(1, parseInt(e.target.value) || 1) };
+                        next[i] = {
+                          ...next[i],
+                          count: Math.max(1, parseInt(e.target.value) || 1),
+                        };
                         setBulkBeds(next);
                       }}
                     />
-                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setBulkBeds(bulkBeds.filter((_, j) => j !== i))}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive"
+                      onClick={() =>
+                        setBulkBeds(bulkBeds.filter((_, j) => j !== i))
+                      }
+                    >
                       <MinusCircle className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
-                <Button type="button" variant="outline" size="sm" className="gap-1" onClick={() => setBulkBeds([...bulkBeds, { type: "twin_single", count: 1 }])}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  onClick={() =>
+                    setBulkBeds([
+                      ...bulkBeds,
+                      { type: "twin_single", count: 1 },
+                    ])
+                  }
+                >
                   <PlusCircle className="h-3.5 w-3.5" /> {t("dashboard.addBed")}
                 </Button>
               </div>
@@ -1169,31 +1928,61 @@ const ResourceManagement = () => {
               <div>
                 <Label>{t("dashboard.roomPrice")}</Label>
                 <div className="relative">
-                  <Input type="number" step="0.01" value={bulkPrice} onChange={(e) => setBulkPrice(e.target.value)} placeholder={t("dashboard.pricePlaceholder")} className="pr-8" />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={bulkPrice}
+                    onChange={(e) => setBulkPrice(e.target.value)}
+                    placeholder={t("dashboard.pricePlaceholder")}
+                    className="pr-8"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                    €
+                  </span>
                 </div>
               </div>
               <div>
                 <Label>{t("dashboard.capacity")}</Label>
-                <Input type="number" value={bulkCapacity} onChange={(e) => setBulkCapacity(e.target.value)} placeholder={t("dashboard.capacityPlaceholder")} />
+                <Input
+                  type="number"
+                  value={bulkCapacity}
+                  onChange={(e) => setBulkCapacity(e.target.value)}
+                  placeholder={t("dashboard.capacityPlaceholder")}
+                />
               </div>
             </div>
 
             <div>
               <Label>{t("dashboard.breakfastPrice")}</Label>
               <div className="relative">
-                <Input type="number" step="0.01" value={bulkBreakfastPrice} onChange={(e) => setBulkBreakfastPrice(e.target.value)} placeholder={t("dashboard.breakfastPlaceholder")} className="pr-8" />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={bulkBreakfastPrice}
+                  onChange={(e) => setBulkBreakfastPrice(e.target.value)}
+                  placeholder={t("dashboard.breakfastPlaceholder")}
+                  className="pr-8"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  €
+                </span>
               </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" onClick={() => setBulkDialogOpen(false)}>{t("common.cancel")}</Button>
+              <Button
+                variant="outline"
+                onClick={() => setBulkDialogOpen(false)}
+              >
+                {t("common.cancel")}
+              </Button>
               <Button
                 onClick={() => bulkAddMutation.mutate()}
                 disabled={bulkAddMutation.isPending || !bulkRoomType}
               >
-                {bulkAddMutation.isPending ? t("common.saving") : t("dashboard.bulkAdd")}
+                {bulkAddMutation.isPending
+                  ? t("common.saving")
+                  : t("dashboard.bulkAdd")}
               </Button>
             </div>
           </div>

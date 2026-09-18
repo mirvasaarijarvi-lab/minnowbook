@@ -52,7 +52,10 @@ function ToastHarness({ language }: { language: Language }) {
           const err = Object.assign(new Error("Service misconfigured"), {
             code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
           });
-          toast.error(t(getBookingErrorToastKey(err)), getBookingErrorToastOptions(err));
+          toast.error(
+            t(getBookingErrorToastKey(err)),
+            getBookingErrorToastOptions(err),
+          );
         }}
       >
         fire-misconfig-toast
@@ -61,7 +64,10 @@ function ToastHarness({ language }: { language: Language }) {
         type="button"
         onClick={() => {
           const err = new Error("network blew up");
-          toast.error(t(getBookingErrorToastKey(err)), getBookingErrorToastOptions(err));
+          toast.error(
+            t(getBookingErrorToastKey(err)),
+            getBookingErrorToastOptions(err),
+          );
         }}
       >
         fire-generic-toast
@@ -149,7 +155,9 @@ describe("public booking SERVICE_ROLE_KEY_MISSING toast", () => {
         code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
       }),
     ).toBe("booking.serviceMisconfigured");
-    expect(getBookingErrorToastKey(new Error("boom"))).toBe("booking.submitError");
+    expect(getBookingErrorToastKey(new Error("boom"))).toBe(
+      "booking.submitError",
+    );
     expect(getBookingErrorToastKey(undefined)).toBe("booking.submitError");
     expect(getBookingErrorToastKey(null)).toBe("booking.submitError");
   });
@@ -159,7 +167,9 @@ describe("public booking SERVICE_ROLE_KEY_MISSING toast", () => {
       code: BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING,
     });
     expect(opts.duration).toBe(10000);
-    expect(getBookingErrorToastOptions(new Error("boom")).duration).toBeLessThan(10000);
+    expect(
+      getBookingErrorToastOptions(new Error("boom")).duration,
+    ).toBeLessThan(10000);
   });
 });
 

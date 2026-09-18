@@ -1,7 +1,11 @@
 import { test, expect } from "./fixtures/ephemeral-tenant";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./fixtures/test-tenant";
 import { randomUUID } from "node:crypto";
-import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricing-accessor";
+import {
+  reportAmounts,
+  sumReportAmounts,
+  roundCents,
+} from "@/lib/report-pricing-accessor";
 
 /**
  * End-to-end: explicit idempotency keys on booking create requests.
@@ -33,7 +37,10 @@ test.describe("Booking create idempotency key", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("repeated creates with the same key never double-apply a promotion", async ({
     ephemeralTenant,
@@ -109,7 +116,10 @@ test.describe("Booking create idempotency key", () => {
 
     const ids = new Set(bodies.map((b) => b.reservation?.id));
     expect(ids.size, "all five requests refer to one booking").toBe(1);
-    expect(bodies[0].duplicate ?? false, "the first request creates the booking").toBe(false);
+    expect(
+      bodies[0].duplicate ?? false,
+      "the first request creates the booking",
+    ).toBe(false);
     for (const b of bodies.slice(1)) {
       expect(b.duplicate, "later requests are replays").toBe(true);
       expect(b.idempotent_replay, "flagged as an idempotent replay").toBe(true);
@@ -127,7 +137,10 @@ test.describe("Booking create idempotency key", () => {
 
     const row = rows![0] as Record<string, any>;
     expect(Number(row.original_price_eur), "list price").toBe(GROSS);
-    expect(Number(row.price_eur), "the discount is applied once, not compounded").toBe(CHARGED);
+    expect(
+      Number(row.price_eur),
+      "the discount is applied once, not compounded",
+    ).toBe(CHARGED);
     expect(row.discount_type).toBe("percentage");
     expect(Number(row.discount_value)).toBe(PERCENT);
     expect(row.discount_reason).toBe(`Promo code: ${code}`);
@@ -138,7 +151,10 @@ test.describe("Booking create idempotency key", () => {
       .eq("tenant_id", tenantId)
       .eq("code", code)
       .single();
-    expect(Number(codeRow!.used_count), "the code is used once for five requests").toBe(1);
+    expect(
+      Number(codeRow!.used_count),
+      "the code is used once for five requests",
+    ).toBe(1);
 
     // Report figures: room + breakfast equal the charged amount, counted once.
     const a = reportAmounts(row as any);
@@ -170,7 +186,10 @@ test.describe("Booking create idempotency key", () => {
       .eq("tenant_id", tenantId)
       .eq("guest_email", secondEmail);
     expect(secondRows, "one booking for the body key").toHaveLength(1);
-    expect(Number(secondRows![0].price_eur), "full price, the code was already spent").toBe(GROSS);
+    expect(
+      Number(secondRows![0].price_eur),
+      "full price, the code was already spent",
+    ).toBe(GROSS);
 
     // --- Concurrent requests sharing one key ------------------------------
     const raceKey = `idem-race-${randomUUID()}`;
@@ -182,7 +201,9 @@ test.describe("Booking create idempotency key", () => {
       date: isoDate(320),
       check_out_date: isoDate(320 + NIGHTS),
     };
-    const raced = await Promise.all([1, 2, 3, 4, 5].map(() => post(racePayload, raceKey)));
+    const raced = await Promise.all(
+      [1, 2, 3, 4, 5].map(() => post(racePayload, raceKey)),
+    );
     const raceBodies = await Promise.all(raced.map((r) => r.json()));
     const raceIds = new Set(
       raceBodies.filter((b) => b.reservation?.id).map((b) => b.reservation.id),
@@ -252,7 +273,10 @@ test.describe("Booking create idempotency key", () => {
       .select("id, price_eur")
       .eq("tenant_id", tenantId)
       .eq("guest_email", rejectedEmail);
-    expect(retryRows, "the corrected retry with the same key books once").toHaveLength(1);
+    expect(
+      retryRows,
+      "the corrected retry with the same key books once",
+    ).toHaveLength(1);
     expect(Number(retryRows![0].price_eur)).toBe(GROSS);
 
     // --- A malformed key is refused up front ------------------------------

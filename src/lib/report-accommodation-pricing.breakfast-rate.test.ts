@@ -29,7 +29,9 @@ import {
 const NIGHTS = 3;
 const GUESTS = 2;
 
-const stay = (over: Partial<AccommodationPricingRow> = {}): AccommodationPricingRow => ({
+const stay = (
+  over: Partial<AccommodationPricingRow> = {},
+): AccommodationPricingRow => ({
   reservation_type: "guesthouse",
   date: "2026-06-01",
   check_out_date: "2026-06-04", // 3 nights
@@ -46,7 +48,9 @@ describe("stored breakfast rates in period reports", () => {
     expect(calcNights(row)).toBe(NIGHTS);
     // 12 x 2 guests x 3 nights = 72, not 15 x 2 x 3 = 90.
     expect(calcBreakfastPrice(row)).toBe(72);
-    expect(calcBreakfastPrice(row)).not.toBe(DEFAULT_BREAKFAST_PRICE_PER_PERSON * GUESTS * NIGHTS);
+    expect(calcBreakfastPrice(row)).not.toBe(
+      DEFAULT_BREAKFAST_PRICE_PER_PERSON * GUESTS * NIGHTS,
+    );
     expect(calcRoomPrice(row)).toBe(225);
     expect(roundCents(calcRoomPrice(row) + calcBreakfastPrice(row))).toBe(
       calcChargedTotal(row),
@@ -55,7 +59,9 @@ describe("stored breakfast rates in period reports", () => {
 
   it("falls back to the default only when no rate was stored", () => {
     const row = stay({ breakfast_price_per_person: null, price_eur: 315 });
-    expect(calcBreakfastPrice(row)).toBe(DEFAULT_BREAKFAST_PRICE_PER_PERSON * GUESTS * NIGHTS);
+    expect(calcBreakfastPrice(row)).toBe(
+      DEFAULT_BREAKFAST_PRICE_PER_PERSON * GUESTS * NIGHTS,
+    );
     expect(calcRoomPrice(row)).toBe(225);
   });
 
@@ -77,9 +83,9 @@ describe("stored breakfast rates in period reports", () => {
             price_eur: charged,
           });
           expect(calcNights(row)).toBe(n);
-          expect(
-            roundCents(calcRoomPrice(row) + calcBreakfastPrice(row)),
-          ).toBe(calcChargedTotal(row));
+          expect(roundCents(calcRoomPrice(row) + calcBreakfastPrice(row))).toBe(
+            calcChargedTotal(row),
+          );
           // The stored rate drives the breakfast line whenever it fits.
           expect(calcBreakfastPrice(row)).toBe(
             Math.min(roundCents(rate * guests * n), calcChargedTotal(row)),
@@ -113,7 +119,9 @@ describe("stored breakfast rates in period reports", () => {
     // the split still adds up to what the guest pays.
     expect(calcBreakfastPrice(absurd)).toBe(297);
     expect(calcRoomPrice(absurd)).toBe(0);
-    expect(roundCents(calcRoomPrice(absurd) + calcBreakfastPrice(absurd))).toBe(297);
+    expect(roundCents(calcRoomPrice(absurd) + calcBreakfastPrice(absurd))).toBe(
+      297,
+    );
   });
 
   it("applies stored rates identically for hotels and leaves other types alone", () => {
@@ -129,10 +137,18 @@ describe("stored breakfast rates in period reports", () => {
   it("keeps a whole period balanced across mixed stored rates", () => {
     const rows = [
       stay({ breakfast_price_per_person: 12, price_eur: 297 }),
-      stay({ breakfast_price_per_person: 9.5, price_eur: 282, guests_count: 3 }),
+      stay({
+        breakfast_price_per_person: 9.5,
+        price_eur: 282,
+        guests_count: 3,
+      }),
       stay({ breakfast_price_per_person: null, price_eur: 315 }),
       stay({ breakfast_price_per_person: 0, price_eur: 225 }),
-      stay({ reservation_type: "restaurant", pricing_type: "menu", price_eur: 80 }),
+      stay({
+        reservation_type: "restaurant",
+        pricing_type: "menu",
+        price_eur: 80,
+      }),
     ];
     let room = 0;
     let breakfast = 0;
@@ -146,18 +162,29 @@ describe("stored breakfast rates in period reports", () => {
     // that row is excluded from the charged sum too.
     const menuRow = rows[4];
     expect(effectiveChargedTotal(menuRow)).toBe(0);
-    expect(room + breakfast - Math.round(calcRoomPrice(menuRow) * 100)).toBe(charged);
+    expect(room + breakfast - Math.round(calcRoomPrice(menuRow) * 100)).toBe(
+      charged,
+    );
   });
 
   it("public booking still persists the resource rate, never the request body", () => {
     const src = readFileSync(
-      path.resolve(__dirname, "../../supabase/functions/public-booking/index.ts"),
+      path.resolve(
+        __dirname,
+        "../../supabase/functions/public-booking/index.ts",
+      ),
       "utf8",
     );
     // The stored rate comes from the resolved resource and is validated.
-    expect(src).toContain("pricingResource?.breakfast_price_per_person != null");
-    expect(src).toContain("if (isFinite(bf) && bf >= 0) insertData.breakfast_price_per_person = bf");
+    expect(src).toContain(
+      "pricingResource?.breakfast_price_per_person != null",
+    );
+    expect(src).toContain(
+      "if (isFinite(bf) && bf >= 0) insertData.breakfast_price_per_person = bf",
+    );
     // It must never be taken from the request body.
-    expect(src).not.toContain("insertData.breakfast_price_per_person = body.breakfast_price_per_person");
+    expect(src).not.toContain(
+      "insertData.breakfast_price_per_person = body.breakfast_price_per_person",
+    );
   });
 });

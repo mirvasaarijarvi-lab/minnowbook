@@ -2,7 +2,11 @@ import { test, expect } from "./fixtures/ephemeral-tenant";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./fixtures/test-tenant";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
-import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricing-accessor";
+import {
+  reportAmounts,
+  sumReportAmounts,
+  roundCents,
+} from "@/lib/report-pricing-accessor";
 
 /**
  * End-to-end: concurrent invoicing requests for the same booking.
@@ -18,8 +22,10 @@ import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricin
  * Requires SERVICE_ROLE_KEY; skips itself without it.
  */
 
-const AMOUNT_ERROR = "Invoice amount must match the recalculated room and breakfast totals.";
-const NO_PRICE_ERROR = "Add a price before marking this reservation as invoiced.";
+const AMOUNT_ERROR =
+  "Invoice amount must match the recalculated room and breakfast totals.";
+const NO_PRICE_ERROR =
+  "Add a price before marking this reservation as invoiced.";
 
 const NIGHTLY = 110;
 const BREAKFAST_RATE = 11;
@@ -39,7 +45,10 @@ test.describe("Concurrent invoicing", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("invoices only once and refuses while totals are inconsistent", async ({
     ephemeralTenant,
@@ -76,19 +85,24 @@ test.describe("Concurrent invoicing", () => {
       .select("id, resource_type");
     expect(resErr, resErr?.message).toBeNull();
     const roomId = resources!.find((r) => r.resource_type === "guesthouse")!.id;
-    const tableId = resources!.find((r) => r.resource_type === "restaurant")!.id;
+    const tableId = resources!.find(
+      (r) => r.resource_type === "restaurant",
+    )!.id;
 
     // --- Bookings through the public function ------------------------------
     const book = async (data: Record<string, unknown>) => {
-      const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          apikey: SUPABASE_ANON_KEY,
+      const res = await request.post(
+        `${SUPABASE_URL}/functions/v1/public-booking`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            apikey: SUPABASE_ANON_KEY,
+          },
+          data: { tenant_id: tenantId, ...data },
+          timeout: 30_000,
         },
-        data: { tenant_id: tenantId, ...data },
-        timeout: 30_000,
-      });
+      );
       expect(res.status(), await res.text()).toBe(200);
     };
 
@@ -135,7 +149,9 @@ test.describe("Concurrent invoicing", () => {
 
     const stay = await fetchRow(stayEmail);
     const dinner = await fetchRow(dinnerEmail);
-    expect(Number(stay.price_eur), "server-recalculated stay total").toBe(EXPECTED_TOTAL);
+    expect(Number(stay.price_eur), "server-recalculated stay total").toBe(
+      EXPECTED_TOTAL,
+    );
     expect(stay.is_invoiced).toBe(false);
     expect(dinner.price_eur, "dine-in has no amount yet").toBeNull();
 
@@ -160,9 +176,16 @@ test.describe("Concurrent invoicing", () => {
       });
       expect(me, me?.message).toBeNull();
       const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: { persistSession: false, autoRefreshToken: false, storageKey: `ci-${i}-${stamp}` },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          storageKey: `ci-${i}-${stamp}`,
+        },
       });
-      const { error: se } = await client.auth.signInWithPassword({ email, password });
+      const { error: se } = await client.auth.signInWithPassword({
+        email,
+        password,
+      });
       expect(se, se?.message).toBeNull();
       clients.push(client);
     }
@@ -200,15 +223,18 @@ test.describe("Concurrent invoicing", () => {
 
     const stayAfter = await fetchRow(stayEmail);
     expect(stayAfter.is_invoiced, "invoiced once").toBe(true);
-    expect(Number(stayAfter.price_eur), "amount never moved").toBe(EXPECTED_TOTAL);
+    expect(Number(stayAfter.price_eur), "amount never moved").toBe(
+      EXPECTED_TOTAL,
+    );
 
     const stayTransitions = await invoiceTransitions(stay.id);
     expect(stayTransitions, "exactly one invoicing recorded").toHaveLength(1);
 
     const staySplit = reportAmounts(stayAfter as any);
-    expect(roundCents(staySplit.room + staySplit.breakfast), "split reconciles").toBe(
-      EXPECTED_TOTAL,
-    );
+    expect(
+      roundCents(staySplit.room + staySplit.breakfast),
+      "split reconciles",
+    ).toBe(EXPECTED_TOTAL);
     expect(
       sumReportAmounts([stayAfter as any]).charged,
       "revenue counted once, not per request",
@@ -225,11 +251,19 @@ test.describe("Concurrent invoicing", () => {
       ),
     );
     for (const r of dinnerResults) {
-      expect(r.error, "an unpriced booking may never be invoiced").not.toBeNull();
+      expect(
+        r.error,
+        "an unpriced booking may never be invoiced",
+      ).not.toBeNull();
       expect(r.error!.message).toContain(NO_PRICE_ERROR);
     }
-    expect((await fetchRow(dinnerEmail)).is_invoiced, "still uninvoiced").toBe(false);
-    expect(await invoiceTransitions(dinner.id), "nothing recorded as invoiced").toHaveLength(0);
+    expect((await fetchRow(dinnerEmail)).is_invoiced, "still uninvoiced").toBe(
+      false,
+    );
+    expect(
+      await invoiceTransitions(dinner.id),
+      "nothing recorded as invoiced",
+    ).toHaveLength(0);
 
     // A mismatching amount, sent concurrently, is refused the same way.
     const mismatchResults = await Promise.all(
@@ -242,7 +276,10 @@ test.describe("Concurrent invoicing", () => {
       ),
     );
     for (const r of mismatchResults) {
-      expect(r.error, "a mismatching amount may never be invoiced").not.toBeNull();
+      expect(
+        r.error,
+        "a mismatching amount may never be invoiced",
+      ).not.toBeNull();
       expect(r.error!.message).toContain(AMOUNT_ERROR);
     }
     const dinnerAfter = await fetchRow(dinnerEmail);
@@ -268,7 +305,10 @@ test.describe("Concurrent invoicing", () => {
     );
     for (const r of finalResults) expect(r.error, r.error?.message).toBeNull();
     expect((await fetchRow(dinnerEmail)).is_invoiced).toBe(true);
-    expect(await invoiceTransitions(dinner.id), "invoiced exactly once").toHaveLength(1);
+    expect(
+      await invoiceTransitions(dinner.id),
+      "invoiced exactly once",
+    ).toHaveLength(1);
 
     // --- Only the two bookings exist, each invoiced once ------------------
     const { data: invoiced } = await admin

@@ -24,13 +24,16 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
+const canRun = Boolean(
+  SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY,
+);
 
 const newService = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -52,10 +55,13 @@ async function assignable(
   tenantId: string,
   key: string | null,
 ): Promise<boolean> {
-  const { data, error } = await service.rpc("is_custom_role_key_assignable_by_owner", {
-    _tenant_id: tenantId,
-    _custom_role_key: key,
-  });
+  const { data, error } = await service.rpc(
+    "is_custom_role_key_assignable_by_owner",
+    {
+      _tenant_id: tenantId,
+      _custom_role_key: key,
+    },
+  );
   if (error) throw error;
   return data as boolean;
 }
@@ -76,7 +82,8 @@ describe.runIf(canRun)("custom role definition hierarchy guard", () => {
         password: `Pw!${rand}${stamp}${rand}`,
         email_confirm: true,
       });
-      if (error || !created?.user) throw error ?? new Error(`user creation failed (${prefix})`);
+      if (error || !created?.user)
+        throw error ?? new Error(`user creation failed (${prefix})`);
       return created.user.id;
     }
 
@@ -95,7 +102,8 @@ describe.runIf(canRun)("custom role definition hierarchy guard", () => {
         })
         .select("id")
         .single();
-      if (error || !data) throw error ?? new Error(`tenant insert failed for ${label}`);
+      if (error || !data)
+        throw error ?? new Error(`tenant insert failed for ${label}`);
       return data.id as string;
     }
 
@@ -147,7 +155,10 @@ describe.runIf(canRun)("custom role definition hierarchy guard", () => {
 
   afterAll(async () => {
     if (!seeded) return;
-    await service.from("tenant_users").delete().eq("tenant_id", seeded.tenantId);
+    await service
+      .from("tenant_users")
+      .delete()
+      .eq("tenant_id", seeded.tenantId);
     await service
       .from("role_definitions")
       .delete()
@@ -284,25 +295,37 @@ describe.runIf(canRun)("custom role definition hierarchy guard", () => {
 
   it("assignability accepts a level-20 and a boundary level-10 custom key", async () => {
     if (!seeded) throw new Error("seed missing");
-    expect(await assignable(service, seeded.tenantId, seeded.safeKey)).toBe(true);
-    expect(await assignable(service, seeded.tenantId, seeded.boundaryKey)).toBe(true);
+    expect(await assignable(service, seeded.tenantId, seeded.safeKey)).toBe(
+      true,
+    );
+    expect(await assignable(service, seeded.tenantId, seeded.boundaryKey)).toBe(
+      true,
+    );
   });
 
   it("assignability rejects the reserved owner and superadmin keys", async () => {
     if (!seeded) throw new Error("seed missing");
     expect(await assignable(service, seeded.tenantId, "owner")).toBe(false);
-    expect(await assignable(service, seeded.tenantId, "superadmin")).toBe(false);
+    expect(await assignable(service, seeded.tenantId, "superadmin")).toBe(
+      false,
+    );
   });
 
   it("assignability rejects an unknown key", async () => {
     if (!seeded) throw new Error("seed missing");
-    expect(await assignable(service, seeded.tenantId, `ci_nope_${stamp}`)).toBe(false);
+    expect(await assignable(service, seeded.tenantId, `ci_nope_${stamp}`)).toBe(
+      false,
+    );
   });
 
   it("assignability rejects a key that only exists on another tenant", async () => {
     if (!seeded) throw new Error("seed missing");
-    expect(await assignable(service, seeded.tenantId, seeded.otherTenantKey)).toBe(false);
-    expect(await assignable(service, seeded.otherTenantId, seeded.otherTenantKey)).toBe(true);
+    expect(
+      await assignable(service, seeded.tenantId, seeded.otherTenantKey),
+    ).toBe(false);
+    expect(
+      await assignable(service, seeded.otherTenantId, seeded.otherTenantKey),
+    ).toBe(true);
   });
 
   // ---------- end-to-end effect on tenant_users ----------

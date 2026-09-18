@@ -12,7 +12,7 @@ const VALID_SITE_ROLES = ["admin", "staff"];
 function canGrantRole(
   callerRole: string,
   targetRole: string,
-  isSysAdmin: boolean
+  isSysAdmin: boolean,
 ): boolean {
   if (PRIVILEGED_ROLES.includes(targetRole)) {
     return isSysAdmin || callerRole === "superadmin";
@@ -109,7 +109,8 @@ describe("Privilege Escalation - Security Regression Tests", () => {
     });
 
     it("tenant IDs must be valid UUIDs", () => {
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       expect(uuidRegex.test("550e8400-e29b-41d4-a716-446655440000")).toBe(true);
       expect(uuidRegex.test("not-a-uuid")).toBe(false);
       expect(uuidRegex.test("'; DROP TABLE tenants;--")).toBe(false);

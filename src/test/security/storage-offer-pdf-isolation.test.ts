@@ -23,7 +23,8 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
  * refuses each of these probes.
  */
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || import.meta.env?.VITE_SUPABASE_URL;
+const SUPABASE_URL =
+  process.env.VITE_SUPABASE_URL || import.meta.env?.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
   import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -57,7 +58,7 @@ let anon: SupabaseClient;
 beforeAll(() => {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error(
-      "VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY must be set to run storage isolation tests"
+      "VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY must be set to run storage isolation tests",
     );
   }
   anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -75,7 +76,7 @@ beforeAll(() => {
  */
 function assertListIsEmptyOrDenied(
   result: { data: unknown; error: unknown },
-  context: string
+  context: string,
 ) {
   const { data, error } = result as {
     data: unknown[] | null;
@@ -92,7 +93,7 @@ function assertListIsEmptyOrDenied(
   expect(Array.isArray(data), `${context}: data must be an array`).toBe(true);
   expect(
     (data ?? []).length,
-    `${context}: anon should not see any entries (got ${(data ?? []).length})`
+    `${context}: anon should not see any entries (got ${(data ?? []).length})`,
   ).toBe(0);
 }
 
@@ -112,7 +113,7 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
           limit: 100,
         });
         assertListIsEmptyOrDenied(result, `tenant-private/${tenantId}`);
-      }
+      },
     );
 
     it.each(PROBE_TENANT_IDS)(
@@ -122,7 +123,7 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
           .from(PRIVATE_BUCKET)
           .list(`${tenantId}/offers`, { limit: 100 });
         assertListIsEmptyOrDenied(result, `tenant-private/${tenantId}/offers`);
-      }
+      },
     );
 
     it("anon cannot list a per-user offer folder in tenant-private", async () => {
@@ -133,7 +134,7 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
             .list(`${tid}/offers/${uid}`, { limit: 100 });
           assertListIsEmptyOrDenied(
             result,
-            `tenant-private/${tid}/offers/${uid}`
+            `tenant-private/${tid}/offers/${uid}`,
           );
         }
       }
@@ -169,7 +170,10 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
       let lastError: { message?: string } | null = null;
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), PER_REQUEST_TIMEOUT_MS);
+        const timer = setTimeout(
+          () => controller.abort(),
+          PER_REQUEST_TIMEOUT_MS,
+        );
         try {
           // The supabase-js storage client does not expose AbortSignal directly,
           // so race the download against the abort timer.
@@ -180,18 +184,22 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
             downloadPromise.then((r) => ({ kind: "ok" as const, r })),
             new Promise<{ kind: "timeout" }>((resolve) => {
               controller.signal.addEventListener("abort", () =>
-                resolve({ kind: "timeout" })
+                resolve({ kind: "timeout" }),
               );
             }),
           ]);
           if (result.kind === "timeout") {
-            lastError = { message: `request aborted after ${PER_REQUEST_TIMEOUT_MS}ms` };
+            lastError = {
+              message: `request aborted after ${PER_REQUEST_TIMEOUT_MS}ms`,
+            };
             // Retry on timeout — transient network blip should not flake the test.
             continue;
           }
           return { ...result.r, timedOut: false } as DownloadResult;
         } catch (err) {
-          lastError = { message: err instanceof Error ? err.message : String(err) };
+          lastError = {
+            message: err instanceof Error ? err.message : String(err),
+          };
         } finally {
           clearTimeout(timer);
         }
@@ -216,7 +224,10 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
         }
 
         const results = await Promise.all(
-          paths.map(async (path) => ({ path, ...(await downloadWithTimeout(path)) }))
+          paths.map(async (path) => ({
+            path,
+            ...(await downloadWithTimeout(path)),
+          })),
         );
 
         for (const { path, data, error, timedOut } of results) {
@@ -224,7 +235,7 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
           if (data) {
             expect(
               data.size,
-              `tenant-private/${path}: anon should not receive non-empty payload`
+              `tenant-private/${path}: anon should not receive non-empty payload`,
             ).toBe(0);
           }
           // If no data and we did not time out, we expect an explicit error
@@ -233,11 +244,11 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
           if (!data && !timedOut) {
             expect(
               error,
-              `tenant-private/${path}: expected an error when no data returned`
+              `tenant-private/${path}: expected an error when no data returned`,
             ).toBeTruthy();
           }
         }
-      }
+      },
     );
 
     it("anon cannot create a signed URL for tenant-private offer PDFs", async () => {
@@ -252,7 +263,7 @@ describe("Storage isolation: anon cannot reach offer PDFs in tenant-private", ()
 
           expect(
             data?.signedUrl,
-            `tenant-private/${path}: anon must not receive a signed URL`
+            `tenant-private/${path}: anon must not receive a signed URL`,
           ).toBeFalsy();
           expect(error).toBeTruthy();
         }
@@ -280,7 +291,7 @@ describe("Storage isolation: anon cannot enumerate cross-tenant paths in tenant-
         limit: 100,
       });
       assertListIsEmptyOrDenied(result, `tenant-assets/${tenantId}`);
-    }
+    },
   );
 
   it("anon search() in tenant-assets returns no enumerable results", async () => {

@@ -60,7 +60,10 @@ function forward(event: RejectedStoragePathEvent): void {
   // Prefer sendBeacon when the page is unloading so the event still
   // ships during navigations. Fall back to fetch with keepalive.
   try {
-    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+    if (
+      typeof navigator !== "undefined" &&
+      typeof navigator.sendBeacon === "function"
+    ) {
       const blob = new Blob([body], { type: "application/json" });
       if (navigator.sendBeacon(ENDPOINT, blob)) return;
     }
@@ -101,7 +104,7 @@ export function installStorageRejectionTelemetry(): void {
   setRejectedStoragePathLogger((event) => {
     // Always keep the local console line so dev / Sentry breadcrumbs
     // still see the rejection.
-    // eslint-disable-next-line no-console
+
     console.warn("[security] storage-path rejected", event);
     if (!ENDPOINT || !ANON_KEY) return;
     if (!shouldForward()) return;

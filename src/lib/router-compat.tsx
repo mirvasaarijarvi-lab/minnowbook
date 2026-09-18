@@ -32,14 +32,20 @@ import {
 
 // ---------- shared URL parsing ----------
 
-function parseTo(to: string): { pathname: string; search?: Record<string, string>; hash?: string } {
+function parseTo(to: string): {
+  pathname: string;
+  search?: Record<string, string>;
+  hash?: string;
+} {
   const [beforeHash, hashStr] = (to ?? "").split("#");
   const [pathname, searchStr] = beforeHash.split("?");
   return {
     // react-router keeps the current path for search-only ("?a=1") and
     // hash-only ("#section") targets; TanStack's "." means current route.
     pathname: pathname || ".",
-    search: searchStr ? Object.fromEntries(new URLSearchParams(searchStr)) : undefined,
+    search: searchStr
+      ? Object.fromEntries(new URLSearchParams(searchStr))
+      : undefined,
     hash: hashStr || undefined,
   };
 }
@@ -56,20 +62,23 @@ type NavigateFn = {
 export function useNavigate(): NavigateFn {
   const tsNav = tsNavigate();
   const router = useRouter();
-  return useCallback((to: string | number, options?: NavigateOptions) => {
-    if (typeof to === "number") {
-      router.history.go(to);
-      return;
-    }
-    const { pathname, search, hash } = parseTo(to);
-    tsNav({
-      to: pathname,
-      search: search as never,
-      hash,
-      state: options?.state as never,
-      replace: options?.replace,
-    });
-  }, [tsNav, router]) as NavigateFn;
+  return useCallback(
+    (to: string | number, options?: NavigateOptions) => {
+      if (typeof to === "number") {
+        router.history.go(to);
+        return;
+      }
+      const { pathname, search, hash } = parseTo(to);
+      tsNav({
+        to: pathname,
+        search: search as never,
+        hash,
+        state: options?.state as never,
+        replace: options?.replace,
+      });
+    },
+    [tsNav, router],
+  ) as NavigateFn;
 }
 
 // ---------- useLocation ----------
@@ -90,7 +99,12 @@ export function useLocation() {
 
 // ---------- useParams ----------
 
-export function useParams<T extends Record<string, string | undefined> = Record<string, string | undefined>>(): T {
+export function useParams<
+  T extends Record<string, string | undefined> = Record<
+    string,
+    string | undefined
+  >,
+>(): T {
   const shimParams = useContext(ShimParamsContext);
   if (shimParams) return shimParams as T;
   return tsParams({ strict: false } as never) as T;
@@ -98,14 +112,29 @@ export function useParams<T extends Record<string, string | undefined> = Record<
 
 // ---------- useSearchParams (@/lib/router-compat compat) ----------
 
-export function useSearchParams(): [URLSearchParams, (init: URLSearchParams | Record<string, string> | ((prev: URLSearchParams) => URLSearchParams), opts?: { replace?: boolean }) => void] {
+export function useSearchParams(): [
+  URLSearchParams,
+  (
+    init:
+      | URLSearchParams
+      | Record<string, string>
+      | ((prev: URLSearchParams) => URLSearchParams),
+    opts?: { replace?: boolean },
+  ) => void,
+] {
   const loc = tsLocation();
   const nav = tsNavigate();
   const router = useRouter();
-  const params = useMemo(() => new URLSearchParams(loc.searchStr ?? ""), [loc.searchStr]);
+  const params = useMemo(
+    () => new URLSearchParams(loc.searchStr ?? ""),
+    [loc.searchStr],
+  );
   const setParams = useCallback(
     (
-      init: URLSearchParams | Record<string, string> | ((prev: URLSearchParams) => URLSearchParams),
+      init:
+        | URLSearchParams
+        | Record<string, string>
+        | ((prev: URLSearchParams) => URLSearchParams),
       opts?: { replace?: boolean },
     ) => {
       // Functional updaters read the router's live location, not the render
@@ -120,8 +149,14 @@ export function useSearchParams(): [URLSearchParams, (init: URLSearchParams | Re
             ? init
             : new URLSearchParams(init);
       const searchObj: Record<string, string> = {};
-      next.forEach((v, k) => { searchObj[k] = v; });
-      nav({ to: live.pathname, search: searchObj as never, replace: opts?.replace });
+      next.forEach((v, k) => {
+        searchObj[k] = v;
+      });
+      nav({
+        to: live.pathname,
+        search: searchObj as never,
+        replace: opts?.replace,
+      });
     },
     [nav, router],
   );
@@ -159,9 +194,25 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
 
 // ---------- Navigate ----------
 
-export function Navigate({ to, replace, state }: { to: string; replace?: boolean; state?: unknown }) {
+export function Navigate({
+  to,
+  replace,
+  state,
+}: {
+  to: string;
+  replace?: boolean;
+  state?: unknown;
+}) {
   const { pathname, search, hash } = parseTo(to);
-  return <TSNavigate to={pathname as never} search={search as never} hash={hash} state={state as never} replace={replace} />;
+  return (
+    <TSNavigate
+      to={pathname as never}
+      search={search as never}
+      hash={hash}
+      state={state as never}
+      replace={replace}
+    />
+  );
 }
 
 // ---------- Outlet ----------
@@ -170,39 +221,54 @@ export const Outlet = TSOutlet;
 
 // ---------- NavLink ----------
 
-type NavLinkRenderState = { isActive: boolean; isPending: boolean; isTransitioning: boolean };
+type NavLinkRenderState = {
+  isActive: boolean;
+  isPending: boolean;
+  isTransitioning: boolean;
+};
 
-export type NavLinkProps = Omit<LinkProps, "className" | "style" | "children"> & {
+export type NavLinkProps = Omit<
+  LinkProps,
+  "className" | "style" | "children"
+> & {
   className?: string | ((state: NavLinkRenderState) => string);
-  style?: React.CSSProperties | ((state: NavLinkRenderState) => React.CSSProperties | undefined);
+  style?:
+    | React.CSSProperties
+    | ((state: NavLinkRenderState) => React.CSSProperties | undefined);
   children?: ReactNode | ((state: NavLinkRenderState) => ReactNode);
   end?: boolean;
 };
 
-export const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(function NavLink(
-  { className, style, children, end, to, ...rest },
-  ref,
-) {
-  const loc = tsLocation();
-  const target = parseTo(to).pathname;
-  const current = loc.pathname;
-  const isActive = end
-    ? current === target
-    : current === target || current.startsWith(target.endsWith("/") ? target : `${target}/`);
-  const state: NavLinkRenderState = { isActive, isPending: false, isTransitioning: false };
-  return (
-    <Link
-      ref={ref}
-      to={to}
-      className={typeof className === "function" ? className(state) : className}
-      style={typeof style === "function" ? style(state) : style}
-      aria-current={isActive ? "page" : undefined}
-      {...(rest as Record<string, unknown>)}
-    >
-      {typeof children === "function" ? children(state) : children}
-    </Link>
-  );
-});
+export const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(
+  function NavLink({ className, style, children, end, to, ...rest }, ref) {
+    const loc = tsLocation();
+    const target = parseTo(to).pathname;
+    const current = loc.pathname;
+    const isActive = end
+      ? current === target
+      : current === target ||
+        current.startsWith(target.endsWith("/") ? target : `${target}/`);
+    const state: NavLinkRenderState = {
+      isActive,
+      isPending: false,
+      isTransitioning: false,
+    };
+    return (
+      <Link
+        ref={ref}
+        to={to}
+        className={
+          typeof className === "function" ? className(state) : className
+        }
+        style={typeof style === "function" ? style(state) : style}
+        aria-current={isActive ? "page" : undefined}
+        {...(rest as Record<string, unknown>)}
+      >
+        {typeof children === "function" ? children(state) : children}
+      </Link>
+    );
+  },
+);
 
 // ---------- optional location (safe outside a router) ----------
 // Some hooks watch the current route but are also rendered in isolation
@@ -258,7 +324,9 @@ export function MemoryRouter({
   }, []);
 
   return (
-    <RouterContextProvider router={router as never}>{children}</RouterContextProvider>
+    <RouterContextProvider router={router as never}>
+      {children}
+    </RouterContextProvider>
   );
 }
 
@@ -307,21 +375,32 @@ function matchPath(
 
 export function Routes({ children }: { children?: ReactNode }) {
   const { pathname } = useLocation();
-  let best: { element: ReactNode; params: Record<string, string>; score: number } | null = null;
+  let best: {
+    element: ReactNode;
+    params: Record<string, string>;
+    score: number;
+  } | null = null;
 
   Children.forEach(children, (child) => {
     if (!isValidElement(child)) return;
     const props = child.props as ShimRouteProps;
-    const pattern = props.index ? "/" : props.path ?? "/";
+    const pattern = props.index ? "/" : (props.path ?? "/");
     const match = matchPath(pattern, pathname);
     if (!match) return;
     if (!best || match.score > best.score) {
-      best = { element: props.element ?? null, params: match.params, score: match.score };
+      best = {
+        element: props.element ?? null,
+        params: match.params,
+        score: match.score,
+      };
     }
   });
 
   if (!best) return null;
-  const matched = best as { element: ReactNode; params: Record<string, string> };
+  const matched = best as {
+    element: ReactNode;
+    params: Record<string, string>;
+  };
   return (
     <ShimParamsContext.Provider value={matched.params}>
       {matched.element}

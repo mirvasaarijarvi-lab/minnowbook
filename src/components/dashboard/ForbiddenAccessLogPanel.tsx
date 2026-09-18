@@ -149,7 +149,11 @@ const ForbiddenAccessLogPanel = () => {
         .order("name", { ascending: true })
         .limit(500);
       if (error) throw error;
-      return ((data as any[]) ?? []) as { id: string; name: string; slug: string }[];
+      return ((data as any[]) ?? []) as {
+        id: string;
+        name: string;
+        slug: string;
+      }[];
     },
     enabled: isSystemAdmin,
     staleTime: 5 * 60_000,
@@ -168,10 +172,9 @@ const ForbiddenAccessLogPanel = () => {
     queryFn: async () => {
       let query = supabase
         .from("audit_log")
-        .select(
-          "id, created_at, tenant_id, user_id, summary, new_data",
-          { count: "exact" },
-        )
+        .select("id, created_at, tenant_id, user_id, summary, new_data", {
+          count: "exact",
+        })
         .eq("action", "forbidden_access")
         .order("created_at", { ascending: false });
 
@@ -186,10 +189,7 @@ const ForbiddenAccessLogPanel = () => {
         // match case-insensitively. Quote-escape any percent signs the
         // user typed so they don't act as wildcards in unexpected ways.
         const escaped = trimmedPath.replace(/[%_\\\\]/g, (m) => `\\\\${m}`);
-        query = query.ilike(
-          "new_data->>attempted_path",
-          `%${escaped}%`,
-        );
+        query = query.ilike("new_data->>attempted_path", `%${escaped}%`);
       }
       if (dateFrom) {
         query = query.gte("created_at", startOfDay(dateFrom).toISOString());
@@ -277,9 +277,7 @@ const ForbiddenAccessLogPanel = () => {
             <Input
               id="fa-user-id"
               value={userIdFilter}
-              onChange={(e) =>
-                onFilterChange(setUserIdFilter)(e.target.value)
-              }
+              onChange={(e) => onFilterChange(setUserIdFilter)(e.target.value)}
               placeholder="xxxxxxxx-xxxx-…"
               className={cn(
                 "h-9 text-xs font-mono",
@@ -291,10 +289,7 @@ const ForbiddenAccessLogPanel = () => {
               }
             />
             {trimmedUserId && !userIdValid && (
-              <p
-                id="fa-user-id-err"
-                className="text-[11px] text-destructive"
-              >
+              <p id="fa-user-id-err" className="text-[11px] text-destructive">
                 Enter a full UUID or clear the field.
               </p>
             )}
@@ -331,9 +326,7 @@ const ForbiddenAccessLogPanel = () => {
               <Input
                 id="fa-path"
                 value={pathFilter}
-                onChange={(e) =>
-                  onFilterChange(setPathFilter)(e.target.value)
-                }
+                onChange={(e) => onFilterChange(setPathFilter)(e.target.value)}
                 placeholder="/superadmin"
                 className="h-9 text-xs pl-7"
               />
@@ -419,10 +412,7 @@ const ForbiddenAccessLogPanel = () => {
         ) : isLoading ? (
           <div className="space-y-2">
             {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-10 rounded-md bg-muted animate-pulse"
-              />
+              <div key={i} className="h-10 rounded-md bg-muted animate-pulse" />
             ))}
           </div>
         ) : rows.length === 0 ? (
@@ -508,7 +498,9 @@ const ForbiddenAccessLogPanel = () => {
             <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
               <span>
                 Showing {page * PAGE_SIZE + 1}–{page * PAGE_SIZE + rows.length}
-                {totalCount !== null ? ` of ${totalCount.toLocaleString()}` : ""}
+                {totalCount !== null
+                  ? ` of ${totalCount.toLocaleString()}`
+                  : ""}
               </span>
               <div className="flex items-center gap-1">
                 <Button

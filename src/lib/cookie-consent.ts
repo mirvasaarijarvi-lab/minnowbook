@@ -71,7 +71,9 @@ export function readConsent(): ConsentRecord | null {
   }
 }
 
-export function writeConsent(categories: Omit<ConsentCategories, "necessary">): ConsentRecord {
+export function writeConsent(
+  categories: Omit<ConsentCategories, "necessary">,
+): ConsentRecord {
   const record: ConsentRecord = {
     version: 1,
     categories: {

@@ -112,7 +112,10 @@ The MimmoBook Team`;
 
   const copyPlainText = () => {
     navigator.clipboard.writeText(emailBody);
-    toast({ title: "Copied", description: "Plain text email copied to clipboard" });
+    toast({
+      title: "Copied",
+      description: "Plain text email copied to clipboard",
+    });
   };
 
   const copyHtml = () => {
@@ -139,7 +142,11 @@ The MimmoBook Team`;
             onClick={() => setShowPreview(!showPreview)}
             className="gap-1.5 text-xs"
           >
-            {showPreview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            {showPreview ? (
+              <EyeOff className="h-3.5 w-3.5" />
+            ) : (
+              <Eye className="h-3.5 w-3.5" />
+            )}
             {showPreview ? "Hide" : "Preview"}
           </Button>
         </div>
@@ -156,13 +163,28 @@ The MimmoBook Team`;
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={copySubject} className="gap-1.5 text-xs">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={copySubject}
+            className="gap-1.5 text-xs"
+          >
             <Copy className="h-3 w-3" /> Subject
           </Button>
-          <Button variant="outline" size="sm" onClick={copyPlainText} className="gap-1.5 text-xs">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={copyPlainText}
+            className="gap-1.5 text-xs"
+          >
             <Copy className="h-3 w-3" /> Plain text
           </Button>
-          <Button variant="outline" size="sm" onClick={copyHtml} className="gap-1.5 text-xs">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={copyHtml}
+            className="gap-1.5 text-xs"
+          >
             <Copy className="h-3 w-3" /> HTML
           </Button>
         </div>
@@ -171,7 +193,9 @@ The MimmoBook Team`;
           <div className="mt-4 border border-border rounded-lg overflow-hidden">
             <div
               className="bg-white"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlEmail) }}
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(htmlEmail),
+              }}
             />
           </div>
         )}

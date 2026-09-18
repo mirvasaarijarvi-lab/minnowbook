@@ -26,7 +26,8 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY ??
@@ -85,7 +86,10 @@ async function createOwner(label: string): Promise<string> {
   return data.user.id;
 }
 
-async function createTenant(ownerUserId: string, label: string): Promise<string> {
+async function createTenant(
+  ownerUserId: string,
+  label: string,
+): Promise<string> {
   const tenantId = randomUUID();
   const shortId = tenantId.slice(0, 8);
   const { error } = await ctx.service.from("tenants").insert({
@@ -135,184 +139,251 @@ const buildBase = () => ({
   status: "pending",
 });
 
-describe.runIf(canRun)("anon reservation insert — malformed discount payloads (live)", () => {
-  beforeAll(async () => {
-    ctx.service = newService();
-    ctx.ownerId = await createOwner("primary");
-    ctx.tenantId = await createTenant(ctx.ownerId, "primary");
-    ctx.otherOwnerId = await createOwner("other");
-    ctx.otherTenantId = await createTenant(ctx.otherOwnerId, "other");
-    ctx.ownDiscountId = await createDiscount(ctx.tenantId, `OWN${randomUUID().slice(0, 6).toUpperCase()}`);
-    ctx.otherDiscountId = await createDiscount(
-      ctx.otherTenantId,
-      `OTH${randomUUID().slice(0, 6).toUpperCase()}`,
-    );
-  }, 60_000);
-
-  afterAll(async () => {
-    if (!ctx.service) return;
-    const swallow = async (p: PromiseLike<unknown>) => {
-      try { await p; } catch { /* best-effort */ }
-    };
-    if (ctx.cleanupReservationIds.length) {
-      await swallow(
-        ctx.service.from("reservations").delete().in("id", ctx.cleanupReservationIds),
+describe.runIf(canRun)(
+  "anon reservation insert — malformed discount payloads (live)",
+  () => {
+    beforeAll(async () => {
+      ctx.service = newService();
+      ctx.ownerId = await createOwner("primary");
+      ctx.tenantId = await createTenant(ctx.ownerId, "primary");
+      ctx.otherOwnerId = await createOwner("other");
+      ctx.otherTenantId = await createTenant(ctx.otherOwnerId, "other");
+      ctx.ownDiscountId = await createDiscount(
+        ctx.tenantId,
+        `OWN${randomUUID().slice(0, 6).toUpperCase()}`,
       );
-    }
-    for (const t of ctx.cleanupTenants) {
-      await swallow(ctx.service.from("reservations").delete().eq("tenant_id", t));
-      await swallow(ctx.service.from("discount_codes").delete().eq("tenant_id", t));
-      await swallow(ctx.service.from("tenant_users").delete().eq("tenant_id", t));
-      await swallow(ctx.service.from("tenants").delete().eq("id", t));
-    }
-    for (const u of ctx.cleanupUsers) {
-      await swallow(ctx.service.auth.admin.deleteUser(u));
-    }
-  }, 60_000);
-
-  // Helper: an insert must either error, OR the returned row must have
-  // all three discount columns forced to NULL (defense-in-depth: if the
-  // policy is later relaxed to WITH CHECK-scrub instead of reject, the
-  // invariant still holds — no discount ever attaches for anon).
-  async function assertAnonInsertBlocksDiscount(
-    payload: Record<string, unknown>,
-    label: string,
-  ) {
-    const anon = newAnon();
-    const { data, error } = await anon
-      .from("reservations")
-      .insert({ ...buildBase(), ...payload })
-      .select("id, discount_code_id, discount_type, discount_value");
-
-    if (error) {
-      // Rejection path — nothing more to check.
-      return;
-    }
-    // Silent-scrub path: row was inserted but discount fields must be NULL.
-    expect(data, `${label}: expected rejection or scrubbed row`).toBeTruthy();
-    expect(data!.length, `${label}: exactly one row`).toBe(1);
-    const row = data![0];
-    expect(row.discount_code_id, `${label}: discount_code_id must be NULL`).toBeNull();
-    expect(row.discount_type, `${label}: discount_type must be NULL`).toBeNull();
-    expect(row.discount_value, `${label}: discount_value must be NULL`).toBeNull();
-    ctx.cleanupReservationIds.push(row.id);
-  }
-
-  // ─── Control ───────────────────────────────────────────────────────
-  // Anon has no SELECT policy on reservations, so the insert must not ask
-  // for a representation; read the row back with the service role.
-  it("clean payload with no discount fields is accepted", async () => {
-    const anon = newAnon();
-    const payload = buildBase();
-    const { error } = await anon.from("reservations").insert(payload);
-    expect(error).toBeNull();
-
-    const { data } = await ctx.service
-      .from("reservations")
-      .select("id, discount_code_id, discount_type, discount_value")
-      .eq("tenant_id", payload.tenant_id)
-      .eq("guest_name", payload.guest_name)
-      .single();
-    expect(data?.discount_code_id).toBeNull();
-    expect(data?.discount_type).toBeNull();
-    expect(data?.discount_value).toBeNull();
-    if (data?.id) ctx.cleanupReservationIds.push(data.id);
-  });
-
-  // ─── Single-field partial payloads ─────────────────────────────────
-  describe("single discount field", () => {
-    it.each([
-      ["discount_code_id (own tenant)", { discount_code_id: () => ctx.ownDiscountId }],
-      ["discount_code_id (other tenant)", { discount_code_id: () => ctx.otherDiscountId }],
-      ["discount_code_id (well-formed but non-existent)", { discount_code_id: () => randomUUID() }],
-      ["discount_type only", { discount_type: () => "percent" }],
-      ["discount_value only", { discount_value: () => 10 }],
-    ] as const)("rejects/scrubs %s", async (label, spec) => {
-      const payload = Object.fromEntries(
-        Object.entries(spec).map(([k, v]) => [k, (v as () => unknown)()]),
+      ctx.otherDiscountId = await createDiscount(
+        ctx.otherTenantId,
+        `OTH${randomUUID().slice(0, 6).toUpperCase()}`,
       );
-      await assertAnonInsertBlocksDiscount(payload, label);
-    });
-  });
+    }, 60_000);
 
-  // ─── Two-field partial payloads (every pair) ───────────────────────
-  describe("two discount fields", () => {
-    it.each([
-      ["code_id + type", () => ({ discount_code_id: ctx.ownDiscountId, discount_type: "percent" })],
-      ["code_id + value", () => ({ discount_code_id: ctx.ownDiscountId, discount_value: 10 })],
-      ["type + value", () => ({ discount_type: "fixed", discount_value: 5 })],
-    ] as const)("rejects/scrubs %s", async (label, build) => {
-      await assertAnonInsertBlocksDiscount(build(), label);
-    });
-  });
+    afterAll(async () => {
+      if (!ctx.service) return;
+      const swallow = async (p: PromiseLike<unknown>) => {
+        try {
+          await p;
+        } catch {
+          /* best-effort */
+        }
+      };
+      if (ctx.cleanupReservationIds.length) {
+        await swallow(
+          ctx.service
+            .from("reservations")
+            .delete()
+            .in("id", ctx.cleanupReservationIds),
+        );
+      }
+      for (const t of ctx.cleanupTenants) {
+        await swallow(
+          ctx.service.from("reservations").delete().eq("tenant_id", t),
+        );
+        await swallow(
+          ctx.service.from("discount_codes").delete().eq("tenant_id", t),
+        );
+        await swallow(
+          ctx.service.from("tenant_users").delete().eq("tenant_id", t),
+        );
+        await swallow(ctx.service.from("tenants").delete().eq("id", t));
+      }
+      for (const u of ctx.cleanupUsers) {
+        await swallow(ctx.service.auth.admin.deleteUser(u));
+      }
+    }, 60_000);
 
-  // ─── Full triple with conflicting values ───────────────────────────
-  describe("all three fields with conflicts", () => {
-    it("type says percent but value is fixed-shaped", async () => {
-      await assertAnonInsertBlocksDiscount(
-        { discount_code_id: ctx.ownDiscountId, discount_type: "percent", discount_value: 250 },
-        "percent+250",
-      );
-    });
-    it("type says fixed but value is percent-shaped", async () => {
-      await assertAnonInsertBlocksDiscount(
-        { discount_code_id: ctx.ownDiscountId, discount_type: "fixed", discount_value: 0.05 },
-        "fixed+0.05",
-      );
-    });
-    it("code_id from other tenant with plausible type/value", async () => {
-      await assertAnonInsertBlocksDiscount(
-        { discount_code_id: ctx.otherDiscountId, discount_type: "percent", discount_value: 10 },
-        "cross-tenant triple",
-      );
-    });
-  });
-
-  // ─── Malformed discount_code_id shapes ─────────────────────────────
-  describe("malformed discount_code_id", () => {
-    it.each([
-      ["non-uuid string", "not-a-uuid"],
-      ["empty string", ""],
-      ["all-zero uuid", "00000000-0000-0000-0000-000000000000"],
-      ["all-f uuid", "ffffffff-ffff-ffff-ffff-ffffffffffff"],
-    ])("rejects/scrubs %s", async (label, id) => {
-      // Non-UUID strings should trigger a type error at PostgREST/PG level;
-      // valid-shape sentinels should either be rejected by policy or
-      // silently scrubbed by our defense-in-depth helper.
+    // Helper: an insert must either error, OR the returned row must have
+    // all three discount columns forced to NULL (defense-in-depth: if the
+    // policy is later relaxed to WITH CHECK-scrub instead of reject, the
+    // invariant still holds — no discount ever attaches for anon).
+    async function assertAnonInsertBlocksDiscount(
+      payload: Record<string, unknown>,
+      label: string,
+    ) {
       const anon = newAnon();
       const { data, error } = await anon
         .from("reservations")
-        .insert({ ...buildBase(), discount_code_id: id })
+        .insert({ ...buildBase(), ...payload })
         .select("id, discount_code_id, discount_type, discount_value");
-      if (error) return;
-      // If it somehow inserted, discount_code_id MUST be NULL.
-      expect(data, `${label}: expected row scrub if not rejected`).toBeTruthy();
-      expect(data![0].discount_code_id, `${label}: must be NULL`).toBeNull();
-      ctx.cleanupReservationIds.push(data![0].id);
-    });
-  });
 
-  // ─── Hostile discount_value values ─────────────────────────────────
-  describe("hostile discount_value", () => {
-    it.each([
-      ["negative", -50],
-      ["zero", 0],
-      ["absurdly large", 9_999_999],
-      ["fractional percent overflow", 1000.5],
-    ])("rejects/scrubs %s", async (label, value) => {
-      await assertAnonInsertBlocksDiscount({ discount_value: value }, `value=${label}`);
-    });
-  });
+      if (error) {
+        // Rejection path — nothing more to check.
+        return;
+      }
+      // Silent-scrub path: row was inserted but discount fields must be NULL.
+      expect(data, `${label}: expected rejection or scrubbed row`).toBeTruthy();
+      expect(data!.length, `${label}: exactly one row`).toBe(1);
+      const row = data![0];
+      expect(
+        row.discount_code_id,
+        `${label}: discount_code_id must be NULL`,
+      ).toBeNull();
+      expect(
+        row.discount_type,
+        `${label}: discount_type must be NULL`,
+      ).toBeNull();
+      expect(
+        row.discount_value,
+        `${label}: discount_value must be NULL`,
+      ).toBeNull();
+      ctx.cleanupReservationIds.push(row.id);
+    }
 
-  // ─── Unknown discount_type strings ─────────────────────────────────
-  describe("unknown discount_type", () => {
-    it.each([
-      ["empty string", ""],
-      ["random word", "freebie"],
-      ["sql-ish", "'; DROP TABLE reservations; --"],
-      ["mixed case", "PeRcEnT"],
-    ])("rejects/scrubs %s", async (label, type) => {
-      await assertAnonInsertBlocksDiscount({ discount_type: type }, `type=${label}`);
+    // ─── Control ───────────────────────────────────────────────────────
+    // Anon has no SELECT policy on reservations, so the insert must not ask
+    // for a representation; read the row back with the service role.
+    it("clean payload with no discount fields is accepted", async () => {
+      const anon = newAnon();
+      const payload = buildBase();
+      const { error } = await anon.from("reservations").insert(payload);
+      expect(error).toBeNull();
+
+      const { data } = await ctx.service
+        .from("reservations")
+        .select("id, discount_code_id, discount_type, discount_value")
+        .eq("tenant_id", payload.tenant_id)
+        .eq("guest_name", payload.guest_name)
+        .single();
+      expect(data?.discount_code_id).toBeNull();
+      expect(data?.discount_type).toBeNull();
+      expect(data?.discount_value).toBeNull();
+      if (data?.id) ctx.cleanupReservationIds.push(data.id);
     });
-  });
-});
+
+    // ─── Single-field partial payloads ─────────────────────────────────
+    describe("single discount field", () => {
+      it.each([
+        [
+          "discount_code_id (own tenant)",
+          { discount_code_id: () => ctx.ownDiscountId },
+        ],
+        [
+          "discount_code_id (other tenant)",
+          { discount_code_id: () => ctx.otherDiscountId },
+        ],
+        [
+          "discount_code_id (well-formed but non-existent)",
+          { discount_code_id: () => randomUUID() },
+        ],
+        ["discount_type only", { discount_type: () => "percent" }],
+        ["discount_value only", { discount_value: () => 10 }],
+      ] as const)("rejects/scrubs %s", async (label, spec) => {
+        const payload = Object.fromEntries(
+          Object.entries(spec).map(([k, v]) => [k, (v as () => unknown)()]),
+        );
+        await assertAnonInsertBlocksDiscount(payload, label);
+      });
+    });
+
+    // ─── Two-field partial payloads (every pair) ───────────────────────
+    describe("two discount fields", () => {
+      it.each([
+        [
+          "code_id + type",
+          () => ({
+            discount_code_id: ctx.ownDiscountId,
+            discount_type: "percent",
+          }),
+        ],
+        [
+          "code_id + value",
+          () => ({ discount_code_id: ctx.ownDiscountId, discount_value: 10 }),
+        ],
+        ["type + value", () => ({ discount_type: "fixed", discount_value: 5 })],
+      ] as const)("rejects/scrubs %s", async (label, build) => {
+        await assertAnonInsertBlocksDiscount(build(), label);
+      });
+    });
+
+    // ─── Full triple with conflicting values ───────────────────────────
+    describe("all three fields with conflicts", () => {
+      it("type says percent but value is fixed-shaped", async () => {
+        await assertAnonInsertBlocksDiscount(
+          {
+            discount_code_id: ctx.ownDiscountId,
+            discount_type: "percent",
+            discount_value: 250,
+          },
+          "percent+250",
+        );
+      });
+      it("type says fixed but value is percent-shaped", async () => {
+        await assertAnonInsertBlocksDiscount(
+          {
+            discount_code_id: ctx.ownDiscountId,
+            discount_type: "fixed",
+            discount_value: 0.05,
+          },
+          "fixed+0.05",
+        );
+      });
+      it("code_id from other tenant with plausible type/value", async () => {
+        await assertAnonInsertBlocksDiscount(
+          {
+            discount_code_id: ctx.otherDiscountId,
+            discount_type: "percent",
+            discount_value: 10,
+          },
+          "cross-tenant triple",
+        );
+      });
+    });
+
+    // ─── Malformed discount_code_id shapes ─────────────────────────────
+    describe("malformed discount_code_id", () => {
+      it.each([
+        ["non-uuid string", "not-a-uuid"],
+        ["empty string", ""],
+        ["all-zero uuid", "00000000-0000-0000-0000-000000000000"],
+        ["all-f uuid", "ffffffff-ffff-ffff-ffff-ffffffffffff"],
+      ])("rejects/scrubs %s", async (label, id) => {
+        // Non-UUID strings should trigger a type error at PostgREST/PG level;
+        // valid-shape sentinels should either be rejected by policy or
+        // silently scrubbed by our defense-in-depth helper.
+        const anon = newAnon();
+        const { data, error } = await anon
+          .from("reservations")
+          .insert({ ...buildBase(), discount_code_id: id })
+          .select("id, discount_code_id, discount_type, discount_value");
+        if (error) return;
+        // If it somehow inserted, discount_code_id MUST be NULL.
+        expect(
+          data,
+          `${label}: expected row scrub if not rejected`,
+        ).toBeTruthy();
+        expect(data![0].discount_code_id, `${label}: must be NULL`).toBeNull();
+        ctx.cleanupReservationIds.push(data![0].id);
+      });
+    });
+
+    // ─── Hostile discount_value values ─────────────────────────────────
+    describe("hostile discount_value", () => {
+      it.each([
+        ["negative", -50],
+        ["zero", 0],
+        ["absurdly large", 9_999_999],
+        ["fractional percent overflow", 1000.5],
+      ])("rejects/scrubs %s", async (label, value) => {
+        await assertAnonInsertBlocksDiscount(
+          { discount_value: value },
+          `value=${label}`,
+        );
+      });
+    });
+
+    // ─── Unknown discount_type strings ─────────────────────────────────
+    describe("unknown discount_type", () => {
+      it.each([
+        ["empty string", ""],
+        ["random word", "freebie"],
+        ["sql-ish", "'; DROP TABLE reservations; --"],
+        ["mixed case", "PeRcEnT"],
+      ])("rejects/scrubs %s", async (label, type) => {
+        await assertAnonInsertBlocksDiscount(
+          { discount_type: type },
+          `type=${label}`,
+        );
+      });
+    });
+  },
+);

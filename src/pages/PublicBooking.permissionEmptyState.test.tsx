@@ -49,7 +49,10 @@ vi.mock("@/integrations/supabase/client", () => {
     if (table === "tenant_settings_public") {
       return denyBranding
         ? { data: null, error: { message: "permission denied", code: "42501" } }
-        : { data: { tenant_id: TENANT.id, business_name: "Branded Co" }, error: null };
+        : {
+            data: { tenant_id: TENANT.id, business_name: "Branded Co" },
+            error: null,
+          };
     }
     return { data: null, error: null };
   };
@@ -77,17 +80,22 @@ vi.mock("@/integrations/supabase/client", () => {
       rpc: vi.fn(() => {
         const c: any = {
           maybeSingle: () => Promise.resolve({ data: null, error: null }),
-          then: (resolve: (v: any) => void) => resolve({ data: null, error: null }),
+          then: (resolve: (v: any) => void) =>
+            resolve({ data: null, error: null }),
         };
         return c;
       }),
       storage: {
-        from: () => ({ createSignedUrl: vi.fn(async () => ({ data: null, error: null })) }),
+        from: () => ({
+          createSignedUrl: vi.fn(async () => ({ data: null, error: null })),
+        }),
       },
       functions: { invoke: vi.fn(async () => ({ data: null, error: null })) },
       auth: {
         getSession: vi.fn(async () => ({ data: { session: null } })),
-        onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+        onAuthStateChange: vi.fn(() => ({
+          data: { subscription: { unsubscribe: vi.fn() } },
+        })),
       },
     },
   };
@@ -106,7 +114,7 @@ const renderPage = () => {
           <Route path="/book/:slug" element={<PublicBooking />} />
         </Routes>
       </MemoryRouter>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   );
 };
 
@@ -121,7 +129,9 @@ describe("PublicBooking branding permission fallback", () => {
     denyBranding = true;
     renderPage();
 
-    expect(await screen.findByText("booking.brandingUnavailable")).toBeInTheDocument();
+    expect(
+      await screen.findByText("booking.brandingUnavailable"),
+    ).toBeInTheDocument();
   });
 
   it("reports the blocked branding state to analytics once", async () => {
@@ -132,8 +142,8 @@ describe("PublicBooking branding permission fallback", () => {
     await screen.findByText("booking.brandingUnavailable");
     await waitFor(() =>
       expect(gtm.permissionEmptyStateShown).toHaveBeenCalledWith(
-        expect.objectContaining({ surface: "public_booking_branding" })
-      )
+        expect.objectContaining({ surface: "public_booking_branding" }),
+      ),
     );
     expect((gtm.permissionEmptyStateShown as any).mock.calls.length).toBe(1);
   });
@@ -142,7 +152,7 @@ describe("PublicBooking branding permission fallback", () => {
     renderPage();
 
     await waitFor(() =>
-      expect(screen.queryByText("booking.brandingUnavailable")).toBeNull()
+      expect(screen.queryByText("booking.brandingUnavailable")).toBeNull(),
     );
   });
 });

@@ -4,7 +4,10 @@ import { ArrowRight, Clock, CalendarDays } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import SupportChatWidget from "@/components/SupportChatWidget";
-import SEOHead, { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
+import SEOHead, {
+  organizationSchema,
+  breadcrumbSchema,
+} from "@/components/SEOHead";
 import { useT } from "@/contexts/I18nContext";
 
 const blogPosts = [
@@ -103,7 +106,8 @@ const Blog = () => {
             "@type": "Blog",
             name: "MimmoBook Blog",
             url: "https://mimmobook.com/blog",
-            description: "Hospitality reservation management insights and guides from MimmoBook.",
+            description:
+              "Hospitality reservation management insights and guides from MimmoBook.",
             publisher: {
               "@type": "Organization",
               name: "MimmoBook",
@@ -134,7 +138,10 @@ const Blog = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {blogPosts.map((post) => (
-              <article key={post.slug} className="group p-6 rounded-xl border border-border bg-card shadow-card hover:shadow-hover transition-all duration-300">
+              <article
+                key={post.slug}
+                className="group p-6 rounded-xl border border-border bg-card shadow-card hover:shadow-hover transition-all duration-300"
+              >
                 <div className="flex items-center gap-3 mb-4">
                   <span className="px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
                     {t(post.categoryKey)}
@@ -159,7 +166,9 @@ const Blog = () => {
                   aria-label={`${t("blog.readMore")}: ${t(post.titleKey)}`}
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
                 >
-                  <span>{t("blog.readMore")}: {t(post.titleKey)}</span>
+                  <span>
+                    {t("blog.readMore")}: {t(post.titleKey)}
+                  </span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </article>
@@ -171,8 +180,12 @@ const Blog = () => {
       {/* CTA */}
       <section className="py-20 bg-primary/5">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4">{t("blog.ctaTitle")}</h2>
-          <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">{t("blog.ctaSubtitle")}</p>
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4">
+            {t("blog.ctaTitle")}
+          </h2>
+          <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
+            {t("blog.ctaSubtitle")}
+          </p>
           <Link to="/signup">
             <Button variant="hero" size="xl">
               {t("common.startFreeTrial")}

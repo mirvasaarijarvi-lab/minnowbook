@@ -25,7 +25,10 @@ type Fixtures = {
 export const test = base.extend<Fixtures>({
   // eslint-disable-next-line no-empty-pattern
   ephemeralTenant: async ({}, use, testInfo) => {
-    const label = testInfo.title.replace(/[^a-z0-9-]/gi, "-").slice(0, 24).toLowerCase();
+    const label = testInfo.title
+      .replace(/[^a-z0-9-]/gi, "-")
+      .slice(0, 24)
+      .toLowerCase();
     const tenant = await createEphemeralTenant({ label });
     try {
       await use(tenant);

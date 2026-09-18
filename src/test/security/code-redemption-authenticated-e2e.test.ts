@@ -79,7 +79,9 @@ function skipReason(): string {
 
 /** SHA-256 of the canonical access-code form (uppercased + trimmed). */
 function hashCode(plaintext: string): string {
-  return createHash("sha256").update(plaintext.trim().toUpperCase()).digest("hex");
+  return createHash("sha256")
+    .update(plaintext.trim().toUpperCase())
+    .digest("hex");
 }
 
 /** Generate a fresh plaintext code that conforms to the BETA-XXXXXXXX shape. */
@@ -98,10 +100,15 @@ async function ensureFixtureUser(admin: SupabaseClient): Promise<{
   // Look up existing user
   let userId: string | null = null;
   for (let page = 1; page <= 5; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
+    const { data, error } = await admin.auth.admin.listUsers({
+      page,
+      perPage: 200,
+    });
     if (error) throw new Error(`listUsers failed: ${error.message}`);
     const users = data.users as Array<{ id: string; email?: string }>;
-    const found = users.find((u) => u.email?.toLowerCase() === FIXTURE_EMAIL.toLowerCase());
+    const found = users.find(
+      (u) => u.email?.toLowerCase() === FIXTURE_EMAIL.toLowerCase(),
+    );
     if (found) {
       userId = found.id;
       break;
@@ -138,12 +145,16 @@ async function ensureFixtureUser(admin: SupabaseClient): Promise<{
     email: FIXTURE_EMAIL,
     password: FIXTURE_PASSWORD,
   });
-  if (signInErr) throw new Error(`fixture sign-in failed: ${signInErr.message}`);
-  const { data: tenantId, error: rpcErr } = await userClient.rpc("create_tenant", {
-    p_name: FIXTURE_TENANT_NAME,
-    p_slug: FIXTURE_TENANT_SLUG,
-    p_tier: "basic",
-  });
+  if (signInErr)
+    throw new Error(`fixture sign-in failed: ${signInErr.message}`);
+  const { data: tenantId, error: rpcErr } = await userClient.rpc(
+    "create_tenant",
+    {
+      p_name: FIXTURE_TENANT_NAME,
+      p_slug: FIXTURE_TENANT_SLUG,
+      p_tier: "basic",
+    },
+  );
   if (rpcErr) throw new Error(`create_tenant failed: ${rpcErr.message}`);
   if (!tenantId) throw new Error("create_tenant returned no id");
   return { userId, tenantId: tenantId as string };
@@ -259,7 +270,10 @@ suite(
 
       // Wipe any stale redemption rows for this tenant from previous runs so
       // the "exactly 1 row after the race" assertion is meaningful.
-      await admin.from("access_code_redemptions").delete().eq("tenant_id", tenantId);
+      await admin
+        .from("access_code_redemptions")
+        .delete()
+        .eq("tenant_id", tenantId);
 
       plaintext = freshPlaintext();
       accessCodeId = await seedAccessCode(admin, plaintext, userId);
@@ -323,7 +337,10 @@ suite(
       //    that would distinguish "already redeemed" from "not found" /
       //    "over quota" (information leakage).
       for (const f of failures) {
-        expect(f.status, `loser must be 400, got ${f.status}: ${f.rawText}`).toBe(400);
+        expect(
+          f.status,
+          `loser must be 400, got ${f.status}: ${f.rawText}`,
+        ).toBe(400);
         const code = bodyCode(f.body);
         expect(
           code,

@@ -53,7 +53,11 @@ vi.mock("@/hooks/useIsSystemAdmin", () => ({
 
 vi.mock("@/lib/gtm", () => ({ gtm: { login: vi.fn() } }));
 
-const Harness = ({ onReady }: { onReady: (api: ReturnType<typeof useAuth>) => void }) => {
+const Harness = ({
+  onReady,
+}: {
+  onReady: (api: ReturnType<typeof useAuth>) => void;
+}) => {
   const api = useAuth();
   onReady(api);
   return null;
@@ -115,7 +119,8 @@ describe("AuthContext explicit-logout guard", () => {
       String(c[0]).includes("[AuthContext][signout] unexpected"),
     );
     expect(unexpectedWarnings.length).toBeGreaterThanOrEqual(1);
-    const diagnostic = unexpectedWarnings[0][1] as { cause?: string } | undefined;
+    const diagnostic = unexpectedWarnings[0][1] as
+      { cause?: string } | undefined;
     expect(diagnostic).toBeDefined();
     expect(diagnostic!.cause).toBeDefined();
   });

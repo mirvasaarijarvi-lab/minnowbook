@@ -18,25 +18,31 @@ const RedeemAccessCode = () => {
     setLoading(true);
     // Idempotency key keeps server-side dedup safe across automatic retries.
     const idempotencyKey =
-      (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`);
+      globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
     try {
       const { data, error, attempts } = await invokeWithRetry<{
         tier?: string;
         granted_until?: string;
         error?: string;
       }>("redeem-access-code", {
-        body: { code: code.trim().toUpperCase(), idempotency_key: idempotencyKey },
+        body: {
+          code: code.trim().toUpperCase(),
+          idempotency_key: idempotencyKey,
+        },
         headers: { "x-idempotency-key": idempotencyKey },
       });
       if (error) {
-        const msg = typeof error === "object" && error && "message" in error
-          ? (error as { message?: string }).message
-          : String(error);
+        const msg =
+          typeof error === "object" && error && "message" in error
+            ? (error as { message?: string }).message
+            : String(error);
         throw new Error(msg || "Redemption failed");
       }
       if (data?.error) throw new Error(data.error);
       if (attempts > 1) {
-        console.info(`[redeem-access-code] succeeded after ${attempts} attempts`);
+        console.info(
+          `[redeem-access-code] succeeded after ${attempts} attempts`,
+        );
       }
 
       setRedeemed(true);
@@ -48,7 +54,11 @@ const RedeemAccessCode = () => {
         description: `You now have ${grant?.tier} access until ${grant?.granted_until}`,
       });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -60,7 +70,9 @@ const RedeemAccessCode = () => {
         <CardContent className="pt-6">
           <div className="flex items-center gap-3 text-accent">
             <Check className="h-5 w-5" />
-            <p className="text-sm font-medium">Access code redeemed successfully!</p>
+            <p className="text-sm font-medium">
+              Access code redeemed successfully!
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -77,7 +89,8 @@ const RedeemAccessCode = () => {
       </CardHeader>
       <CardContent className="space-y-3">
         <p className="text-xs text-muted-foreground leading-relaxed">
-          Make sure you have completed onboarding and set up your workspace before redeeming. The code will not work without a workspace.
+          Make sure you have completed onboarding and set up your workspace
+          before redeeming. The code will not work without a workspace.
         </p>
         <div className="flex gap-2">
           <Input
@@ -87,7 +100,11 @@ const RedeemAccessCode = () => {
             className="font-mono"
             onKeyDown={(e) => e.key === "Enter" && handleRedeem()}
           />
-          <Button onClick={handleRedeem} disabled={loading || !code.trim()} size="sm">
+          <Button
+            onClick={handleRedeem}
+            disabled={loading || !code.trim()}
+            size="sm"
+          >
             {loading ? "Redeeming..." : "Redeem"}
           </Button>
         </div>

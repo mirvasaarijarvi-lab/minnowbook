@@ -67,7 +67,8 @@ const serviceKey =
 
 const missing = [];
 if (!url) missing.push("VITE_SUPABASE_URL (or SUPABASE_URL)");
-if (!anonKey) missing.push("VITE_SUPABASE_PUBLISHABLE_KEY (or SUPABASE_ANON_KEY)");
+if (!anonKey)
+  missing.push("VITE_SUPABASE_PUBLISHABLE_KEY (or SUPABASE_ANON_KEY)");
 if (!serviceKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
 
 if (missing.length > 0) {
@@ -135,7 +136,6 @@ const args = [
   ...testFiles,
   ...passthroughArgs,
 ];
-
 
 console.log(`[test:security:billing] Running: bunx ${args.join(" ")}`);
 

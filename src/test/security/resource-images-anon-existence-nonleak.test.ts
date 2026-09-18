@@ -19,13 +19,16 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
+const canRun = Boolean(
+  SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY,
+);
 
 const newService = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -58,7 +61,10 @@ function randomUuid(): string {
 // Fingerprint every observable channel the anon caller can inspect.
 async function fingerprintById(anon: SupabaseClient, id: string) {
   // 1. `.select(...).eq('id', id)` — plain list query.
-  const list = await anon.from("resource_images").select("id, resource_id, image_url").eq("id", id);
+  const list = await anon
+    .from("resource_images")
+    .select("id, resource_id, image_url")
+    .eq("id", id);
   // 2. `.maybeSingle()` — same query with single-row expectation.
   const single = await anon
     .from("resource_images")
@@ -117,7 +123,8 @@ describe.runIf(canRun)(
         })
         .select("id")
         .single();
-      if (tenantErr || !tenant) throw tenantErr ?? new Error("tenant insert returned no row");
+      if (tenantErr || !tenant)
+        throw tenantErr ?? new Error("tenant insert returned no row");
       const tenantId = tenant.id as string;
 
       async function seedOne(
@@ -136,7 +143,8 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (resErr || !res) throw resErr ?? new Error(`resource insert failed for ${label}`);
+        if (resErr || !res)
+          throw resErr ?? new Error(`resource insert failed for ${label}`);
 
         const { data: img, error: imgErr } = await service
           .from("resource_images")
@@ -148,7 +156,8 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (imgErr || !img) throw imgErr ?? new Error(`image insert failed for ${label}`);
+        if (imgErr || !img)
+          throw imgErr ?? new Error(`image insert failed for ${label}`);
 
         return { imageId: img.id as string, resourceId: res.id as string };
       }

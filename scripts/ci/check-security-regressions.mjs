@@ -27,7 +27,10 @@ import { dirname, resolve } from "node:path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const BASELINE_PATH = resolve(__dirname, "../../.github/security-regression-baseline.json");
+const BASELINE_PATH = resolve(
+  __dirname,
+  "../../.github/security-regression-baseline.json",
+);
 
 function fail(msg, code = 2) {
   console.error(`::error title=Security regression check::${msg}`);
@@ -133,7 +136,9 @@ function main() {
   const lints = Array.isArray(payload.lints) ? payload.lints : [];
 
   if (lints.length === 0) {
-    console.log("Security regression check: advisors returned 0 lints — nothing to gate.");
+    console.log(
+      "Security regression check: advisors returned 0 lints — nothing to gate.",
+    );
     process.exit(0);
   }
 
@@ -153,12 +158,17 @@ function main() {
     process.exit(0);
   }
 
-  console.error(`❌ Security regression check: ${regressions.length} baseline match(es) detected.`);
+  console.error(
+    `❌ Security regression check: ${regressions.length} baseline match(es) detected.`,
+  );
   for (const { entry, lint } of regressions) {
     const meta = lint.metadata || {};
-    const target = [meta.schema, meta.name].filter(Boolean).join(".") || "(no metadata)";
+    const target =
+      [meta.schema, meta.name].filter(Boolean).join(".") || "(no metadata)";
     const line = `${entry.id} :: lint=${lint.name} level=${lint.level} target=${target}`;
-    console.error(`::error title=Security regression (${entry.id})::${line} — ${entry.reference}`);
+    console.error(
+      `::error title=Security regression (${entry.id})::${line} — ${entry.reference}`,
+    );
     console.error(`   description: ${lint.description || "(none)"}`);
   }
   console.error(

@@ -183,7 +183,10 @@ describe("Edge function CORS — exhaustive allowed/disallowed origin coverage",
       }
 
       it("hardening headers are present on every preflight regardless of origin", async () => {
-        const sample = [...ALLOWED_VARIANTS.slice(0, 2), ...DISALLOWED_VARIANTS.slice(0, 3)];
+        const sample = [
+          ...ALLOWED_VARIANTS.slice(0, 2),
+          ...DISALLOWED_VARIANTS.slice(0, 3),
+        ];
         for (const origin of sample) {
           const res = await preflight(fn, origin);
           await res.text();

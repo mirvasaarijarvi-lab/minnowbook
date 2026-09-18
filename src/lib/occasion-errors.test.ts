@@ -25,7 +25,11 @@ describe("occasion error mapping", () => {
 
   it("parses the occasion payload safely", () => {
     const info = parseOccasionError(
-      err("OCCASION_FULL", { name: "Christmas dinner", remaining: 2, seatingTimes: ["17:00:00", "19:00:00"] }),
+      err("OCCASION_FULL", {
+        name: "Christmas dinner",
+        remaining: 2,
+        seatingTimes: ["17:00:00", "19:00:00"],
+      }),
     );
     expect(info).toEqual({
       code: "OCCASION_FULL",
@@ -37,13 +41,22 @@ describe("occasion error mapping", () => {
 
   it("tolerates a missing payload", () => {
     const info = parseOccasionError(err("OCCASION_UNAVAILABLE"));
-    expect(info).toEqual({ code: "OCCASION_UNAVAILABLE", remaining: null, name: null, seatingTimes: [] });
+    expect(info).toEqual({
+      code: "OCCASION_UNAVAILABLE",
+      remaining: null,
+      name: null,
+      seatingTimes: [],
+    });
   });
 
   it("uses the seats-left variant only when seats remain", () => {
-    const withSeats = parseOccasionError(err("OCCASION_FULL", { remaining: 3 }))!;
+    const withSeats = parseOccasionError(
+      err("OCCASION_FULL", { remaining: 3 }),
+    )!;
     const none = parseOccasionError(err("OCCASION_FULL", { remaining: 0 }))!;
-    expect(occasionErrorTranslationKey(withSeats)).toBe("booking.occasionErrFullWithSeats");
+    expect(occasionErrorTranslationKey(withSeats)).toBe(
+      "booking.occasionErrFullWithSeats",
+    );
     expect(occasionErrorTranslationKey(none)).toBe("booking.occasionErrFull");
   });
 
@@ -60,13 +73,23 @@ describe("occasion error mapping", () => {
   });
 
   it("fills placeholders and never leaks them", () => {
-    const info = parseOccasionError(err("OCCASION_FULL", { remaining: 2, name: "Gala", seatingTimes: ["17:00"] }))!;
+    const info = parseOccasionError(
+      err("OCCASION_FULL", {
+        remaining: 2,
+        name: "Gala",
+        seatingTimes: ["17:00"],
+      }),
+    )!;
     const out = applyOccasionErrorPlaceholders(
-      (translations.en as Record<string, string>)["booking.occasionErrFullWithSeats"],
+      (translations.en as Record<string, string>)[
+        "booking.occasionErrFullWithSeats"
+      ],
       info,
     );
     expect(out).toContain("2");
     expect(out).not.toContain("{seats}");
-    expect(applyOccasionErrorPlaceholders("{name} {times} {seats}", info)).toBe("Gala 17:00 2");
+    expect(applyOccasionErrorPlaceholders("{name} {times} {seats}", info)).toBe(
+      "Gala 17:00 2",
+    );
   });
 });

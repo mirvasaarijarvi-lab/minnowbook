@@ -168,14 +168,15 @@ async function callRedeem(
     // failures so the per-matrix summary can attribute the tail.
     const isTimeout =
       controller.signal.aborted ||
-      (e instanceof Error && (e.name === "AbortError" || /aborted/i.test(e.message)));
+      (e instanceof Error &&
+        (e.name === "AbortError" || /aborted/i.test(e.message)));
     return {
       status: 0,
-      body: isTimeout
-        ? { error: `client_timeout_after_${timeoutMs}ms` }
-        : null,
+      body: isTimeout ? { error: `client_timeout_after_${timeoutMs}ms` } : null,
       error: isTimeout
-        ? new Error(`callRedeem timed out after ${timeoutMs}ms (label=${label})`)
+        ? new Error(
+            `callRedeem timed out after ${timeoutMs}ms (label=${label})`,
+          )
         : e,
       durationMs: Date.now() - startedAt,
       label,
@@ -197,7 +198,9 @@ function printMatrixSummary(testLabel: string, attempts: Attempt[]): void {
   if (attempts.length === 0) return;
   const durations = attempts.map((a) => a.durationMs).sort((a, b) => a - b);
   const pct = (p: number) =>
-    durations[Math.min(durations.length - 1, Math.floor((p / 100) * durations.length))];
+    durations[
+      Math.min(durations.length - 1, Math.floor((p / 100) * durations.length))
+    ];
   const total = attempts.length;
   const failed = attempts.filter((a) => a.status === 0 || a.status >= 500);
 
@@ -210,7 +213,6 @@ function printMatrixSummary(testLabel: string, attempts: Attempt[]): void {
     groups.set(key, arr);
   }
 
-  // eslint-disable-next-line no-console
   console.log(
     `[redeem-burst-timing] ${testLabel}: n=${total} ` +
       `min=${durations[0]}ms p50=${pct(50)}ms p95=${pct(95)}ms max=${durations[total - 1]}ms ` +
@@ -223,11 +225,13 @@ function printMatrixSummary(testLabel: string, attempts: Attempt[]): void {
     const codes = [
       ...new Set(
         arr
-          .map((a) => ((a.body as { code?: string } | null)?.code ?? "").toString())
+          .map((a) =>
+            ((a.body as { code?: string } | null)?.code ?? "").toString(),
+          )
           .filter(Boolean),
       ),
     ].join(",");
-    // eslint-disable-next-line no-console
+
     console.log(
       `  [${key}] n=${arr.length} ` +
         `min=${ds[0]}ms p50=${ds[Math.floor(ds.length / 2)]}ms max=${ds[ds.length - 1]}ms ` +
@@ -236,7 +240,9 @@ function printMatrixSummary(testLabel: string, attempts: Attempt[]): void {
   }
 
   // Slowest 3 individual cases (always useful for flake triage).
-  const slowest = [...attempts].sort((a, b) => b.durationMs - a.durationMs).slice(0, 3);
+  const slowest = [...attempts]
+    .sort((a, b) => b.durationMs - a.durationMs)
+    .slice(0, 3);
   for (const a of slowest) {
     const code = ((a.body as { code?: string } | null)?.code ?? "").toString();
     const errMsg =
@@ -245,7 +251,7 @@ function printMatrixSummary(testLabel: string, attempts: Attempt[]): void {
         : a.error
           ? String(a.error)
           : "";
-    // eslint-disable-next-line no-console
+
     console.log(
       `  slowest: ${a.durationMs}ms label=${a.label} auth=${a.withAuth} ` +
         `status=${a.status} code=${code || "-"} input="${a.input}"` +
@@ -253,7 +259,6 @@ function printMatrixSummary(testLabel: string, attempts: Attempt[]): void {
     );
   }
 }
-
 
 function errorMessage(a: Attempt): string {
   const b = a.body as { error?: string } | null;
@@ -335,7 +340,9 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
 
       printMatrixSummary("burst20_same_fake_code", results);
 
-      const successes = results.filter((r) => r.status >= 200 && r.status < 300);
+      const successes = results.filter(
+        (r) => r.status >= 200 && r.status < 300,
+      );
       expect(successes.length, "no parallel attempt may succeed").toBe(0);
 
       const serverErrors = results.filter((r) => r.status >= 500);
@@ -345,15 +352,19 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       ).toBe(0);
 
       for (const r of results) {
-        expect(r.status, "each call must return a deterministic 4xx").toBeGreaterThanOrEqual(400);
+        expect(
+          r.status,
+          "each call must return a deterministic 4xx",
+        ).toBeGreaterThanOrEqual(400);
         expect(r.status).toBeLessThan(500);
         const code = errorCode(r);
-        expect(KNOWN_ERROR_CODES.has(code), `unexpected error code: ${code}`).toBe(true);
+        expect(
+          KNOWN_ERROR_CODES.has(code),
+          `unexpected error code: ${code}`,
+        ).toBe(true);
       }
     },
   );
-
-
 
   it("repeated serial attempts return the same generic error code (no validity leak)", async () => {
     const ITER = 6;
@@ -377,127 +388,156 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     // Both the human message AND the machine code must be perfectly stable
     // across replays — anything else is a state-leak.
     const uniqueMsgs = new Set(messages);
-    expect(uniqueMsgs.size, `replay messages drifted: ${[...uniqueMsgs].join(" | ")}`).toBe(1);
+    expect(
+      uniqueMsgs.size,
+      `replay messages drifted: ${[...uniqueMsgs].join(" | ")}`,
+    ).toBe(1);
     const uniqueCodes = new Set(codes);
-    expect(uniqueCodes.size, `replay codes drifted: ${[...uniqueCodes].join(" | ")}`).toBe(1);
+    expect(
+      uniqueCodes.size,
+      `replay codes drifted: ${[...uniqueCodes].join(" | ")}`,
+    ).toBe(1);
     // No-auth replays must specifically return an auth-rejection code
     // (either our handler's NOT_AUTHENTICATED or the gateway's
     // UNAUTHORIZED_NO_AUTH_HEADER, depending on which layer rejected).
-    expect(AUTH_REJECTION_CODES.has(codes[0]), `expected auth-rejection code, got: ${codes[0]}`).toBe(true);
+    expect(
+      AUTH_REJECTION_CODES.has(codes[0]),
+      `expected auth-rejection code, got: ${codes[0]}`,
+    ).toBe(true);
   });
 
-  it("varied fake codes do NOT produce distinguishable error codes vs. malformed input", {
-    // Network-bound burst against a live edge function; CI cold paths
-    // can exceed the default 30s ceiling. We now run the probe matrix
-    // in small sequential batches instead of one big Promise.all — this
-    // keeps fan-out low (kinder to the edge worker, fewer transport-
-    // layer timeouts) while still exercising every input shape.
-    timeout: 180_000,
-    retry: process.env.CI ? 2 : 0,
-  }, async () => {
-    // Probe matrix: shapes that should all surface as an auth-rejection
-    // code (since no auth is supplied) — never a code-specific error
-    // that would let an attacker classify the input. One representative
-    // per shape is enough for the distinguishability invariant; we drop
-    // the redundant FAKE_CODES tail to keep the matrix lean.
-    const probes: Array<{ code: string; label: string }> = [
-      { code: FAKE_CODES[0], label: "fake" },
-      { code: "", label: "empty" },
-      { code: "A", label: "single_char" },
-      { code: "A".repeat(100), label: "too_long" },
-      { code: "<script>alert(1)</script>", label: "xss" },
-      { code: "'; DROP TABLE access_codes;--", label: "sqli" },
-    ];
+  it(
+    "varied fake codes do NOT produce distinguishable error codes vs. malformed input",
+    {
+      // Network-bound burst against a live edge function; CI cold paths
+      // can exceed the default 30s ceiling. We now run the probe matrix
+      // in small sequential batches instead of one big Promise.all — this
+      // keeps fan-out low (kinder to the edge worker, fewer transport-
+      // layer timeouts) while still exercising every input shape.
+      timeout: 180_000,
+      retry: process.env.CI ? 2 : 0,
+    },
+    async () => {
+      // Probe matrix: shapes that should all surface as an auth-rejection
+      // code (since no auth is supplied) — never a code-specific error
+      // that would let an attacker classify the input. One representative
+      // per shape is enough for the distinguishability invariant; we drop
+      // the redundant FAKE_CODES tail to keep the matrix lean.
+      const probes: Array<{ code: string; label: string }> = [
+        { code: FAKE_CODES[0], label: "fake" },
+        { code: "", label: "empty" },
+        { code: "A", label: "single_char" },
+        { code: "A".repeat(100), label: "too_long" },
+        { code: "<script>alert(1)</script>", label: "xss" },
+        { code: "'; DROP TABLE access_codes;--", label: "sqli" },
+      ];
 
-    // Batch size 3: enough concurrency to catch interleaving / race
-    // behavior in the auth layer, small enough to avoid the cold-start
-    // tail that made the 11-way Promise.all flake.
-    const BATCH = 3;
-    const results: Attempt[] = [];
-    for (let i = 0; i < probes.length; i += BATCH) {
-      const slice = probes.slice(i, i + BATCH);
-      const batch = await Promise.all(
-        slice.map((p) => callRedeem(p.code, false, p.label)),
-      );
-      results.push(...batch);
-    }
-    printMatrixSummary("varied_fake_codes_vs_malformed", results);
+      // Batch size 3: enough concurrency to catch interleaving / race
+      // behavior in the auth layer, small enough to avoid the cold-start
+      // tail that made the 11-way Promise.all flake.
+      const BATCH = 3;
+      const results: Attempt[] = [];
+      for (let i = 0; i < probes.length; i += BATCH) {
+        const slice = probes.slice(i, i + BATCH);
+        const batch = await Promise.all(
+          slice.map((p) => callRedeem(p.code, false, p.label)),
+        );
+        results.push(...batch);
+      }
+      printMatrixSummary("varied_fake_codes_vs_malformed", results);
 
-    for (const r of results) {
-      // status 0 means the fetch itself failed (network blip under burst).
-      // We tolerate that — the security property is about responses that
-      // DID come back from the server.
-      if (r.status === 0) continue;
-      // 502/503/504 are transient gateway responses (cold start, upstream
-      // timeout, brief edge unavailability) under burst load. They carry
-      // no input-derived information, so they don't break the
-      // indistinguishability invariant — skip them like network blips.
-      if (r.status === 502 || r.status === 503 || r.status === 504) continue;
-      expect(r.status).toBeGreaterThanOrEqual(400);
-      expect(r.status).toBeLessThan(500);
-    }
-    // Without auth, EVERY probe that received a response must return the
-    // same auth-rejection code. The auth check (gateway or handler) runs
-    // before any code-shape or code-existence check, so the response
-    // cannot vary by input.
-    const codes = results
-      .filter((r) => r.status !== 0 && r.status !== 502 && r.status !== 503 && r.status !== 504)
-      .map(errorCode)
-      .filter((c) => c.length > 0);
-    expect(codes.length, "at least one probe must have produced a coded error").toBeGreaterThan(0);
-    // The security invariant is "no response varies by input shape." Both
-    // AUTH_REJECTION_CODES values (gateway-rejected UNAUTHORIZED_NO_AUTH_HEADER
-    // vs handler-rejected NOT_AUTHENTICATED) are auth-layer artifacts that
-    // can interleave under burst (cold instance vs warm instance), and
-    // crucially neither depends on the request body. As long as every
-    // response is an auth-rejection, no input-shape side-channel exists.
-    const unique = new Set(codes);
-    for (const c of unique) {
+      for (const r of results) {
+        // status 0 means the fetch itself failed (network blip under burst).
+        // We tolerate that — the security property is about responses that
+        // DID come back from the server.
+        if (r.status === 0) continue;
+        // 502/503/504 are transient gateway responses (cold start, upstream
+        // timeout, brief edge unavailability) under burst load. They carry
+        // no input-derived information, so they don't break the
+        // indistinguishability invariant — skip them like network blips.
+        if (r.status === 502 || r.status === 503 || r.status === 504) continue;
+        expect(r.status).toBeGreaterThanOrEqual(400);
+        expect(r.status).toBeLessThan(500);
+      }
+      // Without auth, EVERY probe that received a response must return the
+      // same auth-rejection code. The auth check (gateway or handler) runs
+      // before any code-shape or code-existence check, so the response
+      // cannot vary by input.
+      const codes = results
+        .filter(
+          (r) =>
+            r.status !== 0 &&
+            r.status !== 502 &&
+            r.status !== 503 &&
+            r.status !== 504,
+        )
+        .map(errorCode)
+        .filter((c) => c.length > 0);
       expect(
-        AUTH_REJECTION_CODES.has(c),
-        `every unauthenticated probe must produce an auth-rejection code; got: ${[...unique].join(" | ")}`,
-      ).toBe(true);
-    }
-  });
+        codes.length,
+        "at least one probe must have produced a coded error",
+      ).toBeGreaterThan(0);
+      // The security invariant is "no response varies by input shape." Both
+      // AUTH_REJECTION_CODES values (gateway-rejected UNAUTHORIZED_NO_AUTH_HEADER
+      // vs handler-rejected NOT_AUTHENTICATED) are auth-layer artifacts that
+      // can interleave under burst (cold instance vs warm instance), and
+      // crucially neither depends on the request body. As long as every
+      // response is an auth-rejection, no input-shape side-channel exists.
+      const unique = new Set(codes);
+      for (const c of unique) {
+        expect(
+          AUTH_REJECTION_CODES.has(c),
+          `every unauthenticated probe must produce an auth-rejection code; got: ${[...unique].join(" | ")}`,
+        ).toBe(true);
+      }
+    },
+  );
 
-  it("burst of 30 distinct fake codes (batched 10x3): zero leaks, zero 5xx, stable codes", {
-    // Run 30 distinct codes in 3 sequential waves of 10 instead of one
-    // 30-way Promise.all. This keeps the indistinguishability + no-5xx
-    // invariants intact (still 30 calls, still 30 distinct inputs) while
-    // dropping peak fan-out by 3x, which is what was driving the cold-
-    // start tail latency that timed out CI.
-    timeout: 180_000,
-    retry: process.env.CI ? 2 : 0,
-  }, async () => {
-    const codes = Array.from(
-      { length: 30 },
-      (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
-    );
-    const BATCH = 10;
-    const results: Attempt[] = [];
-    for (let i = 0; i < codes.length; i += BATCH) {
-      const slice = codes.slice(i, i + BATCH);
-      const batch = await Promise.all(slice.map((c) => callRedeem(c, false)));
-      results.push(...batch);
-    }
-    printMatrixSummary("burst30_distinct_fake_codes", results);
+  it(
+    "burst of 30 distinct fake codes (batched 10x3): zero leaks, zero 5xx, stable codes",
+    {
+      // Run 30 distinct codes in 3 sequential waves of 10 instead of one
+      // 30-way Promise.all. This keeps the indistinguishability + no-5xx
+      // invariants intact (still 30 calls, still 30 distinct inputs) while
+      // dropping peak fan-out by 3x, which is what was driving the cold-
+      // start tail latency that timed out CI.
+      timeout: 180_000,
+      retry: process.env.CI ? 2 : 0,
+    },
+    async () => {
+      const codes = Array.from(
+        { length: 30 },
+        (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
+      );
+      const BATCH = 10;
+      const results: Attempt[] = [];
+      for (let i = 0; i < codes.length; i += BATCH) {
+        const slice = codes.slice(i, i + BATCH);
+        const batch = await Promise.all(slice.map((c) => callRedeem(c, false)));
+        results.push(...batch);
+      }
+      printMatrixSummary("burst30_distinct_fake_codes", results);
 
-    const successes = results.filter((r) => r.status >= 200 && r.status < 300);
-    const serverErrors = results.filter((r) => r.status >= 500);
-    expect(successes.length).toBe(0);
-    expect(serverErrors.length).toBe(0);
+      const successes = results.filter(
+        (r) => r.status >= 200 && r.status < 300,
+      );
+      const serverErrors = results.filter((r) => r.status >= 500);
+      expect(successes.length).toBe(0);
+      expect(serverErrors.length).toBe(0);
 
-    for (const r of results) {
-      const b = (r.body ?? {}) as Record<string, unknown>;
-      expect(b.success).not.toBe(true);
-      expect(b.tier).toBeUndefined();
-      expect(b.granted_until).toBeUndefined();
-      // Every error must carry a known machine-readable code.
-      const code = (b.code as string) ?? "";
-      expect(KNOWN_ERROR_CODES.has(code), `unexpected code: ${code}`).toBe(true);
-    }
-  });
-
+      for (const r of results) {
+        const b = (r.body ?? {}) as Record<string, unknown>;
+        expect(b.success).not.toBe(true);
+        expect(b.tier).toBeUndefined();
+        expect(b.granted_until).toBeUndefined();
+        // Every error must carry a known machine-readable code.
+        const code = (b.code as string) ?? "";
+        expect(KNOWN_ERROR_CODES.has(code), `unexpected code: ${code}`).toBe(
+          true,
+        );
+      }
+    },
+  );
 
   it("OPTIONS preflight burst does not affect the error contract", async () => {
     // Some attackers warm up a function with preflights to look for
@@ -516,7 +556,10 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
     const after = await callRedeem(FAKE_CODES[1], false);
     expect(after.status).toBeGreaterThanOrEqual(400);
     expect(after.status).toBeLessThan(500);
-    expect(AUTH_REJECTION_CODES.has(errorCode(after)), `expected auth-rejection code, got: ${errorCode(after)}`).toBe(true);
+    expect(
+      AUTH_REJECTION_CODES.has(errorCode(after)),
+      `expected auth-rejection code, got: ${errorCode(after)}`,
+    ).toBe(true);
   });
 });
 
@@ -526,22 +569,30 @@ const PROBE_TIMEOUT_MS = 15_000;
 const probeSignal = () => AbortSignal.timeout(PROBE_TIMEOUT_MS);
 
 describe("discount_codes: brute-force / replay resilience (no public endpoint)", () => {
-  it("100 parallel anon SELECTs return zero rows (no enumeration)", { timeout: 30000 }, async () => {
-    const results = await Promise.all(
-      Array.from({ length: 100 }, () =>
-        anon.from("discount_codes").select("id, code").limit(1).abortSignal(probeSignal()),
-      ),
-    );
-    for (const r of results) {
-      if (r.error) {
-        // Explicit RLS denial is acceptable.
-        expect(r.error).toBeTruthy();
-        continue;
+  it(
+    "100 parallel anon SELECTs return zero rows (no enumeration)",
+    { timeout: 30000 },
+    async () => {
+      const results = await Promise.all(
+        Array.from({ length: 100 }, () =>
+          anon
+            .from("discount_codes")
+            .select("id, code")
+            .limit(1)
+            .abortSignal(probeSignal()),
+        ),
+      );
+      for (const r of results) {
+        if (r.error) {
+          // Explicit RLS denial is acceptable.
+          expect(r.error).toBeTruthy();
+          continue;
+        }
+        expect(Array.isArray(r.data)).toBe(true);
+        expect((r.data ?? []).length).toBe(0);
       }
-      expect(Array.isArray(r.data)).toBe(true);
-      expect((r.data ?? []).length).toBe(0);
-    }
-  });
+    },
+  );
 
   it("anon cannot decrement used_count via parallel UPDATEs (replay-to-bypass-max-uses)", async () => {
     const results = await Promise.all(
@@ -566,12 +617,15 @@ describe("discount_codes: brute-force / replay resilience (no public endpoint)",
   it("anon cannot INSERT forged discount_codes under burst", async () => {
     const results = await Promise.all(
       Array.from({ length: 10 }, (_, i) =>
-        anon.from("discount_codes").insert({
-          tenant_id: "00000000-0000-0000-0000-000000000000",
-          code: `FORGED-${i}`,
-          discount_type: "percentage",
-          discount_value: 100,
-        } as never).abortSignal(probeSignal()),
+        anon
+          .from("discount_codes")
+          .insert({
+            tenant_id: "00000000-0000-0000-0000-000000000000",
+            code: `FORGED-${i}`,
+            discount_type: "percentage",
+            discount_value: 100,
+          } as never)
+          .abortSignal(probeSignal()),
       ),
     );
     // Every attempt must error out — no row may ever land.

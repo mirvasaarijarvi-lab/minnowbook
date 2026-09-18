@@ -91,7 +91,9 @@ const ResetPassword = () => {
                 onValidChange={setPasswordValid}
               />
               <div>
-                <Label htmlFor="confirmPassword">{t("resetPassword.confirmPassword")}</Label>
+                <Label htmlFor="confirmPassword">
+                  {t("resetPassword.confirmPassword")}
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -99,10 +101,16 @@ const ResetPassword = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className={confirmPassword.length > 0 && password !== confirmPassword ? "border-destructive" : ""}
+                  className={
+                    confirmPassword.length > 0 && password !== confirmPassword
+                      ? "border-destructive"
+                      : ""
+                  }
                 />
                 {confirmPassword.length > 0 && password !== confirmPassword && (
-                  <p className="text-xs text-destructive mt-1">{t("resetPassword.mismatch")}</p>
+                  <p className="text-xs text-destructive mt-1">
+                    {t("resetPassword.mismatch")}
+                  </p>
                 )}
               </div>
 
@@ -111,9 +119,13 @@ const ResetPassword = () => {
                 variant="hero"
                 size="lg"
                 className="w-full"
-                disabled={loading || !passwordValid || password !== confirmPassword}
+                disabled={
+                  loading || !passwordValid || password !== confirmPassword
+                }
               >
-                {loading ? t("resetPassword.updating") : t("resetPassword.updateButton")}
+                {loading
+                  ? t("resetPassword.updating")
+                  : t("resetPassword.updateButton")}
               </Button>
             </form>
           </>

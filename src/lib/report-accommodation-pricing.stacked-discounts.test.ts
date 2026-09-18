@@ -5,7 +5,11 @@ import {
   roundCents,
   type ReportPricingRow,
 } from "./report-pricing-accessor";
-import { csvPriceCells, parseCsvSplitCell, pdfPriceCells } from "./report-export-cells";
+import {
+  csvPriceCells,
+  parseCsvSplitCell,
+  pdfPriceCells,
+} from "./report-export-cells";
 
 /**
  * Regression: several promo sources may end up on one multi-night stay, for
@@ -61,7 +65,11 @@ describe("stacked discounts on multi-night stays", () => {
     expect(list).toBe(596);
 
     // Promo code -20%, then a 50 EUR coupon, then -5% loyalty.
-    const charged = applyStack(list, [{ pct: 0.2 }, { minus: 50 }, { pct: 0.05 }]);
+    const charged = applyStack(list, [
+      { pct: 0.2 },
+      { minus: 50 },
+      { pct: 0.05 },
+    ]);
     expect(charged).toBe(405.46);
 
     const a = expectBalanced(stay({ price_eur: charged }), "20% + 50 EUR + 5%");
@@ -70,9 +78,17 @@ describe("stacked discounts on multi-night stays", () => {
     expect(a.room).toBe(289.46);
 
     // None of the intermediate figures (476.80, 426.80) appear anywhere.
-    const csv = csvPriceCells(stay({ price_eur: charged }), { breakfast: "Breakfast" });
+    const csv = csvPriceCells(stay({ price_eur: charged }), {
+      breakfast: "Breakfast",
+    });
     const pdf = pdfPriceCells(stay({ price_eur: charged }));
-    for (const cell of [csv.price, csv.total, pdf.room, pdf.breakfast, pdf.total]) {
+    for (const cell of [
+      csv.price,
+      csv.total,
+      pdf.room,
+      pdf.breakfast,
+      pdf.total,
+    ]) {
       expect(cell).not.toContain("476.80");
       expect(cell).not.toContain("426.80");
       expect(cell).not.toContain("596.00");
@@ -85,7 +101,11 @@ describe("stacked discounts on multi-night stays", () => {
   it("stays balanced when a stack discounts a stay below its breakfast value", () => {
     const list = roundCents(6 * 95 + 21.5 * 4 * 6); // 6 nights, 4 guests = 1086
     // -60% campaign, then -50% partner rate, then a 120 EUR goodwill coupon.
-    const charged = applyStack(list, [{ pct: 0.6 }, { pct: 0.5 }, { minus: 120 }]);
+    const charged = applyStack(list, [
+      { pct: 0.6 },
+      { pct: 0.5 },
+      { minus: 120 },
+    ]);
     expect(charged).toBe(97.2);
 
     const row = stay({
@@ -101,7 +121,9 @@ describe("stacked discounts on multi-night stays", () => {
   });
 
   it("reports zero for a stack that comps the whole stay", () => {
-    const row = stay({ price_eur: applyStack(596, [{ pct: 0.5 }, { minus: 1000 }]) });
+    const row = stay({
+      price_eur: applyStack(596, [{ pct: 0.5 }, { minus: 1000 }]),
+    });
     const a = expectBalanced(row, "comped by stack");
     expect(a.charged).toBe(0);
     expect(a.room).toBe(0);
@@ -111,15 +133,24 @@ describe("stacked discounts on multi-night stays", () => {
 
   it("handles a stack that ends in a manual override above the list price", () => {
     // Two promos, then staff type in a corrected total (late checkout added).
-    const charged = applyStack(596, [{ pct: 0.15 }, { minus: 25 }, { setTo: 640.35 }]);
-    const a = expectBalanced(stay({ price_eur: charged }), "manual override up");
+    const charged = applyStack(596, [
+      { pct: 0.15 },
+      { minus: 25 },
+      { setTo: 640.35 },
+    ]);
+    const a = expectBalanced(
+      stay({ price_eur: charged }),
+      "manual override up",
+    );
     expect(a.charged).toBe(640.35);
     expect(a.breakfast).toBe(116);
     expect(a.room).toBe(524.35);
   });
 
   it("keeps every stacked combination balanced across many stays", () => {
-    const stacks: ({ pct: number } | { minus: number } | { setTo: number })[][] = [
+    const stacks: (
+      { pct: number } | { minus: number } | { setTo: number }
+    )[][] = [
       [{ pct: 0.1 }, { pct: 0.07 }],
       [{ pct: 0.33 }, { minus: 19.9 }],
       [{ minus: 40 }, { pct: 0.25 }, { minus: 15.55 }],
@@ -142,9 +173,13 @@ describe("stacked discounts on multi-night stays", () => {
         for (const rate of breakfastRates) {
           for (const nights of nightsList) {
             for (const guests of partyList) {
-              const list = roundCents(nightly * nights + rate * guests * nights);
+              const list = roundCents(
+                nightly * nights + rate * guests * nights,
+              );
               const charged = applyStack(list, stack);
-              const checkOut = new Date(Date.UTC(2027, 1, 1) + nights * 86400000)
+              const checkOut = new Date(
+                Date.UTC(2027, 1, 1) + nights * 86400000,
+              )
                 .toISOString()
                 .slice(0, 10);
               const row = stay({
@@ -169,7 +204,10 @@ describe("stacked discounts on multi-night stays", () => {
 
     // The period total equals the sum of the charged amounts, to the cent.
     const totals = sumReportAmounts(rows);
-    const expected = rows.reduce((sum, r) => sum + Math.round((r.price_eur ?? 0) * 100), 0);
+    const expected = rows.reduce(
+      (sum, r) => sum + Math.round((r.price_eur ?? 0) * 100),
+      0,
+    );
     expect(Math.round(totals.charged * 100)).toBe(expected);
     expect(roundCents(totals.room + totals.breakfast)).toBe(totals.charged);
   });

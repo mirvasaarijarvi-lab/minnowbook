@@ -18,7 +18,8 @@ import { describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const canRun = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
@@ -59,49 +60,55 @@ const EXPECTED_COLUMNS = [
   "created_at",
 ].sort();
 
-describe.runIf(canRun)("resource_images schema invariant (no per-image visibility flag)", () => {
-  it("does not expose any forbidden per-image visibility column", async () => {
-    const service = newService();
-    const { data, error } = await service
-      .schema("information_schema")
-      .from("columns")
-      .select("column_name")
-      .eq("table_schema", "public")
-      .eq("table_name", "resource_images");
+describe.runIf(canRun)(
+  "resource_images schema invariant (no per-image visibility flag)",
+  () => {
+    it("does not expose any forbidden per-image visibility column", async () => {
+      const service = newService();
+      const { data, error } = await service
+        .schema("information_schema")
+        .from("columns")
+        .select("column_name")
+        .eq("table_schema", "public")
+        .eq("table_name", "resource_images");
 
-    expect(error).toBeNull();
-    const names = new Set((data ?? []).map((r) => String(r.column_name)));
+      expect(error).toBeNull();
+      const names = new Set((data ?? []).map((r) => String(r.column_name)));
 
-    const leaked = FORBIDDEN_VISIBILITY_COLUMNS.filter((c) => names.has(c));
-    expect(
-      leaked,
-      `resource_images grew a per-image visibility column (${leaked.join(", ")}). ` +
-        "Review the anon SELECT policy so parent-resource gating still wins " +
-        "before allowing this column.",
-    ).toEqual([]);
-  });
+      const leaked = FORBIDDEN_VISIBILITY_COLUMNS.filter((c) => names.has(c));
+      expect(
+        leaked,
+        `resource_images grew a per-image visibility column (${leaked.join(", ")}). ` +
+          "Review the anon SELECT policy so parent-resource gating still wins " +
+          "before allowing this column.",
+      ).toEqual([]);
+    });
 
-  it("matches the expected column set (schema drift guard)", async () => {
-    const service = newService();
-    const { data, error } = await service
-      .schema("information_schema")
-      .from("columns")
-      .select("column_name")
-      .eq("table_schema", "public")
-      .eq("table_name", "resource_images");
+    it("matches the expected column set (schema drift guard)", async () => {
+      const service = newService();
+      const { data, error } = await service
+        .schema("information_schema")
+        .from("columns")
+        .select("column_name")
+        .eq("table_schema", "public")
+        .eq("table_name", "resource_images");
 
-    expect(error).toBeNull();
-    const actual = (data ?? []).map((r) => String(r.column_name)).sort();
-    expect(
-      actual,
-      "resource_images columns changed. If this is intentional, update " +
-        "EXPECTED_COLUMNS AND re-review the anon SELECT policy for parent gating.",
-    ).toEqual(EXPECTED_COLUMNS);
-  });
-});
+      expect(error).toBeNull();
+      const actual = (data ?? []).map((r) => String(r.column_name)).sort();
+      expect(
+        actual,
+        "resource_images columns changed. If this is intentional, update " +
+          "EXPECTED_COLUMNS AND re-review the anon SELECT policy for parent gating.",
+      ).toEqual(EXPECTED_COLUMNS);
+    });
+  },
+);
 
-describe.skipIf(canRun)("resource_images schema invariant (skipped: missing live creds)", () => {
-  it("skipped: requires SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY", () => {
-    expect(true).toBe(true);
-  });
-});
+describe.skipIf(canRun)(
+  "resource_images schema invariant (skipped: missing live creds)",
+  () => {
+    it("skipped: requires SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY", () => {
+      expect(true).toBe(true);
+    });
+  },
+);

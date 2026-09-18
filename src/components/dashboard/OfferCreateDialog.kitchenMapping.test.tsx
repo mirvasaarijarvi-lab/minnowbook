@@ -34,8 +34,12 @@ vi.mock("@/hooks/useTenant", () => ({
     loading: false,
   }),
 }));
-vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ user: { id: "u-1" } }) }));
-vi.mock("@/hooks/useTierGate", () => ({ useTierGate: () => ({ isGated: () => false }) }));
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({ user: { id: "u-1" } }),
+}));
+vi.mock("@/hooks/useTierGate", () => ({
+  useTierGate: () => ({ isGated: () => false }),
+}));
 vi.mock("@/hooks/useDateLocale", () => ({ useDateLocale: () => undefined }));
 vi.mock("@/hooks/useOffers", async () => {
   const actual = await vi.importActual<any>("@/hooks/useOffers");
@@ -45,7 +49,9 @@ vi.mock("@/hooks/useOffers", async () => {
     useUpdateOffer: () => ({ mutateAsync: vi.fn(), isPending: false }),
   };
 });
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() } }));
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
+}));
 
 vi.mock("@/integrations/supabase/client", () => {
   const chain: any = {};
@@ -54,7 +60,8 @@ vi.mock("@/integrations/supabase/client", () => {
   chain.eq = pass;
   chain.order = pass;
   chain.maybeSingle = () => Promise.resolve({ data: null, error: null });
-  chain.then = (resolve: (v: any) => void) => resolve({ data: RESOURCE_ROWS, error: null });
+  chain.then = (resolve: (v: any) => void) =>
+    resolve({ data: RESOURCE_ROWS, error: null });
   return { supabase: { from: vi.fn(() => chain) } };
 });
 
@@ -80,8 +87,16 @@ const offer = (overrides: Partial<Offer> = {}): Offer =>
     event_space: "Main Hall",
     menu: VENUE_MENU,
     linked_reservations: {
-      restaurant: { enabled: true, resource_type: "restaurant", menu: REST_MENU },
-      guesthouse: { enabled: true, resource_type: "guesthouse", menu: ROOM_MENU },
+      restaurant: {
+        enabled: true,
+        resource_type: "restaurant",
+        menu: REST_MENU,
+      },
+      guesthouse: {
+        enabled: true,
+        resource_type: "guesthouse",
+        menu: ROOM_MENU,
+      },
     } as any,
     language: "en",
     ...overrides,
@@ -101,7 +116,9 @@ const legsFor = (o: Offer) => [
 
 const renderDialog = async (o: Offer, language: Language = "en") => {
   localStorage.setItem("mimmobook-lang", language);
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   render(
     <QueryClientProvider client={client}>
       <I18nProvider>
@@ -115,13 +132,18 @@ const renderDialog = async (o: Offer, language: Language = "en") => {
   // The linked functions appear only once the resource types have loaded.
   const legCount =
     1 +
-    Object.values((o.linked_reservations ?? {}) as Record<string, any>).filter((v) => v?.enabled)
-      .length;
+    Object.values((o.linked_reservations ?? {}) as Record<string, any>).filter(
+      (v) => v?.enabled,
+    ).length;
   await waitFor(() => {
-    const ul = document.querySelector('[aria-labelledby="offer-kitchen-preview-title"] ul');
+    const ul = document.querySelector(
+      '[aria-labelledby="offer-kitchen-preview-title"] ul',
+    );
     expect(ul?.querySelectorAll("li").length ?? 0).toBe(legCount);
   });
-  const panel = document.querySelector('[aria-labelledby="offer-kitchen-preview-title"]');
+  const panel = document.querySelector(
+    '[aria-labelledby="offer-kitchen-preview-title"]',
+  );
   if (!panel) throw new Error("kitchen preview panel not rendered");
   return panel as HTMLElement;
 };
@@ -138,7 +160,9 @@ const texts = (el: Element) =>
 
 /** Names shown for each leg, i.e. the tenant's resource-type labels. */
 const nameFor = (key: string, language: Language) =>
-  translations[language][`dashboard.${key === "main" ? "venue" : key}` as keyof (typeof translations)["en"]] as string;
+  translations[language][
+    `dashboard.${key === "main" ? "venue" : key}` as keyof (typeof translations)["en"]
+  ] as string;
 
 beforeEach(() => localStorage.clear());
 afterEach(() => cleanup());
@@ -178,7 +202,11 @@ describe("displayed mapping labels match the accepted offer output", () => {
   it("falls back to the event function in the label and in the written rows", async () => {
     const o = offer({
       linked_reservations: {
-        guesthouse: { enabled: true, resource_type: "guesthouse", menu: ROOM_MENU },
+        guesthouse: {
+          enabled: true,
+          resource_type: "guesthouse",
+          menu: ROOM_MENU,
+        },
       } as any,
     });
     const panel = await renderDialog(o);
@@ -214,14 +242,20 @@ describe("displayed kitchen-order lines match the accepted offer output", () => 
 
     // The total shown equals the number of rows written.
     expect(
-      screen.getByText(T["offers.kitchenPreviewTotal"].replace("{count}", String(rows.length))),
+      screen.getByText(
+        T["offers.kitchenPreviewTotal"].replace("{count}", String(rows.length)),
+      ),
     ).toBeTruthy();
   });
 
   it("shows an empty dining field as having nothing, and writes no dining rows", async () => {
     const o = offer({
       linked_reservations: {
-        restaurant: { enabled: true, resource_type: "restaurant", menu: "   \n- \n" },
+        restaurant: {
+          enabled: true,
+          resource_type: "restaurant",
+          menu: "   \n- \n",
+        },
         guesthouse: { enabled: true, resource_type: "guesthouse", menu: null },
       } as any,
     });
@@ -232,15 +266,18 @@ describe("displayed kitchen-order lines match the accepted offer output", () => 
     expect(texts(uls(panel)[0])[1]).toBe(
       `${nameFor("restaurant", "en")} ${T["offers.kitchenMapOwn"]}`,
     );
-    expect(screen.getAllByText(T["offers.kitchenPreviewNone"]).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText(T["offers.kitchenPreviewNone"]).length,
+    ).toBeGreaterThan(0);
 
     const rows = buildKitchenOrderRows(TENANT_ID, legsFor(o));
     expect(rows.every((r) => r.reservation_id === "main")).toBe(true);
-    expect(rows.map((r) => r.item_name)).toEqual(["Welcome bites", "Sparkling wine"]);
+    expect(rows.map((r) => r.item_name)).toEqual([
+      "Welcome bites",
+      "Sparkling wine",
+    ]);
     expect(uls(panel).slice(1).flatMap(texts)).toHaveLength(rows.length);
   });
-
-
 
   it("shows no lines and writes none when every food and drinks field is empty", async () => {
     const o = offer({
@@ -252,7 +289,9 @@ describe("displayed kitchen-order lines match the accepted offer output", () => 
     });
     const panel = await renderDialog(o);
     expect(uls(panel).slice(1)).toHaveLength(0);
-    expect(screen.getByText(translations.en["offers.kitchenPreviewEmpty"])).toBeTruthy();
+    expect(
+      screen.getByText(translations.en["offers.kitchenPreviewEmpty"]),
+    ).toBeTruthy();
     expect(buildKitchenOrderRows(TENANT_ID, legsFor(o))).toEqual([]);
   });
 
@@ -267,7 +306,9 @@ describe("displayed kitchen-order lines match the accepted offer output", () => 
         rows.map((r) =>
           [
             `${r.quantity} x ${r.item_name}`,
-            r.category === "drink" ? T["kitchen.cat.drink"] : T["kitchen.cat.food"],
+            r.category === "drink"
+              ? T["kitchen.cat.drink"]
+              : T["kitchen.cat.food"],
             r.notes ? `(${r.notes})` : null,
           ]
             .filter(Boolean)

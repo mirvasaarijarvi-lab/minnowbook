@@ -19,7 +19,8 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SERVICE_ROLE_KEY;
 
@@ -47,7 +48,8 @@ type PricingRow = {
 const PRICING_COLUMNS =
   "id, price_eur, original_price_eur, discount_type, discount_value, discount_code_id, discount_reason, stall_fee";
 
-const futureDate = () => new Date(Date.now() + 9 * 86_400_000).toISOString().slice(0, 10);
+const futureDate = () =>
+  new Date(Date.now() + 9 * 86_400_000).toISOString().slice(0, 10);
 
 const baseRow = (name: string) => ({
   tenant_id: ctx.tenantId,
@@ -84,12 +86,14 @@ describe.runIf(canRun)(
       });
 
       const email = `ci+malformed-${randomUUID().slice(0, 8)}@mimmobook.test`;
-      const { data: userRes, error: userErr } = await ctx.service.auth.admin.createUser({
-        email,
-        password: `Ci-Malformed-${randomUUID()}-Z9!`,
-        email_confirm: true,
-      });
-      if (userErr || !userRes.user) throw userErr ?? new Error("createUser failed");
+      const { data: userRes, error: userErr } =
+        await ctx.service.auth.admin.createUser({
+          email,
+          password: `Ci-Malformed-${randomUUID()}-Z9!`,
+          email_confirm: true,
+        });
+      if (userErr || !userRes.user)
+        throw userErr ?? new Error("createUser failed");
       ctx.ownerId = userRes.user.id;
 
       const mkTenant = async (label: string): Promise<string> => {
@@ -124,7 +128,8 @@ describe.runIf(canRun)(
         })
         .select("id")
         .single();
-      if (codeErr || !code) throw codeErr ?? new Error("discount code insert failed");
+      if (codeErr || !code)
+        throw codeErr ?? new Error("discount code insert failed");
       ctx.otherCodeId = code.id as string;
     }, 90_000);
 
@@ -137,13 +142,22 @@ describe.runIf(canRun)(
           /* best-effort cleanup */
         }
       };
-      for (const tenantId of [ctx.tenantId, ctx.otherTenantId].filter(Boolean)) {
-        await swallow(ctx.service.from("reservations").delete().eq("tenant_id", tenantId));
-        await swallow(ctx.service.from("discount_codes").delete().eq("tenant_id", tenantId));
-        await swallow(ctx.service.from("tenant_users").delete().eq("tenant_id", tenantId));
+      for (const tenantId of [ctx.tenantId, ctx.otherTenantId].filter(
+        Boolean,
+      )) {
+        await swallow(
+          ctx.service.from("reservations").delete().eq("tenant_id", tenantId),
+        );
+        await swallow(
+          ctx.service.from("discount_codes").delete().eq("tenant_id", tenantId),
+        );
+        await swallow(
+          ctx.service.from("tenant_users").delete().eq("tenant_id", tenantId),
+        );
         await swallow(ctx.service.from("tenants").delete().eq("id", tenantId));
       }
-      if (ctx.ownerId) await swallow(ctx.service.auth.admin.deleteUser(ctx.ownerId));
+      if (ctx.ownerId)
+        await swallow(ctx.service.auth.admin.deleteUser(ctx.ownerId));
     }, 90_000);
 
     it("keeps a well-formed server-computed discount intact (control case)", async () => {
@@ -293,7 +307,10 @@ describe.runIf(canRun)(
     });
 
     it("rejects negative money and unknown discount types, scrubbing negative discounts", async () => {
-      const negative = await insertAsService({ price_eur: -50, original_price_eur: -10 });
+      const negative = await insertAsService({
+        price_eur: -50,
+        original_price_eur: -10,
+      });
       expect(negative.error, "negative prices must be rejected").toBeTruthy();
 
       // A negative discount is not a rejection case: the trigger clears the
@@ -309,14 +326,16 @@ describe.runIf(canRun)(
       expect(negativeDiscount.row?.discount_value).toBeNull();
       expect(Number(negativeDiscount.row?.price_eur)).toBe(100);
 
-
       const unknownType = await insertAsService({
         original_price_eur: 100,
         price_eur: 50,
         discount_type: "definitely-not-a-type",
         discount_value: 50,
       });
-      expect(unknownType.error, "unknown discount type must be rejected").toBeTruthy();
+      expect(
+        unknownType.error,
+        "unknown discount type must be rejected",
+      ).toBeTruthy();
     });
 
     it("scrubs malformed discount payloads on update too", async () => {
@@ -332,7 +351,11 @@ describe.runIf(canRun)(
 
       const { data, error } = await ctx.service
         .from("reservations")
-        .update({ discount_type: "percentage", discount_value: 900, price_eur: 1 })
+        .update({
+          discount_type: "percentage",
+          discount_value: 900,
+          price_eur: 1,
+        })
         .eq("id", id)
         .select(PRICING_COLUMNS)
         .single();

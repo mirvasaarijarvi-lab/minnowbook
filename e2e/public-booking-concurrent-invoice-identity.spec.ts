@@ -33,7 +33,8 @@ import { roundCents } from "@/lib/report-pricing-accessor";
  * Requires SERVICE_ROLE_KEY; skips itself without it.
  */
 
-const AMOUNT_ERROR = "Invoice amount must match the recalculated room and breakfast totals.";
+const AMOUNT_ERROR =
+  "Invoice amount must match the recalculated room and breakfast totals.";
 
 const NIGHTLY = 115;
 const BREAKFAST_RATE = 12.25;
@@ -58,7 +59,10 @@ test.describe("Concurrent invoicing identity", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("returns one consistent invoice identifier and a single history entry", async ({
     ephemeralTenant,
@@ -92,15 +96,18 @@ test.describe("Concurrent invoicing identity", () => {
     expect(resErr, resErr?.message).toBeNull();
 
     const book = async (data: Record<string, unknown>) => {
-      const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          apikey: SUPABASE_ANON_KEY,
+      const res = await request.post(
+        `${SUPABASE_URL}/functions/v1/public-booking`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            apikey: SUPABASE_ANON_KEY,
+          },
+          data: { tenant_id: tenantId, ...data },
+          timeout: 30_000,
         },
-        data: { tenant_id: tenantId, ...data },
-        timeout: 30_000,
-      });
+      );
       expect(res.status(), await res.text()).toBe(200);
     };
 
@@ -145,7 +152,9 @@ test.describe("Concurrent invoicing identity", () => {
     };
 
     let stay = await fetchRow(stayEmail);
-    expect(Number(stay.price_eur), "server-recalculated stay total").toBe(STAY_TOTAL);
+    expect(Number(stay.price_eur), "server-recalculated stay total").toBe(
+      STAY_TOTAL,
+    );
 
     const { error: priceErr } = await admin
       .from("reservations")
@@ -161,11 +170,12 @@ test.describe("Concurrent invoicing identity", () => {
     for (let i = 0; i < CLIENTS; i++) {
       const email = `ci+invid-staff${i}-${stamp}@mimmobook.test`;
       const password = `Ci-Tmp-${randomUUID()}-Z9!`;
-      const { data: created, error: userErr } = await admin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
+      const { data: created, error: userErr } =
+        await admin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
       expect(userErr, userErr?.message).toBeNull();
       userIds.push(created!.user!.id);
       const { error: memberErr } = await admin.from("tenant_users").insert({
@@ -182,7 +192,10 @@ test.describe("Concurrent invoicing identity", () => {
           storageKey: `ci-invid-${i}-${stamp}`,
         },
       });
-      const { error: signInErr } = await client.auth.signInWithPassword({ email, password });
+      const { error: signInErr } = await client.auth.signInWithPassword({
+        email,
+        password,
+      });
       expect(signInErr, signInErr?.message).toBeNull();
       clients.push(client);
     }
@@ -197,7 +210,8 @@ test.describe("Concurrent invoicing identity", () => {
         .eq("action", "UPDATE");
       expect(error, error?.message).toBeNull();
       return (data ?? []).filter(
-        (e: any) => e.old_data?.is_invoiced === false && e.new_data?.is_invoiced === true,
+        (e: any) =>
+          e.old_data?.is_invoiced === false && e.new_data?.is_invoiced === true,
       );
     };
 
@@ -210,7 +224,10 @@ test.describe("Concurrent invoicing identity", () => {
 
     try {
       // --- 1 + 2. Concurrent burst on the stay ------------------------------
-      const burst = async (row: Record<string, any>, patchFor: (i: number) => Record<string, unknown>) =>
+      const burst = async (
+        row: Record<string, any>,
+        patchFor: (i: number) => Record<string, unknown>,
+      ) =>
         Promise.all(
           Array.from({ length: REQUESTS }, (_, i) =>
             clients[i % CLIENTS]
@@ -231,7 +248,10 @@ test.describe("Concurrent invoicing identity", () => {
       ).toEqual([]);
 
       const stayTransitions = await invoiceTransitions(stay.id);
-      expect(stayTransitions, "exactly one history entry for the invoicing").toHaveLength(1);
+      expect(
+        stayTransitions,
+        "exactly one history entry for the invoicing",
+      ).toHaveLength(1);
 
       const expectedStayId = stay.id.slice(0, 8).toUpperCase();
       const returnedIdentifiers = stayResults
@@ -250,12 +270,18 @@ test.describe("Concurrent invoicing identity", () => {
 
       stay = await fetchRow(stayEmail);
       expect(stay.is_invoiced, "invoiced once").toBe(true);
-      expect(Number(stay.price_eur), "amount untouched by the burst").toBe(STAY_TOTAL);
+      expect(Number(stay.price_eur), "amount untouched by the burst").toBe(
+        STAY_TOTAL,
+      );
 
       // Rebuilding the document later yields the same identifier and totals.
-      const rebuilt = Array.from({ length: 4 }, () => buildInvoiceModel(stay as any, "en"));
+      const rebuilt = Array.from({ length: 4 }, () =>
+        buildInvoiceModel(stay as any, "en"),
+      );
       for (const model of rebuilt) {
-        expect(model.invoiceNumber, "identifier stable across rebuilds").toBe(expectedStayId);
+        expect(model.invoiceNumber, "identifier stable across rebuilds").toBe(
+          expectedStayId,
+        );
         expect(model.total, "total stable across rebuilds").toBe(STAY_TOTAL);
       }
 
@@ -265,7 +291,10 @@ test.describe("Concurrent invoicing identity", () => {
         dinnerResults.filter((r) => r.error).map((r) => r.error!.message),
         "no request refused for the priced dinner leg",
       ).toEqual([]);
-      expect(await invoiceTransitions(dinner.id), "one history entry for the dinner").toHaveLength(1);
+      expect(
+        await invoiceTransitions(dinner.id),
+        "one history entry for the dinner",
+      ).toHaveLength(1);
 
       dinner = await fetchRow(dinnerEmail);
       const expectedDinnerId = dinner.id.slice(0, 8).toUpperCase();
@@ -275,9 +304,13 @@ test.describe("Concurrent invoicing identity", () => {
           .filter((row): row is Record<string, any> => !!row)
           .map((row) => identifierOf(row)),
       );
-      expect(dinnerIdentifiers.size, "one identifier for the dinner leg").toBe(1);
+      expect(dinnerIdentifiers.size, "one identifier for the dinner leg").toBe(
+        1,
+      );
       expect([...dinnerIdentifiers][0]).toBe(expectedDinnerId);
-      expect(expectedDinnerId, "each leg keeps its own identifier").not.toBe(expectedStayId);
+      expect(expectedDinnerId, "each leg keeps its own identifier").not.toBe(
+        expectedStayId,
+      );
 
       const group = buildGroupInvoiceModel(
         [
@@ -305,7 +338,10 @@ test.describe("Concurrent invoicing identity", () => {
         price_eur: i % 2 === 0 ? 20 : STAY_TOTAL + 0.004,
       }));
       for (const r of tampered) {
-        expect(r.error, "every tampered request must be refused").not.toBeNull();
+        expect(
+          r.error,
+          "every tampered request must be refused",
+        ).not.toBeNull();
         expect(r.error!.message).toContain(AMOUNT_ERROR);
       }
       expect(
@@ -313,8 +349,12 @@ test.describe("Concurrent invoicing identity", () => {
         "no extra history entry from the refused burst",
       ).toHaveLength(1);
       const afterTamper = await fetchRow(stayEmail);
-      expect(Number(afterTamper.price_eur), "amount unchanged").toBe(STAY_TOTAL);
-      expect(identifierOf(afterTamper), "identifier unchanged").toBe(expectedStayId);
+      expect(Number(afterTamper.price_eur), "amount unchanged").toBe(
+        STAY_TOTAL,
+      );
+      expect(identifierOf(afterTamper), "identifier unchanged").toBe(
+        expectedStayId,
+      );
 
       // --- 5. Un-invoice, then invoice again --------------------------------
       const { error: undoErr } = await clients[0]
@@ -325,14 +365,19 @@ test.describe("Concurrent invoicing identity", () => {
       expect(undoErr, undoErr?.message).toBeNull();
 
       const again = await burst(stay, () => ({ is_invoiced: true }));
-      expect(again.filter((r) => r.error).map((r) => r.error!.message)).toEqual([]);
+      expect(again.filter((r) => r.error).map((r) => r.error!.message)).toEqual(
+        [],
+      );
       expect(
         await invoiceTransitions(stay.id),
         "exactly one further transition after re-invoicing",
       ).toHaveLength(2);
       const reinvoiced = await fetchRow(stayEmail);
       expect(reinvoiced.is_invoiced).toBe(true);
-      expect(identifierOf(reinvoiced), "same identifier as the first invoice").toBe(expectedStayId);
+      expect(
+        identifierOf(reinvoiced),
+        "same identifier as the first invoice",
+      ).toBe(expectedStayId);
       expect(Number(reinvoiced.price_eur)).toBe(STAY_TOTAL);
     } finally {
       for (const id of userIds) await admin.auth.admin.deleteUser(id);

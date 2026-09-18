@@ -46,7 +46,9 @@ vi.mock("@/integrations/supabase/client", () => ({
           data: {
             subscription: {
               unsubscribe: () => {
-                registeredCallbacks = registeredCallbacks.filter((x) => x !== cb);
+                registeredCallbacks = registeredCallbacks.filter(
+                  (x) => x !== cb,
+                );
               },
             },
           },
@@ -80,7 +82,9 @@ const mount = () => {
   const ref: { current: ReturnType<typeof useAuth> | null } = { current: null };
   const utils = render(
     <QueryClientProvider
-      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
     >
       <AuthProvider>
         <Harness onReady={(api) => (ref.current = api)} />
@@ -158,7 +162,8 @@ describe("Corrupted persisted session recovery", () => {
     // fire for a corruption-driven sign-out, because it IS intentional.
     const unexpected = warnSpy.mock.calls.find(
       ([msg]) =>
-        typeof msg === "string" && msg.includes("[AuthContext][signout] unexpected"),
+        typeof msg === "string" &&
+        msg.includes("[AuthContext][signout] unexpected"),
     );
     expect(unexpected).toBeUndefined();
 

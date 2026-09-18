@@ -32,7 +32,8 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY ??
@@ -86,7 +87,10 @@ const ctx: Ctx = {
   cleanupTenants: [],
 };
 
-async function createUser(service: SupabaseClient, label: string): Promise<Actor> {
+async function createUser(
+  service: SupabaseClient,
+  label: string,
+): Promise<Actor> {
   const email = `ci+roles-${label}-${randomUUID().slice(0, 8)}@mimmobook.test`;
   const password = `Ci-Roles-${randomUUID()}-Z9!`;
   const { data, error } = await service.auth.admin.createUser({
@@ -175,7 +179,11 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
     ctx.staff = await createUser(ctx.service, "staff");
     ctx.outsider = await createUser(ctx.service, "outsider");
 
-    const primary = await createTenant(ctx.service, ctx.owner.userId, "primary");
+    const primary = await createTenant(
+      ctx.service,
+      ctx.owner.userId,
+      "primary",
+    );
     ctx.tenantId = primary.tenantId;
     ctx.siteId = primary.siteId;
 
@@ -192,11 +200,19 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
   afterAll(async () => {
     if (!ctx.service) return;
     const swallow = async (p: PromiseLike<unknown>) => {
-      try { await p; } catch { /* best-effort */ }
+      try {
+        await p;
+      } catch {
+        /* best-effort */
+      }
     };
     for (const t of ctx.cleanupTenants) {
-      await swallow(ctx.service.from("reservations").delete().eq("tenant_id", t));
-      await swallow(ctx.service.from("tenant_users").delete().eq("tenant_id", t));
+      await swallow(
+        ctx.service.from("reservations").delete().eq("tenant_id", t),
+      );
+      await swallow(
+        ctx.service.from("tenant_users").delete().eq("tenant_id", t),
+      );
       await swallow(ctx.service.from("sites").delete().eq("tenant_id", t));
       await swallow(ctx.service.from("tenants").delete().eq("id", t));
     }
@@ -240,24 +256,33 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
       const client = await signedInClient(ctx.admin);
 
       // Legitimate call (control): admin of tenantId targeting its own site.
-      const { error: okErr } = await client.rpc("copy_tenant_defaults_to_site", {
-        p_tenant_id: ctx.tenantId,
-        p_site_id: ctx.siteId,
-      });
+      const { error: okErr } = await client.rpc(
+        "copy_tenant_defaults_to_site",
+        {
+          p_tenant_id: ctx.tenantId,
+          p_site_id: ctx.siteId,
+        },
+      );
       expect(okErr, "admin on own tenant should succeed").toBeNull();
 
       // Cross-tenant: admin of tenantId targeting otherTenantId.
-      const { error: crossErr } = await client.rpc("copy_tenant_defaults_to_site", {
-        p_tenant_id: ctx.otherTenantId,
-        p_site_id: ctx.otherSiteId,
-      });
+      const { error: crossErr } = await client.rpc(
+        "copy_tenant_defaults_to_site",
+        {
+          p_tenant_id: ctx.otherTenantId,
+          p_site_id: ctx.otherSiteId,
+        },
+      );
       expect(crossErr, "cross-tenant must be rejected").not.toBeNull();
 
       // Mismatched site: own tenant but site from the other tenant.
-      const { error: mismatchErr } = await client.rpc("copy_tenant_defaults_to_site", {
-        p_tenant_id: ctx.tenantId,
-        p_site_id: ctx.otherSiteId,
-      });
+      const { error: mismatchErr } = await client.rpc(
+        "copy_tenant_defaults_to_site",
+        {
+          p_tenant_id: ctx.tenantId,
+          p_site_id: ctx.otherSiteId,
+        },
+      );
       expect(mismatchErr, "site-not-in-tenant must be rejected").not.toBeNull();
 
       await client.auth.signOut();
@@ -307,8 +332,14 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
     it("anon cannot update billing columns", async () => {
       const anon = newAnon();
       for (const patch of billingPatches) {
-        const { error } = await anon.from("tenants").update(patch).eq("id", ctx.tenantId);
-        expect(error, `anon patch ${JSON.stringify(patch)} must be rejected`).not.toBeNull();
+        const { error } = await anon
+          .from("tenants")
+          .update(patch)
+          .eq("id", ctx.tenantId);
+        expect(
+          error,
+          `anon patch ${JSON.stringify(patch)} must be rejected`,
+        ).not.toBeNull();
       }
     });
 
@@ -322,25 +353,39 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
           .select("id");
         // Either an explicit error OR RLS filters the row out (empty result).
         const blocked = Boolean(error) || !data || data.length === 0;
-        expect(blocked, `outsider patch ${JSON.stringify(patch)} must not apply`).toBe(true);
+        expect(
+          blocked,
+          `outsider patch ${JSON.stringify(patch)} must not apply`,
+        ).toBe(true);
       }
       await client.auth.signOut();
     });
 
-    it.each(["admin", "staff"] as const)("%s member cannot update billing columns", async (role) => {
-      const actor = role === "admin" ? ctx.admin : ctx.staff;
-      const client = await signedInClient(actor);
-      for (const patch of billingPatches) {
-        const { error } = await client.from("tenants").update(patch).eq("id", ctx.tenantId);
-        expect(error, `${role} patch ${JSON.stringify(patch)} must be rejected`).not.toBeNull();
-      }
-      await client.auth.signOut();
-    });
+    it.each(["admin", "staff"] as const)(
+      "%s member cannot update billing columns",
+      async (role) => {
+        const actor = role === "admin" ? ctx.admin : ctx.staff;
+        const client = await signedInClient(actor);
+        for (const patch of billingPatches) {
+          const { error } = await client
+            .from("tenants")
+            .update(patch)
+            .eq("id", ctx.tenantId);
+          expect(
+            error,
+            `${role} patch ${JSON.stringify(patch)} must be rejected`,
+          ).not.toBeNull();
+        }
+        await client.auth.signOut();
+      },
+    );
 
     it("post-condition: billing columns unchanged after all role attempts", async () => {
       const { data: row } = await ctx.service
         .from("tenants")
-        .select("tier, subscription_status, stripe_customer_id, stripe_subscription_id, discount_percentage")
+        .select(
+          "tier, subscription_status, stripe_customer_id, stripe_subscription_id, discount_percentage",
+        )
         .eq("id", ctx.tenantId)
         .single();
       expect(row?.tier).toBe("basic");
@@ -366,14 +411,23 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
       { discount_code_id: randomUUID() },
       { discount_type: "percent" },
       { discount_value: 50 },
-      { discount_code_id: randomUUID(), discount_type: "fixed", discount_value: 25 },
+      {
+        discount_code_id: randomUUID(),
+        discount_type: "fixed",
+        discount_value: 25,
+      },
     ];
 
     it("anon insert with any discount field is rejected", async () => {
       const anon = newAnon();
       for (const extra of discountFields) {
-        const { error } = await anon.from("reservations").insert({ ...buildBase(), ...extra });
-        expect(error, `anon insert with ${JSON.stringify(extra)} must fail`).not.toBeNull();
+        const { error } = await anon
+          .from("reservations")
+          .insert({ ...buildBase(), ...extra });
+        expect(
+          error,
+          `anon insert with ${JSON.stringify(extra)} must fail`,
+        ).not.toBeNull();
       }
     });
 
@@ -393,8 +447,13 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
     it("outsider (authenticated non-member) insert with discount is also rejected", async () => {
       const client = await signedInClient(ctx.outsider);
       for (const extra of discountFields) {
-        const { error } = await client.from("reservations").insert({ ...buildBase(), ...extra });
-        expect(error, `outsider insert with ${JSON.stringify(extra)} must fail`).not.toBeNull();
+        const { error } = await client
+          .from("reservations")
+          .insert({ ...buildBase(), ...extra });
+        expect(
+          error,
+          `outsider insert with ${JSON.stringify(extra)} must fail`,
+        ).not.toBeNull();
       }
       await client.auth.signOut();
     });
@@ -425,7 +484,9 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
 
       const { data: row } = await ctx.service
         .from("tenants")
-        .select("tier, subscription_status, stripe_customer_id, stripe_subscription_id, discount_percentage")
+        .select(
+          "tier, subscription_status, stripe_customer_id, stripe_subscription_id, discount_percentage",
+        )
         .eq("id", ctx.tenantId)
         .single();
       expect(row?.tier).toBe("professional");
@@ -489,32 +550,54 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
         .from("tenants")
         .update({ tier: "business" })
         .eq("id", ctx.tenantId);
-      expect(anonBillingErr, "anon billing update stays blocked").not.toBeNull();
+      expect(
+        anonBillingErr,
+        "anon billing update stays blocked",
+      ).not.toBeNull();
 
-      const { error: anonRpcErr } = await anon.rpc("copy_tenant_defaults_to_site", {
-        p_tenant_id: ctx.tenantId,
-        p_site_id: ctx.siteId,
-      });
-      expect(anonRpcErr, "anon copy_tenant_defaults_to_site stays blocked").not.toBeNull();
+      const { error: anonRpcErr } = await anon.rpc(
+        "copy_tenant_defaults_to_site",
+        {
+          p_tenant_id: ctx.tenantId,
+          p_site_id: ctx.siteId,
+        },
+      );
+      expect(
+        anonRpcErr,
+        "anon copy_tenant_defaults_to_site stays blocked",
+      ).not.toBeNull();
 
       const outsider = await signedInClient(ctx.outsider);
-      const { error: outsiderRpcErr } = await outsider.rpc("copy_tenant_defaults_to_site", {
-        p_tenant_id: ctx.tenantId,
-        p_site_id: ctx.siteId,
-      });
-      expect(outsiderRpcErr, "outsider copy_tenant_defaults_to_site stays blocked").not.toBeNull();
+      const { error: outsiderRpcErr } = await outsider.rpc(
+        "copy_tenant_defaults_to_site",
+        {
+          p_tenant_id: ctx.tenantId,
+          p_site_id: ctx.siteId,
+        },
+      );
+      expect(
+        outsiderRpcErr,
+        "outsider copy_tenant_defaults_to_site stays blocked",
+      ).not.toBeNull();
 
-      const { error: outsiderResvErr } = await outsider.from("reservations").insert({
-        tenant_id: ctx.tenantId,
-        reservation_type: "restaurant",
-        date: new Date(Date.now() + 21 * 86_400_000).toISOString().slice(0, 10),
-        guest_name: `TEST CI roles neg-ctrl ${randomUUID().slice(0, 8)}`,
-        guest_email: "ci-roles-neg-ctrl@mimmobook.test",
-        status: "pending",
-        discount_type: "percent",
-        discount_value: 10,
-      });
-      expect(outsiderResvErr, "outsider discount insert stays blocked").not.toBeNull();
+      const { error: outsiderResvErr } = await outsider
+        .from("reservations")
+        .insert({
+          tenant_id: ctx.tenantId,
+          reservation_type: "restaurant",
+          date: new Date(Date.now() + 21 * 86_400_000)
+            .toISOString()
+            .slice(0, 10),
+          guest_name: `TEST CI roles neg-ctrl ${randomUUID().slice(0, 8)}`,
+          guest_email: "ci-roles-neg-ctrl@mimmobook.test",
+          status: "pending",
+          discount_type: "percent",
+          discount_value: 10,
+        });
+      expect(
+        outsiderResvErr,
+        "outsider discount insert stays blocked",
+      ).not.toBeNull();
       await outsider.auth.signOut();
     });
   });
@@ -546,20 +629,21 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
       "23514", // check_violation (trigger-based tier/discount clamps)
     ]);
 
-    const SENSITIVE_TOKENS = (): string[] => [
-      ctx.tenantId,
-      ctx.siteId,
-      ctx.otherTenantId,
-      ctx.otherSiteId,
-      ctx.owner.userId,
-      ctx.owner.email,
-      ctx.admin.userId,
-      ctx.admin.email,
-      ctx.staff.userId,
-      ctx.staff.email,
-      ctx.outsider.userId,
-      ctx.outsider.email,
-    ].filter(Boolean);
+    const SENSITIVE_TOKENS = (): string[] =>
+      [
+        ctx.tenantId,
+        ctx.siteId,
+        ctx.otherTenantId,
+        ctx.otherSiteId,
+        ctx.owner.userId,
+        ctx.owner.email,
+        ctx.admin.userId,
+        ctx.admin.email,
+        ctx.staff.userId,
+        ctx.staff.email,
+        ctx.outsider.userId,
+        ctx.outsider.email,
+      ].filter(Boolean);
 
     interface Rejection {
       code: string | null;
@@ -601,18 +685,24 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
 
     it("copy_tenant_defaults_to_site: anon and outsider return an allowlisted, leak-free rejection", async () => {
       const anon = newAnon();
-      const { error: anonErr } = await anon.rpc("copy_tenant_defaults_to_site", {
-        p_tenant_id: ctx.tenantId,
-        p_site_id: ctx.siteId,
-      });
+      const { error: anonErr } = await anon.rpc(
+        "copy_tenant_defaults_to_site",
+        {
+          p_tenant_id: ctx.tenantId,
+          p_site_id: ctx.siteId,
+        },
+      );
       const anonR = capture(anonErr);
       assertClean(anonR, "anon rpc");
 
       const outsider = await signedInClient(ctx.outsider);
-      const { error: outsiderErr } = await outsider.rpc("copy_tenant_defaults_to_site", {
-        p_tenant_id: ctx.tenantId,
-        p_site_id: ctx.siteId,
-      });
+      const { error: outsiderErr } = await outsider.rpc(
+        "copy_tenant_defaults_to_site",
+        {
+          p_tenant_id: ctx.tenantId,
+          p_site_id: ctx.siteId,
+        },
+      );
       const outsiderR = capture(outsiderErr);
       assertClean(outsiderR, "outsider rpc");
       await outsider.auth.signOut();
@@ -628,7 +718,10 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
     it("tenants billing update: anon and outsider return an allowlisted, leak-free rejection", async () => {
       const patch = { tier: "business" as const };
       const anon = newAnon();
-      const { error: anonErr } = await anon.from("tenants").update(patch).eq("id", ctx.tenantId);
+      const { error: anonErr } = await anon
+        .from("tenants")
+        .update(patch)
+        .eq("id", ctx.tenantId);
       const anonR = capture(anonErr);
       assertClean(anonR, "anon billing update");
 
@@ -664,7 +757,9 @@ describe.runIf(canRun)("billing + RPC hardening — role matrix (live)", () => {
       assertClean(anonR, "anon reservation discount insert");
 
       const outsider = await signedInClient(ctx.outsider);
-      const { error: outsiderErr } = await outsider.from("reservations").insert(base);
+      const { error: outsiderErr } = await outsider
+        .from("reservations")
+        .insert(base);
       const outsiderR = capture(outsiderErr);
       assertClean(outsiderR, "outsider reservation discount insert");
       await outsider.auth.signOut();

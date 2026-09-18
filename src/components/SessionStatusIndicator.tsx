@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 /**
@@ -87,11 +91,7 @@ const SessionStatusIndicator = () => {
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent
-        side="top"
-        align="end"
-        className="w-72 text-sm"
-      >
+      <PopoverContent side="top" align="end" className="w-72 text-sm">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span
@@ -112,7 +112,9 @@ const SessionStatusIndicator = () => {
           {isAuthed ? (
             <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
               <dt className="text-muted-foreground">User</dt>
-              <dd className="truncate font-medium">{user?.email ?? user?.id}</dd>
+              <dd className="truncate font-medium">
+                {user?.email ?? user?.id}
+              </dd>
 
               {ageSeconds !== null && (
                 <>

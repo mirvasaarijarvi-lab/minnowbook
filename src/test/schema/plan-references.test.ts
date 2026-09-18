@@ -81,13 +81,15 @@ describe("plan references gate", () => {
       /supabase\/migrations\//i.test(plan) ||
       /\bCREATE\s+TABLE\b/i.test(plan);
     if (!looksSchemaShaped) {
-      expect(true, "plan.md describes no schema work, gate is vacuous").toBe(true);
+      expect(true, "plan.md describes no schema work, gate is vacuous").toBe(
+        true,
+      );
       return;
     }
     expect(
       referencedTables.length + referencedMigrations.length,
       "plan.md mentions schema vocabulary but the extractor returned nothing. " +
-        "Either rephrase the plan or update the regexes."
+        "Either rephrase the plan or update the regexes.",
     ).toBeGreaterThan(0);
   });
 
@@ -95,12 +97,12 @@ describe("plan references gate", () => {
     it(`plan-referenced table "${table}" has a CREATE TABLE in migrations`, () => {
       const pattern = new RegExp(
         `CREATE\\s+TABLE\\s+(?:IF\\s+NOT\\s+EXISTS\\s+)?(?:public\\.)?${table}\\b`,
-        "i"
+        "i",
       );
       expect(
         pattern.test(corpus),
         `Plan mentions \`${table}\` table but no migration creates public.${table}. ` +
-          `Either add the migration in this PR or remove the reference from plan.md.`
+          `Either add the migration in this PR or remove the reference from plan.md.`,
       ).toBe(true);
     });
   }
@@ -113,10 +115,13 @@ describe("plan references gate", () => {
         const planLines = plan.split("\n");
         const line56 = planLines[55] ?? "<plan.md has fewer than 56 lines>";
         const available = existsSync(MIGRATIONS_DIR)
-          ? readdirSync(MIGRATIONS_DIR).filter((f) => f.endsWith(".sql")).sort().slice(-5)
+          ? readdirSync(MIGRATIONS_DIR)
+              .filter((f) => f.endsWith(".sql"))
+              .sort()
+              .slice(-5)
           : [];
         // Diagnostic block: surfaced in CI logs when this assertion fails.
-        // eslint-disable-next-line no-console
+
         console.error(
           [
             "",

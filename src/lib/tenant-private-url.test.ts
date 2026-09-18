@@ -46,11 +46,9 @@ describe("tenant-private-url helper", () => {
     await createTenantPrivateSignedUrl("a/b.pdf", {
       expiresInSeconds: 9_999_999,
     });
-    expect(createSignedUrl).toHaveBeenCalledWith(
-      "a/b.pdf",
-      7 * 24 * 60 * 60,
-      { download: undefined },
-    );
+    expect(createSignedUrl).toHaveBeenCalledWith("a/b.pdf", 7 * 24 * 60 * 60, {
+      download: undefined,
+    });
   });
 
   it("rejects empty paths", async () => {
@@ -95,8 +93,14 @@ describe("tenant-private-url helper", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
     createSignedUrl
-      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v1" }, error: null })
-      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v2" }, error: null });
+      .mockResolvedValueOnce({
+        data: { signedUrl: "https://example/v1" },
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: { signedUrl: "https://example/v2" },
+        error: null,
+      });
 
     const first = await createTenantPrivateSignedUrl("cache/renew.png", {
       expiresInSeconds: 600, // 10 minutes
@@ -114,8 +118,14 @@ describe("tenant-private-url helper", () => {
 
   it("forceRefresh bypasses the cache", async () => {
     createSignedUrl
-      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v1" }, error: null })
-      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v2" }, error: null });
+      .mockResolvedValueOnce({
+        data: { signedUrl: "https://example/v1" },
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: { signedUrl: "https://example/v2" },
+        error: null,
+      });
     await createTenantPrivateSignedUrl("cache/force.png");
     const fresh = await createTenantPrivateSignedUrl("cache/force.png", {
       forceRefresh: true,
@@ -126,8 +136,14 @@ describe("tenant-private-url helper", () => {
 
   it("invalidate drops a single cached entry", async () => {
     createSignedUrl
-      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v1" }, error: null })
-      .mockResolvedValueOnce({ data: { signedUrl: "https://example/v2" }, error: null });
+      .mockResolvedValueOnce({
+        data: { signedUrl: "https://example/v1" },
+        error: null,
+      })
+      .mockResolvedValueOnce({
+        data: { signedUrl: "https://example/v2" },
+        error: null,
+      });
     await createTenantPrivateSignedUrl("cache/invalidate.png");
     invalidateTenantPrivateSignedUrl("cache/invalidate.png");
     const next = await createTenantPrivateSignedUrl("cache/invalidate.png");
@@ -157,7 +173,11 @@ describe("tenant-private-url SignedUrlError contract", () => {
     });
     await expect(
       createTenantPrivateSignedUrl("tenant-1/secret.bin"),
-    ).rejects.toMatchObject({ name: "SignedUrlError", code: "forbidden", httpStatus: 403 });
+    ).rejects.toMatchObject({
+      name: "SignedUrlError",
+      code: "forbidden",
+      httpStatus: 403,
+    });
   });
 
   it("SDK 404 -> code 'not_found'", async () => {
@@ -167,7 +187,11 @@ describe("tenant-private-url SignedUrlError contract", () => {
     });
     await expect(
       createTenantPrivateSignedUrl("tenant-1/missing.bin"),
-    ).rejects.toMatchObject({ name: "SignedUrlError", code: "not_found", httpStatus: 404 });
+    ).rejects.toMatchObject({
+      name: "SignedUrlError",
+      code: "not_found",
+      httpStatus: 404,
+    });
   });
 
   it("thrown TypeError('fetch failed') -> code 'transport'", async () => {
@@ -179,8 +203,14 @@ describe("tenant-private-url SignedUrlError contract", () => {
 
   it("dropped cache after a classified failure (next call retries)", async () => {
     createSignedUrl
-      .mockResolvedValueOnce({ data: null, error: { message: "permission denied", status: 403 } })
-      .mockResolvedValueOnce({ data: { signedUrl: "https://example/recovered" }, error: null });
+      .mockResolvedValueOnce({
+        data: null,
+        error: { message: "permission denied", status: 403 },
+      })
+      .mockResolvedValueOnce({
+        data: { signedUrl: "https://example/recovered" },
+        error: null,
+      });
     await expect(
       createTenantPrivateSignedUrl("tenant-1/retry.bin"),
     ).rejects.toMatchObject({ code: "forbidden" });

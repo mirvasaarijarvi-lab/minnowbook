@@ -7,7 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Ban, CalendarRange, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import {
+  Ban,
+  CalendarRange,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+} from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useT } from "@/contexts/I18nContext";
 import { useAutoApproval } from "@/hooks/useAutoApproval";
@@ -72,22 +78,29 @@ const AvailabilityTimelinePanel = () => {
         .eq("is_active", true)
         .order("resource_type")
         .order("name");
-      if (selectedSiteId) resourcesQuery = resourcesQuery.eq("site_id", selectedSiteId);
+      if (selectedSiteId)
+        resourcesQuery = resourcesQuery.eq("site_id", selectedSiteId);
 
       let reservationsQuery = supabase
         .from("reservations")
-        .select("id, guest_name, reservation_type, status, date, start_time, end_time, guests_count, site_id")
+        .select(
+          "id, guest_name, reservation_type, status, date, start_time, end_time, guests_count, site_id",
+        )
         .eq("tenant_id", tenantId!)
         .eq("date", day)
         .neq("status", "cancelled");
-      if (selectedSiteId) reservationsQuery = reservationsQuery.eq("site_id", selectedSiteId);
+      if (selectedSiteId)
+        reservationsQuery = reservationsQuery.eq("site_id", selectedSiteId);
 
       let blocksQuery = supabase
         .from("blocked_slots")
-        .select("id, resource_type, resource_id, date, start_time, end_time, reason, site_id")
+        .select(
+          "id, resource_type, resource_id, date, start_time, end_time, reason, site_id",
+        )
         .eq("tenant_id", tenantId!)
         .eq("date", day);
-      if (selectedSiteId) blocksQuery = blocksQuery.eq("site_id", selectedSiteId);
+      if (selectedSiteId)
+        blocksQuery = blocksQuery.eq("site_id", selectedSiteId);
 
       const slotsQuery = supabase
         .from("resource_availability_slots")
@@ -195,7 +208,10 @@ const AvailabilityTimelinePanel = () => {
     if (all.length === 0) return [8 * 60, 22 * 60];
     const min = Math.min(...all.map((b) => b.startMin), 8 * 60);
     const max = Math.max(...all.map((b) => b.endMin), 22 * 60);
-    return [Math.floor(min / 60) * 60, Math.min(24 * 60, Math.ceil(max / 60) * 60)];
+    return [
+      Math.floor(min / 60) * 60,
+      Math.min(24 * 60, Math.ceil(max / 60) * 60),
+    ];
   }, [rows]);
 
   const span = Math.max(60, windowEnd - windowStart);
@@ -208,10 +224,16 @@ const AvailabilityTimelinePanel = () => {
   const queryClient = useQueryClient();
   const { getApprovalStatus } = useAutoApproval();
   const laneRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const [drag, setDrag] = useState<{ rowKey: string; startMin: number; endMin: number } | null>(null);
-  const [pendingBlock, setPendingBlock] = useState<
-    { row: TimelineRow; startMin: number; endMin: number } | null
-  >(null);
+  const [drag, setDrag] = useState<{
+    rowKey: string;
+    startMin: number;
+    endMin: number;
+  } | null>(null);
+  const [pendingBlock, setPendingBlock] = useState<{
+    row: TimelineRow;
+    startMin: number;
+    endMin: number;
+  } | null>(null);
   const [blockReason, setBlockReason] = useState("");
   /** Editable times so the dialog also works without a pointer drag. */
   const [blockStart, setBlockStart] = useState("09:00");
@@ -241,7 +263,8 @@ const AvailabilityTimelinePanel = () => {
    */
   const overlapsReservation = (row: TimelineRow, from: number, to: number) =>
     row.bars.some(
-      (bar) => bar.kind === "reservation" && bar.startMin < to && bar.endMin > from,
+      (bar) =>
+        bar.kind === "reservation" && bar.startMin < to && bar.endMin > from,
     );
 
   const dragInvalid = useMemo(() => {
@@ -254,7 +277,10 @@ const AvailabilityTimelinePanel = () => {
   }, [drag, rows]);
 
   const removeBlock = async (blockId: string) => {
-    const { error } = await supabase.from("blocked_slots").delete().eq("id", blockId);
+    const { error } = await supabase
+      .from("blocked_slots")
+      .delete()
+      .eq("id", blockId);
     if (error) {
       toast.error(error.message);
       return;
@@ -272,7 +298,8 @@ const AvailabilityTimelinePanel = () => {
       const startMin = snap(toMinutes(blockStart, pendingBlock.startMin));
       const endMin = snap(toMinutes(blockEnd, pendingBlock.endMin));
       if (endMin <= startMin) throw new Error(t("timeline.blockError"));
-      if (overlapsReservation(row, startMin, endMin)) throw new Error(t("timeline.overlapBlocked"));
+      if (overlapsReservation(row, startMin, endMin))
+        throw new Error(t("timeline.overlapBlocked"));
       const { data, error } = await supabase
         .from("blocked_slots")
         .insert({
@@ -299,7 +326,10 @@ const AvailabilityTimelinePanel = () => {
       setBlockReason("");
       toast.success(t("timeline.blockCreated"), {
         action: blockId
-          ? { label: t("timeline.undo"), onClick: () => void removeBlock(blockId) }
+          ? {
+              label: t("timeline.undo"),
+              onClick: () => void removeBlock(blockId),
+            }
           : undefined,
       });
     },
@@ -309,9 +339,12 @@ const AvailabilityTimelinePanel = () => {
   });
 
   const barClass = (kind: Bar["kind"], status?: string | null) => {
-    if (kind === "block") return "bg-destructive/20 border-destructive/40 text-destructive";
-    if (kind === "slot") return "bg-emerald-500/15 border-emerald-500/40 text-emerald-700 dark:text-emerald-400";
-    if (status === "pending") return "bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-400";
+    if (kind === "block")
+      return "bg-destructive/20 border-destructive/40 text-destructive";
+    if (kind === "slot")
+      return "bg-emerald-500/15 border-emerald-500/40 text-emerald-700 dark:text-emerald-400";
+    if (status === "pending")
+      return "bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-400";
     return "bg-primary/20 border-primary/40 text-primary";
   };
 
@@ -323,34 +356,73 @@ const AvailabilityTimelinePanel = () => {
           {t("timeline.title")}
         </CardTitle>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" aria-label={t("timeline.previousDay")} onClick={() => setDay(format(addDays(new Date(day), -1), "yyyy-MM-dd"))}>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label={t("timeline.previousDay")}
+            onClick={() =>
+              setDay(format(addDays(new Date(day), -1), "yyyy-MM-dd"))
+            }
+          >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Input type="date" value={day} onChange={(e) => setDay(e.target.value)} className="w-[10.5rem]" />
-          <Button variant="outline" size="icon" aria-label={t("timeline.nextDay")} onClick={() => setDay(format(addDays(new Date(day), 1), "yyyy-MM-dd"))}>
+          <Input
+            type="date"
+            value={day}
+            onChange={(e) => setDay(e.target.value)}
+            className="w-[10.5rem]"
+          />
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label={t("timeline.nextDay")}
+            onClick={() =>
+              setDay(format(addDays(new Date(day), 1), "yyyy-MM-dd"))
+            }
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-primary/30 border border-primary/40" />{t("timeline.legendReservation")}</span>
-          <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-amber-500/30 border border-amber-500/40" />{t("timeline.legendPending")}</span>
-          <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-destructive/30 border border-destructive/40" />{t("timeline.legendBlocked")}</span>
-          <span className="flex items-center gap-1"><span className="h-3 w-3 rounded-sm bg-emerald-500/30 border border-emerald-500/40" />{t("timeline.legendSlot")}</span>
+          <span className="flex items-center gap-1">
+            <span className="h-3 w-3 rounded-sm bg-primary/30 border border-primary/40" />
+            {t("timeline.legendReservation")}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-3 w-3 rounded-sm bg-amber-500/30 border border-amber-500/40" />
+            {t("timeline.legendPending")}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-3 w-3 rounded-sm bg-destructive/30 border border-destructive/40" />
+            {t("timeline.legendBlocked")}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="h-3 w-3 rounded-sm bg-emerald-500/30 border border-emerald-500/40" />
+            {t("timeline.legendSlot")}
+          </span>
         </div>
 
-        <p className="text-xs text-muted-foreground">{t("timeline.dragHint")}</p>
+        <p className="text-xs text-muted-foreground">
+          {t("timeline.dragHint")}
+        </p>
 
         {isLoading ? (
-          <div className="py-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          <div className="py-10 flex justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
         ) : rows.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">{t("timeline.empty")}</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            {t("timeline.empty")}
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <div className="min-w-[46rem]">
               <div className="flex border-b border-border pb-1 mb-1">
-                <div className="w-44 shrink-0 text-xs text-muted-foreground">{t("timeline.resource")}</div>
+                <div className="w-44 shrink-0 text-xs text-muted-foreground">
+                  {t("timeline.resource")}
+                </div>
                 <div className="relative flex-1 h-4">
                   {hourMarks.map((m) => (
                     <span
@@ -368,22 +440,37 @@ const AvailabilityTimelinePanel = () => {
                 const isTypeRow = row.key.startsWith("type-");
                 return (
                   <div key={row.key} className="flex items-center gap-2 py-1">
-                    <div className={`w-44 shrink-0 truncate text-sm ${isTypeRow ? "font-semibold capitalize" : "pl-4 text-muted-foreground"}`}>
+                    <div
+                      className={`w-44 shrink-0 truncate text-sm ${isTypeRow ? "font-semibold capitalize" : "pl-4 text-muted-foreground"}`}
+                    >
                       {row.title}
                       {row.subtitle && (
-                        <Badge variant="outline" className="ml-2 text-[10px] px-1 py-0">{row.subtitle}</Badge>
+                        <Badge
+                          variant="outline"
+                          className="ml-2 text-[10px] px-1 py-0"
+                        >
+                          {row.subtitle}
+                        </Badge>
                       )}
                     </div>
                     <div
-                      ref={(el) => { laneRefs.current[row.key] = el; }}
+                      ref={(el) => {
+                        laneRefs.current[row.key] = el;
+                      }}
                       role="presentation"
                       className="relative flex-1 h-8 rounded-md bg-muted/40 border border-border/60 cursor-crosshair touch-none"
                       onPointerDown={(e) => {
                         if (e.button !== 0) return;
                         const start = minutesFromPointer(row.key, e.clientX);
                         if (start === null) return;
-                        (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-                        setDrag({ rowKey: row.key, startMin: start, endMin: start });
+                        (e.target as HTMLElement).setPointerCapture?.(
+                          e.pointerId,
+                        );
+                        setDrag({
+                          rowKey: row.key,
+                          startMin: start,
+                          endMin: start,
+                        });
                       }}
                       onPointerMove={(e) => {
                         if (!drag || drag.rowKey !== row.key) return;
@@ -407,31 +494,50 @@ const AvailabilityTimelinePanel = () => {
                       onPointerCancel={() => setDrag(null)}
                     >
                       {hourMarks.map((m) => (
-                        <span key={m} className="absolute top-0 bottom-0 w-px bg-border/60" style={{ left: `${((m - windowStart) / span) * 100}%` }} />
-                      ))}
-                      {drag && drag.rowKey === row.key && Math.abs(drag.endMin - drag.startMin) >= SNAP_MINUTES && (
-                        <div
-                          className={`absolute top-1 bottom-1 rounded border pointer-events-none ${
-                            dragInvalid
-                              ? "border-amber-500/70 bg-amber-500/25 border-dashed"
-                              : "border-destructive/60 bg-destructive/25"
-                          }`}
+                        <span
+                          key={m}
+                          className="absolute top-0 bottom-0 w-px bg-border/60"
                           style={{
-                            left: `${((Math.min(drag.startMin, drag.endMin) - windowStart) / span) * 100}%`,
-                            width: `${(Math.abs(drag.endMin - drag.startMin) / span) * 100}%`,
+                            left: `${((m - windowStart) / span) * 100}%`,
                           }}
                         />
-                      )}
+                      ))}
+                      {drag &&
+                        drag.rowKey === row.key &&
+                        Math.abs(drag.endMin - drag.startMin) >=
+                          SNAP_MINUTES && (
+                          <div
+                            className={`absolute top-1 bottom-1 rounded border pointer-events-none ${
+                              dragInvalid
+                                ? "border-amber-500/70 bg-amber-500/25 border-dashed"
+                                : "border-destructive/60 bg-destructive/25"
+                            }`}
+                            style={{
+                              left: `${((Math.min(drag.startMin, drag.endMin) - windowStart) / span) * 100}%`,
+                              width: `${(Math.abs(drag.endMin - drag.startMin) / span) * 100}%`,
+                            }}
+                          />
+                        )}
                       {row.bars.map((bar) => {
-                        const left = ((Math.max(bar.startMin, windowStart) - windowStart) / span) * 100;
-                        const width = ((Math.min(bar.endMin, windowEnd) - Math.max(bar.startMin, windowStart)) / span) * 100;
+                        const left =
+                          ((Math.max(bar.startMin, windowStart) - windowStart) /
+                            span) *
+                          100;
+                        const width =
+                          ((Math.min(bar.endMin, windowEnd) -
+                            Math.max(bar.startMin, windowStart)) /
+                            span) *
+                          100;
                         if (width <= 0) return null;
                         return (
                           <div
                             key={bar.id}
                             title={`${bar.label} ${fmt(bar.startMin)} to ${fmt(bar.endMin)}`}
                             className={`absolute top-1 bottom-1 rounded border px-1 text-[11px] leading-6 truncate ${barClass(bar.kind, bar.status)}`}
-                            style={{ left: `${left}%`, width: `${Math.max(width, 1.5)}%` }}
+                            style={{
+                              left: `${left}%`,
+                              width: `${Math.max(width, 1.5)}%`,
+                            }}
                           >
                             {bar.label}
                           </div>
@@ -442,7 +548,13 @@ const AvailabilityTimelinePanel = () => {
                       variant="ghost"
                       size="sm"
                       className="shrink-0 h-8 px-2 text-xs"
-                      onClick={() => openBlockDialog(row, Math.max(windowStart, 9 * 60), Math.max(windowStart, 9 * 60) + 60)}
+                      onClick={() =>
+                        openBlockDialog(
+                          row,
+                          Math.max(windowStart, 9 * 60),
+                          Math.max(windowStart, 9 * 60) + 60,
+                        )
+                      }
                     >
                       <Ban className="h-3.5 w-3.5 mr-1" />
                       {t("timeline.blockButton")}
@@ -455,11 +567,20 @@ const AvailabilityTimelinePanel = () => {
         )}
       </CardContent>
 
-      <Dialog open={!!pendingBlock} onOpenChange={(open) => { if (!open) setPendingBlock(null); }}>
+      <Dialog
+        open={!!pendingBlock}
+        onOpenChange={(open) => {
+          if (!open) setPendingBlock(null);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-serif">{t("timeline.newBlockTitle")}</DialogTitle>
-            <DialogDescription>{t("timeline.newBlockDescription")}</DialogDescription>
+            <DialogTitle className="font-serif">
+              {t("timeline.newBlockTitle")}
+            </DialogTitle>
+            <DialogDescription>
+              {t("timeline.newBlockDescription")}
+            </DialogDescription>
           </DialogHeader>
           {pendingBlock && (
             <div className="space-y-3">
@@ -470,16 +591,34 @@ const AvailabilityTimelinePanel = () => {
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="timeline-block-start">{t("timeline.startTime")}</Label>
-                  <Input id="timeline-block-start" type="time" step={900} value={blockStart} onChange={(e) => setBlockStart(e.target.value)} />
+                  <Label htmlFor="timeline-block-start">
+                    {t("timeline.startTime")}
+                  </Label>
+                  <Input
+                    id="timeline-block-start"
+                    type="time"
+                    step={900}
+                    value={blockStart}
+                    onChange={(e) => setBlockStart(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="timeline-block-end">{t("timeline.endTime")}</Label>
-                  <Input id="timeline-block-end" type="time" step={900} value={blockEnd} onChange={(e) => setBlockEnd(e.target.value)} />
+                  <Label htmlFor="timeline-block-end">
+                    {t("timeline.endTime")}
+                  </Label>
+                  <Input
+                    id="timeline-block-end"
+                    type="time"
+                    step={900}
+                    value={blockEnd}
+                    onChange={(e) => setBlockEnd(e.target.value)}
+                  />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="timeline-block-reason">{t("timeline.reason")}</Label>
+                <Label htmlFor="timeline-block-reason">
+                  {t("timeline.reason")}
+                </Label>
                 <Input
                   id="timeline-block-reason"
                   value={blockReason}
@@ -494,8 +633,13 @@ const AvailabilityTimelinePanel = () => {
             <Button variant="outline" onClick={() => setPendingBlock(null)}>
               {t("common.cancel")}
             </Button>
-            <Button onClick={() => createBlock.mutate()} disabled={createBlock.isPending}>
-              {createBlock.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Button
+              onClick={() => createBlock.mutate()}
+              disabled={createBlock.isPending}
+            >
+              {createBlock.isPending && (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              )}
               {t("timeline.createBlock")}
             </Button>
           </DialogFooter>

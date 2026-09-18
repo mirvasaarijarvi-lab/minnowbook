@@ -12,18 +12,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Mail, Lock, Eye, EyeOff, RotateCcw, Info, MapPin, Trash2 } from "lucide-react";
+import {
+  Loader2,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  RotateCcw,
+  Info,
+  MapPin,
+  Trash2,
+} from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 import DOMPurify from "dompurify";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 
 const TEMPLATE_TYPES = ["confirmation", "reminder", "cancellation"] as const;
-type TemplateType = typeof TEMPLATE_TYPES[number];
+type TemplateType = (typeof TEMPLATE_TYPES)[number];
 
 const LANGUAGES = ["en", "fi", "sv"] as const;
-type Language = typeof LANGUAGES[number];
+type Language = (typeof LANGUAGES)[number];
 
 interface TemplateForm {
   subject: string;
@@ -31,47 +47,59 @@ interface TemplateForm {
   is_active: boolean;
 }
 
-const DEFAULT_TEMPLATES: Record<TemplateType, Record<Language, { subject: string; body_html: string }>> = {
+const DEFAULT_TEMPLATES: Record<
+  TemplateType,
+  Record<Language, { subject: string; body_html: string }>
+> = {
   confirmation: {
     en: {
       subject: "Your reservation has been confirmed",
-      body_html: "<p>Dear {{guest_name}},</p>\n<p>Your reservation on <strong>{{date}}</strong> has been confirmed.</p>\n<p>We look forward to welcoming you!</p>",
+      body_html:
+        "<p>Dear {{guest_name}},</p>\n<p>Your reservation on <strong>{{date}}</strong> has been confirmed.</p>\n<p>We look forward to welcoming you!</p>",
     },
     fi: {
       subject: "Varauksesi on vahvistettu",
-      body_html: "<p>Hyvä {{guest_name}},</p>\n<p>Varauksesi <strong>{{date}}</strong> on vahvistettu.</p>\n<p>Toivotamme sinut tervetulleeksi!</p>",
+      body_html:
+        "<p>Hyvä {{guest_name}},</p>\n<p>Varauksesi <strong>{{date}}</strong> on vahvistettu.</p>\n<p>Toivotamme sinut tervetulleeksi!</p>",
     },
     sv: {
       subject: "Din bokning har bekräftats",
-      body_html: "<p>Kära {{guest_name}},</p>\n<p>Din bokning den <strong>{{date}}</strong> har bekräftats.</p>\n<p>Vi ser fram emot att välkomna dig!</p>",
+      body_html:
+        "<p>Kära {{guest_name}},</p>\n<p>Din bokning den <strong>{{date}}</strong> har bekräftats.</p>\n<p>Vi ser fram emot att välkomna dig!</p>",
     },
   },
   reminder: {
     en: {
       subject: "Reminder: Your upcoming reservation",
-      body_html: "<p>Dear {{guest_name}},</p>\n<p>This is a friendly reminder about your upcoming reservation on <strong>{{date}}</strong>.</p>\n<p>We look forward to seeing you!</p>",
+      body_html:
+        "<p>Dear {{guest_name}},</p>\n<p>This is a friendly reminder about your upcoming reservation on <strong>{{date}}</strong>.</p>\n<p>We look forward to seeing you!</p>",
     },
     fi: {
       subject: "Muistutus: Tuleva varauksesi",
-      body_html: "<p>Hyvä {{guest_name}},</p>\n<p>Tämä on ystävällinen muistutus tulevasta varauksestasi <strong>{{date}}</strong>.</p>\n<p>Odotamme innolla vierailuasi!</p>",
+      body_html:
+        "<p>Hyvä {{guest_name}},</p>\n<p>Tämä on ystävällinen muistutus tulevasta varauksestasi <strong>{{date}}</strong>.</p>\n<p>Odotamme innolla vierailuasi!</p>",
     },
     sv: {
       subject: "Påminnelse: Din kommande bokning",
-      body_html: "<p>Kära {{guest_name}},</p>\n<p>Detta är en vänlig påminnelse om din kommande bokning den <strong>{{date}}</strong>.</p>\n<p>Vi ser fram emot att välkomna dig!</p>",
+      body_html:
+        "<p>Kära {{guest_name}},</p>\n<p>Detta är en vänlig påminnelse om din kommande bokning den <strong>{{date}}</strong>.</p>\n<p>Vi ser fram emot att välkomna dig!</p>",
     },
   },
   cancellation: {
     en: {
       subject: "Your reservation has been cancelled",
-      body_html: "<p>Dear {{guest_name}},</p>\n<p>We regret to inform you that your reservation on <strong>{{date}}</strong> has been cancelled.</p>\n<p>If you have any questions, please contact us.</p>",
+      body_html:
+        "<p>Dear {{guest_name}},</p>\n<p>We regret to inform you that your reservation on <strong>{{date}}</strong> has been cancelled.</p>\n<p>If you have any questions, please contact us.</p>",
     },
     fi: {
       subject: "Varauksesi on peruutettu",
-      body_html: "<p>Hyvä {{guest_name}},</p>\n<p>Ilmoitamme, että varauksesi <strong>{{date}}</strong> on peruutettu.</p>\n<p>Jos sinulla on kysyttävää, ota meihin yhteyttä.</p>",
+      body_html:
+        "<p>Hyvä {{guest_name}},</p>\n<p>Ilmoitamme, että varauksesi <strong>{{date}}</strong> on peruutettu.</p>\n<p>Jos sinulla on kysyttävää, ota meihin yhteyttä.</p>",
     },
     sv: {
       subject: "Din bokning har avbokats",
-      body_html: "<p>Kära {{guest_name}},</p>\n<p>Vi beklagar att meddela att din bokning den <strong>{{date}}</strong> har avbokats.</p>\n<p>Kontakta oss om du har frågor.</p>",
+      body_html:
+        "<p>Kära {{guest_name}},</p>\n<p>Vi beklagar att meddela att din bokning den <strong>{{date}}</strong> har avbokats.</p>\n<p>Kontakta oss om du har frågor.</p>",
     },
   },
 };
@@ -101,9 +129,14 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
   const isBasic = isGated("basic");
   const isSiteLevel = !!siteId;
 
-  const [selectedType, setSelectedType] = useState<TemplateType>("confirmation");
+  const [selectedType, setSelectedType] =
+    useState<TemplateType>("confirmation");
   const [selectedLang, setSelectedLang] = useState<Language>("en");
-  const [form, setForm] = useState<TemplateForm>({ subject: "", body_html: "", is_active: true });
+  const [form, setForm] = useState<TemplateForm>({
+    subject: "",
+    body_html: "",
+    is_active: true,
+  });
   const [showPreview, setShowPreview] = useState(false);
 
   // Fetch templates scoped to this level (tenant or site)
@@ -145,12 +178,16 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
 
   // Find current template at this level
   const currentTemplate = templates?.find(
-    (tmpl) => tmpl.template_type === selectedType && tmpl.language === selectedLang
+    (tmpl) =>
+      tmpl.template_type === selectedType && tmpl.language === selectedLang,
   );
 
   // Find tenant-level fallback when on site level
   const tenantFallback = isSiteLevel
-    ? tenantTemplates?.find((tmpl) => tmpl.template_type === selectedType && tmpl.language === selectedLang)
+    ? tenantTemplates?.find(
+        (tmpl) =>
+          tmpl.template_type === selectedType && tmpl.language === selectedLang,
+      )
     : null;
 
   const hasOverride = isSiteLevel && !!currentTemplate;
@@ -171,7 +208,11 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
       });
     } else {
       const defaults = DEFAULT_TEMPLATES[selectedType][selectedLang];
-      setForm({ subject: defaults.subject, body_html: defaults.body_html, is_active: true });
+      setForm({
+        subject: defaults.subject,
+        body_html: defaults.body_html,
+        is_active: true,
+      });
     }
   }, [currentTemplate, tenantFallback, selectedType, selectedLang]);
 
@@ -190,7 +231,11 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
       if (currentTemplate) {
         const { error } = await supabase
           .from("tenant_email_templates")
-          .update({ subject: form.subject, body_html: form.body_html, is_active: form.is_active })
+          .update({
+            subject: form.subject,
+            body_html: form.body_html,
+            is_active: form.is_active,
+          })
           .eq("id", currentTemplate.id);
         if (error) throw error;
       } else {
@@ -201,7 +246,9 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["email-templates", tenantId] });
+      queryClient.invalidateQueries({
+        queryKey: ["email-templates", tenantId],
+      });
       toast.success(t("emailTemplates.saved"));
     },
     onError: (err: any) => {
@@ -220,7 +267,9 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["email-templates", tenantId] });
+      queryClient.invalidateQueries({
+        queryKey: ["email-templates", tenantId],
+      });
       toast.success(t("emailTemplates.overrideRemoved"));
     },
     onError: (err: any) => {
@@ -230,7 +279,11 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
 
   const resetToDefault = () => {
     const defaults = DEFAULT_TEMPLATES[selectedType][selectedLang];
-    setForm({ subject: defaults.subject, body_html: defaults.body_html, is_active: true });
+    setForm({
+      subject: defaults.subject,
+      body_html: defaults.body_html,
+      is_active: true,
+    });
   };
 
   const typeLabels: Record<TemplateType, string> = {
@@ -251,7 +304,13 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
     .replace(/\{\{guest_email\}\}/g, "jane@example.com")
     .replace(/\{\{date\}\}/g, "2026-03-15")
     .replace(/\{\{start_time\}\}/g, "14:00")
-    .replace(/\{\{reservation_type\}\}/g, typeLabel(((tenant?.allowed_reservation_types as string[] | undefined) ?? [])[0] ?? ""))
+    .replace(
+      /\{\{reservation_type\}\}/g,
+      typeLabel(
+        ((tenant?.allowed_reservation_types as string[] | undefined) ??
+          [])[0] ?? "",
+      ),
+    )
     .replace(/\{\{guests_count\}\}/g, "4")
     .replace(/\{\{price_eur\}\}/g, "120.00")
     .replace(/\{\{business_name\}\}/g, tenant?.name || "Your Business");
@@ -262,7 +321,9 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Mail className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg font-serif">{t("emailTemplates.title")}</CardTitle>
+            <CardTitle className="text-lg font-serif">
+              {t("emailTemplates.title")}
+            </CardTitle>
             <DashboardTooltip text={t("emailTemplates.tooltip")} />
           </div>
           <div className="flex items-center gap-2">
@@ -286,35 +347,54 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
           </div>
         </div>
         <p className="text-sm text-muted-foreground">
-          {isSiteLevel ? t("emailTemplates.siteDescription") : t("emailTemplates.description")}
+          {isSiteLevel
+            ? t("emailTemplates.siteDescription")
+            : t("emailTemplates.description")}
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Template type tabs */}
-        <Tabs value={selectedType} onValueChange={(v) => setSelectedType(v as TemplateType)}>
+        <Tabs
+          value={selectedType}
+          onValueChange={(v) => setSelectedType(v as TemplateType)}
+        >
           <TabsList className="w-full grid grid-cols-3">
             {TEMPLATE_TYPES.map((type) => (
-              <TabsTrigger key={type} value={type}>{typeLabels[type]}</TabsTrigger>
+              <TabsTrigger key={type} value={type}>
+                {typeLabels[type]}
+              </TabsTrigger>
             ))}
           </TabsList>
         </Tabs>
 
         {/* Language selector */}
         <div className="flex items-center gap-3">
-          <Label className="text-sm shrink-0">{t("emailTemplates.language")}</Label>
-          <Select value={selectedLang} onValueChange={(v) => setSelectedLang(v as Language)}>
+          <Label className="text-sm shrink-0">
+            {t("emailTemplates.language")}
+          </Label>
+          <Select
+            value={selectedLang}
+            onValueChange={(v) => setSelectedLang(v as Language)}
+          >
             <SelectTrigger className="w-36">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {LANGUAGES.map((lang) => (
-                <SelectItem key={lang} value={lang}>{langLabels[lang]}</SelectItem>
+                <SelectItem key={lang} value={lang}>
+                  {langLabels[lang]}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           {currentTemplate && (
-            <Badge variant={currentTemplate.is_active ? "default" : "secondary"} className="text-xs">
-              {currentTemplate.is_active ? t("emailTemplates.active") : t("emailTemplates.inactive")}
+            <Badge
+              variant={currentTemplate.is_active ? "default" : "secondary"}
+              className="text-xs"
+            >
+              {currentTemplate.is_active
+                ? t("emailTemplates.active")
+                : t("emailTemplates.inactive")}
             </Badge>
           )}
         </div>
@@ -330,9 +410,13 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
               <Label>{t("emailTemplates.subject")}</Label>
               <Input
                 value={form.subject}
-                onChange={(e) => setForm((prev) => ({ ...prev, subject: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, subject: e.target.value }))
+                }
                 disabled={isBasic}
-                placeholder={DEFAULT_TEMPLATES[selectedType][selectedLang].subject}
+                placeholder={
+                  DEFAULT_TEMPLATES[selectedType][selectedLang].subject
+                }
               />
             </div>
 
@@ -346,16 +430,26 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
                   className="gap-1.5 text-xs"
                   onClick={() => setShowPreview(!showPreview)}
                 >
-                  {showPreview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                  {showPreview ? t("emailTemplates.hidePreview") : t("emailTemplates.showPreview")}
+                  {showPreview ? (
+                    <EyeOff className="h-3.5 w-3.5" />
+                  ) : (
+                    <Eye className="h-3.5 w-3.5" />
+                  )}
+                  {showPreview
+                    ? t("emailTemplates.hidePreview")
+                    : t("emailTemplates.showPreview")}
                 </Button>
               </div>
               <Textarea
                 rows={8}
                 value={form.body_html}
-                onChange={(e) => setForm((prev) => ({ ...prev, body_html: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, body_html: e.target.value }))
+                }
                 disabled={isBasic}
-                placeholder={DEFAULT_TEMPLATES[selectedType][selectedLang].body_html}
+                placeholder={
+                  DEFAULT_TEMPLATES[selectedType][selectedLang].body_html
+                }
                 className="font-mono text-sm"
               />
             </div>
@@ -363,10 +457,14 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
             {/* Preview */}
             {showPreview && (
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">{t("emailTemplates.previewLabel")}</Label>
+                <Label className="text-xs text-muted-foreground">
+                  {t("emailTemplates.previewLabel")}
+                </Label>
                 <div
                   className="rounded-lg border border-border p-4 bg-card text-sm prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(previewHtml) }}
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(previewHtml),
+                  }}
                 />
               </div>
             )}
@@ -375,11 +473,18 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
             <div className="space-y-2">
               <div className="flex items-center gap-1.5">
                 <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                <Label className="text-xs text-muted-foreground">{t("emailTemplates.availableVars")}</Label>
+                <Label className="text-xs text-muted-foreground">
+                  {t("emailTemplates.availableVars")}
+                </Label>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {VARIABLES.map((v) => (
-                  <Badge key={v.key} variant="outline" className="text-xs font-mono cursor-help" title={v.desc}>
+                  <Badge
+                    key={v.key}
+                    variant="outline"
+                    className="text-xs font-mono cursor-help"
+                    title={v.desc}
+                  >
                     {v.key}
                   </Badge>
                 ))}
@@ -389,12 +494,18 @@ const EmailTemplateEditor = ({ siteId = null }: EmailTemplateEditorProps) => {
             {/* Active toggle */}
             <div className="flex items-center justify-between pt-2">
               <div>
-                <Label className="text-sm">{t("emailTemplates.activeToggle")}</Label>
-                <p className="text-xs text-muted-foreground">{t("emailTemplates.activeToggleDesc")}</p>
+                <Label className="text-sm">
+                  {t("emailTemplates.activeToggle")}
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {t("emailTemplates.activeToggleDesc")}
+                </p>
               </div>
               <Switch
                 checked={form.is_active}
-                onCheckedChange={(v) => setForm((prev) => ({ ...prev, is_active: v }))}
+                onCheckedChange={(v) =>
+                  setForm((prev) => ({ ...prev, is_active: v }))
+                }
                 disabled={isBasic}
               />
             </div>

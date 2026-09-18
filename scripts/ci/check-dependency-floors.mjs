@@ -45,24 +45,73 @@ const FLOORS = {
     reason:
       "DOMPurify mXSS / sanitizer bypasses; GHSA-cmwh-pvxp-8882 permanent hook pollution (fixed in 3.4.11). package.json overrides pin >=3.4.7 as the absolute floor.",
     denied: [
-      "3.0.0", "3.0.1", "3.0.2", "3.0.3", "3.0.4", "3.0.5", "3.0.6", "3.0.7", "3.0.8", "3.0.9", "3.0.10", "3.0.11",
-      "3.1.0", "3.1.1", "3.1.2", "3.1.3", "3.1.4", "3.1.5", "3.1.6", "3.1.7",
-      "3.2.0", "3.2.1", "3.2.2", "3.2.3", "3.2.4", "3.2.5", "3.2.6",
+      "3.0.0",
+      "3.0.1",
+      "3.0.2",
+      "3.0.3",
+      "3.0.4",
+      "3.0.5",
+      "3.0.6",
+      "3.0.7",
+      "3.0.8",
+      "3.0.9",
+      "3.0.10",
+      "3.0.11",
+      "3.1.0",
+      "3.1.1",
+      "3.1.2",
+      "3.1.3",
+      "3.1.4",
+      "3.1.5",
+      "3.1.6",
+      "3.1.7",
+      "3.2.0",
+      "3.2.1",
+      "3.2.2",
+      "3.2.3",
+      "3.2.4",
+      "3.2.5",
+      "3.2.6",
       "3.3.0",
-      "3.4.0", "3.4.1", "3.4.2", "3.4.3", "3.4.4", "3.4.5", "3.4.6", // pre-hook-pollution patch
-      "3.4.7", "3.4.8", "3.4.9", "3.4.10", // pre-GHSA-cmwh-pvxp-8882 patch (3.4.11)
+      "3.4.0",
+      "3.4.1",
+      "3.4.2",
+      "3.4.3",
+      "3.4.4",
+      "3.4.5",
+      "3.4.6", // pre-hook-pollution patch
+      "3.4.7",
+      "3.4.8",
+      "3.4.9",
+      "3.4.10", // pre-GHSA-cmwh-pvxp-8882 patch (3.4.11)
     ],
   },
   ws: { min: "8.21.0", reason: "ws DoS via tiny fragments" },
   esbuild: { min: "0.28.1", reason: "esbuild Deno binary integrity advisory" },
-  "form-data": { min: "4.0.6", reason: "form-data header injection (CR/LF/quote)" },
-  "@remix-run/router": { min: "1.23.2", reason: "react-router open-redirect via // paths" },
+  "form-data": {
+    min: "4.0.6",
+    reason: "form-data header injection (CR/LF/quote)",
+  },
+  "@remix-run/router": {
+    min: "1.23.2",
+    reason: "react-router open-redirect via // paths",
+  },
   minimatch: { min: "9.0.6", reason: "minimatch ReDoS" },
   "brace-expansion": { min: "5.0.5", reason: "brace-expansion ReDoS" },
   picomatch: { min: "4.0.4", reason: "picomatch ReDoS" },
-  browserslist: { min: "4.24.4", reason: "browserslist regex DoS in transitive consumers" },
-  postcss: { min: "8.4.31", reason: "GHSA-7fh5-64p2-3v2j (PostCSS line return parsing) / GHSA-qx2v-qp2m-jg93" },
-  "react-router": { min: "6.30.1", reason: "GHSA-9jcx-v3wj-wh4m + GHSA-2j2x-hqr9-3h42 (open redirect)" },
+  browserslist: {
+    min: "4.24.4",
+    reason: "browserslist regex DoS in transitive consumers",
+  },
+  postcss: {
+    min: "8.4.31",
+    reason:
+      "GHSA-7fh5-64p2-3v2j (PostCSS line return parsing) / GHSA-qx2v-qp2m-jg93",
+  },
+  "react-router": {
+    min: "6.30.1",
+    reason: "GHSA-9jcx-v3wj-wh4m + GHSA-2j2x-hqr9-3h42 (open redirect)",
+  },
 };
 
 /**
@@ -98,7 +147,10 @@ function findInstalledVersions(lockfile, pkgName) {
   for (const [key, meta] of Object.entries(packages)) {
     // Lockfile keys look like "" (root), "node_modules/js-yaml",
     // "node_modules/foo/node_modules/js-yaml", etc.
-    if (key === `node_modules/${pkgName}` || key.endsWith(`/node_modules/${pkgName}`)) {
+    if (
+      key === `node_modules/${pkgName}` ||
+      key.endsWith(`/node_modules/${pkgName}`)
+    ) {
       if (meta && typeof meta.version === "string") {
         found.push({ path: key || "<root>", version: meta.version });
       }

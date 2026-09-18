@@ -41,28 +41,56 @@ const RECENT_FEATURES: Array<{ name: string; keywords: RegExp }> = [
   { name: "Dark mode", keywords: /Dark mode/i },
   { name: "Keyboard shortcuts modal", keywords: /Keyboard shortcuts/i },
   { name: "Login rate limiting", keywords: /Login rate limiting|rate limit/i },
-  { name: "Audit log filters", keywords: /Audit log filters|audit-log filter/i },
+  {
+    name: "Audit log filters",
+    keywords: /Audit log filters|audit-log filter/i,
+  },
   { name: "Backup status indicator", keywords: /Backup status/i },
   { name: "Public reviews/testimonials", keywords: /reviews|testimonial/i },
-  { name: "Multi-language public booking", keywords: /Multi-language public booking|multi-language/i },
+  {
+    name: "Multi-language public booking",
+    keywords: /Multi-language public booking|multi-language/i,
+  },
   { name: "Stripe revenue dashboard", keywords: /Stripe revenue/i },
-  { name: "Kitchen orders", keywords: /Kitchen orders|keittiötilaukset|kökets beställningar/i },
-  { name: "Offers to Reservations conversion report", keywords: /Offers to Reservations|offer.*conversion|tarjouksista varauksiin|offerter till bokningar/i },
+  {
+    name: "Kitchen orders",
+    keywords: /Kitchen orders|keittiötilaukset|kökets beställningar/i,
+  },
+  {
+    name: "Offers to Reservations conversion report",
+    keywords:
+      /Offers to Reservations|offer.*conversion|tarjouksista varauksiin|offerter till bokningar/i,
+  },
   { name: "Booking invoice PDF", keywords: /invoice PDF/i },
   { name: "Report PDF downloads", keywords: /report PDF/i },
-  { name: "Peak hours and busiest weekday", keywords: /peak hours|busiest weekday/i },
+  {
+    name: "Peak hours and busiest weekday",
+    keywords: /peak hours|busiest weekday/i,
+  },
   { name: "Pick sheets", keywords: /pick sheet/i },
   { name: "Booking channel split", keywords: /booking channel|channel split/i },
   { name: "Email delivery timeline", keywords: /email delivery timeline/i },
   { name: "Cross-booking audit view", keywords: /cross-booking audit/i },
-  { name: "Offer pricing from resources", keywords: /offer pricing from resources/i },
+  {
+    name: "Offer pricing from resources",
+    keywords: /offer pricing from resources/i,
+  },
   { name: "Kitchen menu", keywords: /kitchen menu/i },
   { name: "Permission notices", keywords: /permission notice|request access/i },
-  { name: "Reschedule requests and guest cancellation", keywords: /reschedule request|guest cancellation/i },
+  {
+    name: "Reschedule requests and guest cancellation",
+    keywords: /reschedule request|guest cancellation/i,
+  },
   { name: "Special occasions", keywords: /special occasion/i },
-  { name: "Booking rejection monitor", keywords: /rejected booking|rejection/i },
+  {
+    name: "Booking rejection monitor",
+    keywords: /rejected booking|rejection/i,
+  },
   { name: "Duplicate booking guard", keywords: /duplicate booking/i },
-  { name: "Offer to kitchen routing", keywords: /kitchen routing|routed automatically/i },
+  {
+    name: "Offer to kitchen routing",
+    keywords: /kitchen routing|routed automatically/i,
+  },
   { name: "Enterprise plan", keywords: /Enterprise/i },
 ];
 
@@ -92,19 +120,19 @@ describe("'Recent additions' prompt section ↔ dashboard UI parity", () => {
     "feature '$name' appears in the prompt bullets",
     ({ keywords }) => {
       expect(promptFeatures.join("\n")).toMatch(keywords);
-    }
+    },
   );
 
   it.each(RECENT_FEATURES)(
     "feature '$name' is also surfaced in the dashboard 'What's New' copy",
     ({ keywords }) => {
       expect(uiCopy).toMatch(keywords);
-    }
+    },
   );
 
   it("no orphan features in the prompt that the UI doesn't mention", () => {
     const orphans = promptFeatures.filter(
-      (label) => !RECENT_FEATURES.some((f) => f.keywords.test(label))
+      (label) => !RECENT_FEATURES.some((f) => f.keywords.test(label)),
     );
     expect(orphans).toEqual([]);
   });

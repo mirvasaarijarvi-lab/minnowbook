@@ -28,33 +28,84 @@ const NEW_FEATURES_FAQ: { group: string; items: [string, string][] }[] = [
   {
     group: "Hotels & room types",
     items: [
-      ["How do I create many rooms at once?", "Open Resources, choose Hotel room as the type, and use Bulk create to generate a numbered sequence (e.g. 101 to 120). You can edit each room afterwards."],
-      ["Can I price each room type differently?", "Yes. Pricing is set per room type, including weekday/weekend rates and per-night totals across multi-night stays."],
-      ["How is breakfast handled?", "Breakfast is configured as an add-on with its own price; it is added to the nightly total when the guest selects it."],
-      ["How do I take a room offline?", "Open the room and add an availability block for the dates it should be unavailable. Blocked dates are hidden from the public booking flow."],
-      ["Why doesn't a room type appear for a date?", "Either every room of that type is booked or blocked, or the resource isn't active for the selected site. Check Availability and the site selector."],
+      [
+        "How do I create many rooms at once?",
+        "Open Resources, choose Hotel room as the type, and use Bulk create to generate a numbered sequence (e.g. 101 to 120). You can edit each room afterwards.",
+      ],
+      [
+        "Can I price each room type differently?",
+        "Yes. Pricing is set per room type, including weekday/weekend rates and per-night totals across multi-night stays.",
+      ],
+      [
+        "How is breakfast handled?",
+        "Breakfast is configured as an add-on with its own price; it is added to the nightly total when the guest selects it.",
+      ],
+      [
+        "How do I take a room offline?",
+        "Open the room and add an availability block for the dates it should be unavailable. Blocked dates are hidden from the public booking flow.",
+      ],
+      [
+        "Why doesn't a room type appear for a date?",
+        "Either every room of that type is booked or blocked, or the resource isn't active for the selected site. Check Availability and the site selector.",
+      ],
     ],
   },
   {
     group: "Multi-site overrides (Business plan)",
     items: [
-      ["How do I switch between sites?", "Use the site selector in the dashboard header. Your view, resources, and reservations are scoped to the active site."],
-      ["What can I override per site?", "Opening hours, branding (logo, colors), email sender identity, and most booking settings. Anything not overridden falls back to the tenant defaults."],
-      ["How do I reset a site to defaults?", "Open the site's settings page and click Reset to defaults on the relevant section. The site will inherit the tenant-level value again."],
-      ["Can staff be limited to one site?", "Yes. Use site assignments to grant a user a role on specific sites only. They will only see those sites in the switcher."],
-      ["Can I share a booking link for just one site?", "Yes. Generate a single-site booking link from the site's settings; the public flow locks to that site."],
-      ["Is there a limit on sites?", "Multi-site is a Business plan feature. Tier limits apply to total sites; see Pricing for current limits."],
+      [
+        "How do I switch between sites?",
+        "Use the site selector in the dashboard header. Your view, resources, and reservations are scoped to the active site.",
+      ],
+      [
+        "What can I override per site?",
+        "Opening hours, branding (logo, colors), email sender identity, and most booking settings. Anything not overridden falls back to the tenant defaults.",
+      ],
+      [
+        "How do I reset a site to defaults?",
+        "Open the site's settings page and click Reset to defaults on the relevant section. The site will inherit the tenant-level value again.",
+      ],
+      [
+        "Can staff be limited to one site?",
+        "Yes. Use site assignments to grant a user a role on specific sites only. They will only see those sites in the switcher.",
+      ],
+      [
+        "Can I share a booking link for just one site?",
+        "Yes. Generate a single-site booking link from the site's settings; the public flow locks to that site.",
+      ],
+      [
+        "Is there a limit on sites?",
+        "Multi-site is a Business plan feature. Tier limits apply to total sites; see Pricing for current limits.",
+      ],
     ],
   },
   {
     group: "Kitchen Orders",
     items: [
-      ["How does the Kitchen panel work?", "Open Kitchen from the dashboard to see live orders per reservation. Orders move through statuses: received to preparing to ready to served."],
-      ["Which resources support kitchen orders?", "Restaurant, dine-in, catering, and pop-up resource types. Other resource types don't show the Kitchen tab."],
-      ["How do I add items to an order?", "Open the reservation, go to Kitchen Order, and add items from the reusable kitchen menu or as free-text lines with quantity and notes."],
-      ["Where do allergy notes appear?", "Allergy and guest notes are pinned to the top of the order card in the Kitchen panel so staff see them before preparing."],
-      ["Can I reuse menu items?", "Yes. Manage a reusable kitchen menu under Settings; items can be added to any reservation with one click."],
-      ["Who can see kitchen orders?", "Orders are RLS-scoped per site. Staff only see orders for sites they're assigned to."],
+      [
+        "How does the Kitchen panel work?",
+        "Open Kitchen from the dashboard to see live orders per reservation. Orders move through statuses: received to preparing to ready to served.",
+      ],
+      [
+        "Which resources support kitchen orders?",
+        "Restaurant, dine-in, catering, and pop-up resource types. Other resource types don't show the Kitchen tab.",
+      ],
+      [
+        "How do I add items to an order?",
+        "Open the reservation, go to Kitchen Order, and add items from the reusable kitchen menu or as free-text lines with quantity and notes.",
+      ],
+      [
+        "Where do allergy notes appear?",
+        "Allergy and guest notes are pinned to the top of the order card in the Kitchen panel so staff see them before preparing.",
+      ],
+      [
+        "Can I reuse menu items?",
+        "Yes. Manage a reusable kitchen menu under Settings; items can be added to any reservation with one click.",
+      ],
+      [
+        "Who can see kitchen orders?",
+        "Orders are RLS-scoped per site. Staff only see orders for sites they're assigned to.",
+      ],
     ],
   },
 ];
@@ -75,120 +126,123 @@ const Support = () => {
   const t = useT();
   const [search, setSearch] = useState("");
 
-  const articles = useMemo(() => [
-    {
-      title: t("support.gettingStarted"),
-      description: t("support.gettingStartedDesc"),
-      icon: BookOpen,
-      category: t("support.catBasics"),
-      content: [
-        t("support.gettingStartedC1"),
-        t("support.gettingStartedC2"),
-        t("support.gettingStartedC3"),
-        t("support.gettingStartedC4"),
-      ],
-    },
-    {
-      title: t("support.managingRes"),
-      description: t("support.managingResDesc"),
-      icon: CalendarDays,
-      category: t("support.catReservations"),
-      content: [
-        t("support.managingResC1"),
-        t("support.managingResC2"),
-        t("support.managingResC3"),
-        t("support.managingResC4"),
-      ],
-    },
-    {
-      title: t("support.emailTemplates"),
-      description: t("support.emailTemplatesDesc"),
-      icon: Mail,
-      category: t("support.catCommunication"),
-      content: [
-        t("support.emailTemplatesC1"),
-        t("support.emailTemplatesC2"),
-        t("support.emailTemplatesC3"),
-        t("support.emailTemplatesC4"),
-      ],
-    },
-    {
-      title: t("support.brandingTitle"),
-      description: t("support.brandingDesc"),
-      icon: Palette,
-      category: t("support.catCustomization"),
-      content: [
-        t("support.brandingC1"),
-        t("support.brandingC2"),
-        t("support.brandingC3"),
-        t("support.brandingC4"),
-      ],
-    },
-    {
-      title: t("support.openingHoursTitle"),
-      description: t("support.openingHoursDesc"),
-      icon: Clock,
-      category: t("support.catConfiguration"),
-      content: [
-        t("support.openingHoursC1"),
-        t("support.openingHoursC2"),
-        t("support.openingHoursC3"),
-        t("support.openingHoursC4"),
-        t("support.openingHoursC5"),
-        t("support.openingHoursC6"),
-        t("support.openingHoursC7"),
-      ],
-    },
-    {
-      title: t("support.resourcesTitle"),
-      description: t("support.resourcesDesc"),
-      icon: Settings,
-      category: t("support.catConfiguration"),
-      content: [
-        t("support.resourcesC1"),
-        t("support.resourcesC2"),
-        t("support.resourcesC3"),
-        t("support.resourcesC4"),
-      ],
-    },
-    {
-      title: t("support.staffTitle"),
-      description: t("support.staffDesc"),
-      icon: Users,
-      category: t("support.catTeam"),
-      content: [
-        t("support.staffC1"),
-        t("support.staffC2"),
-        t("support.staffC3"),
-        t("support.staffC4"),
-      ],
-    },
-    {
-      title: t("support.billingTitle"),
-      description: t("support.billingDesc"),
-      icon: CreditCard,
-      category: t("support.catBilling"),
-      content: [
-        t("support.billingC1"),
-        t("support.billingC2"),
-        t("support.billingC3"),
-        t("support.billingC4"),
-      ],
-    },
-    {
-      title: t("support.faqTitle"),
-      description: t("support.faqDesc"),
-      icon: HelpCircle,
-      category: t("support.catFaq"),
-      content: [
-        t("support.faqC1"),
-        t("support.faqC2"),
-        t("support.faqC3"),
-        t("support.faqC4"),
-        t("support.faqC5"),
-      ],
-    },
-  ], [t]);
+  const articles = useMemo(
+    () => [
+      {
+        title: t("support.gettingStarted"),
+        description: t("support.gettingStartedDesc"),
+        icon: BookOpen,
+        category: t("support.catBasics"),
+        content: [
+          t("support.gettingStartedC1"),
+          t("support.gettingStartedC2"),
+          t("support.gettingStartedC3"),
+          t("support.gettingStartedC4"),
+        ],
+      },
+      {
+        title: t("support.managingRes"),
+        description: t("support.managingResDesc"),
+        icon: CalendarDays,
+        category: t("support.catReservations"),
+        content: [
+          t("support.managingResC1"),
+          t("support.managingResC2"),
+          t("support.managingResC3"),
+          t("support.managingResC4"),
+        ],
+      },
+      {
+        title: t("support.emailTemplates"),
+        description: t("support.emailTemplatesDesc"),
+        icon: Mail,
+        category: t("support.catCommunication"),
+        content: [
+          t("support.emailTemplatesC1"),
+          t("support.emailTemplatesC2"),
+          t("support.emailTemplatesC3"),
+          t("support.emailTemplatesC4"),
+        ],
+      },
+      {
+        title: t("support.brandingTitle"),
+        description: t("support.brandingDesc"),
+        icon: Palette,
+        category: t("support.catCustomization"),
+        content: [
+          t("support.brandingC1"),
+          t("support.brandingC2"),
+          t("support.brandingC3"),
+          t("support.brandingC4"),
+        ],
+      },
+      {
+        title: t("support.openingHoursTitle"),
+        description: t("support.openingHoursDesc"),
+        icon: Clock,
+        category: t("support.catConfiguration"),
+        content: [
+          t("support.openingHoursC1"),
+          t("support.openingHoursC2"),
+          t("support.openingHoursC3"),
+          t("support.openingHoursC4"),
+          t("support.openingHoursC5"),
+          t("support.openingHoursC6"),
+          t("support.openingHoursC7"),
+        ],
+      },
+      {
+        title: t("support.resourcesTitle"),
+        description: t("support.resourcesDesc"),
+        icon: Settings,
+        category: t("support.catConfiguration"),
+        content: [
+          t("support.resourcesC1"),
+          t("support.resourcesC2"),
+          t("support.resourcesC3"),
+          t("support.resourcesC4"),
+        ],
+      },
+      {
+        title: t("support.staffTitle"),
+        description: t("support.staffDesc"),
+        icon: Users,
+        category: t("support.catTeam"),
+        content: [
+          t("support.staffC1"),
+          t("support.staffC2"),
+          t("support.staffC3"),
+          t("support.staffC4"),
+        ],
+      },
+      {
+        title: t("support.billingTitle"),
+        description: t("support.billingDesc"),
+        icon: CreditCard,
+        category: t("support.catBilling"),
+        content: [
+          t("support.billingC1"),
+          t("support.billingC2"),
+          t("support.billingC3"),
+          t("support.billingC4"),
+        ],
+      },
+      {
+        title: t("support.faqTitle"),
+        description: t("support.faqDesc"),
+        icon: HelpCircle,
+        category: t("support.catFaq"),
+        content: [
+          t("support.faqC1"),
+          t("support.faqC2"),
+          t("support.faqC3"),
+          t("support.faqC4"),
+          t("support.faqC5"),
+        ],
+      },
+    ],
+    [t],
+  );
 
   const filtered = useMemo(() => {
     if (!search.trim()) return articles;
@@ -198,7 +252,7 @@ const Support = () => {
         a.title.toLowerCase().includes(q) ||
         a.description.toLowerCase().includes(q) ||
         a.category.toLowerCase().includes(q) ||
-        a.content.some((c) => c.toLowerCase().includes(q))
+        a.content.some((c) => c.toLowerCase().includes(q)),
     );
   }, [search, articles]);
 
@@ -365,7 +419,6 @@ const Support = () => {
                         >
                           {a}
                         </AccordionContent>
-
                       </AccordionItem>
                     );
                   })}
@@ -375,7 +428,6 @@ const Support = () => {
           })}
         </div>
       </section>
-
 
       {/* CTA + Contact form */}
       <section className="py-16 bg-secondary/50">

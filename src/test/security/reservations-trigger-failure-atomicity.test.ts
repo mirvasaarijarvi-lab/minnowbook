@@ -22,7 +22,8 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY ??
@@ -39,8 +40,10 @@ const ctx = {
   tenantId: "",
 };
 
-const futureDate = () => new Date(Date.now() + 11 * 86_400_000).toISOString().slice(0, 10);
-const pastDate = () => new Date(Date.now() - 5 * 86_400_000).toISOString().slice(0, 10);
+const futureDate = () =>
+  new Date(Date.now() + 11 * 86_400_000).toISOString().slice(0, 10);
+const pastDate = () =>
+  new Date(Date.now() - 5 * 86_400_000).toISOString().slice(0, 10);
 
 const baseRow = (name: string) => ({
   tenant_id: ctx.tenantId,
@@ -55,7 +58,9 @@ const baseRow = (name: string) => ({
 async function rowsFor(name: string) {
   const { data, error } = await ctx.service
     .from("reservations")
-    .select("id, price_eur, original_price_eur, discount_type, discount_value, status")
+    .select(
+      "id, price_eur, original_price_eur, discount_type, discount_value, status",
+    )
     .eq("tenant_id", ctx.tenantId)
     .eq("guest_name", name);
   if (error) throw error;
@@ -87,12 +92,14 @@ describe.runIf(canRun)(
       });
 
       const email = `ci+trigfail-${randomUUID().slice(0, 8)}@mimmobook.test`;
-      const { data: userRes, error: userErr } = await ctx.service.auth.admin.createUser({
-        email,
-        password: `Ci-TrigFail-${randomUUID()}-Z9!`,
-        email_confirm: true,
-      });
-      if (userErr || !userRes.user) throw userErr ?? new Error("createUser failed");
+      const { data: userRes, error: userErr } =
+        await ctx.service.auth.admin.createUser({
+          email,
+          password: `Ci-TrigFail-${randomUUID()}-Z9!`,
+          email_confirm: true,
+        });
+      if (userErr || !userRes.user)
+        throw userErr ?? new Error("createUser failed");
       ctx.ownerId = userRes.user.id;
 
       const id = randomUUID();
@@ -120,18 +127,30 @@ describe.runIf(canRun)(
           /* best-effort cleanup */
         }
       };
-      await swallow(ctx.service.from("reservations").delete().eq("tenant_id", ctx.tenantId));
-      await swallow(ctx.service.from("audit_log").delete().eq("tenant_id", ctx.tenantId));
-      await swallow(ctx.service.from("tenant_users").delete().eq("tenant_id", ctx.tenantId));
-      await swallow(ctx.service.from("tenants").delete().eq("id", ctx.tenantId));
-      if (ctx.ownerId) await swallow(ctx.service.auth.admin.deleteUser(ctx.ownerId));
+      await swallow(
+        ctx.service.from("reservations").delete().eq("tenant_id", ctx.tenantId),
+      );
+      await swallow(
+        ctx.service.from("audit_log").delete().eq("tenant_id", ctx.tenantId),
+      );
+      await swallow(
+        ctx.service.from("tenant_users").delete().eq("tenant_id", ctx.tenantId),
+      );
+      await swallow(
+        ctx.service.from("tenants").delete().eq("id", ctx.tenantId),
+      );
+      if (ctx.ownerId)
+        await swallow(ctx.service.auth.admin.deleteUser(ctx.ownerId));
     }, 90_000);
 
     it("anon insert raising inside the trigger stores nothing at all", async () => {
       const name = `TEST CI trigfail ctrl ${randomUUID().slice(0, 8)}\u0007`;
-      const { error } = await ctx.anon
-        .from("reservations")
-        .insert({ ...baseRow(name), price_eur: 999, discount_type: "percentage", discount_value: 50 });
+      const { error } = await ctx.anon.from("reservations").insert({
+        ...baseRow(name),
+        price_eur: 999,
+        discount_type: "percentage",
+        discount_value: 50,
+      });
 
       expect(error, "trigger must reject control characters").toBeTruthy();
       expect(await rowsFor(name)).toHaveLength(0);
@@ -150,9 +169,11 @@ describe.runIf(canRun)(
 
     it("anon insert with a malformed e-mail is rejected with no row written", async () => {
       const name = `TEST CI trigfail mail ${randomUUID().slice(0, 8)}`;
-      const { error } = await ctx.anon
-        .from("reservations")
-        .insert({ ...baseRow(name), guest_email: "not-an-email", price_eur: 250 });
+      const { error } = await ctx.anon.from("reservations").insert({
+        ...baseRow(name),
+        guest_email: "not-an-email",
+        price_eur: 250,
+      });
 
       expect(error).toBeTruthy();
       expect(await rowsFor(name)).toHaveLength(0);
@@ -161,13 +182,15 @@ describe.runIf(canRun)(
     it("a failing row aborts the whole anon batch, including the valid priced row", async () => {
       const good = `TEST CI trigfail batch-ok ${randomUUID().slice(0, 8)}`;
       const bad = `TEST CI trigfail batch-bad ${randomUUID().slice(0, 8)}\u0000`;
-      const { error } = await ctx.anon.from("reservations").insert([
-        { ...baseRow(good), price_eur: 75 },
-        { ...baseRow(bad) },
-      ]);
+      const { error } = await ctx.anon
+        .from("reservations")
+        .insert([{ ...baseRow(good), price_eur: 75 }, { ...baseRow(bad) }]);
 
       expect(error, "batch must fail").toBeTruthy();
-      expect(await rowsFor(good), "valid sibling row must roll back").toHaveLength(0);
+      expect(
+        await rowsFor(good),
+        "valid sibling row must roll back",
+      ).toHaveLength(0);
       expect(await rowsFor(bad)).toHaveLength(0);
     });
 
@@ -187,7 +210,10 @@ describe.runIf(canRun)(
       ]);
 
       expect(error, "batch must fail on the negative price").toBeTruthy();
-      expect(await rowsFor(good), "no partial pricing may persist").toHaveLength(0);
+      expect(
+        await rowsFor(good),
+        "no partial pricing may persist",
+      ).toHaveLength(0);
       expect(await rowsFor(bad)).toHaveLength(0);
       expect(await auditCountFor(good)).toBe(0);
     });
@@ -217,7 +243,9 @@ describe.runIf(canRun)(
 
       const { data: after, error: readErr } = await ctx.service
         .from("reservations")
-        .select("price_eur, original_price_eur, discount_type, discount_value, discount_reason")
+        .select(
+          "price_eur, original_price_eur, discount_type, discount_value, discount_reason",
+        )
         .eq("id", id)
         .single();
       expect(readErr, readErr?.message).toBeNull();

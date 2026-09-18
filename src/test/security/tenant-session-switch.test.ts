@@ -19,7 +19,11 @@ import {
 } from "./fixtures/tenant-session-switch";
 import { ACTING_TENANT, TARGET_TENANT } from "./fixtures/tenant-access-matrix";
 import { WRITE_DENIAL_MATRIX } from "./fixtures/tenant-write-denial-matrix";
-import { expectReadDenied, expectWriteDenied, type QueryContext } from "./rls-assert";
+import {
+  expectReadDenied,
+  expectWriteDenied,
+  type QueryContext,
+} from "./rls-assert";
 
 const THIRD_TENANT = "44444444-4444-4444-8444-444444444444";
 const STRANGER_TENANT = "55555555-5555-4555-8555-555555555555";
@@ -78,7 +82,10 @@ describe("tenant identity switching within one session", () => {
   });
 
   it("ignores a stale cached scope from the previous tenant", () => {
-    const s = switchTenant(session({ cachedScopeTenantId: TARGET_TENANT }), ACTING_TENANT);
+    const s = switchTenant(
+      session({ cachedScopeTenantId: TARGET_TENANT }),
+      ACTING_TENANT,
+    );
     expect(s.cachedScopeTenantId).toBe(TARGET_TENANT);
     expect(decideSessionAccess(s, TARGET_TENANT).allowed).toBe(false);
     expect(decideSessionAccess(s, ACTING_TENANT).allowed).toBe(true);
@@ -109,7 +116,10 @@ describe("tenant identity switching within one session", () => {
     expect(d.allowed).toBe(false);
     expect(d.reasons).toContain("membership_revoked");
     // switching away and back cannot resurrect it
-    const cycled = switchTenant(switchTenant(revoked, TARGET_TENANT), ACTING_TENANT);
+    const cycled = switchTenant(
+      switchTenant(revoked, TARGET_TENANT),
+      ACTING_TENANT,
+    );
     expect(decideSessionAccess(cycled, ACTING_TENANT).allowed).toBe(false);
   });
 
@@ -147,7 +157,10 @@ describe("tenant identity switching within one session", () => {
   });
 
   it("returns the same decision no matter which path led to the tenant", () => {
-    const direct = decideSessionAccess(switchTenant(session(), TARGET_TENANT), TARGET_TENANT);
+    const direct = decideSessionAccess(
+      switchTenant(session(), TARGET_TENANT),
+      TARGET_TENANT,
+    );
     const roundabout = decideSessionAccess(
       [STRANGER_TENANT, THIRD_TENANT, ACTING_TENANT, TARGET_TENANT].reduce(
         (acc, tenant) => switchTenant(acc, tenant),
@@ -196,11 +209,15 @@ describe("tenant identity switching within one session", () => {
         scenario: `after switching to own tenant: ${c.label}`,
       };
       expect(decideSessionAccess(s, TARGET_TENANT).allowed).toBe(false);
-      expect(() => expectWriteDenied(ctx, { data: [], error: null })).not.toThrow();
-      expect(() => expectWriteDenied(ctx, { data: null, error: denialError })).not.toThrow();
-      expect(() => expectWriteDenied(ctx, { data: c.leakedRows, error: null })).toThrow(
-        /RLS DENIAL FAILED/,
-      );
+      expect(() =>
+        expectWriteDenied(ctx, { data: [], error: null }),
+      ).not.toThrow();
+      expect(() =>
+        expectWriteDenied(ctx, { data: null, error: denialError }),
+      ).not.toThrow();
+      expect(() =>
+        expectWriteDenied(ctx, { data: c.leakedRows, error: null }),
+      ).toThrow(/RLS DENIAL FAILED/);
     }
   });
 
@@ -210,15 +227,23 @@ describe("tenant identity switching within one session", () => {
     const ctx: QueryContext = {
       table: "reservations",
       operation: "SELECT",
-      attemptedQuery: "from('reservations').select('*').eq('tenant_id', PREVIOUS)",
+      attemptedQuery:
+        "from('reservations').select('*').eq('tenant_id', PREVIOUS)",
       actingTenantId: TARGET_TENANT,
       targetTenantId: ACTING_TENANT,
       scenario: "read of the tenant left behind after a switch",
     };
-    expect(() => expectReadDenied(ctx, { data: [], error: null })).not.toThrow();
-    expect(() => expectReadDenied(ctx, { data: null, error: denialError })).not.toThrow();
     expect(() =>
-      expectReadDenied(ctx, { data: [{ id: "x", tenant_id: ACTING_TENANT }], error: null }),
+      expectReadDenied(ctx, { data: [], error: null }),
+    ).not.toThrow();
+    expect(() =>
+      expectReadDenied(ctx, { data: null, error: denialError }),
+    ).not.toThrow();
+    expect(() =>
+      expectReadDenied(ctx, {
+        data: [{ id: "x", tenant_id: ACTING_TENANT }],
+        error: null,
+      }),
     ).toThrow(/RLS DENIAL FAILED/);
   });
 });

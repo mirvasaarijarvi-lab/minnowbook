@@ -6,17 +6,26 @@
  * `diff -u` shape: `--- expected`, `+++ actual`, hunk headers `@@ -a,b +c,d @@`,
  * and `+`/`-`/` ` line prefixes.
  */
-export function unifiedDiff(expected: string, actual: string, context = 3): string {
+export function unifiedDiff(
+  expected: string,
+  actual: string,
+  context = 3,
+): string {
   const a = expected.split("\n");
   const b = actual.split("\n");
   if (a.join("\n") === b.join("\n")) return "";
 
   const m = a.length;
   const n = b.length;
-  const lcs: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(0));
+  const lcs: number[][] = Array.from({ length: m + 1 }, () =>
+    new Array<number>(n + 1).fill(0),
+  );
   for (let i = m - 1; i >= 0; i--) {
     for (let j = n - 1; j >= 0; j--) {
-      lcs[i][j] = a[i] === b[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+      lcs[i][j] =
+        a[i] === b[j]
+          ? lcs[i + 1][j + 1] + 1
+          : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
     }
   }
 
@@ -58,7 +67,10 @@ export function unifiedDiff(expected: string, actual: string, context = 3): stri
   }
   hunks.push({ start: curStart, end: curEnd });
 
-  const out: string[] = ["--- expected (snapshot)", "+++ actual (current source)"];
+  const out: string[] = [
+    "--- expected (snapshot)",
+    "+++ actual (current source)",
+  ];
   for (const { start, end } of hunks) {
     let aStart = 0;
     let bStart = 0;

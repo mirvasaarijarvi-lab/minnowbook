@@ -233,7 +233,11 @@ describe("period report PDF after multi-code discount requests", () => {
           .slice(-3);
 
         if (money[2] === PDF_NO_AMOUNT) {
-          expect(money, why).toEqual([PDF_NO_AMOUNT, PDF_NO_AMOUNT, PDF_NO_AMOUNT]);
+          expect(money, why).toEqual([
+            PDF_NO_AMOUNT,
+            PDF_NO_AMOUNT,
+            PDF_NO_AMOUNT,
+          ]);
           expect(a.hasAmount, why).toBe(false);
           placeholders++;
           return;
@@ -254,10 +258,10 @@ describe("period report PDF after multi-code discount requests", () => {
         // A discounted row never prints the list price as its total. The row
         // where every code was refused is charged the list price on purpose.
         if (!c.chargesListPrice) {
-          expect(total, `${why}: list price not printed as the total`).not.toBeCloseTo(
-            c.listPrice,
-            10,
-          );
+          expect(
+            total,
+            `${why}: list price not printed as the total`,
+          ).not.toBeCloseTo(c.listPrice, 10);
         }
         if (breakfast > 0 && room === 0) cappedBreakfast++;
 
@@ -294,7 +298,9 @@ describe("period report PDF after multi-code discount requests", () => {
         allowedCents.add(Math.round(a.room * 100));
         if (a.breakfast > 0) allowedCents.add(Math.round(a.breakfast * 100));
       }
-      allowedCents.add(Math.round(sumReportAmounts(CASES.map((c) => c.row)).charged * 100));
+      allowedCents.add(
+        Math.round(sumReportAmounts(CASES.map((c) => c.row)).charged * 100),
+      );
 
       const forbidden = new Set<number>();
       for (const c of CASES) {
@@ -303,12 +309,18 @@ describe("period report PDF after multi-code discount requests", () => {
           if (!allowedCents.has(cents)) forbidden.add(cents);
         }
       }
-      expect(forbidden.size, "there are figures to guard against").toBeGreaterThan(6);
+      expect(
+        forbidden.size,
+        "there are figures to guard against",
+      ).toBeGreaterThan(6);
 
       // Forbidden figures must appear nowhere in the document, on any row.
       for (const cents of forbidden) {
         const printed = (cents / 100).toFixed(2);
-        expect(text, `${printed} must not appear anywhere in the PDF`).not.toContain(printed);
+        expect(
+          text,
+          `${printed} must not appear anywhere in the PDF`,
+        ).not.toContain(printed);
       }
 
       // A refused multi-code request is not a booking, so it has no row.
@@ -329,10 +341,15 @@ describe("period report PDF after multi-code discount requests", () => {
         continue;
       }
       const room = Number(cells.room);
-      const breakfast = cells.breakfast === PDF_NO_AMOUNT ? 0 : Number(cells.breakfast);
+      const breakfast =
+        cells.breakfast === PDF_NO_AMOUNT ? 0 : Number(cells.breakfast);
       expect(roundCents(room + breakfast), c.label).toBe(roundCents(a.charged));
-      expect(Number(cells.total), c.label).toBe(roundCents(c.row.price_eur ?? 0));
-      expect(room, `${c.label}: no negative room line`).toBeGreaterThanOrEqual(0);
+      expect(Number(cells.total), c.label).toBe(
+        roundCents(c.row.price_eur ?? 0),
+      );
+      expect(room, `${c.label}: no negative room line`).toBeGreaterThanOrEqual(
+        0,
+      );
     }
   });
 });

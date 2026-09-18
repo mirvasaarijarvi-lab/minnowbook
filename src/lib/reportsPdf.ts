@@ -51,7 +51,9 @@ const TEXT_MUTED: [number, number, number] = [110, 110, 120];
 const LINE: [number, number, number] = [219, 219, 226];
 
 const asText = (value: unknown): string =>
-  String(value ?? "").replace(/\s+/g, " ").trim();
+  String(value ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
 
 /** Draws the KPI row and returns the new vertical cursor. */
 function drawKpis(doc: jsPDF, kpis: PdfKpi[], y: number): number {
@@ -174,10 +176,17 @@ export function buildReportPdf(options: PdfReportOptions): jsPDF {
       body: options.table.body.map((row) => row.map(asText)),
       margin: { left: MARGIN, right: MARGIN },
       styles: { fontSize: 7.5, cellPadding: 1.6, textColor: TEXT_DARK },
-      headStyles: { fillColor: [244, 244, 248], textColor: TEXT_DARK, fontStyle: "bold" },
+      headStyles: {
+        fillColor: [244, 244, 248],
+        textColor: TEXT_DARK,
+        fontStyle: "bold",
+      },
       alternateRowStyles: { fillColor: [252, 252, 253] },
       columnStyles: Object.fromEntries(
-        options.table.head.map((_, i) => [i, { halign: numeric.has(i) ? "right" : "left" }]),
+        options.table.head.map((_, i) => [
+          i,
+          { halign: numeric.has(i) ? "right" : "left" },
+        ]),
       ) as Record<number, { halign: "left" | "right" }>,
       didParseCell: (data) => {
         // autoTable does not inherit column alignment for header cells.

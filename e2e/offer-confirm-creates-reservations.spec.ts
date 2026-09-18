@@ -29,23 +29,25 @@ import { createClient } from "@supabase/supabase-js";
 const STAFF_EMAIL = process.env.E2E_STAFF_EMAIL;
 const STAFF_PASSWORD = process.env.E2E_STAFF_PASSWORD;
 
-
 test.describe("Offer confirm creates main + linked cross reservations", () => {
   test.skip(
     !STAFF_EMAIL || !STAFF_PASSWORD,
     "Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.",
   );
 
-  test("confirms offer and produces main + 2 linked reservations", async ({ tenant }) => {
+  test("confirms offer and produces main + 2 linked reservations", async ({
+    tenant,
+  }) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
     // 1. Sign in as staff
-    const { data: signIn, error: signInErr } = await supabase.auth.signInWithPassword({
-      email: STAFF_EMAIL!,
-      password: STAFF_PASSWORD!,
-    });
+    const { data: signIn, error: signInErr } =
+      await supabase.auth.signInWithPassword({
+        email: STAFF_EMAIL!,
+        password: STAFF_PASSWORD!,
+      });
     expect(signInErr, `sign-in failed: ${signInErr?.message}`).toBeNull();
     expect(signIn?.user?.id).toBeTruthy();
 
@@ -58,7 +60,10 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
       .eq("slug", tenant.slug)
       .maybeSingle();
     expect(tenantErr, tenantErr?.message).toBeNull();
-    expect(tenantRow?.id, `tenant '${tenant.slug}' not visible to this user`).toBeTruthy();
+    expect(
+      tenantRow?.id,
+      `tenant '${tenant.slug}' not visible to this user`,
+    ).toBeTruthy();
     expect(
       tenantRow!.id,
       `signed-in user resolves a different tenant than the shared fixture (${tenant.id})`,
@@ -157,7 +162,10 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
         } as any)
         .select()
         .single();
-      expect(mainErr, `main reservation insert failed: ${mainErr?.message}`).toBeNull();
+      expect(
+        mainErr,
+        `main reservation insert failed: ${mainErr?.message}`,
+      ).toBeNull();
       const resIds: string[] = [mainRes!.id];
 
       // 4. Create linked reservations (only enabled ones)
@@ -175,8 +183,8 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
             start_time: lr.start_time
               ? `${lr.start_time}:00`
               : offer!.start_time
-              ? `${offer!.start_time}:00`
-              : null,
+                ? `${offer!.start_time}:00`
+                : null,
             end_time: lr.end_time ? `${lr.end_time}:00` : null,
             guest_name: offer!.guest_name,
             guest_email: offer!.guest_email,
@@ -192,7 +200,10 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
           } as any)
           .select()
           .single();
-        expect(linkedErr, `linked (${key}) insert failed: ${linkedErr?.message}`).toBeNull();
+        expect(
+          linkedErr,
+          `linked (${key}) insert failed: ${linkedErr?.message}`,
+        ).toBeNull();
         resIds.push(linkedRes!.id);
       }
 
@@ -205,7 +216,10 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
 
       // 6. Verify outcomes
       // 1 main + 2 enabled linked = 3 reservations; the disabled hotel link is excluded.
-      expect(resIds, "should produce main + 2 linked reservations").toHaveLength(3);
+      expect(
+        resIds,
+        "should produce main + 2 linked reservations",
+      ).toHaveLength(3);
 
       const { data: createdReservations, error: fetchErr } = await supabase
         .from("reservations")
@@ -223,7 +237,9 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
       }
 
       // Reservation types: exactly venue + restaurant + guesthouse
-      const types = (createdReservations || []).map((r) => r.reservation_type).sort();
+      const types = (createdReservations || [])
+        .map((r) => r.reservation_type)
+        .sort();
       expect(types).toEqual(["guesthouse", "restaurant", "venue"]);
 
       // Offer state reflects the link
@@ -233,7 +249,9 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
         .eq("id", offerId)
         .single();
       expect(confirmedOffer?.status).toBe("confirmed");
-      expect(((confirmedOffer?.reservation_ids ?? []) as string[]).sort()).toEqual([...resIds].sort());
+      expect(
+        ((confirmedOffer?.reservation_ids ?? []) as string[]).sort(),
+      ).toEqual([...resIds].sort());
     } finally {
       await cleanup();
       await supabase.auth.signOut();

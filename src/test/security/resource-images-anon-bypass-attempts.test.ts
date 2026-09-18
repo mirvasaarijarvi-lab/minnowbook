@@ -21,13 +21,16 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
+const canRun = Boolean(
+  SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY,
+);
 
 const newAnon = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
@@ -77,7 +80,8 @@ describe.runIf(canRun)(
         })
         .select("id")
         .single();
-      if (tenantErr || !tenant) throw tenantErr ?? new Error("tenant insert failed");
+      if (tenantErr || !tenant)
+        throw tenantErr ?? new Error("tenant insert failed");
       const tenantId = tenant.id as string;
 
       async function seedOne(
@@ -96,7 +100,8 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (resErr || !res) throw resErr ?? new Error(`resource insert failed for ${label}`);
+        if (resErr || !res)
+          throw resErr ?? new Error(`resource insert failed for ${label}`);
 
         // "Looks-public" row shape: lowest sort_order (typically the primary/
         // hero image), a benign https URL, no unusual markers.
@@ -111,8 +116,13 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (imgErr || !img) throw imgErr ?? new Error(`image insert failed for ${label}`);
-        return { imageId: img.id as string, resourceId: res.id as string, imageUrl };
+        if (imgErr || !img)
+          throw imgErr ?? new Error(`image insert failed for ${label}`);
+        return {
+          imageId: img.id as string,
+          resourceId: res.id as string,
+          imageUrl,
+        };
       }
 
       seeded = {

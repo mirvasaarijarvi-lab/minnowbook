@@ -35,9 +35,14 @@ const COLOURS = ["red", "green", "blue", "yellow", "purple", "orange"] as const;
 const ORDINALS = ["first", "second", "third"] as const;
 
 export const normaliseAnswer = (value: string) =>
-  value.trim().toLowerCase().replace(/[.!?]+$/, "").replace(/\s+/g, " ");
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/[.!?]+$/, "")
+    .replace(/\s+/g, " ");
 
-const pick = <T,>(items: readonly T[]) => items[Math.floor(Math.random() * items.length)];
+const pick = <T>(items: readonly T[]) =>
+  items[Math.floor(Math.random() * items.length)];
 
 const numberAnswers = (n: number) => [String(n), NUMBER_WORDS[n] ?? String(n)];
 
@@ -77,5 +82,7 @@ export const createAccessibleChallenge = (): AccessibleChallenge => {
   };
 };
 
-export const isChallengePassed = (challenge: AccessibleChallenge, answer: string) =>
-  challenge.accepted.includes(normaliseAnswer(answer));
+export const isChallengePassed = (
+  challenge: AccessibleChallenge,
+  answer: string,
+) => challenge.accepted.includes(normaliseAnswer(answer));

@@ -76,7 +76,10 @@ test.describe("Server-owned invoicing flag and pricing notes", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("client-sent invoiced flags and pricing notes are discarded", async ({
     ephemeralTenant,
@@ -210,7 +213,9 @@ test.describe("Server-owned invoicing flag and pricing notes", () => {
         .eq("tenant_id", tenantId)
         .eq("guest_email", email);
       expect(error, error?.message).toBeNull();
-      expect(data, `${email} stored the wrong number of bookings`).toHaveLength(1);
+      expect(data, `${email} stored the wrong number of bookings`).toHaveLength(
+        1,
+      );
       return data![0] as Record<string, any>;
     };
 
@@ -232,27 +237,44 @@ test.describe("Server-owned invoicing flag and pricing notes", () => {
       expect(row.staff_notes, `${label} staff notes`).toBeNull();
       expect(row.internal_notes, `${label} internal notes`).toBeNull();
       expect(row.created_by, `${label} created_by`).toBeNull();
-      expect(row.acknowledgment_email_sent_at, `${label} ack timestamp`).not.toBe(
-        TAMPERED.acknowledgment_email_sent_at,
-      );
-      expect(row.confirmation_email_sent_at, `${label} confirmation timestamp`).toBeNull();
-      expect(row.cancellation_email_sent_at, `${label} cancellation timestamp`).toBeNull();
-      expect(row.reminder_email_sent_at, `${label} reminder timestamp`).toBeNull();
+      expect(
+        row.acknowledgment_email_sent_at,
+        `${label} ack timestamp`,
+      ).not.toBe(TAMPERED.acknowledgment_email_sent_at);
+      expect(
+        row.confirmation_email_sent_at,
+        `${label} confirmation timestamp`,
+      ).toBeNull();
+      expect(
+        row.cancellation_email_sent_at,
+        `${label} cancellation timestamp`,
+      ).toBeNull();
+      expect(
+        row.reminder_email_sent_at,
+        `${label} reminder timestamp`,
+      ).toBeNull();
       // created_at is the real insert time, not the year 2000.
-      expect(new Date(row.created_at).getUTCFullYear(), `${label} created_at`).toBeGreaterThan(
-        2020,
-      );
+      expect(
+        new Date(row.created_at).getUTCFullYear(),
+        `${label} created_at`,
+      ).toBeGreaterThan(2020);
     }
 
     // --- Prices and discount wording come from the server ------------------
     // Stay: resource price with the real 10 % code, never the claimed 1 EUR or
     // the self-granted 95 %.
     expect(Number(stay.original_price_eur), "stay gross").toBe(STAY_TOTAL);
-    expect(Number(stay.price_eur), "stay charged").toBe(roundCents(STAY_TOTAL * 0.9));
+    expect(Number(stay.price_eur), "stay charged").toBe(
+      roundCents(STAY_TOTAL * 0.9),
+    );
     expect(stay.discount_type, "stay discount type").toBe("percentage");
     expect(Number(stay.discount_value), "stay discount value").toBe(10);
-    expect(stay.discount_reason, "stay discount wording").toBe(`Promo code: ${promoCode}`);
-    expect(Number(stay.breakfast_price_per_person), "stay breakfast rate").toBe(BREAKFAST_EUR);
+    expect(stay.discount_reason, "stay discount wording").toBe(
+      `Promo code: ${promoCode}`,
+    );
+    expect(Number(stay.breakfast_price_per_person), "stay breakfast rate").toBe(
+      BREAKFAST_EUR,
+    );
 
     // Menu-priced dine-in: no amount at all, no invented discount.
     expect(menu.pricing_type, "menu pricing type").toBe("menu");
@@ -276,9 +298,10 @@ test.describe("Server-owned invoicing flag and pricing notes", () => {
       breakfast_price_per_person: Number(stay.breakfast_price_per_person),
       price_eur: Number(stay.price_eur),
     });
-    expect(roundCents(stayAmounts.room + stayAmounts.breakfast), "stay report split").toBe(
-      Number(stay.price_eur),
-    );
+    expect(
+      roundCents(stayAmounts.room + stayAmounts.breakfast),
+      "stay report split",
+    ).toBe(Number(stay.price_eur));
 
     // --- A guest-level client cannot write these fields -------------------
     const anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -320,7 +343,11 @@ test.describe("Server-owned invoicing flag and pricing notes", () => {
 
     const { error: anonUpdateErr } = await anon
       .from("reservations")
-      .update({ is_invoiced: true, pricing_details: "Free of charge", staff_notes: "Comped" })
+      .update({
+        is_invoiced: true,
+        pricing_details: "Free of charge",
+        staff_notes: "Comped",
+      })
       .eq("id", stay.id);
     // Either the API refuses it or RLS matches no row: the stored values must
     // be unchanged in both cases.
@@ -328,7 +355,9 @@ test.describe("Server-owned invoicing flag and pricing notes", () => {
     expect(after.is_invoiced, "stay stayed uninvoiced").toBe(false);
     expect(after.pricing_details, "stay pricing notes stayed empty").toBeNull();
     expect(after.staff_notes, "stay staff notes stayed empty").toBeNull();
-    expect(Number(after.price_eur), "stay amount unchanged").toBe(Number(stay.price_eur));
+    expect(Number(after.price_eur), "stay amount unchanged").toBe(
+      Number(stay.price_eur),
+    );
     if (anonUpdateErr) expect(anonUpdateErr.message.length).toBeGreaterThan(0);
   });
 });

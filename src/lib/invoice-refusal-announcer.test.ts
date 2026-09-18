@@ -32,7 +32,9 @@ describe("invoice refusal announcer", () => {
     expect(region!.textContent?.trim()).toBe("Add a price first.");
     announceInvoiceRefusal("Again.");
     vi.runAllTimers();
-    expect(document.querySelectorAll("#invoice-refusal-live-region")).toHaveLength(1);
+    expect(
+      document.querySelectorAll("#invoice-refusal-live-region"),
+    ).toHaveLength(1);
   });
 
   it("changes the text on a repeated identical refusal so it is re-announced", () => {

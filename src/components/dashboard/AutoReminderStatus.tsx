@@ -40,7 +40,9 @@ const AutoReminderStatus = () => {
 
       let query = supabase
         .from("reservations")
-        .select("id, guest_name, guest_email, date, start_time, reservation_type, reminder_email_sent_at, site_id")
+        .select(
+          "id, guest_name, guest_email, date, start_time, reservation_type, reminder_email_sent_at, site_id",
+        )
         .eq("tenant_id", tenantId)
         .not("reminder_email_sent_at", "is", null)
         .gte("reminder_email_sent_at", sevenDaysAgo.toISOString())
@@ -65,7 +67,9 @@ const AutoReminderStatus = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg font-serif">{t("autoReminder.title")}</CardTitle>
+            <CardTitle className="text-lg font-serif">
+              {t("autoReminder.title")}
+            </CardTitle>
             <DashboardTooltip text={t("autoReminder.tooltip")} />
           </div>
           <Badge variant="outline" className="gap-1.5 text-xs">
@@ -78,9 +82,16 @@ const AutoReminderStatus = () => {
         {/* Next run indicator */}
         <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
           <div>
-            <p className="text-sm font-medium text-foreground">{t("autoReminder.nextRun")}</p>
+            <p className="text-sm font-medium text-foreground">
+              {t("autoReminder.nextRun")}
+            </p>
             <p className="text-xs text-muted-foreground">
-              {format(nextRun, "HH:mm")} ({formatDistanceToNow(nextRun, { addSuffix: true, locale: dateFnsLocale })})
+              {format(nextRun, "HH:mm")} (
+              {formatDistanceToNow(nextRun, {
+                addSuffix: true,
+                locale: dateFnsLocale,
+              })}
+              )
             </p>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -95,7 +106,9 @@ const AutoReminderStatus = () => {
         {/* Recent reminders log */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-foreground">{t("autoReminder.recentLog")}</p>
+            <p className="text-sm font-medium text-foreground">
+              {t("autoReminder.recentLog")}
+            </p>
             <Badge variant="secondary" className="text-xs">
               {reminderCount} {t("autoReminder.sent7d")}
             </Badge>
@@ -119,15 +132,21 @@ const AutoReminderStatus = () => {
                   <div className="flex items-center gap-2 min-w-0">
                     <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
                     <div className="min-w-0">
-                      <p className="font-medium text-foreground truncate">{r.guest_name}</p>
+                      <p className="font-medium text-foreground truncate">
+                        {r.guest_name}
+                      </p>
                       <p className="text-xs text-muted-foreground truncate">
-                        {r.reservation_type} · {r.date}{r.start_time ? ` ${r.start_time.slice(0, 5)}` : ""}
+                        {r.reservation_type} · {r.date}
+                        {r.start_time ? ` ${r.start_time.slice(0, 5)}` : ""}
                       </p>
                     </div>
                   </div>
                   <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
                     {r.reminder_email_sent_at
-                      ? formatDistanceToNow(new Date(r.reminder_email_sent_at), { addSuffix: true, locale: dateFnsLocale })
+                      ? formatDistanceToNow(
+                          new Date(r.reminder_email_sent_at),
+                          { addSuffix: true, locale: dateFnsLocale },
+                        )
                       : ""}
                   </span>
                 </div>

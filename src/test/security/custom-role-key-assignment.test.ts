@@ -53,9 +53,9 @@ function isCustomRoleKeyAssignableByOwner(
 describe("tenant_users.custom_role_key assignment guard", () => {
   describe("accepts safe assignments", () => {
     it("allows NULL custom_role_key (falls back to enum role)", () => {
-      expect(
-        isCustomRoleKeyAssignableByOwner(null, SEEDED_TENANT_ROLES),
-      ).toBe(true);
+      expect(isCustomRoleKeyAssignableByOwner(null, SEEDED_TENANT_ROLES)).toBe(
+        true,
+      );
     });
 
     it("allows a custom role with hierarchy_level >= 10", () => {
@@ -123,9 +123,7 @@ describe("tenant_users.custom_role_key assignment guard", () => {
     it("rejects a role_key that only exists for a DIFFERENT tenant", () => {
       // Simulate a tenant with only seeded roles — a custom role_key from
       // another tenant must not slip through.
-      const otherTenantRoles = SEEDED_TENANT_ROLES.filter(
-        (r) => r.is_system,
-      );
+      const otherTenantRoles = SEEDED_TENANT_ROLES.filter((r) => r.is_system);
       expect(
         isCustomRoleKeyAssignableByOwner("shift_lead", otherTenantRoles),
       ).toBe(false);
@@ -169,20 +167,20 @@ describe("AdminPanel isAssignableRole client-side guard", () => {
   });
 
   it("allows a safe non-system custom role", () => {
-    expect(
-      clientIsAssignableRole("shift_lead", SEEDED_TENANT_ROLES),
-    ).toBe(true);
+    expect(clientIsAssignableRole("shift_lead", SEEDED_TENANT_ROLES)).toBe(
+      true,
+    );
   });
 
   it("blocks a non-system custom role with hierarchy_level < 10", () => {
-    expect(
-      clientIsAssignableRole("elevated_custom", SEEDED_TENANT_ROLES),
-    ).toBe(false);
+    expect(clientIsAssignableRole("elevated_custom", SEEDED_TENANT_ROLES)).toBe(
+      false,
+    );
   });
 
   it("blocks an unknown custom role key", () => {
-    expect(
-      clientIsAssignableRole("does_not_exist", SEEDED_TENANT_ROLES),
-    ).toBe(false);
+    expect(clientIsAssignableRole("does_not_exist", SEEDED_TENANT_ROLES)).toBe(
+      false,
+    );
   });
 });

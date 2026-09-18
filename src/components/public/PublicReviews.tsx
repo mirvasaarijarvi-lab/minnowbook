@@ -11,7 +11,12 @@ interface PublicReviewsProps {
   accentColor: string;
 }
 
-const PublicReviews = ({ tenantId, siteId, primaryColor, accentColor }: PublicReviewsProps) => {
+const PublicReviews = ({
+  tenantId,
+  siteId,
+  primaryColor,
+  accentColor,
+}: PublicReviewsProps) => {
   const t = useT();
 
   const { data: reviews = [] } = useQuery({
@@ -29,12 +34,16 @@ const PublicReviews = ({ tenantId, siteId, primaryColor, accentColor }: PublicRe
 
   if (reviews.length === 0) return null;
 
-  const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+  const avgRating =
+    reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+        <CardTitle
+          className="text-lg font-serif flex items-center gap-2"
+          style={{ color: primaryColor }}
+        >
           <MessageSquare className="h-5 w-5" />
           {t("booking.guestReviews" as any) || "Guest Reviews"}
         </CardTitle>
@@ -57,9 +66,15 @@ const PublicReviews = ({ tenantId, siteId, primaryColor, accentColor }: PublicRe
       <CardContent>
         <div className="space-y-3">
           {reviews.map((review) => (
-            <div key={review.id} className="p-3 rounded-lg border border-border">
+            <div
+              key={review.id}
+              className="p-3 rounded-lg border border-border"
+            >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium" style={{ color: primaryColor }}>
+                <span
+                  className="text-sm font-medium"
+                  style={{ color: primaryColor }}
+                >
                   {review.guest_name}
                 </span>
                 <div className="flex">
@@ -74,7 +89,9 @@ const PublicReviews = ({ tenantId, siteId, primaryColor, accentColor }: PublicRe
                 </div>
               </div>
               {review.comment && (
-                <p className="text-sm text-muted-foreground">{review.comment}</p>
+                <p className="text-sm text-muted-foreground">
+                  {review.comment}
+                </p>
               )}
             </div>
           ))}

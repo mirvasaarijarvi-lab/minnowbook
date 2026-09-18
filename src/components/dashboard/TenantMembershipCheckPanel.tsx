@@ -1,12 +1,32 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, AlertTriangle, RefreshCw, Database, Users, ShieldAlert } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
+  Database,
+  Users,
+  ShieldAlert,
+} from "lucide-react";
 
 interface HealthRow {
   total_memberships: number;
@@ -36,7 +56,9 @@ const TenantMembershipCheckPanel = () => {
   const healthQuery = useQuery({
     queryKey: ["tenant-membership-health"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_tenant_membership_health");
+      const { data, error } = await supabase.rpc(
+        "get_tenant_membership_health",
+      );
       if (error) throw error;
       return (data?.[0] ?? null) as HealthRow | null;
     },
@@ -45,7 +67,9 @@ const TenantMembershipCheckPanel = () => {
   const duplicatesQuery = useQuery({
     queryKey: ["users-with-multiple-tenants"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("find_users_with_multiple_tenants");
+      const { data, error } = await supabase.rpc(
+        "find_users_with_multiple_tenants",
+      );
       if (error) throw error;
       return (data ?? []) as DuplicateRow[];
     },
@@ -54,13 +78,16 @@ const TenantMembershipCheckPanel = () => {
   const isLoading = healthQuery.isLoading || duplicatesQuery.isLoading;
   const isError = healthQuery.isError || duplicatesQuery.isError;
   const errorMessage =
-    (healthQuery.error as Error | null)?.message ?? (duplicatesQuery.error as Error | null)?.message;
+    (healthQuery.error as Error | null)?.message ??
+    (duplicatesQuery.error as Error | null)?.message;
 
   const health = healthQuery.data;
   const duplicates = duplicatesQuery.data ?? [];
 
   // Cross-check: get_user_tenant_id MUST return NULL for any user with > 1 tenant
-  const resolverFailures = duplicates.filter((d) => d.resolved_tenant_id !== null);
+  const resolverFailures = duplicates.filter(
+    (d) => d.resolved_tenant_id !== null,
+  );
   const resolverContractHolds = resolverFailures.length === 0;
   const integrityHolds = (health?.users_with_multiple_tenants ?? 0) === 0;
 
@@ -79,7 +106,8 @@ const TenantMembershipCheckPanel = () => {
           </CardTitle>
           <CardDescription>
             Verifies no user is linked to multiple tenants and that{" "}
-            <code className="text-xs font-mono">get_user_tenant_id()</code> returns NULL when duplicates exist.
+            <code className="text-xs font-mono">get_user_tenant_id()</code>{" "}
+            returns NULL when duplicates exist.
           </CardDescription>
         </div>
         <Button
@@ -98,7 +126,9 @@ const TenantMembershipCheckPanel = () => {
           <Alert variant="destructive">
             <ShieldAlert className="h-4 w-4" />
             <AlertTitle>Check failed</AlertTitle>
-            <AlertDescription>{errorMessage ?? "Unable to run integrity check."}</AlertDescription>
+            <AlertDescription>
+              {errorMessage ?? "Unable to run integrity check."}
+            </AlertDescription>
           </Alert>
         )}
 
@@ -130,7 +160,9 @@ const TenantMembershipCheckPanel = () => {
               <StatTile
                 label="Unresolvable users"
                 value={health?.users_with_no_resolvable_tenant ?? 0}
-                tone={health?.users_with_no_resolvable_tenant ? "warning" : "ok"}
+                tone={
+                  health?.users_with_no_resolvable_tenant ? "warning" : "ok"
+                }
               />
             </div>
 
@@ -156,7 +188,9 @@ const TenantMembershipCheckPanel = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="font-mono text-xs">User ID</TableHead>
+                      <TableHead className="font-mono text-xs">
+                        User ID
+                      </TableHead>
                       <TableHead>Tenants</TableHead>
                       <TableHead className="text-center">Count</TableHead>
                       <TableHead>Resolver result</TableHead>
@@ -171,14 +205,20 @@ const TenantMembershipCheckPanel = () => {
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {(row.tenant_names ?? []).map((name, idx) => (
-                              <Badge key={`${row.user_id}-${idx}`} variant="outline" className="text-xs">
+                              <Badge
+                                key={`${row.user_id}-${idx}`}
+                                variant="outline"
+                                className="text-xs"
+                              >
                                 {name ?? "Unknown"}
                               </Badge>
                             ))}
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
-                          <Badge variant="destructive">{row.tenant_count}</Badge>
+                          <Badge variant="destructive">
+                            {row.tenant_count}
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           {row.resolved_tenant_id === null ? (
@@ -187,7 +227,10 @@ const TenantMembershipCheckPanel = () => {
                               NULL (safe)
                             </Badge>
                           ) : (
-                            <Badge variant="destructive" className="gap-1 font-mono text-[10px]">
+                            <Badge
+                              variant="destructive"
+                              className="gap-1 font-mono text-[10px]"
+                            >
                               <AlertTriangle className="h-3 w-3" />
                               {row.resolved_tenant_id.slice(0, 8)}…
                             </Badge>
@@ -205,8 +248,9 @@ const TenantMembershipCheckPanel = () => {
                 <CheckCircle2 className="h-4 w-4 text-primary" />
                 <AlertTitle>All checks passed</AlertTitle>
                 <AlertDescription>
-                  No tenant_users duplicates found. The UNIQUE (user_id) constraint and the
-                  get_user_tenant_id() resolver are both behaving correctly.
+                  No tenant_users duplicates found. The UNIQUE (user_id)
+                  constraint and the get_user_tenant_id() resolver are both
+                  behaving correctly.
                 </AlertDescription>
               </Alert>
             )}
@@ -242,7 +286,9 @@ const StatTile = ({
         <span>{label}</span>
         {icon}
       </div>
-      <div className="text-2xl font-serif font-semibold text-foreground">{value}</div>
+      <div className="text-2xl font-serif font-semibold text-foreground">
+        {value}
+      </div>
     </div>
   );
 };
@@ -260,7 +306,9 @@ const VerdictCard = ({
 }) => (
   <div
     className={`rounded-md border p-3 flex items-start gap-3 ${
-      ok ? "border-primary/30 bg-primary/5" : "border-destructive/40 bg-destructive/5"
+      ok
+        ? "border-primary/30 bg-primary/5"
+        : "border-destructive/40 bg-destructive/5"
     }`}
   >
     {ok ? (

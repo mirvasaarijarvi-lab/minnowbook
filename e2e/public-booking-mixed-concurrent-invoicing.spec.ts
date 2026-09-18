@@ -7,7 +7,11 @@ import {
   buildGroupInvoiceModel,
   type InvoiceLegRow,
 } from "@/lib/invoicePdf";
-import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricing-accessor";
+import {
+  reportAmounts,
+  sumReportAmounts,
+  roundCents,
+} from "@/lib/report-pricing-accessor";
 
 /**
  * End-to-end: a correct invoicing and a mismatched one racing each other.
@@ -32,8 +36,10 @@ import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricin
  * Requires SERVICE_ROLE_KEY; skips itself without it.
  */
 
-const AMOUNT_ERROR = "Invoice amount must match the recalculated room and breakfast totals.";
-const NO_PRICE_ERROR = "Add a price before marking this reservation as invoiced.";
+const AMOUNT_ERROR =
+  "Invoice amount must match the recalculated room and breakfast totals.";
+const NO_PRICE_ERROR =
+  "Add a price before marking this reservation as invoiced.";
 
 const NIGHTLY = 125;
 const BREAKFAST_RATE = 13.4;
@@ -52,7 +58,11 @@ const isoDate = (daysFromNow: number): string => {
 };
 
 /** Patches that must never be accepted, with the message each should draw. */
-const MISMATCHED: Array<{ label: string; patch: Record<string, unknown>; error: string }> = [
+const MISMATCHED: Array<{
+  label: string;
+  patch: Record<string, unknown>;
+  error: string;
+}> = [
   {
     label: "below the breakfast lines",
     patch: { is_invoiced: true, price_eur: 45 },
@@ -80,7 +90,10 @@ test.describe("Mixed concurrent invoicing", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("rejects the mismatched request while the good one invoices exactly once", async ({
     ephemeralTenant,
@@ -103,26 +116,30 @@ test.describe("Mixed concurrent invoicing", () => {
     expect(resErr, resErr?.message).toBeNull();
 
     const book = async (email: string, name: string, dayOffset: number) => {
-      const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          apikey: SUPABASE_ANON_KEY,
+      const res = await request.post(
+        `${SUPABASE_URL}/functions/v1/public-booking`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            apikey: SUPABASE_ANON_KEY,
+          },
+          data: {
+            tenant_id: tenantId,
+            reservation_type: "guesthouse",
+            date: isoDate(dayOffset),
+            check_out_date: isoDate(dayOffset + NIGHTS),
+            guests_count: GUESTS,
+            breakfast_included: true,
+            guest_name: name,
+            guest_email: email,
+            guest_phone: "+358401234567",
+            special_requests:
+              "Created by the mixed concurrent invoicing E2E spec.",
+          },
+          timeout: 30_000,
         },
-        data: {
-          tenant_id: tenantId,
-          reservation_type: "guesthouse",
-          date: isoDate(dayOffset),
-          check_out_date: isoDate(dayOffset + NIGHTS),
-          guests_count: GUESTS,
-          breakfast_included: true,
-          guest_name: name,
-          guest_email: email,
-          guest_phone: "+358401234567",
-          special_requests: "Created by the mixed concurrent invoicing E2E spec.",
-        },
-        timeout: 30_000,
-      });
+      );
       expect(res.status(), await res.text()).toBe(200);
     };
 
@@ -146,7 +163,10 @@ test.describe("Mixed concurrent invoicing", () => {
 
     for (const email of [emailA, emailB, emailC]) {
       const row = await fetchRow(email);
-      expect(Number(row.price_eur), `server-recalculated total for ${email}`).toBe(STAY_TOTAL);
+      expect(
+        Number(row.price_eur),
+        `server-recalculated total for ${email}`,
+      ).toBe(STAY_TOTAL);
       expect(row.is_invoiced).toBe(false);
     }
 
@@ -156,11 +176,12 @@ test.describe("Mixed concurrent invoicing", () => {
     for (let i = 0; i < CLIENTS; i++) {
       const email = `ci+mixedrace-staff${i}-${stamp}@mimmobook.test`;
       const password = `Ci-Tmp-${randomUUID()}-Z9!`;
-      const { data: created, error: userErr } = await admin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
+      const { data: created, error: userErr } =
+        await admin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
       expect(userErr, userErr?.message).toBeNull();
       userIds.push(created!.user!.id);
       const { error: memberErr } = await admin.from("tenant_users").insert({
@@ -177,7 +198,10 @@ test.describe("Mixed concurrent invoicing", () => {
           storageKey: `ci-mixedrace-${i}-${stamp}`,
         },
       });
-      const { error: signInErr } = await client.auth.signInWithPassword({ email, password });
+      const { error: signInErr } = await client.auth.signInWithPassword({
+        email,
+        password,
+      });
       expect(signInErr, signInErr?.message).toBeNull();
       clients.push(client);
     }
@@ -192,7 +216,8 @@ test.describe("Mixed concurrent invoicing", () => {
         .eq("action", "UPDATE");
       expect(error, error?.message).toBeNull();
       return (data ?? []).filter(
-        (e: any) => e.old_data?.is_invoiced === false && e.new_data?.is_invoiced === true,
+        (e: any) =>
+          e.old_data?.is_invoiced === false && e.new_data?.is_invoiced === true,
       );
     };
 
@@ -202,7 +227,11 @@ test.describe("Mixed concurrent invoicing", () => {
     /** Fires the given patches at one booking all at once. */
     const race = async (
       reservationId: string,
-      patches: Array<{ label: string; patch: Record<string, unknown>; error?: string }>,
+      patches: Array<{
+        label: string;
+        patch: Record<string, unknown>;
+        error?: string;
+      }>,
     ) =>
       Promise.all(
         patches.map(async (p, i) => {
@@ -221,24 +250,39 @@ test.describe("Mixed concurrent invoicing", () => {
     const assertSingleCleanInvoice = async (email: string, label: string) => {
       const row = await fetchRow(email);
       expect(row.is_invoiced, `${label}: invoiced`).toBe(true);
-      expect(Number(row.price_eur), `${label}: the recalculated amount, not a tampered one`).toBe(
-        STAY_TOTAL,
+      expect(
+        Number(row.price_eur),
+        `${label}: the recalculated amount, not a tampered one`,
+      ).toBe(STAY_TOTAL);
+      expect(Number(row.guests_count), `${label}: guest count untouched`).toBe(
+        GUESTS,
       );
-      expect(Number(row.guests_count), `${label}: guest count untouched`).toBe(GUESTS);
       expect(
         await invoiceTransitions(row.id),
         `${label}: exactly one invoicing in the history`,
       ).toHaveLength(1);
 
       const single = buildInvoiceModel(row as any, "en");
-      expect(single.invoiceNumber, `${label}: the booking's own identifier`).toBe(
-        row.id.slice(0, 8).toUpperCase(),
+      expect(
+        single.invoiceNumber,
+        `${label}: the booking's own identifier`,
+      ).toBe(row.id.slice(0, 8).toUpperCase());
+      expect(roundCents(single.total), `${label}: invoice total`).toBe(
+        STAY_TOTAL,
       );
-      expect(roundCents(single.total), `${label}: invoice total`).toBe(STAY_TOTAL);
 
-      const model = buildGroupInvoiceModel([legRow(row, `Mixed Race Room ${stamp}`)], "en");
-      expect(model.lines, `${label}: no invoice rows from refused requests`).toHaveLength(2);
-      expect(model.lines.filter((l) => l.kind === "room"), `${label}: one room line`).toHaveLength(1);
+      const model = buildGroupInvoiceModel(
+        [legRow(row, `Mixed Race Room ${stamp}`)],
+        "en",
+      );
+      expect(
+        model.lines,
+        `${label}: no invoice rows from refused requests`,
+      ).toHaveLength(2);
+      expect(
+        model.lines.filter((l) => l.kind === "room"),
+        `${label}: one room line`,
+      ).toHaveLength(1);
       expect(
         model.lines.filter((l) => l.kind === "breakfast"),
         `${label}: one breakfast line`,
@@ -264,7 +308,10 @@ test.describe("Mixed concurrent invoicing", () => {
 
       const goodA = resultsA.find((r) => r.label === "correct")!;
       expect(goodA.error, "the correct request succeeds").toBeNull();
-      expect(goodA.data, "the correct request returns the booking").not.toBeNull();
+      expect(
+        goodA.data,
+        "the correct request returns the booking",
+      ).not.toBeNull();
       expect(
         buildInvoiceModel(goodA.data as any, "en").invoiceNumber,
         "the succeeding request reports the booking identifier",
@@ -279,7 +326,10 @@ test.describe("Mixed concurrent invoicing", () => {
         expect(r.data, `${r.label}: returns no invoice row`).toBeNull();
       }
 
-      const invoicedA = await assertSingleCleanInvoice(emailA, "good in the middle");
+      const invoicedA = await assertSingleCleanInvoice(
+        emailA,
+        "good in the middle",
+      );
 
       const { data: invoicedRows, error: listErr } = await admin
         .from("reservations")
@@ -287,15 +337,18 @@ test.describe("Mixed concurrent invoicing", () => {
         .eq("tenant_id", tenantId)
         .eq("is_invoiced", true);
       expect(listErr, listErr?.message).toBeNull();
-      expect(invoicedRows, "only the raced booking is invoiced").toHaveLength(1);
+      expect(invoicedRows, "only the raced booking is invoiced").toHaveLength(
+        1,
+      );
       expect(
         roundCents(sumReportAmounts(invoicedRows as any[]).charged),
         "revenue counted once at the correct amount",
       ).toBe(STAY_TOTAL);
       const split = reportAmounts(invoicedA as any);
-      expect(roundCents(split.room + split.breakfast), "room and breakfast reconcile").toBe(
-        STAY_TOTAL,
-      );
+      expect(
+        roundCents(split.room + split.breakfast),
+        "room and breakfast reconcile",
+      ).toBe(STAY_TOTAL);
 
       // --- 5. Reverse order: mismatched first, good last -------------------
       const rowB = await fetchRow(emailB);
@@ -306,7 +359,10 @@ test.describe("Mixed concurrent invoicing", () => {
         MISMATCHED[0],
         { label: "correct", patch: { is_invoiced: true } },
       ]);
-      expect(resultsB.find((r) => r.label === "correct")!.error, "good request last").toBeNull();
+      expect(
+        resultsB.find((r) => r.label === "correct")!.error,
+        "good request last",
+      ).toBeNull();
       for (const r of resultsB.filter((x) => x.label !== "correct")) {
         expect(r.error, `reverse ${r.label}: refused`).not.toBeNull();
         expect(r.data, `reverse ${r.label}: no invoice row`).toBeNull();
@@ -321,17 +377,26 @@ test.describe("Mixed concurrent invoicing", () => {
         expect(r.data, `all-bad ${r.label}: no invoice row`).toBeNull();
       }
       const finalC = await fetchRow(emailC);
-      expect(finalC.is_invoiced, "nothing invoiced when every request mismatches").toBe(false);
+      expect(
+        finalC.is_invoiced,
+        "nothing invoiced when every request mismatches",
+      ).toBe(false);
       expect(Number(finalC.price_eur), "amount untouched").toBe(STAY_TOTAL);
       expect(Number(finalC.guests_count), "guest count untouched").toBe(GUESTS);
-      expect(await invoiceTransitions(finalC.id), "no invoicing recorded").toHaveLength(0);
+      expect(
+        await invoiceTransitions(finalC.id),
+        "no invoicing recorded",
+      ).toHaveLength(0);
 
       const { data: finalInvoiced } = await admin
         .from("reservations")
         .select("id")
         .eq("tenant_id", tenantId)
         .eq("is_invoiced", true);
-      expect(finalInvoiced, "only the two good races produced invoices").toHaveLength(2);
+      expect(
+        finalInvoiced,
+        "only the two good races produced invoices",
+      ).toHaveLength(2);
     } finally {
       for (const id of userIds) await admin.auth.admin.deleteUser(id);
     }

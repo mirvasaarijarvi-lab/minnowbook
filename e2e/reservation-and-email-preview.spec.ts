@@ -52,7 +52,11 @@ test.describe("Smoke: reservation submit + confirmation email preview", () => {
     });
 
     await testInfo.attach("public-booking-smoke.har.json", {
-      body: JSON.stringify({ log: { version: "1.2", entries: harEntries } }, null, 2),
+      body: JSON.stringify(
+        { log: { version: "1.2", entries: harEntries } },
+        null,
+        2,
+      ),
       contentType: "application/json",
     });
 
@@ -92,7 +96,9 @@ test.describe("Smoke: reservation submit + confirmation email preview", () => {
     await page.waitForLoadState("networkidle");
 
     const root = page.getByTestId("email-preview-smoke-root");
-    await expect(root, "email preview root must mount").toBeVisible({ timeout: 15_000 });
+    await expect(root, "email preview root must mount").toBeVisible({
+      timeout: 15_000,
+    });
 
     // Wait for the smoke route to apply the forced language. Only then does
     // it mount <ConfirmationEmailPreview/>, guaranteeing the inner DOM is
@@ -102,11 +108,16 @@ test.describe("Smoke: reservation submit + confirmation email preview", () => {
       "smoke route must finish applying the forced language before rendering",
     ).toHaveAttribute("data-preview-ready", "true", { timeout: 15_000 });
     await expect(root).toHaveAttribute("data-preview-lang", "en");
-    await expect(root).toHaveAttribute("data-preview-business-name", expectedBusinessName);
+    await expect(root).toHaveAttribute(
+      "data-preview-business-name",
+      expectedBusinessName,
+    );
     await expect(root).toHaveAttribute("data-preview-guest-name", guestName);
 
     const preview = root.getByTestId("confirmation-email-preview");
-    await expect(preview, "confirmation email preview must mount").toBeVisible({ timeout: 15_000 });
+    await expect(preview, "confirmation email preview must mount").toBeVisible({
+      timeout: 15_000,
+    });
 
     const businessHeading = preview.getByTestId("email-preview-business-name");
     await businessHeading.waitFor({ state: "visible", timeout: 15_000 });
@@ -124,5 +135,4 @@ test.describe("Smoke: reservation submit + confirmation email preview", () => {
       "preview header must render the mocked business name",
     ).toHaveText(expectedBusinessName, { timeout: 10_000 });
   });
-
 });

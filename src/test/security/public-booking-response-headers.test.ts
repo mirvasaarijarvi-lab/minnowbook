@@ -86,8 +86,7 @@ describe("public-booking — every Response spreads shared headers", () => {
       // OPTIONS preflight `new Response(null, { headers: corsHeaders })`
       // doesn't spread, but still references the bag directly. Accept
       // that exact shape too so we don't false-positive on it.
-      const referencesBagDirectly =
-        /headers\s*:\s*corsHeaders\b/.test(slice);
+      const referencesBagDirectly = /headers\s*:\s*corsHeaders\b/.test(slice);
 
       expect(
         spreadsShared || referencesBagDirectly,
@@ -101,8 +100,7 @@ describe("public-booking — every Response spreads shared headers", () => {
       // sniffs HTML and CSP guarantees become moot. We only enforce
       // this on bodies that look like JSON payloads.
       const looksJson =
-        /JSON\.stringify\s*\(/.test(slice) ||
-        /["']\{\s*["']/.test(slice); // hand-rolled `{ "..." }` literal
+        /JSON\.stringify\s*\(/.test(slice) || /["']\{\s*["']/.test(slice); // hand-rolled `{ "..." }` literal
       if (!looksJson) {
         expect(true).toBe(true);
         return;
@@ -128,8 +126,7 @@ describe("public-booking — every Response spreads shared headers", () => {
       const status = Number(statusMatch[1]);
       if (status < 400) continue;
       const ok =
-        /\.\.\.\s*corsHeaders\b/.test(slice) ||
-        /\.\.\.\s*cors\b/.test(slice);
+        /\.\.\.\s*corsHeaders\b/.test(slice) || /\.\.\.\s*cors\b/.test(slice);
       if (!ok) {
         const line = source.slice(0, start).split("\n").length;
         offenders.push({ line, status: String(status) });

@@ -34,7 +34,9 @@ const args = Object.fromEntries(
 const SUITE = args.suite;
 const JUNIT = args.junit;
 if (!SUITE || !JUNIT) {
-  console.error("usage: rerun-flaky.mjs --suite=<vitest|playwright> --junit=<path>");
+  console.error(
+    "usage: rerun-flaky.mjs --suite=<vitest|playwright> --junit=<path>",
+  );
   process.exit(64);
 }
 
@@ -46,7 +48,9 @@ const writeSummary = (s) => {
 
 const failures = parseJunit(JUNIT);
 if (failures.length === 0) {
-  writeSummary(`## Rerun (${SUITE}): nothing to do — initial run had no failures.\n`);
+  writeSummary(
+    `## Rerun (${SUITE}): nothing to do — initial run had no failures.\n`,
+  );
   process.exit(0);
 }
 
@@ -83,7 +87,9 @@ writeSummary(
   [
     `## 🔁 Rerunning ${quarantined.length} quarantined ${SUITE} test(s)`,
     ``,
-    ...quarantined.map((q) => `- \`${q.id}\` — ${q.entry.reason} (${q.entry.issue})`),
+    ...quarantined.map(
+      (q) => `- \`${q.id}\` — ${q.entry.reason} (${q.entry.issue})`,
+    ),
     ``,
   ].join("\n"),
 );
@@ -102,14 +108,13 @@ let cmd, cmdArgs, rerunJunit;
 if (SUITE === "vitest") {
   // Match each failed test name. Vitest's --testNamePattern is a regex; we
   // OR the escaped names so the rerun touches only the quarantined cases.
-  const pattern = quarantined
-    .map((q) => escapeRegex(q.name))
-    .join("|");
+  const pattern = quarantined.map((q) => escapeRegex(q.name)).join("|");
   rerunJunit = JUNIT.replace(/\.xml$/, "-rerun.xml");
   mkdirSync(dirname(rerunJunit), { recursive: true });
   cmd = "bunx";
   cmdArgs = [
-    "vitest", "run",
+    "vitest",
+    "run",
     `--testNamePattern=${pattern}`,
     "--sequence.shuffle=false",
     "--sequence.concurrent=false",
@@ -123,14 +128,13 @@ if (SUITE === "vitest") {
 } else if (SUITE === "playwright") {
   // Playwright --grep is a regex too. Use the test title (last segment) so
   // describe-block reformatting doesn't break the match.
-  const pattern = quarantined
-    .map((q) => escapeRegex(q.name))
-    .join("|");
+  const pattern = quarantined.map((q) => escapeRegex(q.name)).join("|");
   rerunJunit = JUNIT.replace(/\.xml$/, "-rerun.xml");
   mkdirSync(dirname(rerunJunit), { recursive: true });
   cmd = "bunx";
   cmdArgs = [
-    "playwright", "test",
+    "playwright",
+    "test",
     `--grep=${pattern}`,
     "--workers=1",
     "--retries=0",

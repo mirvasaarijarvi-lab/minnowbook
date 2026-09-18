@@ -69,7 +69,19 @@ export const useCreateOffer = () => {
   const queryClient = useQueryClient();
   const { tenantId } = useTenant();
   return useMutation({
-    mutationFn: async (offer: Omit<Offer, "id" | "tenant_id" | "created_at" | "updated_at" | "reservation_ids" | "archived_at" | "last_sent_at" | "last_send_provider_id">) => {
+    mutationFn: async (
+      offer: Omit<
+        Offer,
+        | "id"
+        | "tenant_id"
+        | "created_at"
+        | "updated_at"
+        | "reservation_ids"
+        | "archived_at"
+        | "last_sent_at"
+        | "last_send_provider_id"
+      >,
+    ) => {
       if (!tenantId) throw new Error("No tenant");
       const { data, error } = await supabase
         .from("offers")

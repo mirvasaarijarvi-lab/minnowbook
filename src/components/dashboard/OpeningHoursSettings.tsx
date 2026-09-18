@@ -17,7 +17,13 @@ import { Loader2, Clock, RotateCcw, Building2 } from "lucide-react";
 import DashboardTooltip from "./DashboardTooltip";
 
 const DAY_KEYS: TranslationKey[] = [
-  "days.monday", "days.tuesday", "days.wednesday", "days.thursday", "days.friday", "days.saturday", "days.sunday",
+  "days.monday",
+  "days.tuesday",
+  "days.wednesday",
+  "days.thursday",
+  "days.friday",
+  "days.saturday",
+  "days.sunday",
 ];
 // day_of_week: 0=Sunday, 1=Monday ... 6=Saturday
 const DAY_INDEX_MAP = [1, 2, 3, 4, 5, 6, 0]; // display Mon-Sun, map to DB values
@@ -46,11 +52,14 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
   const t = useT();
   const queryClient = useQueryClient();
   const { typeLabel } = useResourceTypeLabel();
-  const reservationTypes = (tenant?.allowed_reservation_types as string[]) ?? [];
+  const reservationTypes =
+    (tenant?.allowed_reservation_types as string[]) ?? [];
 
   const isSiteLevel = !!siteId;
 
-  const [activeType, setActiveType] = useState(reservationTypes[0] ?? "restaurant");
+  const [activeType, setActiveType] = useState(
+    reservationTypes[0] ?? "restaurant",
+  );
   const [hoursByType, setHoursByType] = useState<Record<string, HourRow[]>>({});
   const [dirty, setDirty] = useState(false);
 
@@ -95,9 +104,12 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
 
   // Populate state from DB — use site hours if they exist, otherwise fall back to tenant defaults
   useEffect(() => {
-    const source = (isSiteLevel && existingHours && existingHours.length > 0)
-      ? existingHours
-      : (isSiteLevel ? tenantDefaults : existingHours);
+    const source =
+      isSiteLevel && existingHours && existingHours.length > 0
+        ? existingHours
+        : isSiteLevel
+          ? tenantDefaults
+          : existingHours;
     if (!source) return;
 
     const map: Record<string, HourRow[]> = {};
@@ -113,7 +125,12 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
                 close_time: existing.close_time ?? "22:00",
                 is_closed: existing.is_closed ?? false,
               }
-            : { day_of_week: dow, open_time: "09:00", close_time: "22:00", is_closed: false };
+            : {
+                day_of_week: dow,
+                open_time: "09:00",
+                close_time: "22:00",
+                is_closed: false,
+              };
         });
       } else {
         map[rt] = defaultHours();
@@ -123,7 +140,12 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
     setDirty(false);
   }, [existingHours, tenantDefaults, reservationTypes.join(","), isSiteLevel]);
 
-  const updateHour = (type: string, dayIdx: number, field: keyof HourRow, value: any) => {
+  const updateHour = (
+    type: string,
+    dayIdx: number,
+    field: keyof HourRow,
+    value: any,
+  ) => {
     setHoursByType((prev) => {
       const rows = [...(prev[type] ?? defaultHours())];
       rows[dayIdx] = { ...rows[dayIdx], [field]: value };
@@ -150,17 +172,18 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
       if (delError) throw delError;
 
       // Insert all
-      const rows = Object.entries(hoursByType).flatMap(([resourceType, hours]) =>
-        hours.map((h) => ({
-          tenant_id: tenantId,
-          site_id: siteId as string | null,
-          resource_type: resourceType,
-          day_of_week: h.day_of_week,
-          open_time: h.open_time,
-          close_time: h.close_time,
-          is_closed: h.is_closed,
-          approval_status: "approved",
-        }))
+      const rows = Object.entries(hoursByType).flatMap(
+        ([resourceType, hours]) =>
+          hours.map((h) => ({
+            tenant_id: tenantId,
+            site_id: siteId as string | null,
+            resource_type: resourceType,
+            day_of_week: h.day_of_week,
+            open_time: h.open_time,
+            close_time: h.close_time,
+            is_closed: h.is_closed,
+            approval_status: "approved",
+          })),
       );
 
       if (rows.length > 0) {
@@ -219,14 +242,22 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-muted-foreground" />
-          <CardTitle className="text-lg font-serif">{t("help.art5Title")}</CardTitle>
+          <CardTitle className="text-lg font-serif">
+            {t("help.art5Title")}
+          </CardTitle>
           {isSiteLevel && (
             <Badge variant="outline" className="gap-1 text-xs">
               <Building2 className="h-3 w-3" />
-              {hasSiteOverrides ? t("openingHours.siteOverride") : t("openingHours.usingDefaults")}
+              {hasSiteOverrides
+                ? t("openingHours.siteOverride")
+                : t("openingHours.usingDefaults")}
             </Badge>
           )}
-          <DashboardTooltip text={t(isSiteLevel ? "openingHours.siteTooltip" : "openingHours.tooltip")} />
+          <DashboardTooltip
+            text={t(
+              isSiteLevel ? "openingHours.siteTooltip" : "openingHours.tooltip",
+            )}
+          />
         </div>
         <p className="text-sm text-muted-foreground">{t("help.art5Desc")}</p>
       </CardHeader>
@@ -257,21 +288,27 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
                 <Input
                   type="time"
                   value={row.open_time}
-                  onChange={(e) => updateHour(activeType, idx, "open_time", e.target.value)}
+                  onChange={(e) =>
+                    updateHour(activeType, idx, "open_time", e.target.value)
+                  }
                   disabled={row.is_closed}
                   className="h-9 text-sm"
                 />
                 <Input
                   type="time"
                   value={row.close_time}
-                  onChange={(e) => updateHour(activeType, idx, "close_time", e.target.value)}
+                  onChange={(e) =>
+                    updateHour(activeType, idx, "close_time", e.target.value)
+                  }
                   disabled={row.is_closed}
                   className="h-9 text-sm"
                 />
                 <div className="flex items-center gap-1.5">
                   <Switch
                     checked={row.is_closed}
-                    onCheckedChange={(checked) => updateHour(activeType, idx, "is_closed", checked)}
+                    onCheckedChange={(checked) =>
+                      updateHour(activeType, idx, "is_closed", checked)
+                    }
                   />
                   <span className="text-xs text-muted-foreground whitespace-nowrap">
                     {row.is_closed ? t("booking.closedDay") : ""}

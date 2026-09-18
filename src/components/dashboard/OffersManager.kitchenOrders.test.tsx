@@ -108,7 +108,10 @@ vi.mock("@/hooks/useOffers", async () => {
   return {
     ...actual,
     useOffers: () => ({ data: currentOffers, isLoading: false }),
-    useUpdateOffer: () => ({ mutateAsync: updateOfferMutate, isPending: false }),
+    useUpdateOffer: () => ({
+      mutateAsync: updateOfferMutate,
+      isPending: false,
+    }),
   };
 });
 
@@ -133,7 +136,8 @@ function makeChain(table: string) {
   chain.is = passthrough;
   chain.order = passthrough;
   chain.single = () => Promise.resolve({ data: rows[0] ?? null, error: null });
-  chain.maybeSingle = () => Promise.resolve({ data: rows[0] ?? null, error: null });
+  chain.maybeSingle = () =>
+    Promise.resolve({ data: rows[0] ?? null, error: null });
   chain.then = (resolve: (v: any) => void) => resolve(payload);
 
   chain.insert = (values: any) => {
@@ -149,7 +153,8 @@ function makeChain(table: string) {
     const insertChain: any = {
       select: () => insertChain,
       single: () => Promise.resolve({ data: inserted, error: null }),
-      then: (resolve: (v: any) => void) => resolve({ data: inserted, error: null }),
+      then: (resolve: (v: any) => void) =>
+        resolve({ data: inserted, error: null }),
     };
     return insertChain;
   };
@@ -170,8 +175,9 @@ import { KITCHEN_RESERVATION_TYPES } from "@/lib/offer-kitchen-orders";
 
 /** Mirrors the KitchenOrdersPanel reservation filter. */
 const showsInKitchenTab = (row: any) =>
-  (KITCHEN_RESERVATION_TYPES as readonly string[]).includes(row.reservation_type) &&
-  row.status !== "cancelled";
+  (KITCHEN_RESERVATION_TYPES as readonly string[]).includes(
+    row.reservation_type,
+  ) && row.status !== "cancelled";
 
 const renderOffers = (language: Language = "en") => {
   localStorage.setItem("mimmobook-lang", language);
@@ -208,7 +214,11 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
   it("creates the reservation from the offer and sends its menu to the kitchen", async () => {
     currentOffers = [
       baseOffer({
-        menu: ["20 x Roast beef", "4 x Vegan plate (no nuts)", "20 x Red wine"].join("\n"),
+        menu: [
+          "20 x Roast beef",
+          "4 x Vegan plate (no nuts)",
+          "20 x Red wine",
+        ].join("\n"),
       }),
     ];
 
@@ -236,7 +246,12 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
     // 2. The menu became kitchen order lines on that reservation.
     expect(insertedKitchenOrders).toHaveLength(3);
     expect(
-      insertedKitchenOrders.map((o) => [o.item_name, o.quantity, o.category, o.notes]),
+      insertedKitchenOrders.map((o) => [
+        o.item_name,
+        o.quantity,
+        o.category,
+        o.notes,
+      ]),
     ).toEqual([
       ["Roast beef", 20, "food", null],
       ["Vegan plate", 4, "food", "no nuts"],
@@ -294,7 +309,9 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
     ]);
     const restaurantId = "r-2";
 
-    const byReservation = insertedKitchenOrders.reduce<Record<string, string[]>>((acc, o) => {
+    const byReservation = insertedKitchenOrders.reduce<
+      Record<string, string[]>
+    >((acc, o) => {
       (acc[o.reservation_id] ||= []).push(o.item_name);
       return acc;
     }, {});
@@ -302,10 +319,18 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
       "r-1": ["Welcome bites"],
       [restaurantId]: ["Breakfast basket"],
     });
-    const basket = insertedKitchenOrders.find((o) => o.item_name === "Breakfast basket");
-    expect(basket).toMatchObject({ quantity: 2, status: "received", sort_order: 0 });
+    const basket = insertedKitchenOrders.find(
+      (o) => o.item_name === "Breakfast basket",
+    );
+    expect(basket).toMatchObject({
+      quantity: 2,
+      status: "received",
+      sort_order: 0,
+    });
     // Nothing was attached to the room reservation.
-    expect(insertedKitchenOrders.some((o) => o.reservation_id === "r-3")).toBe(false);
+    expect(insertedKitchenOrders.some((o) => o.reservation_id === "r-3")).toBe(
+      false,
+    );
   });
 
   /**
@@ -380,9 +405,11 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
     for (const order of insertedKitchenOrders) {
       expect(order.tenant_id).toBe(TENANT_ID);
       expect(order.status).toBe("received");
-      expect(showsInKitchenTab(
-        insertedReservations[Number(order.reservation_id.slice(2)) - 1],
-      )).toBe(true);
+      expect(
+        showsInKitchenTab(
+          insertedReservations[Number(order.reservation_id.slice(2)) - 1],
+        ),
+      ).toBe(true);
     }
     expect(toast.warning).not.toHaveBeenCalled();
     expect(toast.error).not.toHaveBeenCalled();
@@ -402,7 +429,10 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
     ["bullet markers only", "-\n*\n• \n"],
   ])("offer with %s", (_label, menu) => {
     it("creates one unchanged reservation and no kitchen order lines", async () => {
-      const offer = baseOffer({ id: `offer-kitchen-none-${_label}`, menu: menu as any });
+      const offer = baseOffer({
+        id: `offer-kitchen-none-${_label}`,
+        menu: menu as any,
+      });
       currentOffers = [offer];
 
       await confirmOffer();
@@ -447,109 +477,123 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
    * The confirmation message must tell staff, in their own language, whether
    * anything went to the Kitchen tab and how many lines it was.
    */
-  describe.each(["en", "fi", "sv"] as Language[])("confirmation message in %s", (language) => {
-    it("names the number of food and drink lines sent to the kitchen", async () => {
-      currentOffers = [
-        baseOffer({
-          id: `offer-kitchen-msg-${language}`,
-          menu: ["20 x Roast beef", "4 x Vegan plate", "20 x Red wine"].join("\n"),
-        }),
-      ];
+  describe.each(["en", "fi", "sv"] as Language[])(
+    "confirmation message in %s",
+    (language) => {
+      it("names the number of food and drink lines sent to the kitchen", async () => {
+        currentOffers = [
+          baseOffer({
+            id: `offer-kitchen-msg-${language}`,
+            menu: ["20 x Roast beef", "4 x Vegan plate", "20 x Red wine"].join(
+              "\n",
+            ),
+          }),
+        ];
 
-      await confirmOffer(language);
+        await confirmOffer(language);
 
-      expect(insertedKitchenOrders).toHaveLength(3);
-      const expected = translations[language]["offers.confirmedKitchenSent"].replace(
-        "{count}",
-        "3",
-      );
-      expect(expected).not.toContain("{count}");
-      expect(toast.success).toHaveBeenCalledWith(
-        translations[language]["offers.confirmedSuccess"],
-        { description: expected },
-      );
-    });
-
-    it("uses singular wording for a single food or drink line", async () => {
-      currentOffers = [
-        baseOffer({
-          id: `offer-kitchen-msg-one-${language}`,
-          menu: "1 x Roast beef",
-        }),
-      ];
-
-      await confirmOffer(language);
-
-      expect(insertedKitchenOrders).toHaveLength(1);
-      const expected = translations[language]["offers.confirmedKitchenSentOne"];
-      expect(expected).not.toContain("{count}");
-      expect(expected).not.toBe(translations[language]["offers.confirmedKitchenSent"]);
-      expect(toast.success).toHaveBeenCalledWith(
-        translations[language]["offers.confirmedSuccess"],
-        { description: expected },
-      );
-    });
-
-    it("states that nothing was sent to the kitchen when there is no food or drink", async () => {
-      currentOffers = [baseOffer({ id: `offer-kitchen-msg-none-${language}`, menu: "   " })];
-
-      await confirmOffer(language);
-
-      expect(insertedKitchenOrders).toHaveLength(0);
-      expect(toast.success).toHaveBeenCalledWith(
-        translations[language]["offers.confirmedSuccess"],
-        { description: translations[language]["offers.confirmedNoKitchen"] },
-      );
-      expect(toast.warning).not.toHaveBeenCalled();
-  });
-
-    it("announces the kitchen result politely to screen readers", async () => {
-      const { getOfferStatusRegion, resetOfferStatusAnnouncer } = await import(
-        "@/lib/offer-status-announcer"
-      );
-      resetOfferStatusAnnouncer();
-      currentOffers = [
-        baseOffer({
-          id: `offer-kitchen-a11y-${language}`,
-          menu: ["10 x Soup", "10 x Water"].join("\n"),
-        }),
-      ];
-
-      await confirmOffer(language);
-
-      await waitFor(() => {
-        const region = getOfferStatusRegion();
-        expect(region?.textContent?.trim()).toBeTruthy();
+        expect(insertedKitchenOrders).toHaveLength(3);
+        const expected = translations[language][
+          "offers.confirmedKitchenSent"
+        ].replace("{count}", "3");
+        expect(expected).not.toContain("{count}");
+        expect(toast.success).toHaveBeenCalledWith(
+          translations[language]["offers.confirmedSuccess"],
+          { description: expected },
+        );
       });
-      const region = getOfferStatusRegion()!;
-      expect(region.getAttribute("aria-live")).toBe("polite");
-      expect(region.getAttribute("role")).toBe("status");
-      expect(region.getAttribute("aria-atomic")).toBe("true");
-      const text = region.textContent ?? "";
-      expect(text).toContain(translations[language]["offers.confirmedSuccess"]);
-      expect(text).toContain(
-        translations[language]["offers.confirmedKitchenSent"].replace("{count}", "2"),
-      );
-      expect(text).not.toContain("{count}");
-    });
 
-    it("announces that nothing was sent to the kitchen", async () => {
-      const { getOfferStatusRegion, resetOfferStatusAnnouncer } = await import(
-        "@/lib/offer-status-announcer"
-      );
-      resetOfferStatusAnnouncer();
-      currentOffers = [baseOffer({ id: `offer-kitchen-a11y-none-${language}`, menu: null })];
+      it("uses singular wording for a single food or drink line", async () => {
+        currentOffers = [
+          baseOffer({
+            id: `offer-kitchen-msg-one-${language}`,
+            menu: "1 x Roast beef",
+          }),
+        ];
 
-      await confirmOffer(language);
+        await confirmOffer(language);
 
-      await waitFor(() => {
-        expect(getOfferStatusRegion()?.textContent?.trim()).toBeTruthy();
+        expect(insertedKitchenOrders).toHaveLength(1);
+        const expected =
+          translations[language]["offers.confirmedKitchenSentOne"];
+        expect(expected).not.toContain("{count}");
+        expect(expected).not.toBe(
+          translations[language]["offers.confirmedKitchenSent"],
+        );
+        expect(toast.success).toHaveBeenCalledWith(
+          translations[language]["offers.confirmedSuccess"],
+          { description: expected },
+        );
       });
-      expect(getOfferStatusRegion()?.textContent).toContain(
-        translations[language]["offers.confirmedNoKitchen"],
-      );
-    });
-  });
+
+      it("states that nothing was sent to the kitchen when there is no food or drink", async () => {
+        currentOffers = [
+          baseOffer({ id: `offer-kitchen-msg-none-${language}`, menu: "   " }),
+        ];
+
+        await confirmOffer(language);
+
+        expect(insertedKitchenOrders).toHaveLength(0);
+        expect(toast.success).toHaveBeenCalledWith(
+          translations[language]["offers.confirmedSuccess"],
+          { description: translations[language]["offers.confirmedNoKitchen"] },
+        );
+        expect(toast.warning).not.toHaveBeenCalled();
+      });
+
+      it("announces the kitchen result politely to screen readers", async () => {
+        const { getOfferStatusRegion, resetOfferStatusAnnouncer } =
+          await import("@/lib/offer-status-announcer");
+        resetOfferStatusAnnouncer();
+        currentOffers = [
+          baseOffer({
+            id: `offer-kitchen-a11y-${language}`,
+            menu: ["10 x Soup", "10 x Water"].join("\n"),
+          }),
+        ];
+
+        await confirmOffer(language);
+
+        await waitFor(() => {
+          const region = getOfferStatusRegion();
+          expect(region?.textContent?.trim()).toBeTruthy();
+        });
+        const region = getOfferStatusRegion()!;
+        expect(region.getAttribute("aria-live")).toBe("polite");
+        expect(region.getAttribute("role")).toBe("status");
+        expect(region.getAttribute("aria-atomic")).toBe("true");
+        const text = region.textContent ?? "";
+        expect(text).toContain(
+          translations[language]["offers.confirmedSuccess"],
+        );
+        expect(text).toContain(
+          translations[language]["offers.confirmedKitchenSent"].replace(
+            "{count}",
+            "2",
+          ),
+        );
+        expect(text).not.toContain("{count}");
+      });
+
+      it("announces that nothing was sent to the kitchen", async () => {
+        const { getOfferStatusRegion, resetOfferStatusAnnouncer } =
+          await import("@/lib/offer-status-announcer");
+        resetOfferStatusAnnouncer();
+        currentOffers = [
+          baseOffer({ id: `offer-kitchen-a11y-none-${language}`, menu: null }),
+        ];
+
+        await confirmOffer(language);
+
+        await waitFor(() => {
+          expect(getOfferStatusRegion()?.textContent?.trim()).toBeTruthy();
+        });
+        expect(getOfferStatusRegion()?.textContent).toContain(
+          translations[language]["offers.confirmedNoKitchen"],
+        );
+      });
+    },
+  );
 
   it("keeps the reservation and warns when the kitchen lines cannot be saved", async () => {
     const { supabase } = await import("@/integrations/supabase/client");

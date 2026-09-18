@@ -33,7 +33,10 @@ const FUNCTIONS_DIR = "supabase/functions";
 const SHARED_HTTP_HEADERS = join(FUNCTIONS_DIR, "_shared", "http-headers.ts");
 
 /** Functions intentionally exempt from a given header. Keep empty unless reviewed. */
-const ALLOWLIST: Record<string, { hsts?: boolean; referrer?: boolean; csp?: boolean }> = {};
+const ALLOWLIST: Record<
+  string,
+  { hsts?: boolean; referrer?: boolean; csp?: boolean }
+> = {};
 
 // --------------------------------------------------------------------------
 // AST helpers
@@ -55,11 +58,19 @@ function walk(node: ts.Node, visit: (n: ts.Node) => void) {
 }
 
 /** Resolve an Identifier to its initializer expression within a source file. */
-function resolveLocalConst(sf: ts.SourceFile, name: string): ts.Expression | null {
+function resolveLocalConst(
+  sf: ts.SourceFile,
+  name: string,
+): ts.Expression | null {
   let found: ts.Expression | null = null;
   walk(sf, (n) => {
     if (found) return;
-    if (ts.isVariableDeclaration(n) && ts.isIdentifier(n.name) && n.name.text === name && n.initializer) {
+    if (
+      ts.isVariableDeclaration(n) &&
+      ts.isIdentifier(n.name) &&
+      n.name.text === name &&
+      n.initializer
+    ) {
       found = n.initializer;
     }
   });
@@ -67,7 +78,10 @@ function resolveLocalConst(sf: ts.SourceFile, name: string): ts.Expression | nul
 }
 
 /** Find the function declaration body for a named function. */
-function findFunctionReturnLiteral(sf: ts.SourceFile, name: string): ts.ObjectLiteralExpression | null {
+function findFunctionReturnLiteral(
+  sf: ts.SourceFile,
+  name: string,
+): ts.ObjectLiteralExpression | null {
   let result: ts.ObjectLiteralExpression | null = null;
   walk(sf, (n) => {
     if (result) return;
@@ -76,10 +90,14 @@ function findFunctionReturnLiteral(sf: ts.SourceFile, name: string): ts.ObjectLi
       // Our shared helper builds a `headers` const then returns it.
       let returnedExpr: ts.Expression | null = null;
       walk(n.body, (m) => {
-        if (ts.isReturnStatement(m) && m.expression) returnedExpr = m.expression;
+        if (ts.isReturnStatement(m) && m.expression)
+          returnedExpr = m.expression;
       });
       if (returnedExpr && ts.isIdentifier(returnedExpr)) {
-        const init = resolveLocalConst(sf, (returnedExpr as ts.Identifier).text);
+        const init = resolveLocalConst(
+          sf,
+          (returnedExpr as ts.Identifier).text,
+        );
         if (init && ts.isObjectLiteralExpression(init)) result = init;
       } else if (returnedExpr && ts.isObjectLiteralExpression(returnedExpr)) {
         result = returnedExpr;
@@ -101,14 +119,19 @@ function literalToHeaderMap(
   const out = new Map<string, string | null>();
   for (const prop of obj.properties) {
     if (ts.isPropertyAssignment(prop)) {
-      const key = ts.isStringLiteral(prop.name) || ts.isNoSubstitutionTemplateLiteral(prop.name)
-        ? prop.name.text
-        : ts.isIdentifier(prop.name)
+      const key =
+        ts.isStringLiteral(prop.name) ||
+        ts.isNoSubstitutionTemplateLiteral(prop.name)
           ? prop.name.text
-          : null;
+          : ts.isIdentifier(prop.name)
+            ? prop.name.text
+            : null;
       if (!key) continue;
       let value: string | null = null;
-      if (ts.isStringLiteral(prop.initializer) || ts.isNoSubstitutionTemplateLiteral(prop.initializer)) {
+      if (
+        ts.isStringLiteral(prop.initializer) ||
+        ts.isNoSubstitutionTemplateLiteral(prop.initializer)
+      ) {
         value = prop.initializer.text;
       }
       out.set(key, value);
@@ -140,7 +163,11 @@ function loadSharedBags(): SharedBags {
 
   // SECURITY_HEADERS — pure literal
   const secInit = resolveLocalConst(sf, "SECURITY_HEADERS");
-  if (secInit && ts.isAsExpression(secInit) && ts.isObjectLiteralExpression(secInit.expression)) {
+  if (
+    secInit &&
+    ts.isAsExpression(secInit) &&
+    ts.isObjectLiteralExpression(secInit.expression)
+  ) {
     bags.set("SECURITY_HEADERS", literalToHeaderMap(secInit.expression, bags));
   } else if (secInit && ts.isObjectLiteralExpression(secInit)) {
     bags.set("SECURITY_HEADERS", literalToHeaderMap(secInit, bags));
@@ -208,13 +235,26 @@ function scanFunction(name: string, shared: SharedBags): FunctionScan {
   // Find local consts whose initializer is `getCorsHeaders(...)` (or aliases of it)
   // or whose initializer object spreads a known bag identifier.
   walk(sf, (n) => {
-    if (!ts.isVariableDeclaration(n) || !ts.isIdentifier(n.name) || !n.initializer) return;
+    if (
+      !ts.isVariableDeclaration(n) ||
+      !ts.isIdentifier(n.name) ||
+      !n.initializer
+    )
+      return;
     const init = n.initializer;
-    if (ts.isCallExpression(init) && ts.isIdentifier(init.expression) && bagAliases.has(init.expression.text)) {
+    if (
+      ts.isCallExpression(init) &&
+      ts.isIdentifier(init.expression) &&
+      bagAliases.has(init.expression.text)
+    ) {
       bagAliases.add(n.name.text);
     } else if (ts.isObjectLiteralExpression(init)) {
       for (const prop of init.properties) {
-        if (ts.isSpreadAssignment(prop) && ts.isIdentifier(prop.expression) && bagAliases.has(prop.expression.text)) {
+        if (
+          ts.isSpreadAssignment(prop) &&
+          ts.isIdentifier(prop.expression) &&
+          bagAliases.has(prop.expression.text)
+        ) {
           bagAliases.add(n.name.text);
           break;
         }
@@ -232,17 +272,27 @@ function scanFunction(name: string, shared: SharedBags): FunctionScan {
   // If function only imports corsHeaders (not getCorsHeaders), prefer that bag.
   const importedNames = new Set<string>();
   walk(sf, (n) => {
-    if (ts.isImportDeclaration(n) && ts.isStringLiteral(n.moduleSpecifier)
-      && n.moduleSpecifier.text.includes("_shared/http-headers")) {
+    if (
+      ts.isImportDeclaration(n) &&
+      ts.isStringLiteral(n.moduleSpecifier) &&
+      n.moduleSpecifier.text.includes("_shared/http-headers")
+    ) {
       const named = n.importClause?.namedBindings;
       if (named && ts.isNamedImports(named)) {
-        for (const el of named.elements) importedNames.add((el.propertyName ?? el.name).text);
+        for (const el of named.elements)
+          importedNames.add((el.propertyName ?? el.name).text);
       }
     }
   });
-  if (importedNames.has("getCorsHeaders") && shared.bags.has("getCorsHeaders")) {
+  if (
+    importedNames.has("getCorsHeaders") &&
+    shared.bags.has("getCorsHeaders")
+  ) {
     resolved = shared.bags.get("getCorsHeaders")!;
-  } else if (importedNames.has("corsHeaders") && shared.bags.has("corsHeaders")) {
+  } else if (
+    importedNames.has("corsHeaders") &&
+    shared.bags.has("corsHeaders")
+  ) {
     resolved = shared.bags.get("corsHeaders")!;
   }
 
@@ -250,7 +300,8 @@ function scanFunction(name: string, shared: SharedBags): FunctionScan {
   const responses: FunctionScan["responses"] = [];
   walk(sf, (n) => {
     if (!ts.isNewExpression(n)) return;
-    if (!ts.isIdentifier(n.expression) || n.expression.text !== "Response") return;
+    if (!ts.isIdentifier(n.expression) || n.expression.text !== "Response")
+      return;
     const args = n.arguments ?? ts.factory.createNodeArray([]);
     const arg0 = args[0];
     const init = args[1];
@@ -262,21 +313,35 @@ function scanFunction(name: string, shared: SharedBags): FunctionScan {
         (p): p is ts.PropertyAssignment =>
           ts.isPropertyAssignment(p) &&
           ((ts.isIdentifier(p.name) && p.name.text === "headers") ||
-            ((ts.isStringLiteral(p.name) || ts.isNoSubstitutionTemplateLiteral(p.name)) && p.name.text === "headers")),
+            ((ts.isStringLiteral(p.name) ||
+              ts.isNoSubstitutionTemplateLiteral(p.name)) &&
+              p.name.text === "headers")),
       );
       if (headersProp) {
         const hv = headersProp.initializer;
         if (ts.isIdentifier(hv) && bagAliases.has(hv.text)) {
           spreadsBag = true;
-        } else if (ts.isCallExpression(hv) && ts.isIdentifier(hv.expression) && bagAliases.has(hv.expression.text)) {
+        } else if (
+          ts.isCallExpression(hv) &&
+          ts.isIdentifier(hv.expression) &&
+          bagAliases.has(hv.expression.text)
+        ) {
           spreadsBag = true;
         } else if (ts.isObjectLiteralExpression(hv)) {
           for (const prop of hv.properties) {
             if (ts.isSpreadAssignment(prop)) {
               const e = prop.expression;
-              if (ts.isIdentifier(e) && bagAliases.has(e.text)) { spreadsBag = true; break; }
-              if (ts.isCallExpression(e) && ts.isIdentifier(e.expression) && bagAliases.has(e.expression.text)) {
-                spreadsBag = true; break;
+              if (ts.isIdentifier(e) && bagAliases.has(e.text)) {
+                spreadsBag = true;
+                break;
+              }
+              if (
+                ts.isCallExpression(e) &&
+                ts.isIdentifier(e.expression) &&
+                bagAliases.has(e.expression.text)
+              ) {
+                spreadsBag = true;
+                break;
               }
             }
           }
@@ -285,7 +350,9 @@ function scanFunction(name: string, shared: SharedBags): FunctionScan {
     }
 
     const { line } = sf.getLineAndCharacterOfPosition(n.getStart(sf));
-    const snippet = text.slice(n.getStart(sf), Math.min(text.length, n.getEnd())).split("\n")[0];
+    const snippet = text
+      .slice(n.getStart(sf), Math.min(text.length, n.getEnd()))
+      .split("\n")[0];
     responses.push({ line: line + 1, isNullBody, spreadsBag, snippet });
   });
 
@@ -301,7 +368,11 @@ function listFunctionDirs(): string[] {
     .filter((name) => !name.startsWith("_"))
     .filter((name) => {
       const indexPath = join(FUNCTIONS_DIR, name, "index.ts");
-      try { return statSync(indexPath).isFile(); } catch { return false; }
+      try {
+        return statSync(indexPath).isFile();
+      } catch {
+        return false;
+      }
     })
     .sort();
 }
@@ -316,7 +387,10 @@ const functions = listFunctionDirs();
 describe("shared header bag (AST-resolved)", () => {
   it("SECURITY_HEADERS literal was extracted from _shared/http-headers.ts", () => {
     const sec = shared.bags.get("SECURITY_HEADERS");
-    expect(sec, "could not extract SECURITY_HEADERS object literal").toBeTruthy();
+    expect(
+      sec,
+      "could not extract SECURITY_HEADERS object literal",
+    ).toBeTruthy();
     expect(sec!.size).toBeGreaterThan(0);
   });
 
@@ -330,14 +404,21 @@ describe("shared header bag (AST-resolved)", () => {
   });
 
   it("Referrer-Policy is in the strict allowlist", () => {
-    const v = (shared.bags.get("SECURITY_HEADERS")!.get("Referrer-Policy") ?? "").toLowerCase();
+    const v = (
+      shared.bags.get("SECURITY_HEADERS")!.get("Referrer-Policy") ?? ""
+    ).toLowerCase();
     expect([
-      "no-referrer", "same-origin", "strict-origin", "strict-origin-when-cross-origin",
+      "no-referrer",
+      "same-origin",
+      "strict-origin",
+      "strict-origin-when-cross-origin",
     ]).toContain(v);
   });
 
   it("CSP locks down default-src and frame-ancestors", () => {
-    const v = (shared.bags.get("SECURITY_HEADERS")!.get("Content-Security-Policy") ?? "").toLowerCase();
+    const v = (
+      shared.bags.get("SECURITY_HEADERS")!.get("Content-Security-Policy") ?? ""
+    ).toLowerCase();
     expect(v).toMatch(/default-src\s+'none'/);
     expect(v).toMatch(/frame-ancestors\s+'none'/);
   });
@@ -367,7 +448,9 @@ describe("edge-function transport-security header consistency (AST scan)", () =>
 
     it("resolved bag carries Strict-Transport-Security", () => {
       if (exempt.hsts) return;
-      expect(scan.resolvedHeaders.get("Strict-Transport-Security")).toBeTruthy();
+      expect(
+        scan.resolvedHeaders.get("Strict-Transport-Security"),
+      ).toBeTruthy();
     });
 
     it("resolved bag carries Referrer-Policy", () => {
@@ -385,7 +468,9 @@ describe("edge-function transport-security header consistency (AST scan)", () =>
         scan.responses.length,
         `${fn} has no Response constructions to scan — file shape changed?`,
       ).toBeGreaterThan(0);
-      const offenders = scan.responses.filter((r) => !r.spreadsBag && !r.isNullBody);
+      const offenders = scan.responses.filter(
+        (r) => !r.spreadsBag && !r.isNullBody,
+      );
       expect(
         offenders,
         `${fn} has Response sites that don't reference the shared bag:\n` +
@@ -399,7 +484,10 @@ describe("transport-security allowlist hygiene", () => {
   it("every allow-listed function still exists on disk", () => {
     const present = new Set(functions);
     for (const name of Object.keys(ALLOWLIST)) {
-      expect(present.has(name), `ALLOWLIST refers to missing function "${name}"`).toBe(true);
+      expect(
+        present.has(name),
+        `ALLOWLIST refers to missing function "${name}"`,
+      ).toBe(true);
     }
   });
 

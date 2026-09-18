@@ -12,7 +12,8 @@ import { siteOrigin } from "@/lib/site-origin";
 
 const SiteTabs = () => {
   const { tenantId, tenant, isOwner, isAdmin } = useTenant();
-  const { selectedSiteId, setSelectedSiteId, setSelectedResourceId } = useSiteContext();
+  const { selectedSiteId, setSelectedSiteId, setSelectedResourceId } =
+    useSiteContext();
   const { hasMultiSiteAccess } = useTierGate();
   const t = useT();
 
@@ -42,10 +43,13 @@ const SiteTabs = () => {
     setSelectedResourceId(null);
   };
 
-  const selectedSite = selectedSiteId ? sites?.find((s) => s.id === selectedSiteId) : null;
-  const bookingUrl = selectedSite && tenant?.slug
-    ? `${siteOrigin()}/book/${tenant.slug}?site=${selectedSite.slug}`
+  const selectedSite = selectedSiteId
+    ? sites?.find((s) => s.id === selectedSiteId)
     : null;
+  const bookingUrl =
+    selectedSite && tenant?.slug
+      ? `${siteOrigin()}/book/${tenant.slug}?site=${selectedSite.slug}`
+      : null;
 
   const copyLink = () => {
     if (!bookingUrl) return;
@@ -55,10 +59,7 @@ const SiteTabs = () => {
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Tabs
-        value={selectedSiteId ?? "all"}
-        onValueChange={handleChange}
-      >
+      <Tabs value={selectedSiteId ?? "all"} onValueChange={handleChange}>
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="all" className="text-xs">
             {t("sites.allSites")}

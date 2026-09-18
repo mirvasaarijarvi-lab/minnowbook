@@ -11,12 +11,17 @@ import {
 describe("getEffectiveTimezone", () => {
   it("prefers resource over tenant", () => {
     expect(
-      getEffectiveTimezone({ resourceTz: "Europe/Paris", tenantTz: "Europe/Helsinki" })
+      getEffectiveTimezone({
+        resourceTz: "Europe/Paris",
+        tenantTz: "Europe/Helsinki",
+      }),
     ).toEqual({ tz: "Europe/Paris", source: "resource" });
   });
 
   it("falls back to tenant when resource is empty", () => {
-    expect(getEffectiveTimezone({ resourceTz: "  ", tenantTz: "Europe/Helsinki" })).toEqual({
+    expect(
+      getEffectiveTimezone({ resourceTz: "  ", tenantTz: "Europe/Helsinki" }),
+    ).toEqual({
       tz: "Europe/Helsinki",
       source: "tenant",
     });
@@ -41,7 +46,10 @@ describe("tzToday / tzNow", () => {
 
   it("returns the wall-clock time in the target timezone", () => {
     const fixed = new Date("2026-06-17T22:30:00Z");
-    expect(tzNow("Europe/Helsinki", fixed)).toEqual({ date: "2026-06-18", time: "01:30" });
+    expect(tzNow("Europe/Helsinki", fixed)).toEqual({
+      date: "2026-06-18",
+      time: "01:30",
+    });
   });
 });
 

@@ -120,44 +120,43 @@ test.describe("Authenticated non-admin /superadmin denial flow", () => {
     await expect(page).toHaveTitle(/Access denied — 403/);
   });
 
-  test(
-    "Forbidden page beacon to forbidden-status produces a real HTTP 403 in the network log",
-    async ({ page }) => {
-      await loginAs(page, nonAdminEmail!, nonAdminPassword!);
+  test("Forbidden page beacon to forbidden-status produces a real HTTP 403 in the network log", async ({
+    page,
+  }) => {
+    await loginAs(page, nonAdminEmail!, nonAdminPassword!);
 
-      // Capture the beacon while the page is mounting. The page fires
-      // the request from a useEffect on mount; we wait for it explicitly
-      // rather than racing the navigation.
-      const beaconPromise: Promise<Response> = page.waitForResponse(
-        (res: Response) =>
-          res.url().includes("/functions/v1/forbidden-status") &&
-          res.request().method() === "GET",
-        { timeout: 10_000 },
-      );
+    // Capture the beacon while the page is mounting. The page fires
+    // the request from a useEffect on mount; we wait for it explicitly
+    // rather than racing the navigation.
+    const beaconPromise: Promise<Response> = page.waitForResponse(
+      (res: Response) =>
+        res.url().includes("/functions/v1/forbidden-status") &&
+        res.request().method() === "GET",
+      { timeout: 10_000 },
+    );
 
-      await page.goto("/superadmin");
-      const beacon = await beaconPromise;
+    await page.goto("/superadmin");
+    const beacon = await beaconPromise;
 
-      // The headline assertion: a REAL 403 in the network log,
-      // independent of the SPA shell which is always served as 200.
-      expect(
-        beacon.status(),
-        "forbidden-status beacon must return 403 — this is the monitorable signal that the SPA's 200 shell hides",
-      ).toBe(403);
+    // The headline assertion: a REAL 403 in the network log,
+    // independent of the SPA shell which is always served as 200.
+    expect(
+      beacon.status(),
+      "forbidden-status beacon must return 403 — this is the monitorable signal that the SPA's 200 shell hides",
+    ).toBe(403);
 
-      // The query string carries the attempted area so audit pipelines
-      // can correlate the network entry with the route.
-      const beaconUrl = new URL(beacon.url());
-      expect(beaconUrl.searchParams.get("area")).toBeTruthy();
+    // The query string carries the attempted area so audit pipelines
+    // can correlate the network entry with the route.
+    const beaconUrl = new URL(beacon.url());
+    expect(beaconUrl.searchParams.get("area")).toBeTruthy();
 
-      // Belt-and-braces: the in-page beacon-status data attribute should
-      // also reflect the 403, confirming the page successfully observed
-      // the response (and didn't just silently fall back to "unreachable").
-      await expect(page.getByRole("main")).toHaveAttribute(
-        "data-status-beacon",
-        "403",
-        { timeout: 10_000 },
-      );
-    },
-  );
+    // Belt-and-braces: the in-page beacon-status data attribute should
+    // also reflect the 403, confirming the page successfully observed
+    // the response (and didn't just silently fall back to "unreachable").
+    await expect(page.getByRole("main")).toHaveAttribute(
+      "data-status-beacon",
+      "403",
+      { timeout: 10_000 },
+    );
+  });
 });

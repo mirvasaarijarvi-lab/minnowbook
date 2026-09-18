@@ -20,7 +20,8 @@ describe("parseTierLimitError", () => {
 
   it("recognizes the site limit message", () => {
     const result = parseTierLimitError({
-      message: 'Tier "professional" allows at most 1 site(s). Upgrade to add more.',
+      message:
+        'Tier "professional" allows at most 1 site(s). Upgrade to add more.',
     });
     expect(result).toEqual({
       code: "SITE_LIMIT_REACHED",

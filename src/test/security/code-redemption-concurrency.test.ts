@@ -57,7 +57,7 @@ const probeSignal = () => AbortSignal.timeout(PROBE_TIMEOUT_MS);
 beforeAll(() => {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error(
-      "VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY must be set for code-redemption concurrency tests"
+      "VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY must be set for code-redemption concurrency tests",
     );
   }
   anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -127,30 +127,38 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
     const PARALLEL = 10;
     const attempts = await Promise.all(
       Array.from({ length: PARALLEL }, () =>
-        callRedeem(FAKE_BUT_VALID_SHAPE, true)
-      )
+        callRedeem(FAKE_BUT_VALID_SHAPE, true),
+      ),
     );
 
     // 1. No call should succeed (the code doesn't exist).
     const successes = attempts.filter((a) => a.status === 200);
     expect(
       successes.length,
-      "no parallel attempt should succeed for a non-existent code"
+      "no parallel attempt should succeed for a non-existent code",
     ).toBe(0);
 
     // 2. No call should crash the function (5xx).
     const crashes = attempts.filter((a) => a.status >= 500);
     expect(
       crashes.length,
-      `function must not 5xx under concurrency. Got: ${JSON.stringify(crashes)}`
+      `function must not 5xx under concurrency. Got: ${JSON.stringify(crashes)}`,
     ).toBe(0);
 
     // 3. Every response should be a structured JSON error with a known code.
     for (const a of attempts) {
-      expect(a.status, "every response must be a client error").toBeGreaterThanOrEqual(400);
+      expect(
+        a.status,
+        "every response must be a client error",
+      ).toBeGreaterThanOrEqual(400);
       expect(a.status).toBeLessThan(500);
-      expect(a.body, "response body must be a JSON object").toBeTypeOf("object");
-      expect((a.body as { error?: string })?.error, "error field present").toBeTruthy();
+      expect(a.body, "response body must be a JSON object").toBeTypeOf(
+        "object",
+      );
+      expect(
+        (a.body as { error?: string })?.error,
+        "error field present",
+      ).toBeTruthy();
       const code = bodyCode(a.body);
       expect(
         KNOWN_ERROR_CODES.has(code),
@@ -181,18 +189,21 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
     const firstStatus = results[0].status;
     const firstError = (results[0].body as { error?: string })?.error;
     const firstCode = bodyCode(results[0].body);
-    expect(KNOWN_ERROR_CODES.has(firstCode), `unknown code: ${firstCode}`).toBe(true);
+    expect(KNOWN_ERROR_CODES.has(firstCode), `unknown code: ${firstCode}`).toBe(
+      true,
+    );
 
     for (const r of results) {
-      expect(r.status, "status must be stable across replays").toBe(firstStatus);
+      expect(r.status, "status must be stable across replays").toBe(
+        firstStatus,
+      );
       expect(
         (r.body as { error?: string })?.error,
-        "error message must be stable across replays"
+        "error message must be stable across replays",
       ).toBe(firstError);
-      expect(
-        bodyCode(r.body),
-        "error code must be stable across replays",
-      ).toBe(firstCode);
+      expect(bodyCode(r.body), "error code must be stable across replays").toBe(
+        firstCode,
+      );
     }
   }, 30_000);
 
@@ -242,7 +253,11 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
   // All three vectors must be denied by RLS.
 
   it("anon cannot SELECT discount_codes (no public read policy)", async () => {
-    const { data, error } = await anon.from("discount_codes").select("*").limit(1).abortSignal(probeSignal());
+    const { data, error } = await anon
+      .from("discount_codes")
+      .select("*")
+      .limit(1)
+      .abortSignal(probeSignal());
     if (error) {
       expect(error).toBeTruthy();
     } else {
@@ -251,15 +266,21 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
   });
 
   it("anon cannot INSERT a fresh discount code (no INSERT policy for anon)", async () => {
-    const { data, error } = await anon.from("discount_codes").insert({
-      tenant_id: "00000000-0000-0000-0000-0000000000aa",
-      code: "ANON-INJECT-TEST",
-      discount_type: "percentage",
-      discount_value: 100,
-      max_uses: 9999,
-      is_active: true,
-    } as never).abortSignal(probeSignal());
-    expect(error, "anon insert into discount_codes must be denied").toBeTruthy();
+    const { data, error } = await anon
+      .from("discount_codes")
+      .insert({
+        tenant_id: "00000000-0000-0000-0000-0000000000aa",
+        code: "ANON-INJECT-TEST",
+        discount_type: "percentage",
+        discount_value: 100,
+        max_uses: 9999,
+        is_active: true,
+      } as never)
+      .abortSignal(probeSignal());
+    expect(
+      error,
+      "anon insert into discount_codes must be denied",
+    ).toBeTruthy();
     const insertedRows = (data ?? []) as unknown[];
     expect(insertedRows.length).toBe(0);
   });
@@ -276,7 +297,7 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
     if (Array.isArray(result.data)) {
       expect(
         result.data.length,
-        "anon must not update used_count on any discount code"
+        "anon must not update used_count on any discount code",
       ).toBe(0);
     }
   });
@@ -289,10 +310,7 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
       .select()
       .abortSignal(probeSignal());
     if (Array.isArray(result.data)) {
-      expect(
-        result.data.length,
-        "anon must not delete discount codes"
-      ).toBe(0);
+      expect(result.data.length, "anon must not delete discount codes").toBe(0);
     }
   });
 
@@ -302,12 +320,19 @@ describe("discount_codes — replay/concurrency surface as anon", () => {
     const PARALLEL = 100;
     const results = await Promise.all(
       Array.from({ length: PARALLEL }, () =>
-        anon.from("discount_codes").select("id").limit(1).abortSignal(probeSignal())
-      )
+        anon
+          .from("discount_codes")
+          .select("id")
+          .limit(1)
+          .abortSignal(probeSignal()),
+      ),
     );
     for (const r of results) {
       const len = Array.isArray(r.data) ? (r.data?.length ?? 0) : 0;
-      expect(len, "anon must never see a discount_code row, even under load").toBe(0);
+      expect(
+        len,
+        "anon must never see a discount_code row, even under load",
+      ).toBe(0);
     }
   }, 30_000);
 });
@@ -319,13 +344,16 @@ describe("redemption ledger — anon cannot forge or reset access_code_redemptio
   // confuse the function, or (b) DELETE existing rows to replay.
 
   it("anon cannot INSERT into access_code_redemptions", async () => {
-    const { data, error } = await anon.from("access_code_redemptions").insert({
-      access_code_id: "00000000-0000-0000-0000-0000000000aa",
-      tenant_id: "00000000-0000-0000-0000-0000000000bb",
-      redeemed_by: "00000000-0000-0000-0000-0000000000cc",
-      granted_tier: "business",
-      granted_until: "2099-12-31",
-    } as never).abortSignal(probeSignal());
+    const { data, error } = await anon
+      .from("access_code_redemptions")
+      .insert({
+        access_code_id: "00000000-0000-0000-0000-0000000000aa",
+        tenant_id: "00000000-0000-0000-0000-0000000000bb",
+        redeemed_by: "00000000-0000-0000-0000-0000000000cc",
+        granted_tier: "business",
+        granted_until: "2099-12-31",
+      } as never)
+      .abortSignal(probeSignal());
     expect(error, "anon insert into redemptions must be denied").toBeTruthy();
     const insertedRows = (data ?? []) as unknown[];
     expect(insertedRows.length).toBe(0);
@@ -356,7 +384,11 @@ describe("redemption ledger — anon cannot forge or reset access_code_redemptio
   });
 
   it("anon SELECT on access_code_redemptions returns zero rows", async () => {
-    const { data } = await anon.from("access_code_redemptions").select("id").limit(5).abortSignal(probeSignal());
+    const { data } = await anon
+      .from("access_code_redemptions")
+      .select("id")
+      .limit(5)
+      .abortSignal(probeSignal());
     expect((data ?? []).length).toBe(0);
   });
 });

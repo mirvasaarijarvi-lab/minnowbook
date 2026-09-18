@@ -32,7 +32,8 @@ import {
 } from "@/test/security/fixtures/tenant-pair";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
@@ -43,8 +44,8 @@ const liveAvailable =
 const liveDescribe = liveAvailable ? describe : describe.skip;
 const skipReason = liveAvailable
   ? null
-  : tenantPairFixtureSkipReason() ??
-    "SUPABASE_SERVICE_ROLE_KEY required to seed real booking_token baseline";
+  : (tenantPairFixtureSkipReason() ??
+    "SUPABASE_SERVICE_ROLE_KEY required to seed real booking_token baseline");
 
 interface SeededToken {
   tenantId: string;
@@ -100,7 +101,10 @@ async function seedActiveToken(
   };
 }
 
-async function cleanup(admin: SupabaseClient, seed: SeededToken): Promise<void> {
+async function cleanup(
+  admin: SupabaseClient,
+  seed: SeededToken,
+): Promise<void> {
   await admin.from("booking_tokens").delete().eq("id", seed.tokenId);
   await admin.from("reservations").delete().eq("id", seed.reservationId);
 }
@@ -110,11 +114,18 @@ interface RpcResult {
   error: { message: string; code?: string } | null;
 }
 
-async function callLookup(client: SupabaseClient, token: string): Promise<RpcResult> {
-  const { data, error } = await client.rpc("lookup_booking_token", { p_token: token });
+async function callLookup(
+  client: SupabaseClient,
+  token: string,
+): Promise<RpcResult> {
+  const { data, error } = await client.rpc("lookup_booking_token", {
+    p_token: token,
+  });
   return {
     data,
-    error: error ? { message: error.message, code: (error as { code?: string }).code } : null,
+    error: error
+      ? { message: error.message, code: (error as { code?: string }).code }
+      : null,
   };
 }
 
@@ -166,7 +177,9 @@ liveDescribe("lookup_booking_token — enumeration resistance under load", () =>
     );
     expectUniformEmpty(results);
     // All results must be structurally equal (uniform shape)
-    const serialized = results.map((r) => JSON.stringify({ data: r.data, error: r.error }));
+    const serialized = results.map((r) =>
+      JSON.stringify({ data: r.data, error: r.error }),
+    );
     const unique = new Set(serialized);
     expect(unique.size).toBe(1);
   });
@@ -207,7 +220,9 @@ liveDescribe("lookup_booking_token — enumeration resistance under load", () =>
       // null byte
       "abc\u0000def".padEnd(64, "x"),
     ];
-    const results = await Promise.all(malicious.map((s) => callLookup(anon, s)));
+    const results = await Promise.all(
+      malicious.map((s) => callLookup(anon, s)),
+    );
     expectUniformEmpty(results);
   });
 
@@ -274,7 +289,9 @@ liveDescribe("lookup_booking_token — enumeration resistance under load", () =>
 
   it("baseline sanity: the real seeded token still resolves under the same burst load", async () => {
     const calls = await Promise.all(
-      Array.from({ length: 10 }, () => callLookup(anon, realSeed.tokenPlaintext)),
+      Array.from({ length: 10 }, () =>
+        callLookup(anon, realSeed.tokenPlaintext),
+      ),
     );
     for (const c of calls) {
       expect(c.error).toBeNull();
@@ -288,7 +305,13 @@ liveDescribe("lookup_booking_token — enumeration resistance under load", () =>
     const real = realSeed.tokenPlaintext;
     const nearMisses: string[] = [];
     // Flip one character at 5 different positions
-    const positions = [0, Math.floor(real.length / 4), Math.floor(real.length / 2), real.length - 2, real.length - 1];
+    const positions = [
+      0,
+      Math.floor(real.length / 4),
+      Math.floor(real.length / 2),
+      real.length - 2,
+      real.length - 1,
+    ];
     for (const p of positions) {
       const ch = real[p] === "0" ? "1" : "0";
       nearMisses.push(real.slice(0, p) + ch + real.slice(p + 1));
@@ -297,7 +320,9 @@ liveDescribe("lookup_booking_token — enumeration resistance under load", () =>
     nearMisses.push(real.slice(0, -1));
     nearMisses.push(real + "0");
     nearMisses.push(real.toUpperCase()); // case flip
-    const results = await Promise.all(nearMisses.map((g) => callLookup(anon, g)));
+    const results = await Promise.all(
+      nearMisses.map((g) => callLookup(anon, g)),
+    );
     // Note: case-flipped may match if comparison is case-insensitive at PG level
     // for `text =`, but PostgreSQL `text` equality IS case-sensitive, so it
     // must return empty.

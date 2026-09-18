@@ -7,7 +7,11 @@ import {
   buildGroupInvoiceModel,
   type InvoiceLegRow,
 } from "@/lib/invoicePdf";
-import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricing-accessor";
+import {
+  reportAmounts,
+  sumReportAmounts,
+  roundCents,
+} from "@/lib/report-pricing-accessor";
 
 /**
  * End-to-end: marking the same booking as invoiced again and again.
@@ -29,7 +33,8 @@ import { reportAmounts, sumReportAmounts, roundCents } from "@/lib/report-pricin
  * Requires SERVICE_ROLE_KEY; skips itself without it.
  */
 
-const AMOUNT_ERROR = "Invoice amount must match the recalculated room and breakfast totals.";
+const AMOUNT_ERROR =
+  "Invoice amount must match the recalculated room and breakfast totals.";
 
 const NIGHTLY = 120;
 const BREAKFAST_RATE = 12.5;
@@ -53,7 +58,10 @@ test.describe("Repeat invoicing of the same booking", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("creates the invoice once and keeps the totals correct", async ({
     ephemeralTenant,
@@ -89,15 +97,18 @@ test.describe("Repeat invoicing of the same booking", () => {
 
     // --- Bookings through the public function ------------------------------
     const book = async (data: Record<string, unknown>) => {
-      const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          apikey: SUPABASE_ANON_KEY,
+      const res = await request.post(
+        `${SUPABASE_URL}/functions/v1/public-booking`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            apikey: SUPABASE_ANON_KEY,
+          },
+          data: { tenant_id: tenantId, ...data },
+          timeout: 30_000,
         },
-        data: { tenant_id: tenantId, ...data },
-        timeout: 30_000,
-      });
+      );
       expect(res.status(), await res.text()).toBe(200);
     };
 
@@ -142,7 +153,9 @@ test.describe("Repeat invoicing of the same booking", () => {
     };
 
     const stay = await fetchRow(stayEmail);
-    expect(Number(stay.price_eur), "server-recalculated stay total").toBe(STAY_TOTAL);
+    expect(Number(stay.price_eur), "server-recalculated stay total").toBe(
+      STAY_TOTAL,
+    );
     expect(stay.is_invoiced).toBe(false);
 
     // Staff price the dinner leg (dine-in has no automatic amount).
@@ -157,11 +170,12 @@ test.describe("Repeat invoicing of the same booking", () => {
     // --- One signed-in staff member ----------------------------------------
     const staffEmail = `ci+repeatinv-staff-${stamp}@mimmobook.test`;
     const staffPassword = `Ci-Tmp-${randomUUID()}-Z9!`;
-    const { data: staffUser, error: userErr } = await admin.auth.admin.createUser({
-      email: staffEmail,
-      password: staffPassword,
-      email_confirm: true,
-    });
+    const { data: staffUser, error: userErr } =
+      await admin.auth.admin.createUser({
+        email: staffEmail,
+        password: staffPassword,
+        email_confirm: true,
+      });
     expect(userErr, userErr?.message).toBeNull();
     const { error: memberErr } = await admin.from("tenant_users").insert({
       tenant_id: tenantId,
@@ -193,7 +207,8 @@ test.describe("Repeat invoicing of the same booking", () => {
         .eq("action", "UPDATE");
       expect(error, error?.message).toBeNull();
       return (data ?? []).filter(
-        (e: any) => e.old_data?.is_invoiced === false && e.new_data?.is_invoiced === true,
+        (e: any) =>
+          e.old_data?.is_invoiced === false && e.new_data?.is_invoiced === true,
       );
     };
 
@@ -209,15 +224,27 @@ test.describe("Repeat invoicing of the same booking", () => {
           .update({ is_invoiced: true })
           .eq("id", stay.id)
           .eq("tenant_id", tenantId);
-        expect(error, `attempt ${attempt}: repeating the action must not fail`).toBeNull();
+        expect(
+          error,
+          `attempt ${attempt}: repeating the action must not fail`,
+        ).toBeNull();
 
         const row = await fetchRow(stayEmail);
         expect(row.is_invoiced, `attempt ${attempt}: invoiced`).toBe(true);
-        expect(Number(row.price_eur), `attempt ${attempt}: amount never moves`).toBe(STAY_TOTAL);
+        expect(
+          Number(row.price_eur),
+          `attempt ${attempt}: amount never moves`,
+        ).toBe(STAY_TOTAL);
 
         // --- 2. The invoice document is identical every time ---------------
-        const model = buildGroupInvoiceModel([legRow(row, "Repeat Invoice Room")], "en");
-        expect(model.lines, `attempt ${attempt}: one room + one breakfast line`).toHaveLength(2);
+        const model = buildGroupInvoiceModel(
+          [legRow(row, "Repeat Invoice Room")],
+          "en",
+        );
+        expect(
+          model.lines,
+          `attempt ${attempt}: one room + one breakfast line`,
+        ).toHaveLength(2);
         expect(
           model.lines.filter((l) => l.kind === "room"),
           `attempt ${attempt}: exactly one room line`,
@@ -230,9 +257,18 @@ test.describe("Repeat invoicing of the same booking", () => {
           roundCents(model.lines.reduce((s, l) => s + l.amount, 0)),
           `attempt ${attempt}: lines sum to the charged amount`,
         ).toBe(STAY_TOTAL);
-        expect(roundCents(model.total), `attempt ${attempt}: invoice total`).toBe(STAY_TOTAL);
+        expect(
+          roundCents(model.total),
+          `attempt ${attempt}: invoice total`,
+        ).toBe(STAY_TOTAL);
         snapshots.push(
-          JSON.stringify(model.lines.map((l) => [l.kind, l.description, roundCents(l.amount)])),
+          JSON.stringify(
+            model.lines.map((l) => [
+              l.kind,
+              l.description,
+              roundCents(l.amount),
+            ]),
+          ),
         );
 
         // Exactly one invoicing recorded, however many attempts were made.
@@ -241,7 +277,10 @@ test.describe("Repeat invoicing of the same booking", () => {
           `attempt ${attempt}: still a single invoicing in the history`,
         ).toHaveLength(1);
       }
-      expect(new Set(snapshots).size, "every attempt produced the same invoice").toBe(1);
+      expect(
+        new Set(snapshots).size,
+        "every attempt produced the same invoice",
+      ).toBe(1);
 
       // --- 1b. A retry after success returns the existing invoice result ----
       // The response to a retry is the already-invoiced booking itself: same
@@ -250,14 +289,21 @@ test.describe("Repeat invoicing of the same booking", () => {
       const existing = buildInvoiceModel(firstInvoiced as any, "en");
       const fingerprint = (row: Record<string, any>) => {
         const single = buildInvoiceModel(row as any, "en");
-        const group = buildGroupInvoiceModel([legRow(row, "Repeat Invoice Room")], "en");
+        const group = buildGroupInvoiceModel(
+          [legRow(row, "Repeat Invoice Room")],
+          "en",
+        );
         return JSON.stringify({
           invoiceNumber: single.invoiceNumber,
           total: roundCents(single.total),
           subtotal: roundCents(single.subtotal),
           discountAmount: roundCents(single.discountAmount),
           isInvoiced: group.isInvoiced,
-          lines: group.lines.map((l) => [l.kind, l.description, roundCents(l.amount)]),
+          lines: group.lines.map((l) => [
+            l.kind,
+            l.description,
+            roundCents(l.amount),
+          ]),
         });
       };
       const expectedFingerprint = fingerprint(firstInvoiced);
@@ -274,15 +320,18 @@ test.describe("Repeat invoicing of the same booking", () => {
         expect(returned, `retry ${retry}: returns the booking`).not.toBeNull();
 
         const row = returned as Record<string, any>;
-        expect(row.id, `retry ${retry}: same booking, no new record`).toBe(firstInvoiced.id);
+        expect(row.id, `retry ${retry}: same booking, no new record`).toBe(
+          firstInvoiced.id,
+        );
         expect(row.is_invoiced, `retry ${retry}: still invoiced`).toBe(true);
         expect(
           buildInvoiceModel(row as any, "en").invoiceNumber,
           `retry ${retry}: same invoice identifier`,
         ).toBe(existing.invoiceNumber);
-        expect(fingerprint(row), `retry ${retry}: identical invoice result`).toBe(
-          expectedFingerprint,
-        );
+        expect(
+          fingerprint(row),
+          `retry ${retry}: identical invoice result`,
+        ).toBe(expectedFingerprint);
         expect(
           await invoiceTransitions(stay.id),
           `retry ${retry}: no second invoicing recorded`,
@@ -295,7 +344,10 @@ test.describe("Repeat invoicing of the same booking", () => {
           .eq("tenant_id", tenantId)
           .eq("guest_email", stayEmail);
         expect(countErr, countErr?.message).toBeNull();
-        expect(rowsForGuest, `retry ${retry}: exactly one booking`).toHaveLength(1);
+        expect(
+          rowsForGuest,
+          `retry ${retry}: exactly one booking`,
+        ).toHaveLength(1);
         expect(rowsForGuest![0].is_invoiced).toBe(true);
       }
 
@@ -314,8 +366,13 @@ test.describe("Repeat invoicing of the same booking", () => {
         expect(tamper.error, `${label}: refused`).not.toBeNull();
         expect(tamper.error!.message).toContain(AMOUNT_ERROR);
         const afterTamper = await fetchRow(stayEmail);
-        expect(Number(afterTamper.price_eur), `${label}: stored amount untouched`).toBe(STAY_TOTAL);
-        expect(afterTamper.is_invoiced, `${label}: still invoiced once`).toBe(true);
+        expect(
+          Number(afterTamper.price_eur),
+          `${label}: stored amount untouched`,
+        ).toBe(STAY_TOTAL);
+        expect(afterTamper.is_invoiced, `${label}: still invoiced once`).toBe(
+          true,
+        );
         expect(
           await invoiceTransitions(stay.id),
           `${label}: no extra invoicing recorded`,
@@ -334,16 +391,30 @@ test.describe("Repeat invoicing of the same booking", () => {
       const stayFinal = await fetchRow(stayEmail);
       const dinnerFinal = await fetchRow(dinnerEmail);
       expect(dinnerFinal.is_invoiced, "second leg invoiced").toBe(true);
-      expect(Number(dinnerFinal.price_eur), "second leg amount unchanged").toBe(SECOND_LEG_TOTAL);
-      expect(await invoiceTransitions(stay.id), "first leg invoiced once").toHaveLength(1);
-      expect(await invoiceTransitions(dinnerFinal.id), "second leg invoiced once").toHaveLength(1);
+      expect(Number(dinnerFinal.price_eur), "second leg amount unchanged").toBe(
+        SECOND_LEG_TOTAL,
+      );
+      expect(
+        await invoiceTransitions(stay.id),
+        "first leg invoiced once",
+      ).toHaveLength(1);
+      expect(
+        await invoiceTransitions(dinnerFinal.id),
+        "second leg invoiced once",
+      ).toHaveLength(1);
 
       const groupModel = buildGroupInvoiceModel(
-        [legRow(stayFinal, "Repeat Invoice Room"), legRow(dinnerFinal, "Repeat Invoice Table")],
+        [
+          legRow(stayFinal, "Repeat Invoice Room"),
+          legRow(dinnerFinal, "Repeat Invoice Table"),
+        ],
         "en",
       );
       // One room line per leg, one breakfast line for the stay only.
-      expect(groupModel.lines, "no duplicated lines after repeats").toHaveLength(3);
+      expect(
+        groupModel.lines,
+        "no duplicated lines after repeats",
+      ).toHaveLength(3);
       expect(
         roundCents(groupModel.lines.reduce((s, l) => s + l.amount, 0)),
         "group lines sum to the group total",
@@ -353,10 +424,17 @@ test.describe("Repeat invoicing of the same booking", () => {
       );
       const perLeg = (id: string) =>
         roundCents(
-          groupModel.lines.filter((l) => l.legId === id).reduce((s, l) => s + l.amount, 0),
+          groupModel.lines
+            .filter((l) => l.legId === id)
+            .reduce((s, l) => s + l.amount, 0),
         );
-      expect(perLeg(stayFinal.id), "stay lines match the stay charge").toBe(STAY_TOTAL);
-      expect(perLeg(dinnerFinal.id), "dinner line matches the dinner charge").toBe(SECOND_LEG_TOTAL);
+      expect(perLeg(stayFinal.id), "stay lines match the stay charge").toBe(
+        STAY_TOTAL,
+      );
+      expect(
+        perLeg(dinnerFinal.id),
+        "dinner line matches the dinner charge",
+      ).toBe(SECOND_LEG_TOTAL);
 
       // --- 5. Reporting counts each booking once --------------------------
       const { data: invoicedRows } = await admin
@@ -364,16 +442,20 @@ test.describe("Repeat invoicing of the same booking", () => {
         .select(INVOICE_COLS)
         .eq("tenant_id", tenantId)
         .eq("is_invoiced", true);
-      expect(invoicedRows, "one invoiced row per booking, not per attempt").toHaveLength(2);
+      expect(
+        invoicedRows,
+        "one invoiced row per booking, not per attempt",
+      ).toHaveLength(2);
       expect(
         roundCents(sumReportAmounts(invoicedRows as any[]).charged),
         "revenue counted once",
       ).toBe(roundCents(STAY_TOTAL + SECOND_LEG_TOTAL));
 
       const staySplit = reportAmounts(stayFinal as any);
-      expect(roundCents(staySplit.room + staySplit.breakfast), "stay split reconciles").toBe(
-        STAY_TOTAL,
-      );
+      expect(
+        roundCents(staySplit.room + staySplit.breakfast),
+        "stay split reconciles",
+      ).toBe(STAY_TOTAL);
     } finally {
       await admin.auth.admin.deleteUser(staffUser!.user!.id);
     }

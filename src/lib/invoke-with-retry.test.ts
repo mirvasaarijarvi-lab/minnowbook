@@ -3,7 +3,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const invokeMock = vi.fn();
 
 vi.mock("@/integrations/supabase/client", () => ({
-  supabase: { functions: { invoke: (...args: unknown[]) => invokeMock(...args) } },
+  supabase: {
+    functions: { invoke: (...args: unknown[]) => invokeMock(...args) },
+  },
 }));
 
 import { invokeWithRetry, shouldRetryError } from "./invoke-with-retry";
@@ -29,14 +31,21 @@ describe("invokeWithRetry", () => {
     expect(invokeMock).toHaveBeenCalledTimes(1);
   });
 
-  it.each([502, 503, 504])("retries on transient %s and eventually succeeds", async (status) => {
-    invokeMock
-      .mockResolvedValueOnce({ data: null, error: gatewayError(status) })
-      .mockResolvedValueOnce({ data: { ok: true }, error: null });
-    const res = await invokeWithRetry("fn", { body: {} }, { baseDelayMs: 1, maxDelayMs: 2 });
-    expect(res.error).toBeNull();
-    expect(res.attempts).toBe(2);
-  });
+  it.each([502, 503, 504])(
+    "retries on transient %s and eventually succeeds",
+    async (status) => {
+      invokeMock
+        .mockResolvedValueOnce({ data: null, error: gatewayError(status) })
+        .mockResolvedValueOnce({ data: { ok: true }, error: null });
+      const res = await invokeWithRetry(
+        "fn",
+        { body: {} },
+        { baseDelayMs: 1, maxDelayMs: 2 },
+      );
+      expect(res.error).toBeNull();
+      expect(res.attempts).toBe(2);
+    },
+  );
 
   it("fails fast on 401 (no retry)", async () => {
     invokeMock.mockResolvedValueOnce({ data: null, error: gatewayError(401) });
@@ -47,14 +56,21 @@ describe("invokeWithRetry", () => {
   });
 
   it("fails fast on 400 validation errors", async () => {
-    invokeMock.mockResolvedValueOnce({ data: { error: "bad input" }, error: gatewayError(400) });
+    invokeMock.mockResolvedValueOnce({
+      data: { error: "bad input" },
+      error: gatewayError(400),
+    });
     const res = await invokeWithRetry("fn", { body: {} }, { baseDelayMs: 1 });
     expect(res.attempts).toBe(1);
   });
 
   it("gives up after maxAttempts on persistent 502", async () => {
     invokeMock.mockResolvedValue({ data: null, error: gatewayError(502) });
-    const res = await invokeWithRetry("fn", { body: {} }, { maxAttempts: 3, baseDelayMs: 1, maxDelayMs: 2 });
+    const res = await invokeWithRetry(
+      "fn",
+      { body: {} },
+      { maxAttempts: 3, baseDelayMs: 1, maxDelayMs: 2 },
+    );
     expect(res.attempts).toBe(3);
     expect(invokeMock).toHaveBeenCalledTimes(3);
   });
@@ -74,7 +90,11 @@ describe("invokeWithRetry", () => {
       ac.abort();
       return Promise.reject(new DOMException("Aborted", "AbortError"));
     });
-    const res = await invokeWithRetry("fn", { body: {} }, { signal: ac.signal, baseDelayMs: 1 });
+    const res = await invokeWithRetry(
+      "fn",
+      { body: {} },
+      { signal: ac.signal, baseDelayMs: 1 },
+    );
     expect(res.attempts).toBe(1);
   });
 

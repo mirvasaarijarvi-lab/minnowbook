@@ -7,21 +7,39 @@ import {
 
 describe("inferLocalBusinessType", () => {
   it("picks the trade from the service labels", () => {
-    expect(inferLocalBusinessType(["wellness"], ["Beard trim", "Parturi"])).toBe("HairSalon");
-    expect(inferLocalBusinessType(["wellness"], ["Classic haircut"])).toBe("HairSalon");
-    expect(inferLocalBusinessType(["wellness"], ["Hieronta 60 min"])).toBe("HealthAndBeautyBusiness");
-    expect(inferLocalBusinessType(["wellness"], ["Deep tissue massage"])).toBe("HealthAndBeautyBusiness");
-    expect(inferLocalBusinessType(["custom"], ["Kakkutilaus", "Leipomo"])).toBe("Bakery");
-    expect(inferLocalBusinessType(["custom"], ["Personal training session"])).toBe("HealthClub");
-    expect(inferLocalBusinessType(["wellness"], ["Bridal make-up"])).toBe("BeautySalon");
+    expect(
+      inferLocalBusinessType(["wellness"], ["Beard trim", "Parturi"]),
+    ).toBe("HairSalon");
+    expect(inferLocalBusinessType(["wellness"], ["Classic haircut"])).toBe(
+      "HairSalon",
+    );
+    expect(inferLocalBusinessType(["wellness"], ["Hieronta 60 min"])).toBe(
+      "HealthAndBeautyBusiness",
+    );
+    expect(inferLocalBusinessType(["wellness"], ["Deep tissue massage"])).toBe(
+      "HealthAndBeautyBusiness",
+    );
+    expect(inferLocalBusinessType(["custom"], ["Kakkutilaus", "Leipomo"])).toBe(
+      "Bakery",
+    );
+    expect(
+      inferLocalBusinessType(["custom"], ["Personal training session"]),
+    ).toBe("HealthClub");
+    expect(inferLocalBusinessType(["wellness"], ["Bridal make-up"])).toBe(
+      "BeautySalon",
+    );
   });
 
   it("falls back to the reservation types", () => {
     expect(inferLocalBusinessType(["restaurant"], [])).toBe("Restaurant");
     expect(inferLocalBusinessType(["venue"], null)).toBe("EventVenue");
-    expect(inferLocalBusinessType(["hotel", "restaurant"], [])).toBe("Restaurant");
+    expect(inferLocalBusinessType(["hotel", "restaurant"], [])).toBe(
+      "Restaurant",
+    );
     expect(inferLocalBusinessType(["guesthouse"], [])).toBe("BedAndBreakfast");
-    expect(inferLocalBusinessType(["wellness"], [])).toBe("HealthAndBeautyBusiness");
+    expect(inferLocalBusinessType(["wellness"], [])).toBe(
+      "HealthAndBeautyBusiness",
+    );
     expect(inferLocalBusinessType([], [])).toBe("LocalBusiness");
     expect(inferLocalBusinessType(null, null)).toBe("LocalBusiness");
   });
@@ -33,7 +51,12 @@ describe("buildOpeningHoursSpecification", () => {
       { day_of_week: 1, open_time: "09:00:00", close_time: "17:00:00" },
       { day_of_week: 2, open_time: "09:00", close_time: "17:00" },
       { day_of_week: 3, open_time: "10:00", close_time: "20:00" },
-      { day_of_week: 0, open_time: "10:00", close_time: "14:00", is_closed: true },
+      {
+        day_of_week: 0,
+        open_time: "10:00",
+        close_time: "14:00",
+        is_closed: true,
+      },
       { day_of_week: 4, open_time: null, close_time: "17:00" },
       { day_of_week: 5, open_time: "nonsense", close_time: "17:00" },
       { day_of_week: 6, open_time: "12:00", close_time: "12:00" },
@@ -41,14 +64,26 @@ describe("buildOpeningHoursSpecification", () => {
     ]);
 
     expect(spec).toEqual([
-      { "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday", "Tuesday"], opens: "09:00", closes: "17:00" },
-      { "@type": "OpeningHoursSpecification", dayOfWeek: ["Wednesday"], opens: "10:00", closes: "20:00" },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday"],
+        opens: "09:00",
+        closes: "17:00",
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Wednesday"],
+        opens: "10:00",
+        closes: "20:00",
+      },
     ]);
   });
 
   it("returns nothing when there are no usable rows", () => {
     expect(buildOpeningHoursSpecification(null)).toEqual([]);
-    expect(buildOpeningHoursSpecification([{ day_of_week: 1, is_closed: true }])).toEqual([]);
+    expect(
+      buildOpeningHoursSpecification([{ day_of_week: 1, is_closed: true }]),
+    ).toEqual([]);
   });
 });
 
@@ -72,7 +107,9 @@ describe("buildLocalBusinessSchema", () => {
       image: "https://cdn.example.com/logo.png",
       reservationTypes: ["wellness"],
       serviceLabels: ["Parturi"],
-      openingHours: [{ day_of_week: 2, open_time: "09:00", close_time: "18:00" }],
+      openingHours: [
+        { day_of_week: 2, open_time: "09:00", close_time: "18:00" },
+      ],
       services: [
         { name: "Haircut", priceEur: 35 },
         { name: "Beard trim", priceEur: null },
@@ -82,7 +119,9 @@ describe("buildLocalBusinessSchema", () => {
     })!;
 
     expect(schema["@type"]).toBe("HairSalon");
-    expect(schema["@id"]).toBe("https://mimmobook.com/book/studio-mimmi#business");
+    expect(schema["@id"]).toBe(
+      "https://mimmobook.com/book/studio-mimmi#business",
+    );
     expect(schema.name).toBe("Studio Mimmi");
     expect(schema.url).toBe(base.bookingUrl);
     expect(schema.telephone).toBe("+358 40 123 4567");
@@ -139,14 +178,20 @@ describe("buildLocalBusinessSchema", () => {
     ]) {
       expect(schema).not.toHaveProperty(key);
     }
-    expect((schema.potentialAction as any).target.inLanguage).toEqual(["en", "fi", "sv"]);
+    expect((schema.potentialAction as any).target.inLanguage).toEqual([
+      "en",
+      "fi",
+      "sv",
+    ]);
   });
 
   it("caps the offer catalogue and trims the description", () => {
     const schema = buildLocalBusinessSchema({
       ...base,
       description: "x".repeat(400),
-      services: Array.from({ length: 40 }, (_, i) => ({ name: `Service ${i}` })),
+      services: Array.from({ length: 40 }, (_, i) => ({
+        name: `Service ${i}`,
+      })),
     })!;
 
     expect((schema.description as string).length).toBe(300);

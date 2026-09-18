@@ -7,10 +7,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { History, Monitor, Smartphone, Globe, CalendarIcon, X } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  History,
+  Monitor,
+  Smartphone,
+  Globe,
+  CalendarIcon,
+  X,
+} from "lucide-react";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import DashboardTooltip from "./DashboardTooltip";
@@ -24,9 +48,13 @@ interface LoginEntry {
   email?: string;
 }
 
-function parseDevice(ua: string | null): { icon: typeof Monitor; label: string } {
+function parseDevice(ua: string | null): {
+  icon: typeof Monitor;
+  label: string;
+} {
   if (!ua) return { icon: Globe, label: "Unknown" };
-  if (/mobile|android|iphone|ipad/i.test(ua)) return { icon: Smartphone, label: "Mobile" };
+  if (/mobile|android|iphone|ipad/i.test(ua))
+    return { icon: Smartphone, label: "Mobile" };
   return { icon: Monitor, label: "Desktop" };
 }
 
@@ -69,15 +97,24 @@ const LoginHistoryPanel = () => {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["login-history", tenantId, dateFrom?.toISOString(), dateTo?.toISOString(), selectedUserId, page],
+    queryKey: [
+      "login-history",
+      tenantId,
+      dateFrom?.toISOString(),
+      dateTo?.toISOString(),
+      selectedUserId,
+      page,
+    ],
     queryFn: async () => {
       let query = supabase
         .from("login_history")
         .select("*")
         .order("logged_in_at", { ascending: false });
 
-      if (dateFrom) query = query.gte("logged_in_at", startOfDay(dateFrom).toISOString());
-      if (dateTo) query = query.lte("logged_in_at", endOfDay(dateTo).toISOString());
+      if (dateFrom)
+        query = query.gte("logged_in_at", startOfDay(dateFrom).toISOString());
+      if (dateTo)
+        query = query.lte("logged_in_at", endOfDay(dateTo).toISOString());
       if (selectedUserId !== "all") query = query.eq("user_id", selectedUserId);
 
       query = query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -86,10 +123,12 @@ const LoginHistoryPanel = () => {
       if (error) throw error;
 
       const hasMore = (logins?.length ?? 0) > PAGE_SIZE;
-      const trimmedLogins = hasMore ? logins!.slice(0, PAGE_SIZE) : (logins ?? []);
+      const trimmedLogins = hasMore
+        ? logins!.slice(0, PAGE_SIZE)
+        : (logins ?? []);
 
       const userMap = new Map(
-        (tenantUsers ?? []).map((u) => [u.user_id, u.display_name])
+        (tenantUsers ?? []).map((u) => [u.user_id, u.display_name]),
       );
 
       const entries = trimmedLogins.map((l) => ({
@@ -112,7 +151,9 @@ const LoginHistoryPanel = () => {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <History className="h-5 w-5 text-primary" />
-            <CardTitle className="font-serif">{t("admin.loginHistory")}</CardTitle>
+            <CardTitle className="font-serif">
+              {t("admin.loginHistory")}
+            </CardTitle>
             {loginHistory && (
               <span className="text-xs text-muted-foreground">
                 {loginHistory.length} {t("admin.loginCount")}
@@ -122,8 +163,19 @@ const LoginHistoryPanel = () => {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <Select value={selectedUserId} onValueChange={(v) => { setSelectedUserId(v); setPage(0); }}>
-              <SelectTrigger className={cn("w-[160px] h-8 text-xs", selectedUserId !== "all" && "border-primary/50")}>
+            <Select
+              value={selectedUserId}
+              onValueChange={(v) => {
+                setSelectedUserId(v);
+                setPage(0);
+              }}
+            >
+              <SelectTrigger
+                className={cn(
+                  "w-[160px] h-8 text-xs",
+                  selectedUserId !== "all" && "border-primary/50",
+                )}
+              >
                 <SelectValue placeholder={t("admin.allUsers")} />
               </SelectTrigger>
               <SelectContent>
@@ -138,30 +190,69 @@ const LoginHistoryPanel = () => {
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateFrom && "border-primary/50")}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "gap-1.5 text-xs",
+                    dateFrom && "border-primary/50",
+                  )}
+                >
                   <CalendarIcon className="h-3.5 w-3.5" />
                   {dateFrom ? format(dateFrom, "dd.MM.yyyy") : t("admin.from")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
-                <Calendar mode="single" selected={dateFrom} onSelect={(d) => { setDateFrom(d); setPage(0); }} disabled={(d) => (dateTo ? d > dateTo : false)} initialFocus className="p-3 pointer-events-auto" />
+                <Calendar
+                  mode="single"
+                  selected={dateFrom}
+                  onSelect={(d) => {
+                    setDateFrom(d);
+                    setPage(0);
+                  }}
+                  disabled={(d) => (dateTo ? d > dateTo : false)}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
               </PopoverContent>
             </Popover>
 
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className={cn("gap-1.5 text-xs", dateTo && "border-primary/50")}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "gap-1.5 text-xs",
+                    dateTo && "border-primary/50",
+                  )}
+                >
                   <CalendarIcon className="h-3.5 w-3.5" />
                   {dateTo ? format(dateTo, "dd.MM.yyyy") : t("admin.to")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="end">
-                <Calendar mode="single" selected={dateTo} onSelect={(d) => { setDateTo(d); setPage(0); }} disabled={(d) => (dateFrom ? d < dateFrom : false)} initialFocus className="p-3 pointer-events-auto" />
+                <Calendar
+                  mode="single"
+                  selected={dateTo}
+                  onSelect={(d) => {
+                    setDateTo(d);
+                    setPage(0);
+                  }}
+                  disabled={(d) => (dateFrom ? d < dateFrom : false)}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
               </PopoverContent>
             </Popover>
 
             {hasFilters && (
-              <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-1 text-xs text-muted-foreground">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={resetFilters}
+                className="gap-1 text-xs text-muted-foreground"
+              >
                 <X className="h-3.5 w-3.5" /> {t("admin.clear")}
               </Button>
             )}
@@ -224,13 +315,24 @@ const LoginHistoryPanel = () => {
 
             <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
               <p className="text-xs text-muted-foreground">
-                {t("admin.page")} {page + 1}{hasFilters ? ` (${t("admin.filtered")})` : ""}
+                {t("admin.page")} {page + 1}
+                {hasFilters ? ` (${t("admin.filtered")})` : ""}
               </p>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page === 0}
+                  onClick={() => setPage((p) => p - 1)}
+                >
                   {t("admin.previous")}
                 </Button>
-                <Button variant="outline" size="sm" disabled={!hasMore} onClick={() => setPage((p) => p + 1)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasMore}
+                  onClick={() => setPage((p) => p + 1)}
+                >
                   {t("admin.next")}
                 </Button>
               </div>

@@ -19,7 +19,12 @@ export const validBlogPostingGraph: Record<string, unknown>[] = [
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://mimmobook.com/" },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://mimmobook.com/",
+      },
     ],
   },
   {
@@ -168,6 +173,12 @@ export const badFaqPageGraph: Record<string, unknown>[] = [
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "@id": "https://mimmobook.com/blog/example#faq",
-    mainEntity: [{ "@type": "Question", name: "", acceptedAnswer: { "@type": "Answer", text: "" } }],
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "",
+        acceptedAnswer: { "@type": "Answer", text: "" },
+      },
+    ],
   },
 ];

@@ -92,7 +92,8 @@ const renderForbidden = (props: React.ComponentProps<typeof Forbidden>) => {
 describe("Forbidden page — forbidden-status beacon (fires once on mount)", () => {
   it("invokes the forbidden-status function exactly once with the resolved areaSlug", async () => {
     const fetchSpy = vi.fn(
-      async () => new Response(JSON.stringify({ status: 403 }), { status: 403 }),
+      async () =>
+        new Response(JSON.stringify({ status: 403 }), { status: 403 }),
     );
     vi.stubGlobal("fetch", fetchSpy);
 
@@ -135,7 +136,8 @@ describe("Forbidden page — forbidden-status beacon (fires once on mount)", () 
     // doesn't change the slug must NOT cause a duplicate beacon. This
     // protects the audit / monitoring stream from re-render amplification.
     const fetchSpy = vi.fn(
-      async () => new Response(JSON.stringify({ status: 403 }), { status: 403 }),
+      async () =>
+        new Response(JSON.stringify({ status: 403 }), { status: 403 }),
     );
     vi.stubGlobal("fetch", fetchSpy);
 
@@ -174,7 +176,8 @@ describe("Forbidden page — forbidden-status beacon (fires once on mount)", () 
     // Backwards-compat: legacy call sites pass only the human label.
     // The page slugifies it for the beacon URL so monitors get a stable key.
     const fetchSpy = vi.fn(
-      async () => new Response(JSON.stringify({ status: 403 }), { status: 403 }),
+      async () =>
+        new Response(JSON.stringify({ status: 403 }), { status: 403 }),
     );
     vi.stubGlobal("fetch", fetchSpy);
 
@@ -184,7 +187,10 @@ describe("Forbidden page — forbidden-status beacon (fires once on mount)", () 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
 
-    const [calledUrl] = fetchSpy.mock.calls[0] as unknown as [string, RequestInit];
+    const [calledUrl] = fetchSpy.mock.calls[0] as unknown as [
+      string,
+      RequestInit,
+    ];
     // "the Reports Dashboard" -> strip "the ", lowercase, hyphenate.
     expect(calledUrl).toBe(
       `${STUB_SUPABASE_URL}/functions/v1/forbidden-status?area=reports-dashboard`,
@@ -196,9 +202,7 @@ describe("Forbidden page — forbidden-status beacon (fires once on mount)", () 
     // rather than firing a malformed request to a relative URL.
     vi.stubEnv("VITE_SUPABASE_URL", "");
 
-    const fetchSpy = vi.fn(
-      async () => new Response(null, { status: 403 }),
-    );
+    const fetchSpy = vi.fn(async () => new Response(null, { status: 403 }));
     vi.stubGlobal("fetch", fetchSpy);
 
     renderForbidden({

@@ -29,12 +29,9 @@ describe("prompt-sections helper", () => {
 
     it("bounded by `####` stops at the next #### sibling", () => {
       // Fixture so this doesn't depend on the prompt ever having two ####s.
-      const fixture = [
-        "#### One",
-        "alpha line",
-        "#### Two",
-        "beta line",
-      ].join("\n");
+      const fixture = ["#### One", "alpha line", "#### Two", "beta line"].join(
+        "\n",
+      );
       const section = extractSection(fixture, "#### One", "####");
       expect(section).toContain("alpha line");
       expect(section).not.toContain("beta line");
@@ -42,7 +39,7 @@ describe("prompt-sections helper", () => {
 
     it("throws a readable error when the header is missing", () => {
       expect(() =>
-        extractSection(prompt, "### This Section Does Not Exist")
+        extractSection(prompt, "### This Section Does Not Exist"),
       ).toThrow(/Section not found/);
     });
   });
@@ -64,9 +61,9 @@ describe("prompt-sections helper", () => {
     });
 
     it("returns [] for sections with no qualifying bullets", () => {
-      expect(extractBoldBulletLabels("just a paragraph\nno bullets here")).toEqual(
-        []
-      );
+      expect(
+        extractBoldBulletLabels("just a paragraph\nno bullets here"),
+      ).toEqual([]);
     });
   });
 

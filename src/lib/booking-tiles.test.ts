@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  buildTypeTiles,
-  selectTile,
-  type SiteResource,
-} from "./booking-tiles";
+import { buildTypeTiles, selectTile, type SiteResource } from "./booking-tiles";
 
 describe("buildTypeTiles — public booking custom resource tiles", () => {
   it("renders one tile per built-in reservation type", () => {
@@ -20,8 +16,18 @@ describe("buildTypeTiles — public booking custom resource tiles", () => {
 
   it("renders one tile per custom resource using custom_type_label", () => {
     const resources: SiteResource[] = [
-      { id: "r1", resource_type: "custom", custom_type_label: "Spa", name: "Spa Room" },
-      { id: "r2", resource_type: "custom", custom_type_label: "Hair Salon", name: "Salon A" },
+      {
+        id: "r1",
+        resource_type: "custom",
+        custom_type_label: "Spa",
+        name: "Spa Room",
+      },
+      {
+        id: "r2",
+        resource_type: "custom",
+        custom_type_label: "Hair Salon",
+        name: "Salon A",
+      },
       { id: "r3", resource_type: "restaurant", name: "Main Dining" },
     ];
     const tiles = buildTypeTiles(["restaurant", "custom"], resources);
@@ -91,7 +97,11 @@ describe("buildTypeTiles — public booking custom resource tiles", () => {
     expect(tile.kind).toBe("custom");
     if (tile.kind === "custom") {
       expect(tile.subServices).toHaveLength(2);
-      expect(tile.subServices[0]).toMatchObject({ id: "s1", name: "Massage", price_eur: 60 });
+      expect(tile.subServices[0]).toMatchObject({
+        id: "s1",
+        name: "Massage",
+        price_eur: 60,
+      });
     }
   });
 
@@ -100,7 +110,12 @@ describe("buildTypeTiles — public booking custom resource tiles", () => {
       ["custom"],
       [
         { id: "r1", resource_type: "custom", custom_type_label: "A" },
-        { id: "r2", resource_type: "custom", custom_type_label: "B", sub_services: "not-an-array" },
+        {
+          id: "r2",
+          resource_type: "custom",
+          custom_type_label: "B",
+          sub_services: "not-an-array",
+        },
       ],
     );
     expect((tiles[0] as any).subServices).toEqual([]);
@@ -139,7 +154,11 @@ describe("buildTypeTiles — public booking custom resource tiles", () => {
 
 describe("selectTile — clicking a tile sets booking form state", () => {
   it("selecting a built-in tile sets reservation_type and clears resource_id", () => {
-    const patch = selectTile({ kind: "builtin", key: "restaurant", type: "restaurant" });
+    const patch = selectTile({
+      kind: "builtin",
+      key: "restaurant",
+      type: "restaurant",
+    });
     expect(patch).toEqual({
       reservation_type: "restaurant",
       resource_id: "",
@@ -209,7 +228,11 @@ describe("buildTypeTiles — wellness resources", () => {
       ],
     );
     expect(tiles).toHaveLength(3);
-    expect(tiles.map((t) => t.key)).toEqual(["restaurant", "wellness:r1", "wellness:r2"]);
+    expect(tiles.map((t) => t.key)).toEqual([
+      "restaurant",
+      "wellness:r1",
+      "wellness:r2",
+    ]);
     expect(tiles.find((t) => t.key === "wellness")).toBeUndefined();
   });
 

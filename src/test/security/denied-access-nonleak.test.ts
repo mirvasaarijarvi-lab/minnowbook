@@ -97,7 +97,7 @@ describe("denial error payloads", () => {
       expect(json.details.guest_email).toBe(REDACTED);
       expect(json.details.booking_token).toBe(REDACTED);
       expect(json.details.attempted).toBe(REDACTED);
-        expect(json.details.rows).toBe(REDACTED);
+      expect(json.details.rows).toBe(REDACTED);
       // Non-identifying operational context survives.
       expect(json.details.attemptCount).toBe(3);
       expect(json.details.retriable).toBe(false);
@@ -242,10 +242,15 @@ describe("audit events for refused access", () => {
   const migrationsDir = resolve(process.cwd(), "drizzle/migrations");
   const sqlFiles = readdirSync(migrationsDir)
     .filter((f) => f.endsWith(".sql"))
-    .map((f) => ({ name: f, sql: readFileSync(join(migrationsDir, f), "utf-8") }));
+    .map((f) => ({
+      name: f,
+      sql: readFileSync(join(migrationsDir, f), "utf-8"),
+    }));
 
   it("the audit trigger only stamps the row's own tenant_id", () => {
-    const writers = sqlFiles.filter((f) => /INSERT INTO public\.audit_log/i.test(f.sql));
+    const writers = sqlFiles.filter((f) =>
+      /INSERT INTO public\.audit_log/i.test(f.sql),
+    );
     expect(writers.length).toBeGreaterThan(0);
     for (const { name, sql } of writers) {
       // The tenant id always comes from the affected row, never from a
@@ -253,19 +258,26 @@ describe("audit events for refused access", () => {
       expect(sql, `${name} must derive tenant_id from the row`).toMatch(
         /v_tenant_id\s*:?=\s*(OLD|NEW)\.tenant_id|(OLD|NEW)\.tenant_id/,
       );
-      expect(sql, `${name} must not take a tenant id from the request`).not.toMatch(
-        /current_setting\(\s*'request\.[^']*tenant/i,
-      );
+      expect(
+        sql,
+        `${name} must not take a tenant id from the request`,
+      ).not.toMatch(/current_setting\(\s*'request\.[^']*tenant/i);
     }
   });
 
   it("audit writes happen AFTER the row change, so a refused write logs nothing", () => {
-    const triggerDefs = sqlFiles.filter((f) => /CREATE\s+(OR REPLACE\s+)?TRIGGER/i.test(f.sql));
+    const triggerDefs = sqlFiles.filter((f) =>
+      /CREATE\s+(OR REPLACE\s+)?TRIGGER/i.test(f.sql),
+    );
     for (const { name, sql } of triggerDefs) {
-      const auditTriggers = sql.match(/CREATE\s+(OR REPLACE\s+)?TRIGGER[\s\S]{0,300}?;/gi) ?? [];
+      const auditTriggers =
+        sql.match(/CREATE\s+(OR REPLACE\s+)?TRIGGER[\s\S]{0,300}?;/gi) ?? [];
       for (const def of auditTriggers) {
         if (!/audit_log_trigger/i.test(def)) continue;
-        expect(def, `${name}: audit triggers must be AFTER, not BEFORE`).toMatch(/\bAFTER\b/i);
+        expect(
+          def,
+          `${name}: audit triggers must be AFTER, not BEFORE`,
+        ).toMatch(/\bAFTER\b/i);
       }
     }
   });
@@ -280,11 +292,16 @@ describe("audit events for refused access", () => {
   ];
 
   it("only the reviewed writers insert audit rows directly", () => {
-    const appFiles = [...sourceFiles(FUNCTIONS_DIR), ...sourceFiles(resolve(process.cwd(), "src"))];
+    const appFiles = [
+      ...sourceFiles(FUNCTIONS_DIR),
+      ...sourceFiles(resolve(process.cwd(), "src")),
+    ];
     const writers = appFiles
       .filter((file) => {
         const src = readFileSync(file, "utf-8");
-        return /from\(\s*["'`]audit_log["'`]\s*\)[\s\S]{0,120}?\.(insert|upsert)\(/.test(src);
+        return /from\(\s*["'`]audit_log["'`]\s*\)[\s\S]{0,120}?\.(insert|upsert)\(/.test(
+          src,
+        );
       })
       .map((file) => file.replace(`${process.cwd()}/`, ""))
       .sort();
@@ -293,12 +310,18 @@ describe("audit events for refused access", () => {
 
   it("the forbidden-access logger attributes rows only to an approved membership", () => {
     const src = readFileSync(
-      resolve(process.cwd(), "supabase/functions/log-forbidden-access/index.ts"),
+      resolve(
+        process.cwd(),
+        "supabase/functions/log-forbidden-access/index.ts",
+      ),
       "utf-8",
     );
     // A client-supplied tenant hint must be validated as a uuid AND checked
     // against an approved tenant_users row before it reaches the audit row.
-    const hintBlock = src.slice(src.indexOf("body.tenantId"), src.indexOf("if (!tenantId)"));
+    const hintBlock = src.slice(
+      src.indexOf("body.tenantId"),
+      src.indexOf("if (!tenantId)"),
+    );
     expect(hintBlock).toContain('.eq("tenant_id", body.tenantId)');
     expect(hintBlock).toContain('.eq("is_approved", true)');
     // Every membership lookup in the file requires approval.
@@ -306,9 +329,10 @@ describe("audit events for refused access", () => {
     expect(lookups.length).toBeGreaterThan(1);
     for (const lookup of lookups) {
       const block = lookup.slice(0, 300);
-      expect(block, `membership lookup must require approval:\n${block}`).toContain(
-        '.eq("is_approved", true)',
-      );
+      expect(
+        block,
+        `membership lookup must require approval:\n${block}`,
+      ).toContain('.eq("is_approved", true)');
     }
     // The user id always comes from the verified JWT, never the body.
     expect(src).not.toMatch(/user_id:\s*body\./);
@@ -329,9 +353,15 @@ describe("audit events for refused access", () => {
   });
 
   it("the audit trigger runs with a pinned search_path and is not callable by clients", () => {
-    const def = sqlFiles.find((f) => /CREATE OR REPLACE FUNCTION public\.audit_log_trigger/i.test(f.sql));
+    const def = sqlFiles.find((f) =>
+      /CREATE OR REPLACE FUNCTION public\.audit_log_trigger/i.test(f.sql),
+    );
     expect(def).toBeDefined();
-    expect(def!.sql).toMatch(/SET search_path TO 'public'|SET search_path = public/i);
-    expect(def!.sql).toMatch(/REVOKE ALL ON FUNCTION public\.audit_log_trigger\(\)/i);
+    expect(def!.sql).toMatch(
+      /SET search_path TO 'public'|SET search_path = public/i,
+    );
+    expect(def!.sql).toMatch(
+      /REVOKE ALL ON FUNCTION public\.audit_log_trigger\(\)/i,
+    );
   });
 });

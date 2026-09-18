@@ -23,11 +23,7 @@ const ROOT = process.cwd();
 // Current code is scanned in full. Migrations are append-only history
 // and historically contained 2-arg overloads/calls, so we only flag
 // migrations newer than the drop baseline below.
-const SCAN_DIRS = [
-  "supabase/functions",
-  "src",
-  "scripts",
-];
+const SCAN_DIRS = ["supabase/functions", "src", "scripts"];
 
 // Migration filename (YYYYMMDDHHMMSS prefix) at which the legacy
 // 2-arg overloads were dropped. Any migration with a STRICTLY GREATER
@@ -87,23 +83,43 @@ function findCallsWithArity(src, name, argCount) {
   let i = 0;
   while ((i = src.indexOf(needle, i)) !== -1) {
     const before = i === 0 ? "" : src[i - 1];
-    if (/[A-Za-z0-9_]/.test(before)) { i += needle.length; continue; }
+    if (/[A-Za-z0-9_]/.test(before)) {
+      i += needle.length;
+      continue;
+    }
     // Walk balanced parens, counting top-level commas.
     let depth = 0;
     let commas = 0;
-    let inS = false, inD = false, inDollar = false;
+    let inS = false,
+      inD = false,
+      inDollar = false;
     let j = i + needle.length - 1; // points at "("
     let nonWhitespaceSeen = false;
     for (; j < src.length; j++) {
       const c = src[j];
-      if (inS) { if (c === "'") inS = false; continue; }
-      if (inD) { if (c === '"') inD = false; continue; }
-      if (c === "'") { inS = true; continue; }
-      if (c === '"') { inD = true; continue; }
+      if (inS) {
+        if (c === "'") inS = false;
+        continue;
+      }
+      if (inD) {
+        if (c === '"') inD = false;
+        continue;
+      }
+      if (c === "'") {
+        inS = true;
+        continue;
+      }
+      if (c === '"') {
+        inD = true;
+        continue;
+      }
       if (c === "(") depth++;
       else if (c === ")") {
         depth--;
-        if (depth === 0) { j++; break; }
+        if (depth === 0) {
+          j++;
+          break;
+        }
       } else if (c === "," && depth === 1) {
         commas++;
       } else if (depth === 1 && /\S/.test(c)) {
@@ -116,7 +132,12 @@ function findCallsWithArity(src, name, argCount) {
       const pre = src.slice(0, i);
       const line = pre.split("\n").length;
       const col = i - pre.lastIndexOf("\n");
-      hits.push({ offset: i, line, col, snippet: src.slice(i, Math.min(src.length, j + 1)) });
+      hits.push({
+        offset: i,
+        line,
+        col,
+        snippet: src.slice(i, Math.min(src.length, j + 1)),
+      });
     }
     i = j > i ? j : i + needle.length;
   }
@@ -127,7 +148,11 @@ function scanRepo() {
   const offenders = [];
   for (const d of SCAN_DIRS) {
     const abs = join(ROOT, d);
-    try { statSync(abs); } catch { continue; }
+    try {
+      statSync(abs);
+    } catch {
+      continue;
+    }
     for (const f of walk(abs)) {
       const rel = relative(ROOT, f).split(sep).join("/");
       if (ALLOWLIST.includes(rel)) continue;
@@ -136,7 +161,13 @@ function scanRepo() {
         if (!src.includes(fn + "(")) continue;
         const twoArg = findCallsWithArity(src, fn, 2);
         for (const h of twoArg) {
-          offenders.push({ file: rel, fn, line: h.line, col: h.col, snippet: h.snippet.replace(/\s+/g, " ").slice(0, 160) });
+          offenders.push({
+            file: rel,
+            fn,
+            line: h.line,
+            col: h.col,
+            snippet: h.snippet.replace(/\s+/g, " ").slice(0, 160),
+          });
         }
       }
     }
@@ -156,7 +187,11 @@ function checkNewMigrations(offenders) {
   // history and are not scanned here.
   const migDir = join(ROOT, "supabase/migrations");
   let entries;
-  try { entries = readdirSync(migDir); } catch { return offenders; }
+  try {
+    entries = readdirSync(migDir);
+  } catch {
+    return offenders;
+  }
   for (const name of entries) {
     if (!name.endsWith(".sql")) continue;
     const ts = migrationTimestamp(name);
@@ -204,7 +239,9 @@ async function checkLiveDb() {
   const url = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
   const hasPgEnv = !!(process.env.PGHOST && process.env.PGUSER);
   if (!url && !hasPgEnv) {
-    console.log("[arity-check] No SUPABASE_DB_URL / PG* env, skipping live DB probe.");
+    console.log(
+      "[arity-check] No SUPABASE_DB_URL / PG* env, skipping live DB probe.",
+    );
     return [];
   }
   let pg;

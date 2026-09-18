@@ -50,25 +50,77 @@ const MALICIOUS_PATHS: Array<{
   path: string;
   reason: string;
 }> = [
-  { label: "parent traversal segment", path: "tenant/../other-tenant/secret.pdf", reason: "traversal_or_empty_segment" },
-  { label: "leading parent traversal", path: "../etc/passwd", reason: "traversal_or_empty_segment" },
-  { label: "current-dir segment", path: "tenant/./logo.png", reason: "traversal_or_empty_segment" },
+  {
+    label: "parent traversal segment",
+    path: "tenant/../other-tenant/secret.pdf",
+    reason: "traversal_or_empty_segment",
+  },
+  {
+    label: "leading parent traversal",
+    path: "../etc/passwd",
+    reason: "traversal_or_empty_segment",
+  },
+  {
+    label: "current-dir segment",
+    path: "tenant/./logo.png",
+    reason: "traversal_or_empty_segment",
+  },
   { label: "absolute unix path", path: "/etc/passwd", reason: "absolute" },
-  { label: "double slash empty segment", path: "tenant//logo.png", reason: "traversal_or_empty_segment" },
-  { label: "trailing slash empty segment", path: "tenant/logo.png/", reason: "traversal_or_empty_segment" },
-  { label: "windows backslash traversal", path: "tenant\\..\\other\\file", reason: "backslash" },
-  { label: "embedded NUL byte", path: "tenant/logo.png\u0000.jpg", reason: "control_char" },
-  { label: "ASCII control character", path: "tenant/\u0007bell.png", reason: "control_char" },
-  { label: "DEL control character", path: "tenant/\u007fdel.png", reason: "control_char" },
-  { label: "http scheme", path: "http://evil.example.com/x.png", reason: "scheme" },
-  { label: "https scheme", path: "https://evil.example.com/x.png", reason: "scheme" },
+  {
+    label: "double slash empty segment",
+    path: "tenant//logo.png",
+    reason: "traversal_or_empty_segment",
+  },
+  {
+    label: "trailing slash empty segment",
+    path: "tenant/logo.png/",
+    reason: "traversal_or_empty_segment",
+  },
+  {
+    label: "windows backslash traversal",
+    path: "tenant\\..\\other\\file",
+    reason: "backslash",
+  },
+  {
+    label: "embedded NUL byte",
+    path: "tenant/logo.png\u0000.jpg",
+    reason: "control_char",
+  },
+  {
+    label: "ASCII control character",
+    path: "tenant/\u0007bell.png",
+    reason: "control_char",
+  },
+  {
+    label: "DEL control character",
+    path: "tenant/\u007fdel.png",
+    reason: "control_char",
+  },
+  {
+    label: "http scheme",
+    path: "http://evil.example.com/x.png",
+    reason: "scheme",
+  },
+  {
+    label: "https scheme",
+    path: "https://evil.example.com/x.png",
+    reason: "scheme",
+  },
   { label: "file scheme", path: "file:///etc/passwd", reason: "scheme" },
   { label: "whitespace only", path: "   ", reason: "empty" },
-  { label: "overly long path", path: `${"a/".repeat(600)}file.png`, reason: "too_long" },
+  {
+    label: "overly long path",
+    path: `${"a/".repeat(600)}file.png`,
+    reason: "too_long",
+  },
 ];
 
-async function postPath(path: unknown): Promise<{ status: number; body: RejectionResponse }> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+async function postPath(
+  path: unknown,
+): Promise<{ status: number; body: RejectionResponse }> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
   if (SUPABASE_ANON_KEY) {
     // Supabase functions gateway requires `apikey` even when
     // `verify_jwt = false`. No Authorization is sent so the function
@@ -101,7 +153,6 @@ async function postPath(path: unknown): Promise<{ status: number; body: Rejectio
   return { status: lastStatus, body: lastBody };
 }
 
-
 test.describe("mint-tenant-private-url HTTP contract", () => {
   test.skip(!!skipReason, skipReason ?? "");
 
@@ -125,7 +176,9 @@ test.describe("mint-tenant-private-url HTTP contract", () => {
   });
 
   test("rejects non-JSON body with invalid_request", async () => {
-    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
     if (SUPABASE_ANON_KEY) headers.apikey = SUPABASE_ANON_KEY;
     const res = await fetch(FUNCTION_URL, {
       method: "POST",
@@ -147,7 +200,9 @@ test.describe("mint-tenant-private-url HTTP contract", () => {
   });
 
   test("well-formed path without auth returns 401 unauthenticated", async () => {
-    const { status, body } = await postPath("tenant-id/offers/2026/offer-123.pdf");
+    const { status, body } = await postPath(
+      "tenant-id/offers/2026/offer-123.pdf",
+    );
     expect(status).toBe(401);
     expect(body.error_code).toBe("unauthenticated");
   });

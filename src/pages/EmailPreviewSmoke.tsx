@@ -47,7 +47,9 @@ const EmailPreviewSmoke = () => {
   // non-deterministic across runs.
   const requestedLang = (() => {
     const raw = params.get("lang");
-    return raw === "fi" || raw === "sv" || raw === "en" ? (raw as Language) : "en";
+    return raw === "fi" || raw === "sv" || raw === "en"
+      ? (raw as Language)
+      : "en";
   })();
 
   const [langApplied, setLangApplied] = useState(false);
@@ -63,14 +65,18 @@ const EmailPreviewSmoke = () => {
   if (!enabled) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground" data-testid="email-preview-disabled">
+        <p
+          className="text-sm text-muted-foreground"
+          data-testid="email-preview-disabled"
+        >
           Email preview smoke route is disabled. Append ?e2e=1 to enable.
         </p>
       </main>
     );
   }
 
-  const variant = params.get("variant") === "cancellation" ? "cancellation" : "confirmation";
+  const variant =
+    params.get("variant") === "cancellation" ? "cancellation" : "confirmation";
   const reservation = {
     guest_name: params.get("guest_name") ?? DEFAULT_GUEST_NAME,
     guest_email: "smoke@example.com",

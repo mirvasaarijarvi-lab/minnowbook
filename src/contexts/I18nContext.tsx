@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  ReactNode,
+} from "react";
 import { Language, TranslationKey, translations } from "@/i18n/translations";
 
 interface I18nContextType {
@@ -10,8 +17,7 @@ interface I18nContextType {
 }
 
 // Default t function that actually resolves translations (prevents raw keys flashing)
-const defaultT = (key: TranslationKey): string =>
-  translations.en[key] ?? key;
+const defaultT = (key: TranslationKey): string => translations.en[key] ?? key;
 
 const defaultTDynamic = (key: string): string =>
   (translations.en as Record<string, string>)[key] ?? key;
@@ -76,7 +82,7 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
     (key: TranslationKey): string => {
       return translations[language][key] ?? translations.en[key] ?? key;
     },
-    [language]
+    [language],
   );
 
   const tDynamic = useCallback(
@@ -85,7 +91,7 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
       const enMap = translations.en as Record<string, string>;
       return langMap[key] ?? enMap[key] ?? key;
     },
-    [language]
+    [language],
   );
 
   return (

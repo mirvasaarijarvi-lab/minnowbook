@@ -49,7 +49,7 @@ let anon: SupabaseClient;
 beforeAll(() => {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error(
-      "VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY must be set to run audit_log append-only tests"
+      "VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY must be set to run audit_log append-only tests",
     );
   }
   anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -60,7 +60,7 @@ beforeAll(() => {
 /** INSERT denial must produce an error (WITH CHECK / no-policy denial). */
 function expectInsertDenied(
   result: { data: unknown; error: { message?: string } | null },
-  ctx: string
+  ctx: string,
 ) {
   const { data, error } = result;
   expect(error, `${ctx}: insert must produce an error`).toBeTruthy();
@@ -118,7 +118,7 @@ describe("audit_log — anon cannot read, write, or modify", () => {
     if (Array.isArray(data)) {
       expect(
         data.length,
-        "audit_log anon update must not return modified rows"
+        "audit_log anon update must not return modified rows",
       ).toBe(0);
     }
   });
@@ -133,7 +133,7 @@ describe("audit_log — anon cannot read, write, or modify", () => {
     if (Array.isArray(data)) {
       expect(
         data.length,
-        "audit_log anon delete must not return deleted rows"
+        "audit_log anon delete must not return deleted rows",
       ).toBe(0);
     }
   });

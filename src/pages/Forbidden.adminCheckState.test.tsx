@@ -169,10 +169,7 @@ describe("Forbidden — adminCheckState plumbing", () => {
       expect(main).toHaveAttribute("data-admin-check-stale", "true");
       expect(main).toHaveAttribute("data-admin-check-errored", "false");
       expect(main).toHaveAttribute("data-admin-check-status", "success");
-      expect(main).toHaveAttribute(
-        "data-admin-check-fetch-status",
-        "fetching",
-      );
+      expect(main).toHaveAttribute("data-admin-check-fetch-status", "fetching");
       expect(main).toHaveAttribute(
         "data-admin-check-data-updated-at",
         "2026-04-22T10:55:00.000Z",

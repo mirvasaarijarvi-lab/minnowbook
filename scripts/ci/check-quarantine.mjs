@@ -19,7 +19,14 @@ export const MANIFEST_PATH = resolve(
 export const MAX_ENTRIES = Number(process.env.QUARANTINE_MAX ?? 15);
 export const MAX_AGE_DAYS = 30;
 
-const REQUIRED_KEYS = ["pattern", "reason", "owner", "added", "expires", "issue"];
+const REQUIRED_KEYS = [
+  "pattern",
+  "reason",
+  "owner",
+  "added",
+  "expires",
+  "issue",
+];
 const SECTIONS = ["vitest", "playwright"];
 
 export function loadManifest(path = MANIFEST_PATH) {
@@ -76,10 +83,14 @@ export function validateManifest(manifest, opts = {}) {
       }
       if (e.pattern) {
         const dupKey = `${section}::${e.pattern}`;
-        if (seenPatterns.has(dupKey)) errors.push(`${where} duplicate pattern "${e.pattern}"`);
+        if (seenPatterns.has(dupKey))
+          errors.push(`${where} duplicate pattern "${e.pattern}"`);
         seenPatterns.add(dupKey);
-        try { new RegExp(e.pattern); }
-        catch (re) { errors.push(`${where} pattern is not a valid regex: ${re.message}`); }
+        try {
+          new RegExp(e.pattern);
+        } catch (re) {
+          errors.push(`${where} pattern is not a valid regex: ${re.message}`);
+        }
         if (prevPattern && e.pattern < prevPattern) {
           warnings.push(`${where} not sorted (came after "${prevPattern}")`);
         }
@@ -87,26 +98,38 @@ export function validateManifest(manifest, opts = {}) {
       }
       const added = parseDate(e.added);
       const expires = parseDate(e.expires);
-      if (e.added && !added) errors.push(`${where} added "${e.added}" is not YYYY-MM-DD`);
-      if (e.expires && !expires) errors.push(`${where} expires "${e.expires}" is not YYYY-MM-DD`);
+      if (e.added && !added)
+        errors.push(`${where} added "${e.added}" is not YYYY-MM-DD`);
+      if (e.expires && !expires)
+        errors.push(`${where} expires "${e.expires}" is not YYYY-MM-DD`);
       if (added && expires) {
         const ageDays = Math.round((expires - added) / 86_400_000);
         if (ageDays <= 0) errors.push(`${where} expires must be after added`);
         if (ageDays > maxAge) {
-          errors.push(`${where} expires must be within ${maxAge} days of added (got ${ageDays})`);
+          errors.push(
+            `${where} expires must be within ${maxAge} days of added (got ${ageDays})`,
+          );
         }
       }
       if (expires && expires < now) {
-        errors.push(`${where} EXPIRED on ${e.expires} — fix the underlying flake or open a fresh tracking issue`);
+        errors.push(
+          `${where} EXPIRED on ${e.expires} — fix the underlying flake or open a fresh tracking issue`,
+        );
       }
-      if (e.issue && typeof e.issue === "string" && !/^https?:\/\//.test(e.issue)) {
+      if (
+        e.issue &&
+        typeof e.issue === "string" &&
+        !/^https?:\/\//.test(e.issue)
+      ) {
         errors.push(`${where} issue must be a full URL`);
       }
     }
   }
 
   if (total > maxEntries) {
-    errors.push(`quarantine has ${total} entries, max is ${maxEntries} — fix flakes instead of adding more`);
+    errors.push(
+      `quarantine has ${total} entries, max is ${maxEntries} — fix flakes instead of adding more`,
+    );
   }
 
   return { ok: errors.length === 0, errors, warnings, total };

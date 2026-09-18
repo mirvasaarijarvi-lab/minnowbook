@@ -51,7 +51,9 @@ function summarizeRows(rows: unknown[] | null | undefined): string {
   const sample = rows.slice(0, 3);
   const more = rows.length - sample.length;
   const json = JSON.stringify(sample, null, 2);
-  return more > 0 ? `${json}\n  …and ${more} more row(s) (total: ${rows.length})` : json;
+  return more > 0
+    ? `${json}\n  …and ${more} more row(s) (total: ${rows.length})`
+    : json;
 }
 
 /**
@@ -73,7 +75,11 @@ export function isBlockedByEdgeFirewall(result: DenialResult): boolean {
   );
 }
 
-function buildFailureMessage(ctx: QueryContext, result: DenialResult, reason: string): string {
+function buildFailureMessage(
+  ctx: QueryContext,
+  result: DenialResult,
+  reason: string,
+): string {
   const lines = [
     `RLS DENIAL FAILED: ${ctx.scenario ?? `${ctx.operation} on ${ctx.table}`}`,
     "",
@@ -85,12 +91,17 @@ function buildFailureMessage(ctx: QueryContext, result: DenialResult, reason: st
   if (ctx.targetTenantId) lines.push(`Target tenant:   ${ctx.targetTenantId}`);
   lines.push("", `Reason: ${reason}`, "");
   if (result.error) {
-    lines.push("Supabase error:", `  code:    ${result.error.code ?? "(none)"}`,
+    lines.push(
+      "Supabase error:",
+      `  code:    ${result.error.code ?? "(none)"}`,
       `  message: ${result.error.message}`,
       `  details: ${result.error.details ?? "(none)"}`,
-      `  hint:    ${result.error.hint ?? "(none)"}`);
+      `  hint:    ${result.error.hint ?? "(none)"}`,
+    );
   } else {
-    lines.push("Supabase error: (none — query succeeded but returned forbidden rows)");
+    lines.push(
+      "Supabase error: (none — query succeeded but returned forbidden rows)",
+    );
   }
   lines.push("", "Returned rows:", summarizeRows(result.data));
   return lines.join("\n");
@@ -102,7 +113,10 @@ function buildFailureMessage(ctx: QueryContext, result: DenialResult, reason: st
  * with full context. A Supabase error (e.g. "permission denied") counts
  * as denial and passes silently.
  */
-export function expectReadDenied(ctx: QueryContext, result: DenialResult): void {
+export function expectReadDenied(
+  ctx: QueryContext,
+  result: DenialResult,
+): void {
   if (result.error) return; // permission denied is acceptable
   const rows = result.data ?? [];
   if (rows.length === 0) return;
@@ -120,8 +134,12 @@ export function expectReadDenied(ctx: QueryContext, result: DenialResult): void 
  * explicit error OR a silent no-op (`data === [] || null`) when the
  * `WITH CHECK` clause filters the row out. Anything else is a leak.
  */
-export function expectWriteDenied(ctx: QueryContext, result: DenialResult): void {
-  const denied = Boolean(result.error) || !result.data || result.data.length === 0;
+export function expectWriteDenied(
+  ctx: QueryContext,
+  result: DenialResult,
+): void {
+  const denied =
+    Boolean(result.error) || !result.data || result.data.length === 0;
   if (denied) return;
   throw new Error(
     buildFailureMessage(
@@ -146,7 +164,11 @@ export function expectNoForeignTenantRows(
     // Blocked at the edge: no rows reached the client, nothing to leak.
     if (isBlockedByEdgeFirewall(result)) return;
     throw new Error(
-      buildFailureMessage(ctx, result, `Unexpected error on legitimate own-tenant query.`),
+      buildFailureMessage(
+        ctx,
+        result,
+        `Unexpected error on legitimate own-tenant query.`,
+      ),
     );
   }
   const rows = (result.data ?? []) as Array<{ tenant_id?: string }>;

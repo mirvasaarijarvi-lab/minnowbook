@@ -76,8 +76,9 @@ function normalize(stmt: string): string {
 
 function isReservationsIndex(stmt: string): boolean {
   // Matches: CREATE [UNIQUE] INDEX [IF NOT EXISTS] <name> ON [public.]reservations ...
-  return /^CREATE\s+(?:UNIQUE\s+)?INDEX(?:\s+IF\s+NOT\s+EXISTS)?\s+\S+\s+ON\s+(?:public\.)?reservations\b/i
-    .test(stmt);
+  return /^CREATE\s+(?:UNIQUE\s+)?INDEX(?:\s+IF\s+NOT\s+EXISTS)?\s+\S+\s+ON\s+(?:public\.)?reservations\b/i.test(
+    stmt,
+  );
 }
 
 function parseIndexName(stmt: string): string | null {
@@ -93,7 +94,12 @@ function parseDropIndexNames(stmt: string): string[] {
   if (!m) return [];
   return m[1]
     .split(",")
-    .map((n) => n.trim().replace(/^public\./i, "").replace(/[";]+$/g, ""))
+    .map((n) =>
+      n
+        .trim()
+        .replace(/^public\./i, "")
+        .replace(/[";]+$/g, ""),
+    )
     .filter((n) => /^idx_reservations_/i.test(n));
 }
 
@@ -226,7 +232,9 @@ describe("reservations schema snapshot", () => {
       );
     }
 
-    const expected = JSON.parse(readFileSync(MANIFEST_PATH, "utf8")) as Snapshot;
+    const expected = JSON.parse(
+      readFileSync(MANIFEST_PATH, "utf8"),
+    ) as Snapshot;
 
     // Vitest's deep-equal already produces a readable diff, but we precompute
     // a name-level summary so a reviewer eyeballing the failure log sees

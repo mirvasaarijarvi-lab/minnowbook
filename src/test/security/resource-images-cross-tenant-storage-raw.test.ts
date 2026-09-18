@@ -39,14 +39,17 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const BUCKET = "tenant-assets";
-const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
+const canRun = Boolean(
+  SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY,
+);
 
 type TenantBRole = "owner" | "admin" | "staff";
 const ROLE_MATRIX: TenantBRole[] = ["owner", "admin", "staff"];
@@ -69,7 +72,10 @@ interface Seeded {
   objectPath: string;
   publicUrl: string;
   fileBytes: Uint8Array;
-  members: Record<TenantBRole, { userId: string; email: string; password: string }>;
+  members: Record<
+    TenantBRole,
+    { userId: string; email: string; password: string }
+  >;
 }
 
 describe.runIf(canRun)(
@@ -118,14 +124,21 @@ describe.runIf(canRun)(
 
       const fileName = `gallery-${stamp}.jpg`;
       const objectPath = `${tenantAId}/resources/${resourceId}/${fileName}`;
-      const fileBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xd9, 0x11, 0x22, 0x33, 0x44]);
+      const fileBytes = new Uint8Array([
+        0xff, 0xd8, 0xff, 0xd9, 0x11, 0x22, 0x33, 0x44,
+      ]);
 
       const { error: upErr } = await service.storage
         .from(BUCKET)
-        .upload(objectPath, fileBytes, { contentType: "image/jpeg", upsert: true });
+        .upload(objectPath, fileBytes, {
+          contentType: "image/jpeg",
+          upsert: true,
+        });
       if (upErr) throw upErr;
 
-      const { data: urlData } = service.storage.from(BUCKET).getPublicUrl(objectPath);
+      const { data: urlData } = service.storage
+        .from(BUCKET)
+        .getPublicUrl(objectPath);
       const publicUrl = urlData.publicUrl;
 
       const { data: img, error: iErr } = await service
@@ -159,12 +172,14 @@ describe.runIf(canRun)(
       for (const role of ROLE_MATRIX) {
         const email = `ci-resimg-xtstor-${role}+${stamp}-${rand}@example.invalid`;
         const password = `Pw!${role}${rand}${stamp}`;
-        const { data: created, error: cErr } = await service.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true,
-        });
-        if (cErr || !created?.user) throw cErr ?? new Error(`auth create failed for ${role}`);
+        const { data: created, error: cErr } =
+          await service.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+          });
+        if (cErr || !created?.user)
+          throw cErr ?? new Error(`auth create failed for ${role}`);
 
         const { error: tuErr } = await service.from("tenant_users").insert({
           tenant_id: tenantBId,
@@ -175,7 +190,10 @@ describe.runIf(canRun)(
         if (tuErr) throw tuErr;
 
         const client = newAnon();
-        const { error: signInErr } = await client.auth.signInWithPassword({ email, password });
+        const { error: signInErr } = await client.auth.signInWithPassword({
+          email,
+          password,
+        });
         if (signInErr) throw signInErr;
         memberClients[role] = client;
         members[role] = { userId: created.user.id, email, password };
@@ -198,12 +216,18 @@ describe.runIf(canRun)(
         await memberClients[role]?.auth.signOut().catch(() => {});
       }
       if (!seeded) return;
-      await service.storage.from(BUCKET).remove([seeded.objectPath]).catch(() => {});
+      await service.storage
+        .from(BUCKET)
+        .remove([seeded.objectPath])
+        .catch(() => {});
       await service.from("resource_images").delete().eq("id", seeded.imageId);
       await service.from("resources").delete().eq("id", seeded.resourceId);
       const userIds = ROLE_MATRIX.map((r) => seeded!.members[r].userId);
       await service.from("tenant_users").delete().in("user_id", userIds);
-      await service.from("tenants").delete().in("id", [seeded.tenantAId, seeded.tenantBId]);
+      await service
+        .from("tenants")
+        .delete()
+        .in("id", [seeded.tenantAId, seeded.tenantBId]);
       for (const uid of userIds) {
         await service.auth.admin.deleteUser(uid).catch(() => {});
       }
@@ -211,16 +235,16 @@ describe.runIf(canRun)(
 
     it("sanity: service role CAN download the seeded object", async () => {
       if (!seeded) throw new Error("seed missing");
-      const { data, error } = await service.storage.from(BUCKET).download(seeded.objectPath);
+      const { data, error } = await service.storage
+        .from(BUCKET)
+        .download(seeded.objectPath);
       expect(error).toBeNull();
       expect(data).toBeTruthy();
       const bytes = new Uint8Array(await (data as Blob).arrayBuffer());
       expect(bytes.length).toBe(seeded.fileBytes.length);
     });
 
-    type Caller =
-      | { kind: "anon" }
-      | { kind: "member"; role: TenantBRole };
+    type Caller = { kind: "anon" } | { kind: "member"; role: TenantBRole };
 
     const CALLERS: Caller[] = [
       { kind: "anon" },
@@ -253,7 +277,9 @@ describe.runIf(canRun)(
       it(`${name}: .storage.download(exact path) is denied`, async () => {
         if (!seeded) throw new Error("seed missing");
         const c = clientFor(caller);
-        const { data, error } = await c.storage.from(BUCKET).download(seeded.objectPath);
+        const { data, error } = await c.storage
+          .from(BUCKET)
+          .download(seeded.objectPath);
         expect(data).toBeNull();
         expect(error).not.toBeNull();
       });
@@ -279,7 +305,10 @@ describe.runIf(canRun)(
         const token = await tokenFor(caller);
         const url = `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${seeded.objectPath}`;
         const resp = await fetch(url, {
-          headers: { apikey: SUPABASE_ANON_KEY!, Authorization: `Bearer ${token}` },
+          headers: {
+            apikey: SUPABASE_ANON_KEY!,
+            Authorization: `Bearer ${token}`,
+          },
         });
         await resp.arrayBuffer();
         expect(resp.ok).toBe(false);

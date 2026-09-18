@@ -33,9 +33,12 @@ function safeResolveWithin(input, root = process.cwd()) {
   return absPath;
 }
 
-const [, , manager, inputPathArg, outputPathArg, lockfileArg, levelArg] = process.argv;
+const [, , manager, inputPathArg, outputPathArg, lockfileArg, levelArg] =
+  process.argv;
 if (!manager || !inputPathArg || !outputPathArg || !lockfileArg) {
-  console.error("Usage: audit-to-sarif.mjs <manager> <input.json> <output.sarif> <lockfile> [audit_level]");
+  console.error(
+    "Usage: audit-to-sarif.mjs <manager> <input.json> <output.sarif> <lockfile> [audit_level]",
+  );
   process.exit(2);
 }
 const inputPath = safeResolveWithin(inputPathArg);
@@ -47,7 +50,9 @@ const lockfile = safeResolveWithin(lockfileArg);
 // inspecting code-scanning alerts can see which severity floor was in
 // effect when the SARIF was produced. Falls back to env to keep call
 // sites in the workflow short, then to "unknown" if neither is set.
-const auditLevel = String(levelArg || process.env.AUDIT_LEVEL || "unknown").toLowerCase();
+const auditLevel = String(
+  levelArg || process.env.AUDIT_LEVEL || "unknown",
+).toLowerCase();
 
 if (!fs.existsSync(inputPath) || fs.statSync(inputPath).size === 0) {
   console.log(`${inputPath} missing or empty, skipping SARIF conversion.`);
@@ -139,7 +144,9 @@ function buildLockfileIndex(lockfilePath) {
     return map;
   }
   if (stat.size > MAX_LOCKFILE_BYTES) {
-    console.warn(`Lockfile exceeds size cap (${stat.size} bytes), skipping index.`);
+    console.warn(
+      `Lockfile exceeds size cap (${stat.size} bytes), skipping index.`,
+    );
     return map;
   }
   const text = fs.readFileSync(lockfilePath, "utf8");
@@ -169,7 +176,9 @@ function buildLockfileIndex(lockfilePath) {
     },
     // pnpm-lock.yaml v6+
     (line) => {
-      const m = /^\s*'?\/((?:@[^/@]+\/)?[A-Za-z0-9._-]+)@[^':\s]+'?\s*:/.exec(line);
+      const m = /^\s*'?\/((?:@[^/@]+\/)?[A-Za-z0-9._-]+)@[^':\s]+'?\s*:/.exec(
+        line,
+      );
       return m ? [m[1]] : [];
     },
   ];
@@ -197,12 +206,14 @@ function locationsFor(pkg) {
     // SARIF stays valid and the result still surfaces. This typically
     // means the advisory targets a virtual / metapackage that is not
     // a real key in the lockfile.
-    return [{
-      physicalLocation: {
-        artifactLocation: { uri: lockfile },
-        region: { startLine: 1 },
+    return [
+      {
+        physicalLocation: {
+          artifactLocation: { uri: lockfile },
+          region: { startLine: 1 },
+        },
       },
-    }];
+    ];
   }
   return lines.slice(0, MAX_LOCATIONS_PER_RESULT).map((ln) => ({
     physicalLocation: {
@@ -223,7 +234,10 @@ for (const a of advisories) {
       shortDescription: { text: a.title.slice(0, 120) },
       fullDescription: { text: a.title },
       helpUri: a.url,
-      help: { text: `${a.title}\nSee: ${a.url}`, markdown: `**${a.title}**\n\nSee: [${a.url}](${a.url})` },
+      help: {
+        text: `${a.title}\nSee: ${a.url}`,
+        markdown: `**${a.title}**\n\nSee: [${a.url}](${a.url})`,
+      },
       defaultConfiguration: { level },
       properties: {
         "security-severity": sevToScore[a.severity] || "1.0",
@@ -232,7 +246,8 @@ for (const a of advisories) {
     });
   }
   const locs = locationsFor(a.pkg);
-  const anchored = locs.length > 0 && (lockfileIndex.get(a.pkg)?.length || 0) > 0;
+  const anchored =
+    locs.length > 0 && (lockfileIndex.get(a.pkg)?.length || 0) > 0;
   results.push({
     ruleId: a.ruleId,
     level,
@@ -247,36 +262,41 @@ for (const a of advisories) {
 }
 
 const sarif = {
-  $schema: "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  $schema:
+    "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
   version: "2.1.0",
-  runs: [{
-    tool: {
-      driver: {
-        name: driverName,
-        informationUri: driverInfoUri,
-        version: "1.0",
-        rules: Array.from(rules.values()),
-        // Mirrored on the driver so tools that only render
-        // tool.driver.properties (some SARIF viewers) still expose
-        // the gate level next to the tool name.
-        properties: {
-          auditLevel,
-          manager,
+  runs: [
+    {
+      tool: {
+        driver: {
+          name: driverName,
+          informationUri: driverInfoUri,
+          version: "1.0",
+          rules: Array.from(rules.values()),
+          // Mirrored on the driver so tools that only render
+          // tool.driver.properties (some SARIF viewers) still expose
+          // the gate level next to the tool name.
+          properties: {
+            auditLevel,
+            manager,
+          },
         },
       },
+      // run.properties is the canonical place for run-scoped metadata
+      // in SARIF 2.1.0. Code scanning preserves these fields and they
+      // appear in the alert details payload.
+      properties: {
+        auditLevel,
+        auditLevelDescription: `Minimum severity that fails the dependency-audit gate. Advisories below '${auditLevel}' are present in the report but do not block the PR.`,
+        manager,
+        generatedAt: new Date().toISOString(),
+      },
+      results,
     },
-    // run.properties is the canonical place for run-scoped metadata
-    // in SARIF 2.1.0. Code scanning preserves these fields and they
-    // appear in the alert details payload.
-    properties: {
-      auditLevel,
-      auditLevelDescription: `Minimum severity that fails the dependency-audit gate. Advisories below '${auditLevel}' are present in the report but do not block the PR.`,
-      manager,
-      generatedAt: new Date().toISOString(),
-    },
-    results,
-  }],
+  ],
 };
 
 fs.writeFileSync(outputPath, JSON.stringify(sarif));
-console.log(`Wrote ${outputPath} with ${results.length} result(s) across ${rules.size} rule(s) for ${manager} at AUDIT_LEVEL=${auditLevel}.`);
+console.log(
+  `Wrote ${outputPath} with ${results.length} result(s) across ${rules.size} rule(s) for ${manager} at AUDIT_LEVEL=${auditLevel}.`,
+);

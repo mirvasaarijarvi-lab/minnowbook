@@ -22,7 +22,8 @@ export type ParsedAllowEntry = AllowEntry & {
   _matched: number;
 };
 
-export const ISO_8601 = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([+-]\d{2}:\d{2}|Z)$/;
+export const ISO_8601 =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([+-]\d{2}:\d{2}|Z)$/;
 export const ABS_HTTPS_URL = /^https:\/\/[^\s]+$/;
 
 const isNonEmptyString = (v: unknown): v is string =>
@@ -32,9 +33,18 @@ const isNonEmptyString = (v: unknown): v is string =>
 // Validators
 // ---------------------------------------------------------------------------
 
-const validateAuthorNode = (out: Issue[], slug: string, path: string, node: unknown) => {
+const validateAuthorNode = (
+  out: Issue[],
+  slug: string,
+  path: string,
+  node: unknown,
+) => {
   if (!node || typeof node !== "object") {
-    out.push({ slug, path, message: "author node is missing or not an object" });
+    out.push({
+      slug,
+      path,
+      message: "author node is missing or not an object",
+    });
     return;
   }
   const n = node as Record<string, unknown>;
@@ -51,13 +61,26 @@ const validateAuthorNode = (out: Issue[], slug: string, path: string, node: unkn
     }
   }
   if (isNonEmptyString(n.url) && !ABS_HTTPS_URL.test(n.url as string)) {
-    out.push({ slug, path: `${path}.url`, message: "url must be an absolute https URL" });
+    out.push({
+      slug,
+      path: `${path}.url`,
+      message: "url must be an absolute https URL",
+    });
   }
 };
 
-const validateImageObject = (out: Issue[], slug: string, path: string, img: unknown) => {
+const validateImageObject = (
+  out: Issue[],
+  slug: string,
+  path: string,
+  img: unknown,
+) => {
   if (!img || typeof img !== "object") {
-    out.push({ slug, path, message: "ImageObject is missing or not an object" });
+    out.push({
+      slug,
+      path,
+      message: "ImageObject is missing or not an object",
+    });
     return;
   }
   const i = img as Record<string, unknown>;
@@ -65,15 +88,30 @@ const validateImageObject = (out: Issue[], slug: string, path: string, img: unkn
     out.push({ slug, path: `${path}.@type`, message: "expected ImageObject" });
   }
   if (!isNonEmptyString(i.url) || !ABS_HTTPS_URL.test(i.url as string)) {
-    out.push({ slug, path: `${path}.url`, message: "url must be an absolute https URL" });
+    out.push({
+      slug,
+      path: `${path}.url`,
+      message: "url must be an absolute https URL",
+    });
   }
   if (typeof i.width !== "number" || typeof i.height !== "number") {
-    out.push({ slug, path, message: "ImageObject must declare numeric width and height" });
+    out.push({
+      slug,
+      path,
+      message: "ImageObject must declare numeric width and height",
+    });
   }
 };
 
-const validateBlogPosting = (out: Issue[], slug: string, node: Record<string, unknown>) => {
-  const t = typeof node["@type"] === "string" ? (node["@type"] as string) : "BlogPosting";
+const validateBlogPosting = (
+  out: Issue[],
+  slug: string,
+  node: Record<string, unknown>,
+) => {
+  const t =
+    typeof node["@type"] === "string"
+      ? (node["@type"] as string)
+      : "BlogPosting";
   const required = [
     "headline",
     "datePublished",
@@ -102,12 +140,21 @@ const validateBlogPosting = (out: Issue[], slug: string, node: Record<string, un
     }
   }
   if (typeof node.url === "string" && !ABS_HTTPS_URL.test(node.url)) {
-    out.push({ slug, path: `${t}.url`, message: "url must be an absolute https URL" });
+    out.push({
+      slug,
+      path: `${t}.url`,
+      message: "url must be an absolute https URL",
+    });
   }
   if (typeof node.wordCount === "number" && node.wordCount <= 0) {
-    out.push({ slug, path: `${t}.wordCount`, message: "wordCount must be > 0" });
+    out.push({
+      slug,
+      path: `${t}.wordCount`,
+      message: "wordCount must be > 0",
+    });
   }
-  const mainEntity = node.mainEntityOfPage as Record<string, unknown> | undefined;
+  const mainEntity = node.mainEntityOfPage as
+    Record<string, unknown> | undefined;
   if (
     !mainEntity ||
     mainEntity["@type"] !== "WebPage" ||
@@ -126,7 +173,9 @@ const validateBlogPosting = (out: Issue[], slug: string, node: Record<string, un
     if (author.length === 0) {
       out.push({ slug, path: `${t}.author`, message: "author array is empty" });
     }
-    author.forEach((a, i) => validateAuthorNode(out, slug, `${t}.author[${i}]`, a));
+    author.forEach((a, i) =>
+      validateAuthorNode(out, slug, `${t}.author[${i}]`, a),
+    );
   } else {
     validateAuthorNode(out, slug, `${t}.author`, author);
   }
@@ -144,14 +193,22 @@ const validateBlogPosting = (out: Issue[], slug: string, node: Record<string, un
     }
     for (const k of ["name", "url", "@id"]) {
       if (!isNonEmptyString(publisher[k])) {
-        out.push({ slug, path: `${t}.publisher.${k}`, message: `missing/empty ${k}` });
+        out.push({
+          slug,
+          path: `${t}.publisher.${k}`,
+          message: `missing/empty ${k}`,
+        });
       }
     }
     validateImageObject(out, slug, `${t}.publisher.logo`, publisher.logo);
   }
 };
 
-const validateFaqPage = (out: Issue[], slug: string, node: Record<string, unknown>) => {
+const validateFaqPage = (
+  out: Issue[],
+  slug: string,
+  node: Record<string, unknown>,
+) => {
   const entries = node.mainEntity;
   if (!Array.isArray(entries) || entries.length === 0) {
     out.push({
@@ -163,12 +220,20 @@ const validateFaqPage = (out: Issue[], slug: string, node: Record<string, unknow
   }
   entries.forEach((q, i) => {
     if (!q || typeof q !== "object") {
-      out.push({ slug, path: `FAQPage.mainEntity[${i}]`, message: "not an object" });
+      out.push({
+        slug,
+        path: `FAQPage.mainEntity[${i}]`,
+        message: "not an object",
+      });
       return;
     }
     const qq = q as Record<string, unknown>;
     if (qq["@type"] !== "Question") {
-      out.push({ slug, path: `FAQPage.mainEntity[${i}].@type`, message: "must be Question" });
+      out.push({
+        slug,
+        path: `FAQPage.mainEntity[${i}].@type`,
+        message: "must be Question",
+      });
     }
     if (!isNonEmptyString(qq.name)) {
       out.push({
@@ -195,7 +260,11 @@ const validateFaqPage = (out: Issue[], slug: string, node: Record<string, unknow
 export function validateNodes(slug: string, nodes: unknown): Issue[] {
   const out: Issue[] = [];
   if (!Array.isArray(nodes) || nodes.length === 0) {
-    out.push({ slug, path: "$", message: "buildBlogPostJsonLd returned no nodes" });
+    out.push({
+      slug,
+      path: "$",
+      message: "buildBlogPostJsonLd returned no nodes",
+    });
     return out;
   }
   for (let i = 0; i < nodes.length; i++) {
@@ -206,7 +275,11 @@ export function validateNodes(slug: string, nodes: unknown): Issue[] {
     if (!isNonEmptyString(n["@type"] as string)) {
       out.push({ slug, path: `[${i}].@type`, message: "missing @type" });
     }
-    if (n["@type"] === "BlogPosting" || n["@type"] === "Article" || n["@type"] === "FAQPage") {
+    if (
+      n["@type"] === "BlogPosting" ||
+      n["@type"] === "Article" ||
+      n["@type"] === "FAQPage"
+    ) {
       if (!isNonEmptyString(n["@id"] as string)) {
         out.push({ slug, path: `[${i}].@id`, message: "missing @id" });
       }
@@ -228,7 +301,13 @@ export function validateNodes(slug: string, nodes: unknown): Issue[] {
 // Allowlist
 // ---------------------------------------------------------------------------
 
-const REQUIRED_ALLOW_KEYS = ["slug", "path", "messagePattern", "reason", "expires"] as const;
+const REQUIRED_ALLOW_KEYS = [
+  "slug",
+  "path",
+  "messagePattern",
+  "reason",
+  "expires",
+] as const;
 
 /**
  * Parse an allowlist JSON object (already loaded from disk). Returns the

@@ -25,14 +25,17 @@ const FindBooking = () => {
     }
     setSending(true);
     try {
-      const { error } = await supabase.functions.invoke("guest-booking-portal", {
-        body: {
-          action: "lookup",
-          email: email.trim(),
-          language,
-          origin: window.location.origin,
+      const { error } = await supabase.functions.invoke(
+        "guest-booking-portal",
+        {
+          body: {
+            action: "lookup",
+            email: email.trim(),
+            language,
+            origin: window.location.origin,
+          },
         },
-      });
+      );
       if (error) throw error;
       setSent(true);
     } catch {
@@ -53,7 +56,9 @@ const FindBooking = () => {
       <header className="border-b border-border bg-card px-4 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Logo variant="color" size="sm" />
-          <span className="text-sm text-muted-foreground">{t("guest.portal.label")}</span>
+          <span className="text-sm text-muted-foreground">
+            {t("guest.portal.label")}
+          </span>
         </div>
       </header>
 
@@ -69,16 +74,28 @@ const FindBooking = () => {
             {sent ? (
               <div className="space-y-3 text-center py-4">
                 <MailCheck className="h-10 w-10 text-primary mx-auto" />
-                <p className="text-sm text-muted-foreground">{t("guest.find.sentBody")}</p>
-                <Button variant="outline" onClick={() => { setSent(false); setEmail(""); }}>
+                <p className="text-sm text-muted-foreground">
+                  {t("guest.find.sentBody")}
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSent(false);
+                    setEmail("");
+                  }}
+                >
                   {t("guest.find.useAnother")}
                 </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <p className="text-sm text-muted-foreground">{t("guest.find.intro")}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("guest.find.intro")}
+                </p>
                 <div className="space-y-2">
-                  <Label htmlFor="find-booking-email">{t("guest.find.emailLabel")}</Label>
+                  <Label htmlFor="find-booking-email">
+                    {t("guest.find.emailLabel")}
+                  </Label>
                   <Input
                     id="find-booking-email"
                     type="email"
@@ -90,7 +107,9 @@ const FindBooking = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={sending}>
-                  {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  {sending ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
                   {t("guest.find.submit")}
                 </Button>
               </form>

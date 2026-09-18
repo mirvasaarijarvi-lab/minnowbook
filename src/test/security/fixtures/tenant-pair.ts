@@ -47,7 +47,8 @@ export interface TenantPairFixture {
 }
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
@@ -68,11 +69,11 @@ const ENV_CREDS = {
 
 const envCredsComplete = Boolean(
   ENV_CREDS.a.email &&
-    ENV_CREDS.a.password &&
-    ENV_CREDS.a.tenantId &&
-    ENV_CREDS.b.email &&
-    ENV_CREDS.b.password &&
-    ENV_CREDS.b.tenantId,
+  ENV_CREDS.a.password &&
+  ENV_CREDS.a.tenantId &&
+  ENV_CREDS.b.email &&
+  ENV_CREDS.b.password &&
+  ENV_CREDS.b.tenantId,
 );
 
 /**
@@ -108,7 +109,10 @@ async function signInAsExistingUser(
   expectedTenantId: string,
 ): Promise<TenantClient> {
   const client = newAnonClient();
-  const { data, error } = await client.auth.signInWithPassword({ email, password });
+  const { data, error } = await client.auth.signInWithPassword({
+    email,
+    password,
+  });
   if (error) throw new Error(`Sign-in failed for ${email}: ${error.message}`);
   if (!data.user) throw new Error(`Sign-in for ${email} returned no user`);
   return { client, tenantId: expectedTenantId, email, userId: data.user.id };
@@ -128,7 +132,8 @@ async function findUserByEmail(
 ): Promise<{ id: string; email?: string } | null> {
   const base = SUPABASE_URL!.replace(/\/$/, "");
   const url =
-    `${base}/auth/v1/admin/users?page=1&per_page=5&filter=` + encodeURIComponent(email);
+    `${base}/auth/v1/admin/users?page=1&per_page=5&filter=` +
+    encodeURIComponent(email);
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_SERVICE_ROLE_KEY!,
@@ -141,9 +146,13 @@ async function findUserByEmail(
       `admin users lookup for ${email} failed: HTTP ${res.status} ${body.slice(0, 200)}`,
     );
   }
-  const body = (await res.json()) as { users?: Array<{ id: string; email?: string }> };
+  const body = (await res.json()) as {
+    users?: Array<{ id: string; email?: string }>;
+  };
   const users = body.users ?? [];
-  return users.find((u) => u.email?.toLowerCase() === email.toLowerCase()) ?? null;
+  return (
+    users.find((u) => u.email?.toLowerCase() === email.toLowerCase()) ?? null
+  );
 }
 
 /**
@@ -174,7 +183,6 @@ async function ensureUser(
   return data.user.id;
 }
 
-
 /**
  * Look up the user's existing tenant via service role (bypasses RLS) or
  * create one via the public RPC. Idempotent.
@@ -191,7 +199,8 @@ async function ensureTenant(
     .select("tenant_id")
     .eq("user_id", userId)
     .maybeSingle();
-  if (lookupError) throw new Error(`tenant_users lookup failed: ${lookupError.message}`);
+  if (lookupError)
+    throw new Error(`tenant_users lookup failed: ${lookupError.message}`);
   if (existing?.tenant_id) return existing.tenant_id as string;
 
   const { data, error } = await userClient.rpc("create_tenant", {
@@ -199,7 +208,8 @@ async function ensureTenant(
     p_slug: tenantSlug,
     p_tier: "business",
   });
-  if (error) throw new Error(`create_tenant(${tenantSlug}) failed: ${error.message}`);
+  if (error)
+    throw new Error(`create_tenant(${tenantSlug}) failed: ${error.message}`);
   if (!data) throw new Error(`create_tenant(${tenantSlug}) returned no id`);
   return data as string;
 }
@@ -214,8 +224,15 @@ async function provisionOne(
     email: spec.email,
     password: spec.password,
   });
-  if (signInError) throw new Error(`Sign-in for ${spec.email} failed: ${signInError.message}`);
-  const tenantId = await ensureTenant(admin, client, userId, spec.tenantName, spec.tenantSlug);
+  if (signInError)
+    throw new Error(`Sign-in for ${spec.email} failed: ${signInError.message}`);
+  const tenantId = await ensureTenant(
+    admin,
+    client,
+    userId,
+    spec.tenantName,
+    spec.tenantSlug,
+  );
   return { client, tenantId, email: spec.email, userId };
 }
 
@@ -239,8 +256,16 @@ export async function createTenantPairFixture(): Promise<TenantPairFixture> {
   if (envCredsComplete) {
     try {
       const [a, b] = await Promise.all([
-        signInAsExistingUser(ENV_CREDS.a.email!, ENV_CREDS.a.password!, ENV_CREDS.a.tenantId!),
-        signInAsExistingUser(ENV_CREDS.b.email!, ENV_CREDS.b.password!, ENV_CREDS.b.tenantId!),
+        signInAsExistingUser(
+          ENV_CREDS.a.email!,
+          ENV_CREDS.a.password!,
+          ENV_CREDS.a.tenantId!,
+        ),
+        signInAsExistingUser(
+          ENV_CREDS.b.email!,
+          ENV_CREDS.b.password!,
+          ENV_CREDS.b.tenantId!,
+        ),
       ]);
       return { available: true, source: "env", a, b };
     } catch (err) {

@@ -30,8 +30,10 @@ const REGION = "#invoice-refusal-live-region";
 
 const GUEST_INVOICED =
   "This booking has already been invoiced, so it can no longer be changed here. Please contact us directly.";
-const GUEST_CANCELLED = "This booking is already cancelled, so there is nothing left to change.";
-const STAFF_ONLY_WORDING = "Add a price before marking this reservation as invoiced";
+const GUEST_CANCELLED =
+  "This booking is already cancelled, so there is nothing left to change.";
+const STAFF_ONLY_WORDING =
+  "Add a price before marking this reservation as invoiced";
 
 /** Server replies the mocked edge function can be told to produce. */
 type Outcome = "invoiced" | "cancelled-rule" | "ok";
@@ -53,67 +55,81 @@ const CORS = {
  * reschedule attempt is answered, so the spec can flip between refusals and
  * success between clicks.
  */
-async function mockPortal(page: Page, state: { outcome: Outcome; attempts: number }) {
-  await page.route("**/functions/v1/guest-booking-portal", async (route: Route) => {
-    if (route.request().method() === "OPTIONS") {
-      await route.fulfill({ status: 204, headers: CORS, body: "" });
-      return;
-    }
-    const body = route.request().postDataJSON() as { action?: string; token?: string };
-    const token = body?.token ?? "unknown";
+async function mockPortal(
+  page: Page,
+  state: { outcome: Outcome; attempts: number },
+) {
+  await page.route(
+    "**/functions/v1/guest-booking-portal",
+    async (route: Route) => {
+      if (route.request().method() === "OPTIONS") {
+        await route.fulfill({ status: 204, headers: CORS, body: "" });
+        return;
+      }
+      const body = route.request().postDataJSON() as {
+        action?: string;
+        token?: string;
+      };
+      const token = body?.token ?? "unknown";
 
-    if (body?.action === "view") {
+      if (body?.action === "view") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: CORS,
+          body: JSON.stringify({
+            ok: true,
+            reservation: {
+              id: `res-${token}`,
+              guest_name:
+                token === "token-b"
+                  ? "Second Booking Guest"
+                  : "First Booking Guest",
+              reservation_type: "restaurant",
+              status: "confirmed",
+              date: futureDate(30),
+              start_time: "18:00",
+              guests_count: 2,
+              price_eur: 120,
+            },
+            token: { token },
+            settings: {},
+          }),
+        });
+        return;
+      }
+
+      state.attempts += 1;
+      if (state.outcome === "ok") {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          headers: CORS,
+          body: JSON.stringify({ ok: true }),
+        });
+        return;
+      }
+      // Refusals arrive as a 200 body carrying `error`, which is how the real
+      // function reports a rule it will not break.
+      const error =
+        state.outcome === "invoiced"
+          ? "This reservation is already invoiced and cannot be changed after invoicing."
+          : "This reservation is cancelled, so invoicing no longer applies.";
       await route.fulfill({
         status: 200,
         contentType: "application/json",
         headers: CORS,
-        body: JSON.stringify({
-          ok: true,
-          reservation: {
-            id: `res-${token}`,
-            guest_name: token === "token-b" ? "Second Booking Guest" : "First Booking Guest",
-            reservation_type: "restaurant",
-            status: "confirmed",
-            date: futureDate(30),
-            start_time: "18:00",
-            guests_count: 2,
-            price_eur: 120,
-          },
-          token: { token },
-          settings: {},
-        }),
+        body: JSON.stringify({ ok: false, error }),
       });
-      return;
-    }
-
-    state.attempts += 1;
-    if (state.outcome === "ok") {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        headers: CORS,
-        body: JSON.stringify({ ok: true }),
-      });
-      return;
-    }
-    // Refusals arrive as a 200 body carrying `error`, which is how the real
-    // function reports a rule it will not break.
-    const error =
-      state.outcome === "invoiced"
-        ? "This reservation is already invoiced and cannot be changed after invoicing."
-        : "This reservation is cancelled, so invoicing no longer applies.";
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      headers: CORS,
-      body: JSON.stringify({ ok: false, error }),
-    });
-  });
+    },
+  );
 }
 
 async function openBooking(page: Page, token: string) {
   await page.goto(`/my-booking/${token}`, { waitUntil: "domcontentloaded" });
-  await expect(page.getByTestId("guest-portal-name")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId("guest-portal-name")).toBeVisible({
+    timeout: 30_000,
+  });
 }
 
 /** Fill the change request and submit it, returning the submit button. */
@@ -136,7 +152,9 @@ const announced = (page: Page) =>
   );
 
 test.describe("Invoice refusal notice lifecycle", () => {
-  test("replaces, announces and clears refusals across retries and bookings", async ({ page }) => {
+  test("replaces, announces and clears refusals across retries and bookings", async ({
+    page,
+  }) => {
     const state = { outcome: "invoiced" as Outcome, attempts: 0 };
     await mockPortal(page, state);
     await openBooking(page, "token-a");
@@ -176,27 +194,42 @@ test.describe("Invoice refusal notice lifecycle", () => {
     // --- 3. A different reason replaces the previous wording ---------------
     state.outcome = "cancelled-rule";
     await button.click();
-    await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(GUEST_INVOICED), "the earlier reason must be gone").toHaveCount(0);
-    await expect.poll(() => announced(page), { timeout: 10_000 }).toContain("already cancelled");
+    await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(
+      page.getByText(GUEST_INVOICED),
+      "the earlier reason must be gone",
+    ).toHaveCount(0);
+    await expect
+      .poll(() => announced(page), { timeout: 10_000 })
+      .toContain("already cancelled");
 
     // --- 4. A successful retry clears message and announcement ------------
     state.outcome = "ok";
     await button.click();
-    await expect(page.getByText("Your change request has been sent")).toBeVisible({
+    await expect(
+      page.getByText("Your change request has been sent"),
+    ).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, { timeout: 15_000 });
+    await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, {
+      timeout: 15_000,
+    });
     await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
 
     // --- 5. Switching bookings clears a pending refusal -------------------
     state.outcome = "invoiced";
     await openBooking(page, "token-a2");
     await requestNewDate(page);
-    await expect(page.getByText(GUEST_INVOICED)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(GUEST_INVOICED)).toBeVisible({
+      timeout: 15_000,
+    });
 
     await openBooking(page, "token-b");
-    await expect(page.getByTestId("guest-portal-name")).toHaveText("Second Booking Guest");
+    await expect(page.getByTestId("guest-portal-name")).toHaveText(
+      "Second Booking Guest",
+    );
     await expect(
       page.getByText(GUEST_INVOICED),
       "a refusal from the previous booking must not follow the guest",
@@ -206,19 +239,27 @@ test.describe("Invoice refusal notice lifecycle", () => {
     // --- 6. The new booking refuses and then succeeds on its own ----------
     state.outcome = "cancelled-rule";
     const buttonB = await requestNewDate(page);
-    await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByText(GUEST_INVOICED)).toHaveCount(0);
 
     state.outcome = "ok";
     await buttonB.click();
-    await expect(page.getByText("Your change request has been sent")).toBeVisible({
+    await expect(
+      page.getByText("Your change request has been sent"),
+    ).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, { timeout: 15_000 });
+    await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, {
+      timeout: 15_000,
+    });
     await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
   });
 
-  test("clears a refusal on back and forward navigation between bookings", async ({ page }) => {
+  test("clears a refusal on back and forward navigation between bookings", async ({
+    page,
+  }) => {
     const state = { outcome: "invoiced" as Outcome, attempts: 0 };
     await mockPortal(page, state);
 
@@ -226,13 +267,18 @@ test.describe("Invoice refusal notice lifecycle", () => {
     await openBooking(page, "token-a");
     await openBooking(page, "token-b");
     await requestNewDate(page);
-    await expect(page.getByText(GUEST_INVOICED)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(GUEST_INVOICED)).toBeVisible({
+      timeout: 15_000,
+    });
 
     // Back to the first booking: the refusal belongs to the other one.
     await page.goBack({ waitUntil: "domcontentloaded" });
-    await expect(page.getByTestId("guest-portal-name")).toHaveText("First Booking Guest", {
-      timeout: 30_000,
-    });
+    await expect(page.getByTestId("guest-portal-name")).toHaveText(
+      "First Booking Guest",
+      {
+        timeout: 30_000,
+      },
+    );
     await expect(
       page.getByText(GUEST_INVOICED),
       "going back must not carry the refusal to the previous booking",
@@ -242,13 +288,20 @@ test.describe("Invoice refusal notice lifecycle", () => {
     // Refuse here, then go forward again: still nothing stale.
     state.outcome = "cancelled-rule";
     await requestNewDate(page);
-    await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({
+      timeout: 15_000,
+    });
 
     await page.goForward({ waitUntil: "domcontentloaded" });
-    await expect(page.getByTestId("guest-portal-name")).toHaveText("Second Booking Guest", {
-      timeout: 30_000,
+    await expect(page.getByTestId("guest-portal-name")).toHaveText(
+      "Second Booking Guest",
+      {
+        timeout: 30_000,
+      },
+    );
+    await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, {
+      timeout: 15_000,
     });
-    await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, { timeout: 15_000 });
     await expect(page.getByText(GUEST_INVOICED)).toHaveCount(0);
     await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
   });

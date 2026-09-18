@@ -32,11 +32,13 @@ export interface SpaProbe {
  * Sanitize a label into something safe for an attachment filename.
  */
 function slug(label: string): string {
-  return label
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 64) || "checkpoint";
+  return (
+    label
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+      .slice(0, 64) || "checkpoint"
+  );
 }
 
 /**
@@ -110,7 +112,9 @@ export async function captureCheckpoint(
               exists: !!el,
               visible: !!(el && el.offsetParent !== null),
               child_element_count: el ? el.childElementCount : null,
-              text_excerpt: el ? (el.textContent ?? "").trim().slice(0, 200) : null,
+              text_excerpt: el
+                ? (el.textContent ?? "").trim().slice(0, 200)
+                : null,
             };
           }, selector);
           probes.push({ selector, ...probe });
@@ -136,7 +140,8 @@ export async function captureCheckpoint(
           contentType: "image/png",
         });
       } catch (err) {
-        state.screenshot_error = err instanceof Error ? err.message : String(err);
+        state.screenshot_error =
+          err instanceof Error ? err.message : String(err);
       }
     }
   } else {

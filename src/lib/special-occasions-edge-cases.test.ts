@@ -77,12 +77,21 @@ describe("over-capacity bookings", () => {
     const bookings = [book("12:00", 2), book("17:30", 3), book(null, 1)];
     expect(remainingSeats(open, bookings)).toBe(0);
     expect(
-      validateOccasionBooking({ occasion: open, date: DATE, guests: 1, bookings, startTime: "19:00" }),
+      validateOccasionBooking({
+        occasion: open,
+        date: DATE,
+        guests: 1,
+        bookings,
+        startTime: "19:00",
+      }),
     ).toEqual({ ok: false, reason: "FULL", remaining: 0 });
   });
 
   it("frees seats again when a booking is cancelled or rejected", () => {
-    const bookings = [book("12:00", 4, "cancelled"), book("12:00", 1, "rejected")];
+    const bookings = [
+      book("12:00", 4, "cancelled"),
+      book("12:00", 1, "rejected"),
+    ];
     expect(remainingSeats(seatings, bookings, "12:00")).toBe(4);
     expect(
       validateOccasionBooking({
@@ -170,7 +179,10 @@ describe("unavailable sittings", () => {
 
   it("accepts a stored sitting written with seconds or padding", () => {
     const occasion = { ...seatings, seating_times: '["9:00","12:00:00"]' };
-    expect(seatingAvailability(occasion, []).map((s) => s.time)).toEqual(["09:00", "12:00"]);
+    expect(seatingAvailability(occasion, []).map((s) => s.time)).toEqual([
+      "09:00",
+      "12:00",
+    ]);
     expect(
       validateOccasionBooking({
         occasion,
@@ -187,7 +199,13 @@ describe("unavailable sittings", () => {
       const occasion = { ...seatings, seating_times: times as unknown };
       expect(seatingAvailability(occasion, [])).toEqual([]);
       expect(
-        validateOccasionBooking({ occasion, date: DATE, startTime: "12:00", guests: 1, bookings: [] }),
+        validateOccasionBooking({
+          occasion,
+          date: DATE,
+          startTime: "12:00",
+          guests: 1,
+          bookings: [],
+        }),
       ).toEqual({ ok: false, reason: "INVALID_SEATING" });
     }
   });

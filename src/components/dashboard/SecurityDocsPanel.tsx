@@ -34,7 +34,8 @@ const DOCS: DocLink[] = [
   },
   {
     title: "SBOM Checksum",
-    description: "SHA-256 checksum of the SBOM, used to verify integrity of the downloaded file.",
+    description:
+      "SHA-256 checksum of the SBOM, used to verify integrity of the downloaded file.",
     href: "/security-docs/sbom.cdx.json.sha256",
     download: true,
     icon: FileText,
@@ -66,7 +67,8 @@ const DOCS: DocLink[] = [
   },
   {
     title: "security.txt",
-    description: "RFC 9116 machine-readable disclosure contact at /.well-known/security.txt.",
+    description:
+      "RFC 9116 machine-readable disclosure contact at /.well-known/security.txt.",
     href: "/.well-known/security.txt",
     download: true,
     icon: FileText,
@@ -107,10 +109,11 @@ const SecurityDocsPanel = () => {
           Security & Compliance
         </CardTitle>
         <p className="text-sm text-muted-foreground mt-1">
-          Centralized index of MimmoBook's security program documents, served directly from this
-          app for one-click access during audits and incident response. Continuous scanning runs
-          via Dependabot and Aikido; the documents below describe the policies, procedures, and
-          artifacts behind those scans.
+          Centralized index of MimmoBook's security program documents, served
+          directly from this app for one-click access during audits and incident
+          response. Continuous scanning runs via Dependabot and Aikido; the
+          documents below describe the policies, procedures, and artifacts
+          behind those scans.
         </p>
       </CardHeader>
       <CardContent>
@@ -126,7 +129,9 @@ const SecurityDocsPanel = () => {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Icon className="h-4 w-4 text-primary shrink-0" />
-                    <h3 className="font-medium text-sm leading-tight">{doc.title}</h3>
+                    <h3 className="font-medium text-sm leading-tight">
+                      {doc.title}
+                    </h3>
                   </div>
                   {doc.badge && (
                     <Badge variant="secondary" className="text-xs shrink-0">
@@ -134,12 +139,18 @@ const SecurityDocsPanel = () => {
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground flex-1">{doc.description}</p>
+                <p className="text-xs text-muted-foreground flex-1">
+                  {doc.description}
+                </p>
                 <Button asChild variant="outline" size="sm" className="w-fit">
                   <a
                     href={doc.href}
                     target={doc.external || doc.download ? "_blank" : undefined}
-                    rel={doc.external || doc.download ? "noopener noreferrer" : undefined}
+                    rel={
+                      doc.external || doc.download
+                        ? "noopener noreferrer"
+                        : undefined
+                    }
                     download={doc.download ? "" : undefined}
                   >
                     {doc.download ? "Download" : "Open"}
@@ -152,10 +163,11 @@ const SecurityDocsPanel = () => {
         </div>
 
         <div className="mt-4 rounded-md border border-dashed bg-muted/40 p-3 text-xs text-muted-foreground">
-          <strong className="text-foreground">Continuous scanning:</strong> Dependabot raises pull
-          requests for vulnerable npm dependencies. Aikido scans the workspace and surfaces
-          findings in the Security tab. Findings are triaged within the SLAs defined in the
-          Incident Response Plan.
+          <strong className="text-foreground">Continuous scanning:</strong>{" "}
+          Dependabot raises pull requests for vulnerable npm dependencies.
+          Aikido scans the workspace and surfaces findings in the Security tab.
+          Findings are triaged within the SLAs defined in the Incident Response
+          Plan.
         </div>
       </CardContent>
     </Card>

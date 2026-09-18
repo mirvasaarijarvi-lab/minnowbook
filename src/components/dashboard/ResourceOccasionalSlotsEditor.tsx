@@ -107,7 +107,8 @@ const ResourceOccasionalSlotsEditor = forwardRef<
   };
 
   const showValidationToast = (code: string) => {
-    if (code === "invalid_range") toast.error(t("occasionalSlots.invalidRange"));
+    if (code === "invalid_range")
+      toast.error(t("occasionalSlots.invalidRange"));
     else if (code === "past_date") toast.error(t("occasionalSlots.pastDate"));
     else toast.error(t("settings.saveError"));
   };
@@ -129,7 +130,9 @@ const ResourceOccasionalSlotsEditor = forwardRef<
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["resource-availability-slots", resourceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["resource-availability-slots", resourceId],
+      });
       toast.success(t("settings.saved"));
       resetDraft();
     },
@@ -164,7 +167,9 @@ const ResourceOccasionalSlotsEditor = forwardRef<
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["resource-availability-slots", resourceId] });
+      queryClient.invalidateQueries({
+        queryKey: ["resource-availability-slots", resourceId],
+      });
     },
     onError: () => toast.error(t("settings.saveError")),
   });
@@ -191,10 +196,12 @@ const ResourceOccasionalSlotsEditor = forwardRef<
           .insert(rows);
         if (error) throw error;
         setPendingSlots([]);
-        queryClient.invalidateQueries({ queryKey: ["resource-availability-slots", newResourceId] });
+        queryClient.invalidateQueries({
+          queryKey: ["resource-availability-slots", newResourceId],
+        });
       },
     }),
-    [pendingSlots, tenantId, queryClient]
+    [pendingSlots, tenantId, queryClient],
   );
 
   const savedSlots = slotsQuery.data ?? [];
@@ -236,7 +243,9 @@ const ResourceOccasionalSlotsEditor = forwardRef<
         <div className="space-y-2 rounded-md border border-dashed border-border p-3">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <div>
-              <Label className="text-xs text-muted-foreground">{t("occasionalSlots.date")}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {t("occasionalSlots.date")}
+              </Label>
               <Input
                 type="date"
                 value={draftDate}
@@ -246,7 +255,9 @@ const ResourceOccasionalSlotsEditor = forwardRef<
               />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">{t("occasionalSlots.from")}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {t("occasionalSlots.from")}
+              </Label>
               <Input
                 type="time"
                 value={draftStart}
@@ -255,7 +266,9 @@ const ResourceOccasionalSlotsEditor = forwardRef<
               />
             </div>
             <div>
-              <Label className="text-xs text-muted-foreground">{t("occasionalSlots.to")}</Label>
+              <Label className="text-xs text-muted-foreground">
+                {t("occasionalSlots.to")}
+              </Label>
               <Input
                 type="time"
                 value={draftEnd}
@@ -265,7 +278,9 @@ const ResourceOccasionalSlotsEditor = forwardRef<
             </div>
           </div>
           <div>
-            <Label className="text-xs text-muted-foreground">{t("occasionalSlots.note")}</Label>
+            <Label className="text-xs text-muted-foreground">
+              {t("occasionalSlots.note")}
+            </Label>
             <Input
               type="text"
               value={draftNote}
@@ -282,7 +297,9 @@ const ResourceOccasionalSlotsEditor = forwardRef<
             </Button>
             <Button
               size="sm"
-              onClick={() => (isPending ? addPendingDraft() : createMutation.mutate())}
+              onClick={() =>
+                isPending ? addPendingDraft() : createMutation.mutate()
+              }
               disabled={!isPending && createMutation.isPending}
             >
               {!isPending && createMutation.isPending ? (
@@ -299,7 +316,9 @@ const ResourceOccasionalSlotsEditor = forwardRef<
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
       ) : visibleSlots.length === 0 ? (
-        <p className="text-xs text-muted-foreground italic">{t("occasionalSlots.empty")}</p>
+        <p className="text-xs text-muted-foreground italic">
+          {t("occasionalSlots.empty")}
+        </p>
       ) : (
         <ul className="space-y-1.5">
           {visibleSlots.map((s) => {
@@ -321,14 +340,20 @@ const ResourceOccasionalSlotsEditor = forwardRef<
                     {dateLabel} · {start} to {end}
                   </div>
                   {s.note && (
-                    <div className="text-[11px] text-muted-foreground truncate">{s.note}</div>
+                    <div className="text-[11px] text-muted-foreground truncate">
+                      {s.note}
+                    </div>
                   )}
                 </div>
                 <Button
                   size="icon"
                   variant="ghost"
                   className="h-7 w-7 shrink-0 text-destructive hover:text-destructive"
-                  onClick={() => (isPending ? removePending(s.id) : deleteMutation.mutate(s.id))}
+                  onClick={() =>
+                    isPending
+                      ? removePending(s.id)
+                      : deleteMutation.mutate(s.id)
+                  }
                   disabled={!isPending && deleteMutation.isPending}
                   aria-label={t("occasionalSlots.remove")}
                 >

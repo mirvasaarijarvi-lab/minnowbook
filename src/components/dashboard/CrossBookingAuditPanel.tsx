@@ -15,8 +15,21 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import DashboardTooltip from "./DashboardTooltip";
 import CollapsibleSection from "./CollapsibleSection";
 
@@ -66,12 +79,20 @@ const CrossBookingAuditPanel = () => {
   const endStr = format(addDays(today, 180), "yyyy-MM-dd");
 
   const { data: rows = [], isLoading } = useQuery({
-    queryKey: ["cross-booking-audit", tenantId, selectedSiteId, startStr, endStr],
+    queryKey: [
+      "cross-booking-audit",
+      tenantId,
+      selectedSiteId,
+      startStr,
+      endStr,
+    ],
     enabled: !!tenantId,
     queryFn: async () => {
       let query = supabase
         .from("reservations")
-        .select("id, reservation_type, status, date, guest_name, guest_email, linked_group_id, site_id")
+        .select(
+          "id, reservation_type, status, date, guest_name, guest_email, linked_group_id, site_id",
+        )
         .eq("tenant_id", tenantId!)
         .gte("date", startStr)
         .lte("date", endStr)
@@ -115,7 +136,11 @@ const CrossBookingAuditPanel = () => {
       });
     }
 
-    const linkedIds = new Set(Array.from(groups.values()).flat().map((r) => r.id));
+    const linkedIds = new Set(
+      Array.from(groups.values())
+        .flat()
+        .map((r) => r.id),
+    );
     const byGuestDate = new Map<string, Row[]>();
     for (const r of rows) {
       if (linkedIds.has(r.id)) continue;
@@ -139,7 +164,11 @@ const CrossBookingAuditPanel = () => {
 
     // Newest first, comparing ISO dates so 10.3. sorts after 9.3.
     return out.sort((a, b) =>
-      a.sortDate === b.sortDate ? a.guest.localeCompare(b.guest) : a.sortDate < b.sortDate ? 1 : -1,
+      a.sortDate === b.sortDate
+        ? a.guest.localeCompare(b.guest)
+        : a.sortDate < b.sortDate
+          ? 1
+          : -1,
     );
   }, [rows]);
 
@@ -158,11 +187,23 @@ const CrossBookingAuditPanel = () => {
       title: t("an.cross.title"),
       subtitle: `${startStr} - ${endStr}`,
       kpis: [
-        { label: t("an.cross.count"), value: String(visible.reduce((s, c) => s + c.count, 0)) },
-        { label: t("an.cross.group"), value: String(visible.filter((c) => c.linked).length) },
+        {
+          label: t("an.cross.count"),
+          value: String(visible.reduce((s, c) => s + c.count, 0)),
+        },
+        {
+          label: t("an.cross.group"),
+          value: String(visible.filter((c) => c.linked).length),
+        },
       ],
       table: {
-        head: [t("an.cross.date"), t("an.cross.guest"), t("an.cross.services"), t("an.cross.count"), t("an.cross.group")],
+        head: [
+          t("an.cross.date"),
+          t("an.cross.guest"),
+          t("an.cross.services"),
+          t("an.cross.count"),
+          t("an.cross.group"),
+        ],
         body: tableRows,
         numericColumns: [3],
       },
@@ -171,13 +212,24 @@ const CrossBookingAuditPanel = () => {
   };
 
   const handleCsv = () => {
-    const head = [t("an.cross.date"), t("an.cross.guest"), t("an.cross.services"), t("an.cross.count"), t("an.cross.group")];
+    const head = [
+      t("an.cross.date"),
+      t("an.cross.guest"),
+      t("an.cross.services"),
+      t("an.cross.count"),
+      t("an.cross.group"),
+    ];
     const content =
       "sep=;\n" +
-      [head, ...tableRows].map((row) => row.map((cell) => `"${sanitizeCell(cell)}"`).join(";")).join("\r\n");
-    const blob = new Blob([new Uint8Array([0xef, 0xbb, 0xbf]), new TextEncoder().encode(content)], {
-      type: "text/csv;charset=utf-8;",
-    });
+      [head, ...tableRows]
+        .map((row) => row.map((cell) => `"${sanitizeCell(cell)}"`).join(";"))
+        .join("\r\n");
+    const blob = new Blob(
+      [new Uint8Array([0xef, 0xbb, 0xbf]), new TextEncoder().encode(content)],
+      {
+        type: "text/csv;charset=utf-8;",
+      },
+    );
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -203,8 +255,13 @@ const CrossBookingAuditPanel = () => {
           <div className="flex flex-wrap items-end gap-4">
             <div className="space-y-1">
               <Label className="text-xs">{t("an.range")}</Label>
-              <Select value={rangeKey} onValueChange={(v) => setRangeKey(v as RangeKey)}>
-                <SelectTrigger className="h-8 w-[170px] text-xs"><SelectValue /></SelectTrigger>
+              <Select
+                value={rangeKey}
+                onValueChange={(v) => setRangeKey(v as RangeKey)}
+              >
+                <SelectTrigger className="h-8 w-[170px] text-xs">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="30">{t("an.last30")}</SelectItem>
                   <SelectItem value="90">{t("an.last90")}</SelectItem>
@@ -213,16 +270,34 @@ const CrossBookingAuditPanel = () => {
               </Select>
             </div>
             <div className="mb-1 flex items-center gap-2">
-              <Switch id="cross-linked-only" checked={linkedOnly} onCheckedChange={setLinkedOnly} />
-              <Label htmlFor="cross-linked-only" className="text-xs">{t("an.cross.linkedOnly")}</Label>
+              <Switch
+                id="cross-linked-only"
+                checked={linkedOnly}
+                onCheckedChange={setLinkedOnly}
+              />
+              <Label htmlFor="cross-linked-only" className="text-xs">
+                {t("an.cross.linkedOnly")}
+              </Label>
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleCsv} disabled={visible.length === 0}>
-              <Download className="mr-2 h-4 w-4" />CSV
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCsv}
+              disabled={visible.length === 0}
+            >
+              <Download className="mr-2 h-4 w-4" />
+              CSV
             </Button>
-            <Button variant="outline" size="sm" onClick={handlePdf} disabled={visible.length === 0}>
-              <FileText className="mr-2 h-4 w-4" />{t("an.exportPdf")}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePdf}
+              disabled={visible.length === 0}
+            >
+              <FileText className="mr-2 h-4 w-4" />
+              {t("an.exportPdf")}
             </Button>
           </div>
         </div>
@@ -230,33 +305,50 @@ const CrossBookingAuditPanel = () => {
         {isLoading ? (
           <Skeleton className="h-[200px] w-full" />
         ) : visible.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">{t("an.cross.none")}</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">
+            {t("an.cross.none")}
+          </p>
         ) : (
-          <CollapsibleSection title={t("an.cross.title")} count={visible.length}>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("an.cross.date")}</TableHead>
-                  <TableHead>{t("an.cross.guest")}</TableHead>
-                  <TableHead>{t("an.cross.services")}</TableHead>
-                  <TableHead className="text-right">{t("an.cross.count")}</TableHead>
-                  <TableHead>{t("an.cross.group")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {visible.map((c) => (
-                  <TableRow key={c.key}>
-                    <TableCell className="whitespace-nowrap">{c.dateLabel}</TableCell>
-                    <TableCell>{c.guest}</TableCell>
-                    <TableCell>{c.types.map(typeLabel).join(", ")}</TableCell>
-                    <TableCell className="text-right">{c.count}</TableCell>
-                    <TableCell>{c.linked ? <Badge variant="secondary">{t("an.cross.group")}</Badge> : "-"}</TableCell>
+          <CollapsibleSection
+            title={t("an.cross.title")}
+            count={visible.length}
+          >
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("an.cross.date")}</TableHead>
+                    <TableHead>{t("an.cross.guest")}</TableHead>
+                    <TableHead>{t("an.cross.services")}</TableHead>
+                    <TableHead className="text-right">
+                      {t("an.cross.count")}
+                    </TableHead>
+                    <TableHead>{t("an.cross.group")}</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {visible.map((c) => (
+                    <TableRow key={c.key}>
+                      <TableCell className="whitespace-nowrap">
+                        {c.dateLabel}
+                      </TableCell>
+                      <TableCell>{c.guest}</TableCell>
+                      <TableCell>{c.types.map(typeLabel).join(", ")}</TableCell>
+                      <TableCell className="text-right">{c.count}</TableCell>
+                      <TableCell>
+                        {c.linked ? (
+                          <Badge variant="secondary">
+                            {t("an.cross.group")}
+                          </Badge>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CollapsibleSection>
         )}
       </CardContent>

@@ -64,8 +64,18 @@ const guardRecord: TenantGuardRecord = {
   membershipB: true,
   emailA: "a@example.test",
   emailB: "b@example.test",
-  membershipRowA: { role: "owner", isApproved: true, userId: "u-a", found: true },
-  membershipRowB: { role: "owner", isApproved: true, userId: "u-b", found: true },
+  membershipRowA: {
+    role: "owner",
+    isApproved: true,
+    userId: "u-a",
+    found: true,
+  },
+  membershipRowB: {
+    role: "owner",
+    isApproved: true,
+    userId: "u-b",
+    found: true,
+  },
 };
 
 function entryFor(name: string, errorMessage: string | null): ReportEntry {
@@ -112,60 +122,77 @@ const tenantIdsIn = (rows: Array<Record<string, unknown>>): string[] =>
 describe("allow-path matrix: own-tenant query paths", () => {
   it("covers every query path in the deny matrix exactly once", () => {
     expect(ALLOW_PATH_MATRIX).toHaveLength(QUERY_PATH_MATRIX.length);
-    expect(ALLOW_PATH_MATRIX.map((c) => c.label)).toEqual(QUERY_PATH_MATRIX.map((c) => c.label));
-    expect(new Set(ALLOW_PATH_MATRIX.map((c) => c.label)).size).toBe(ALLOW_PATH_MATRIX.length);
+    expect(ALLOW_PATH_MATRIX.map((c) => c.label)).toEqual(
+      QUERY_PATH_MATRIX.map((c) => c.label),
+    );
+    expect(new Set(ALLOW_PATH_MATRIX.map((c) => c.label)).size).toBe(
+      ALLOW_PATH_MATRIX.length,
+    );
     expect(new Set(ALLOW_PATH_MATRIX.map((c) => c.kind))).toEqual(
       new Set(QUERY_PATH_MATRIX.map((c) => c.kind)),
     );
   });
 
-  describe.each(ALLOW_PATH_MATRIX.map((c) => [c.label, c] as const))("%s", (_label, c) => {
-    const result: DenialResult = { data: c.ownRows, error: null };
+  describe.each(ALLOW_PATH_MATRIX.map((c) => [c.label, c] as const))(
+    "%s",
+    (_label, c) => {
+      const result: DenialResult = { data: c.ownRows, error: null };
 
-    it("returns only rows carrying the acting tenant id", () => {
-      const ids = tenantIdsIn(c.ownRows);
-      expect(ids.length).toBeGreaterThanOrEqual(c.minRows > 0 ? 1 : 0);
-      for (const id of ids) expect(id).toBe(ACTING_TENANT);
-      expect(c.ownRows).toHaveLength(c.minRows);
-    });
+      it("returns only rows carrying the acting tenant id", () => {
+        const ids = tenantIdsIn(c.ownRows);
+        expect(ids.length).toBeGreaterThanOrEqual(c.minRows > 0 ? 1 : 0);
+        for (const id of ids) expect(id).toBe(ACTING_TENANT);
+        expect(c.ownRows).toHaveLength(c.minRows);
+      });
 
-    it("carries no other tenant's metadata", () => {
-      const json = JSON.stringify(c.ownRows) + c.attemptedQuery + (c.scenario ?? "");
-      for (const value of FOREIGN_METADATA) expect(json).not.toContain(value);
-    });
+      it("carries no other tenant's metadata", () => {
+        const json =
+          JSON.stringify(c.ownRows) + c.attemptedQuery + (c.scenario ?? "");
+        for (const value of FOREIGN_METADATA) expect(json).not.toContain(value);
+      });
 
-    it("passes the foreign-row guard used by the suites", () => {
-      expect(() => expectNoForeignTenantRows(ctxFor(c), result, TARGET_TENANT)).not.toThrow();
-    });
+      it("passes the foreign-row guard used by the suites", () => {
+        expect(() =>
+          expectNoForeignTenantRows(ctxFor(c), result, TARGET_TENANT),
+        ).not.toThrow();
+      });
 
-    it("still catches a foreign row that sneaks into the same response", () => {
-      const polluted: DenialResult = {
-        data: [...c.ownRows, { id: "x", tenant_id: TARGET_TENANT, guest_name: "Foreign Guest" }],
-        error: null,
-      };
-      expect(() => expectNoForeignTenantRows(ctxFor(c), polluted, TARGET_TENANT)).toThrow(
-        /RLS DENIAL FAILED/,
-      );
-    });
+      it("still catches a foreign row that sneaks into the same response", () => {
+        const polluted: DenialResult = {
+          data: [
+            ...c.ownRows,
+            { id: "x", tenant_id: TARGET_TENANT, guest_name: "Foreign Guest" },
+          ],
+          error: null,
+        };
+        expect(() =>
+          expectNoForeignTenantRows(ctxFor(c), polluted, TARGET_TENANT),
+        ).toThrow(/RLS DENIAL FAILED/);
+      });
 
-    it("is reported as a pass with no failure details", () => {
-      const payload = payloadFor([entryFor(c.label, null)]);
-      const guarded = applyReportGuard(payload);
-      expect(guarded.denied).toBe(false);
-      const entry = guarded.payload.entries[0];
-      expect(entry.status).toBe("passed");
-      expect(entry.rlsDetails).toBeNull();
-      expect(entry.errorMessage).toBeNull();
+      it("is reported as a pass with no failure details", () => {
+        const payload = payloadFor([entryFor(c.label, null)]);
+        const guarded = applyReportGuard(payload);
+        expect(guarded.denied).toBe(false);
+        const entry = guarded.payload.entries[0];
+        expect(entry.status).toBe("passed");
+        expect(entry.rlsDetails).toBeNull();
+        expect(entry.errorMessage).toBeNull();
 
-      const html = renderHtml(guarded.payload);
-      expect(html).not.toContain("RLS DENIAL FAILED");
-      expect(html).not.toContain("Returned rows");
-      expect(html).toContain(c.label.replace(/&/g, "&amp;").replace(/'/g, "&#39;"));
-    });
-  });
+        const html = renderHtml(guarded.payload);
+        expect(html).not.toContain("RLS DENIAL FAILED");
+        expect(html).not.toContain("Returned rows");
+        expect(html).toContain(
+          c.label.replace(/&/g, "&amp;").replace(/'/g, "&#39;"),
+        );
+      });
+    },
+  );
 
   describe("the whole allow run", () => {
-    const payload = payloadFor(ALLOW_PATH_MATRIX.map((c) => entryFor(c.label, null)));
+    const payload = payloadFor(
+      ALLOW_PATH_MATRIX.map((c) => entryFor(c.label, null)),
+    );
 
     it("reports every path as passed", () => {
       expect(payload.totals.passed).toBe(ALLOW_PATH_MATRIX.length);
@@ -178,7 +205,7 @@ describe("allow-path matrix: own-tenant query paths", () => {
         if (value === TARGET_TENANT) continue; // the guard section legitimately lists the pair ids
         expect(json).not.toContain(value);
       }
-      expect(json).not.toContain("rlsDetails\":{");
+      expect(json).not.toContain('rlsDetails":{');
     });
 
     it("shows only ids, roles and flags for the tenant pair", () => {

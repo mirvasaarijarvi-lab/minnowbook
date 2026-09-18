@@ -2,7 +2,11 @@ import { test, expect } from "./fixtures/ephemeral-tenant";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./fixtures/test-tenant";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
-import { sumReportAmounts, roundCents, type ReportPricingRow } from "@/lib/report-pricing-accessor";
+import {
+  sumReportAmounts,
+  roundCents,
+  type ReportPricingRow,
+} from "@/lib/report-pricing-accessor";
 
 /**
  * End-to-end: period aggregates move only when invoicing actually succeeds.
@@ -31,8 +35,10 @@ import { sumReportAmounts, roundCents, type ReportPricingRow } from "@/lib/repor
  * Requires SERVICE_ROLE_KEY; skips itself without it.
  */
 
-const AMOUNT_ERROR = "Invoice amount must match the recalculated room and breakfast totals.";
-const NO_PRICE_ERROR = "Add a price before marking this reservation as invoiced.";
+const AMOUNT_ERROR =
+  "Invoice amount must match the recalculated room and breakfast totals.";
+const NO_PRICE_ERROR =
+  "Add a price before marking this reservation as invoiced.";
 
 const NIGHTLY = 140;
 const BREAKFAST_RATE = 13.75;
@@ -56,7 +62,10 @@ test.describe("Period aggregates and invoicing", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("move only when invoicing succeeds, never on a refused or tampered attempt", async ({
     ephemeralTenant,
@@ -90,15 +99,18 @@ test.describe("Period aggregates and invoicing", () => {
     expect(resErr, resErr?.message).toBeNull();
 
     const book = async (data: Record<string, unknown>) => {
-      const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          apikey: SUPABASE_ANON_KEY,
+      const res = await request.post(
+        `${SUPABASE_URL}/functions/v1/public-booking`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            apikey: SUPABASE_ANON_KEY,
+          },
+          data: { tenant_id: tenantId, ...data },
+          timeout: 30_000,
         },
-        data: { tenant_id: tenantId, ...data },
-        timeout: 30_000,
-      });
+      );
       expect(res.status(), await res.text()).toBe(200);
     };
 
@@ -172,8 +184,13 @@ test.describe("Period aggregates and invoicing", () => {
     const stay = await rowFor(stayEmail);
     const stay2 = await rowFor(stay2Email);
     const dinner = await rowFor(dinnerEmail);
-    expect(Number(stay.price_eur), "stay total recalculated by the server").toBe(STAY_TOTAL);
-    expect(Number(stay2.price_eur), "second stay total").toBe(SECOND_STAY_TOTAL);
+    expect(
+      Number(stay.price_eur),
+      "stay total recalculated by the server",
+    ).toBe(STAY_TOTAL);
+    expect(Number(stay2.price_eur), "second stay total").toBe(
+      SECOND_STAY_TOTAL,
+    );
     expect(dinner.price_eur, "dine-in has no amount yet").toBeNull();
 
     // --- 1. Baseline -------------------------------------------------------
@@ -192,11 +209,12 @@ test.describe("Period aggregates and invoicing", () => {
     // --- Staff client ------------------------------------------------------
     const staffEmail = `ci+agg-staff-${stamp}@mimmobook.test`;
     const staffPassword = `Ci-Tmp-${randomUUID()}-Z9!`;
-    const { data: staffUser, error: userErr } = await admin.auth.admin.createUser({
-      email: staffEmail,
-      password: staffPassword,
-      email_confirm: true,
-    });
+    const { data: staffUser, error: userErr } =
+      await admin.auth.admin.createUser({
+        email: staffEmail,
+        password: staffPassword,
+        email_confirm: true,
+      });
     expect(userErr, userErr?.message).toBeNull();
     const { error: memberErr } = await admin.from("tenant_users").insert({
       tenant_id: tenantId,
@@ -205,9 +223,17 @@ test.describe("Period aggregates and invoicing", () => {
       is_approved: true,
     });
     expect(memberErr, memberErr?.message).toBeNull();
-    const staffClient: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false, storageKey: `ci-agg-${stamp}` },
-    });
+    const staffClient: SupabaseClient = createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          storageKey: `ci-agg-${stamp}`,
+        },
+      },
+    );
     const { error: signInErr } = await staffClient.auth.signInWithPassword({
       email: staffEmail,
       password: staffPassword,
@@ -243,12 +269,19 @@ test.describe("Period aggregates and invoicing", () => {
           .eq("id", id)
           .eq("tenant_id", tenantId);
         expect(error, `${label}: must be refused`).not.toBeNull();
-        expect(error!.message, `${label}: clear reason`).toContain(expectedMessage);
+        expect(error!.message, `${label}: clear reason`).toContain(
+          expectedMessage,
+        );
         await expectAggregates(label, before);
       };
 
       // No amount at all.
-      await refuse("no-amount", dinner.id, { is_invoiced: true }, NO_PRICE_ERROR);
+      await refuse(
+        "no-amount",
+        dinner.id,
+        { is_invoiced: true },
+        NO_PRICE_ERROR,
+      );
       // Fractions of a cent.
       await refuse(
         "sub-cent",
@@ -257,7 +290,12 @@ test.describe("Period aggregates and invoicing", () => {
         AMOUNT_ERROR,
       );
       // An amount that does not cover the breakfast lines of the stay.
-      await refuse("below-breakfast", stay.id, { is_invoiced: true, price_eur: 40 }, AMOUNT_ERROR);
+      await refuse(
+        "below-breakfast",
+        stay.id,
+        { is_invoiced: true, price_eur: 40 },
+        AMOUNT_ERROR,
+      );
       // A tampered amount on the second stay.
       await refuse(
         "tampered-second-stay",
@@ -268,8 +306,14 @@ test.describe("Period aggregates and invoicing", () => {
 
       // Nothing invoiced, nothing changed since the baseline.
       await expectAggregates("after all refusals", baseline);
-      expect((await rowFor(stayEmail)).is_invoiced, "stay still uninvoiced").toBe(false);
-      expect((await rowFor(dinnerEmail)).price_eur, "no partial amount stored").toBeNull();
+      expect(
+        (await rowFor(stayEmail)).is_invoiced,
+        "stay still uninvoiced",
+      ).toBe(false);
+      expect(
+        (await rowFor(dinnerEmail)).price_eur,
+        "no partial amount stored",
+      ).toBeNull();
 
       // --- 3. A successful invoicing moves the invoiced figure only --------
       const { error: okErr } = await staffClient
@@ -280,8 +324,14 @@ test.describe("Period aggregates and invoicing", () => {
       expect(okErr, okErr?.message).toBeNull();
 
       const afterFirst = await aggregates();
-      expect(afterFirst.booked, "booked figures untouched by invoicing").toEqual(baseline.booked);
-      expect(afterFirst.invoiced.charged, "invoiced total is exactly that stay").toBe(STAY_TOTAL);
+      expect(
+        afterFirst.booked,
+        "booked figures untouched by invoicing",
+      ).toEqual(baseline.booked);
+      expect(
+        afterFirst.invoiced.charged,
+        "invoiced total is exactly that stay",
+      ).toBe(STAY_TOTAL);
       expect(afterFirst.invoicedCount).toBe(1);
       expect(
         roundCents(afterFirst.invoiced.room + afterFirst.invoiced.breakfast),
@@ -301,7 +351,12 @@ test.describe("Period aggregates and invoicing", () => {
 
       // A tampered repeat on the invoiced booking is still refused, and the
       // aggregates stay where the successful invoicing left them.
-      await refuse("tampered-repeat", stay.id, { is_invoiced: true, price_eur: 30 }, AMOUNT_ERROR);
+      await refuse(
+        "tampered-repeat",
+        stay.id,
+        { is_invoiced: true, price_eur: 30 },
+        AMOUNT_ERROR,
+      );
       await expectAggregates("after tampered repeat", afterFirst);
 
       // --- Pricing the dinner adds to booked, not to invoiced --------------
@@ -313,12 +368,14 @@ test.describe("Period aggregates and invoicing", () => {
       expect(priceErr, priceErr?.message).toBeNull();
 
       const afterPricing = await aggregates();
-      expect(afterPricing.booked.charged, "booked total includes the priced dinner").toBe(
-        roundCents(STAY_TOTAL + SECOND_STAY_TOTAL + DINNER_TOTAL),
-      );
-      expect(afterPricing.invoiced, "invoiced figures unaffected by pricing").toEqual(
-        afterFirst.invoiced,
-      );
+      expect(
+        afterPricing.booked.charged,
+        "booked total includes the priced dinner",
+      ).toBe(roundCents(STAY_TOTAL + SECOND_STAY_TOTAL + DINNER_TOTAL));
+      expect(
+        afterPricing.invoiced,
+        "invoiced figures unaffected by pricing",
+      ).toEqual(afterFirst.invoiced);
 
       // Invoicing it now moves the invoiced figure by exactly that amount.
       const { error: dinnerInvoiceErr } = await staffClient
@@ -329,10 +386,13 @@ test.describe("Period aggregates and invoicing", () => {
       expect(dinnerInvoiceErr, dinnerInvoiceErr?.message).toBeNull();
 
       const afterSecond = await aggregates();
-      expect(afterSecond.booked, "booked figures unchanged").toEqual(afterPricing.booked);
-      expect(afterSecond.invoiced.charged, "invoiced total grew by the dinner amount").toBe(
-        roundCents(STAY_TOTAL + DINNER_TOTAL),
+      expect(afterSecond.booked, "booked figures unchanged").toEqual(
+        afterPricing.booked,
       );
+      expect(
+        afterSecond.invoiced.charged,
+        "invoiced total grew by the dinner amount",
+      ).toBe(roundCents(STAY_TOTAL + DINNER_TOTAL));
       expect(afterSecond.invoicedCount).toBe(2);
 
       // --- 5. Un-invoicing moves the figure back by the same amount --------
@@ -344,10 +404,17 @@ test.describe("Period aggregates and invoicing", () => {
       expect(undoErr, undoErr?.message).toBeNull();
 
       const afterUndo = await aggregates();
-      expect(afterUndo.booked, "booked figures still unchanged").toEqual(afterPricing.booked);
-      expect(afterUndo.invoiced.charged, "back to the single invoiced stay").toBe(STAY_TOTAL);
+      expect(afterUndo.booked, "booked figures still unchanged").toEqual(
+        afterPricing.booked,
+      );
+      expect(
+        afterUndo.invoiced.charged,
+        "back to the single invoiced stay",
+      ).toBe(STAY_TOTAL);
       expect(afterUndo.invoicedCount).toBe(1);
-      expect(afterUndo.invoiced, "identical to the earlier snapshot").toEqual(afterFirst.invoiced);
+      expect(afterUndo.invoiced, "identical to the earlier snapshot").toEqual(
+        afterFirst.invoiced,
+      );
     } finally {
       await admin.auth.admin.deleteUser(staffUser!.user!.id);
     }

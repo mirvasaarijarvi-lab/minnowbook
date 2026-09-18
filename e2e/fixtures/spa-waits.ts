@@ -86,10 +86,9 @@ export async function gotoAndWaitForSpa(
     timeout: navTimeoutMs,
   });
   expect(response, `navigation to ${url} produced no response`).not.toBeNull();
-  expect(
-    response!.status(),
-    `unexpected HTTP status for ${url}`,
-  ).toBeLessThan(400);
+  expect(response!.status(), `unexpected HTTP status for ${url}`).toBeLessThan(
+    400,
+  );
 
   await page.waitForFunction(
     (sel) => {

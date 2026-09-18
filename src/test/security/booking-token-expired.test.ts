@@ -25,7 +25,8 @@ import {
 } from "@/test/security/fixtures/tenant-pair";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
@@ -36,8 +37,8 @@ const liveAvailable =
 const liveDescribe = liveAvailable ? describe : describe.skip;
 const skipReason = liveAvailable
   ? null
-  : tenantPairFixtureSkipReason() ??
-    "SUPABASE_SERVICE_ROLE_KEY required to seed expired booking_tokens";
+  : (tenantPairFixtureSkipReason() ??
+    "SUPABASE_SERVICE_ROLE_KEY required to seed expired booking_tokens");
 
 interface SeededToken {
   tenantId: string;
@@ -55,7 +56,11 @@ function randomHex(bytes = 32): string {
 async function seedToken(
   admin: SupabaseClient,
   tenantId: string,
-  opts: { expiresAt?: Date; isRevoked?: boolean; tokenLength?: 64 | 32 | 128 } = {},
+  opts: {
+    expiresAt?: Date;
+    isRevoked?: boolean;
+    tokenLength?: 64 | 32 | 128;
+  } = {},
 ): Promise<SeededToken> {
   const len = opts.tokenLength ?? 64;
   const tokenPlaintext = randomHex(len / 2);
@@ -99,7 +104,10 @@ async function seedToken(
   };
 }
 
-async function cleanup(admin: SupabaseClient, seed: SeededToken): Promise<void> {
+async function cleanup(
+  admin: SupabaseClient,
+  seed: SeededToken,
+): Promise<void> {
   await admin.from("booking_tokens").delete().eq("id", seed.tokenId);
   await admin.from("reservations").delete().eq("id", seed.reservationId);
 }
@@ -152,7 +160,9 @@ liveDescribe("lookup_booking_token — expired tokens are never returned", () =>
     });
     expect(error, error?.message).toBeNull();
     expect((data ?? []).length).toBe(1);
-    const row = (data as Array<{ id: string; is_revoked: boolean; expires_at: string }>)[0];
+    const row = (
+      data as Array<{ id: string; is_revoked: boolean; expires_at: string }>
+    )[0];
     expect(row.id).toBe(activeSeed.tokenId);
     expect(row.is_revoked).toBe(false);
     expect(new Date(row.expires_at).getTime()).toBeGreaterThan(Date.now());
@@ -199,7 +209,9 @@ liveDescribe("lookup_booking_token — expired tokens are never returned", () =>
       expect((after.data ?? []).length).toBe(0);
     } finally {
       // Restore for subsequent tests
-      const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      const futureDate = new Date(
+        Date.now() + 30 * 24 * 60 * 60 * 1000,
+      ).toISOString();
       await admin
         .from("booking_tokens")
         .update({ expires_at: futureDate })
@@ -210,7 +222,9 @@ liveDescribe("lookup_booking_token — expired tokens are never returned", () =>
   it("expired token of correct length cannot be probed via repeated calls (no shape leak)", async () => {
     const calls = await Promise.all(
       Array.from({ length: 5 }, () =>
-        anon.rpc("lookup_booking_token", { p_token: bornExpiredSeed.tokenPlaintext }),
+        anon.rpc("lookup_booking_token", {
+          p_token: bornExpiredSeed.tokenPlaintext,
+        }),
       ),
     );
     for (const c of calls) {
@@ -226,7 +240,9 @@ liveDescribe("lookup_booking_token — expired tokens are never returned", () =>
     });
     expect((hidden.data ?? []).length).toBe(0);
 
-    const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const futureDate = new Date(
+      Date.now() + 7 * 24 * 60 * 60 * 1000,
+    ).toISOString();
     const { error: updErr } = await admin
       .from("booking_tokens")
       .update({ expires_at: futureDate })
@@ -239,12 +255,16 @@ liveDescribe("lookup_booking_token — expired tokens are never returned", () =>
       });
       expect(visible.error).toBeNull();
       expect((visible.data ?? []).length).toBe(1);
-      const row = (visible.data as Array<{ id: string; expires_at: string }>)[0];
+      const row = (
+        visible.data as Array<{ id: string; expires_at: string }>
+      )[0];
       expect(row.id).toBe(bornExpiredSeed.tokenId);
       expect(new Date(row.expires_at).getTime()).toBeGreaterThan(Date.now());
     } finally {
       // Re-expire so cleanup leaves the original semantics
-      const longAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
+      const longAgo = new Date(
+        Date.now() - 365 * 24 * 60 * 60 * 1000,
+      ).toISOString();
       await admin
         .from("booking_tokens")
         .update({ expires_at: longAgo })
@@ -253,9 +273,12 @@ liveDescribe("lookup_booking_token — expired tokens are never returned", () =>
   });
 
   it("expired token is invisible to authenticated tenant member calling the RPC too", async () => {
-    const { data, error } = await fixture.a!.client.rpc("lookup_booking_token", {
-      p_token: bornExpiredSeed.tokenPlaintext,
-    });
+    const { data, error } = await fixture.a!.client.rpc(
+      "lookup_booking_token",
+      {
+        p_token: bornExpiredSeed.tokenPlaintext,
+      },
+    );
     expect(error).toBeNull();
     expect((data ?? []).length).toBe(0);
   });

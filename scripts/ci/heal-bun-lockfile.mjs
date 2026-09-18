@@ -14,7 +14,14 @@
 //   2  drift detected but heal failed (bun install errored)
 //   3  preflight itself errored (bad manifest, etc.)
 import { spawnSync } from "node:child_process";
-import { readFileSync, writeFileSync, existsSync, mkdtempSync, copyFileSync, rmSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  mkdtempSync,
+  copyFileSync,
+  rmSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { dirname, join, resolve } from "node:path";
@@ -24,7 +31,8 @@ const REPO_ROOT = resolve(HERE, "..", "..");
 const LOCK = join(REPO_ROOT, "bun.lock");
 const CHECK_ONLY = process.argv.includes("--check");
 
-const { collectDrift, formatReport } = await import("./preflight-manifest-drift.mjs");
+const { collectDrift, formatReport } =
+  await import("./preflight-manifest-drift.mjs");
 
 function header(s) {
   return `\n=== ${s} ===`;
@@ -56,12 +64,17 @@ let pre;
 try {
   pre = collectDrift({ root: REPO_ROOT });
 } catch (e) {
-  fail(3, `lock:heal: preflight crashed — ${e instanceof Error ? e.message : String(e)}`);
+  fail(
+    3,
+    `lock:heal: preflight crashed — ${e instanceof Error ? e.message : String(e)}`,
+  );
 }
 if (pre.fatal) fail(3, `lock:heal: ${pre.fatal}`);
 
 if (pre.ok) {
-  process.stdout.write("lock:heal: package.json already in sync with lockfiles ✓\n");
+  process.stdout.write(
+    "lock:heal: package.json already in sync with lockfiles ✓\n",
+  );
   process.exit(0);
 }
 
@@ -73,7 +86,10 @@ if (CHECK_ONLY) {
 }
 
 if (!existsSync(LOCK)) {
-  fail(3, `lock:heal: bun.lock missing at ${LOCK}; create one with \`bun install\` first.`);
+  fail(
+    3,
+    `lock:heal: bun.lock missing at ${LOCK}; create one with \`bun install\` first.`,
+  );
 }
 
 // 2) Snapshot bun.lock so we can show a precise diff after regeneration.
@@ -81,15 +97,26 @@ const tmp = mkdtempSync(join(tmpdir(), "lock-heal-"));
 const snapshot = join(tmp, "bun.lock.before");
 copyFileSync(LOCK, snapshot);
 
-process.stdout.write(header("Regenerating bun.lock (bun install --save-text-lockfile --ignore-scripts)") + "\n");
+process.stdout.write(
+  header(
+    "Regenerating bun.lock (bun install --save-text-lockfile --ignore-scripts)",
+  ) + "\n",
+);
 const install = spawnSync(
   "bun",
   ["install", "--save-text-lockfile", "--ignore-scripts", "--no-summary"],
-  { cwd: REPO_ROOT, stdio: "inherit", env: { ...process.env, CI: "1", NO_COLOR: "1" } },
+  {
+    cwd: REPO_ROOT,
+    stdio: "inherit",
+    env: { ...process.env, CI: "1", NO_COLOR: "1" },
+  },
 );
 if (install.status !== 0) {
   rmSync(tmp, { recursive: true, force: true });
-  fail(2, `lock:heal: \`bun install\` exited ${install.status}. Lockfile may be partially updated; inspect manually.`);
+  fail(
+    2,
+    `lock:heal: \`bun install\` exited ${install.status}. Lockfile may be partially updated; inspect manually.`,
+  );
 }
 
 const before = readFileSync(snapshot, "utf8");

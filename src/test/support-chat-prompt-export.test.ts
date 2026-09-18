@@ -15,7 +15,7 @@ describe("support-chat prompt — imported from edge function export", () => {
 
   it("identifies itself as MimmoBook's support assistant", () => {
     expect(SUPPORT_CHAT_SYSTEM_PROMPT).toMatch(
-      /MimmoBook's friendly support assistant/
+      /MimmoBook's friendly support assistant/,
     );
     expect(SUPPORT_CHAT_SYSTEM_PROMPT).toMatch(/MimmoSupporter/);
   });
@@ -26,7 +26,7 @@ describe("support-chat prompt — imported from edge function export", () => {
 
   it("contains the Calendar Sync Q&A flow with iCal vs Google branching", () => {
     expect(SUPPORT_CHAT_SYSTEM_PROMPT).toContain(
-      "#### Calendar Sync — Q&A flow"
+      "#### Calendar Sync — Q&A flow",
     );
     expect(SUPPORT_CHAT_SYSTEM_PROMPT).toMatch(/Always ask first/i);
     expect(SUPPORT_CHAT_SYSTEM_PROMPT).toMatch(/iCal subscription/);
@@ -39,10 +39,10 @@ describe("support-chat prompt — imported from edge function export", () => {
 
   it("ends with the concise/markdown/contact-admin closing paragraph", () => {
     expect(SUPPORT_CHAT_SYSTEM_PROMPT).toMatch(
-      /Keep answers concise, friendly, and actionable/
+      /Keep answers concise, friendly, and actionable/,
     );
     expect(SUPPORT_CHAT_SYSTEM_PROMPT.trimEnd()).toMatch(
-      /contact their admin\.$/
+      /contact their admin\.$/,
     );
   });
 

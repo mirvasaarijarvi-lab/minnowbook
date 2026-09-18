@@ -22,13 +22,17 @@ describe("Permissions - Security Regression Tests", () => {
   });
 
   it("no duplicate permission keys exist", () => {
-    const keys = PERMISSION_CATEGORIES.flatMap((c) => c.permissions.map((p) => p.key));
+    const keys = PERMISSION_CATEGORIES.flatMap((c) =>
+      c.permissions.map((p) => p.key),
+    );
     const unique = new Set(keys);
     expect(unique.size).toBe(keys.length);
   });
 
   it("critical permissions are defined", () => {
-    const allKeys = PERMISSION_CATEGORIES.flatMap((c) => c.permissions.map((p) => p.key));
+    const allKeys = PERMISSION_CATEGORIES.flatMap((c) =>
+      c.permissions.map((p) => p.key),
+    );
     expect(allKeys).toContain(PERM_RESERVATIONS_VIEW);
     expect(allKeys).toContain(PERM_ADMIN_MANAGE);
     expect(allKeys).toContain(PERM_SETTINGS_MANAGE);

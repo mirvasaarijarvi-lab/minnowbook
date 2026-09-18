@@ -49,7 +49,8 @@ import { guardTenantPair } from "./fixtures/tenant-id-guard";
  */
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
+  string | undefined;
 
 /**
  * Tenant-scoped tables that have a `tenant_id` column and are protected by
@@ -137,7 +138,10 @@ describe("Cross-Tenant RLS Regression Tests", () => {
     it.each(TENANT_SCOPED_TABLES)(
       "anon SELECT * FROM %s returns no rows (RLS enforced)",
       async (table) => {
-        const { data, error } = await anon.from(table).select("tenant_id").limit(5);
+        const { data, error } = await anon
+          .from(table)
+          .select("tenant_id")
+          .limit(5);
         if (error) {
           expect(error.message).toBeTruthy();
           return;
@@ -160,8 +164,15 @@ describe("Cross-Tenant RLS Regression Tests", () => {
 
     it("anon INSERT into private tenant tables is denied", async () => {
       const fakeTenantId = "00000000-0000-0000-0000-000000000000";
-      const payload = { tenant_id: fakeTenantId, table_name: "test", action: "INSERT" };
-      const { data, error } = await anon.from("audit_log").insert(payload).select();
+      const payload = {
+        tenant_id: fakeTenantId,
+        table_name: "test",
+        action: "INSERT",
+      };
+      const { data, error } = await anon
+        .from("audit_log")
+        .insert(payload)
+        .select();
       expectWriteDenied(
         {
           table: "audit_log",
@@ -224,8 +235,16 @@ describe("Cross-Tenant RLS Regression Tests", () => {
         // failures instead of misleading "RLS denied" passes.
         await guardTenantPair({
           suite: "cross-tenant-rls",
-          a: { client: clientA, tenantId: fixture.a.tenantId, email: fixture.a.email },
-          b: { client: clientB, tenantId: fixture.b.tenantId, email: fixture.b.email },
+          a: {
+            client: clientA,
+            tenantId: fixture.a.tenantId,
+            email: fixture.a.email,
+          },
+          b: {
+            client: clientB,
+            tenantId: fixture.b.tenantId,
+            email: fixture.b.email,
+          },
         });
         console.error(
           `[rls-fixture] using ${fixture.source} credentials — A=${fixture.a.tenantId} B=${fixture.b.tenantId}`,
@@ -274,7 +293,10 @@ describe("Cross-Tenant RLS Regression Tests", () => {
           table_name: "rls_test",
           action: "INSERT",
         };
-        const { data, error } = await clientA.from("audit_log").insert(payload).select();
+        const { data, error } = await clientA
+          .from("audit_log")
+          .insert(payload)
+          .select();
         expectWriteDenied(
           {
             table: "audit_log",
@@ -370,15 +392,28 @@ describe("Cross-Tenant RLS Regression Tests", () => {
       }> = [
         {
           table: "notifications",
-          payload: (t) => ({ tenant_id: t, type: "test", title: "x", message: "x" }),
+          payload: (t) => ({
+            tenant_id: t,
+            type: "test",
+            title: "x",
+            message: "x",
+          }),
         },
         {
           table: "booking_validation_log",
-          payload: (t) => ({ tenant_id: t, source: "rls_test", outcome: "denied" }),
+          payload: (t) => ({
+            tenant_id: t,
+            source: "rls_test",
+            outcome: "denied",
+          }),
         },
         {
           table: "kitchen_menu_items",
-          payload: (t) => ({ tenant_id: t, name: "rls_test_item", category: "food" }),
+          payload: (t) => ({
+            tenant_id: t,
+            name: "rls_test_item",
+            category: "food",
+          }),
         },
         {
           table: "kitchen_orders",
@@ -390,7 +425,11 @@ describe("Cross-Tenant RLS Regression Tests", () => {
         },
         {
           table: "discount_codes",
-          payload: (t) => ({ tenant_id: t, code: "RLS_TEST", discount_value: 0 }),
+          payload: (t) => ({
+            tenant_id: t,
+            code: "RLS_TEST",
+            discount_value: 0,
+          }),
         },
         {
           table: "offers",
@@ -430,7 +469,10 @@ describe("Cross-Tenant RLS Regression Tests", () => {
         "user A cannot INSERT a forged tenant B row into $table",
         async ({ table, payload }) => {
           const body = payload(liveCreds.b.tenantId!);
-          const { data, error } = await clientA.from(table).insert(body).select();
+          const { data, error } = await clientA
+            .from(table)
+            .insert(body)
+            .select();
           expectWriteDenied(
             {
               table,
@@ -449,7 +491,10 @@ describe("Cross-Tenant RLS Regression Tests", () => {
         "user B cannot INSERT a forged tenant A row into $table",
         async ({ table, payload }) => {
           const body = payload(liveCreds.a.tenantId!);
-          const { data, error } = await clientB.from(table).insert(body).select();
+          const { data, error } = await clientB
+            .from(table)
+            .insert(body)
+            .select();
           expectWriteDenied(
             {
               table,
@@ -634,7 +679,10 @@ describe("Cross-Tenant RLS Regression Tests", () => {
       });
 
       it("user A reservations query never leaks tenant B rows (unfiltered)", async () => {
-        const result = await clientA.from("reservations").select("tenant_id").limit(50);
+        const result = await clientA
+          .from("reservations")
+          .select("tenant_id")
+          .limit(50);
         expectNoForeignTenantRows(
           {
             table: "reservations",
@@ -649,7 +697,10 @@ describe("Cross-Tenant RLS Regression Tests", () => {
       });
 
       it("user B reservations query never leaks tenant A rows (unfiltered)", async () => {
-        const result = await clientB.from("reservations").select("tenant_id").limit(50);
+        const result = await clientB
+          .from("reservations")
+          .select("tenant_id")
+          .limit(50);
         expectNoForeignTenantRows(
           {
             table: "reservations",
@@ -674,14 +725,11 @@ describe("Cross-Tenant RLS Regression Tests", () => {
   describe.skipIf(tenantPairFixtureLikelyAvailable())(
     "Skipped: live cross-tenant mode disabled",
     () => {
-      it(
-        `Live mode disabled — ${
-          tenantPairFixtureSkipReason() ?? "unknown reason"
-        }. Set RLS_TEST_TENANT_A/B_EMAIL/PASSWORD/ID, OR provide SUPABASE_SERVICE_ROLE_KEY to auto-provision throwaway users (CI does this via .github/workflows/cross-tenant-rls-local.yml).`,
-        () => {
-          expect(true).toBe(true);
-        },
-      );
+      it(`Live mode disabled — ${
+        tenantPairFixtureSkipReason() ?? "unknown reason"
+      }. Set RLS_TEST_TENANT_A/B_EMAIL/PASSWORD/ID, OR provide SUPABASE_SERVICE_ROLE_KEY to auto-provision throwaway users (CI does this via .github/workflows/cross-tenant-rls-local.yml).`, () => {
+        expect(true).toBe(true);
+      });
     },
   );
 });

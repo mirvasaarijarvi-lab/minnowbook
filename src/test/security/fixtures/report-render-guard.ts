@@ -95,7 +95,10 @@ export function deniedGuardRecords(records: TenantGuardRecord[] = []): Array<{
  * layers, so match loosely in both directions rather than demanding an exact
  * string. An unnamed guard record matches everything (fail closed).
  */
-export function suiteMatchesGuard(entrySuite: string, guardSuite: string): boolean {
+export function suiteMatchesGuard(
+  entrySuite: string,
+  guardSuite: string,
+): boolean {
   const guard = normalize(guardSuite);
   if (!guard) return true;
   const entry = normalize(entrySuite);
@@ -104,8 +107,14 @@ export function suiteMatchesGuard(entrySuite: string, guardSuite: string): boole
 }
 
 /** Strip every captured value, keeping only the refusal marker. */
-export function redactFailureDetails(reasons: string[]): GuardableFailureDetails {
-  return { reason: WITHHELD_NOTICE, withheld: true, withheldReasons: [...reasons] };
+export function redactFailureDetails(
+  reasons: string[],
+): GuardableFailureDetails {
+  return {
+    reason: WITHHELD_NOTICE,
+    withheld: true,
+    withheldReasons: [...reasons],
+  };
 }
 
 /**
@@ -113,9 +122,10 @@ export function redactFailureDetails(reasons: string[]): GuardableFailureDetails
  * never mutated so callers can compare before/after and repeated calls are
  * idempotent.
  */
-export function applyReportGuard<E extends GuardableEntry, P extends GuardablePayload<E>>(
-  payload: P,
-): ReportGuardOutcome<P> {
+export function applyReportGuard<
+  E extends GuardableEntry,
+  P extends GuardablePayload<E>,
+>(payload: P): ReportGuardOutcome<P> {
   const denied = deniedGuardRecords(payload.tenantGuard ?? []);
   const reasons = [...new Set(denied.flatMap((d) => d.reasons))].sort();
   if (denied.length === 0) {
@@ -124,10 +134,16 @@ export function applyReportGuard<E extends GuardableEntry, P extends GuardablePa
 
   let withheldEntries = 0;
   const entries = (payload.entries ?? []).map((entry): E => {
-    const matching = denied.filter((d) => suiteMatchesGuard(entry.suite, d.suite));
+    const matching = denied.filter((d) =>
+      suiteMatchesGuard(entry.suite, d.suite),
+    );
     if (matching.length === 0) return entry;
-    const entryReasons = [...new Set(matching.flatMap((m) => m.reasons))].sort();
-    const hasData = Boolean(entry.errorMessage || entry.errorStack || entry.rlsDetails);
+    const entryReasons = [
+      ...new Set(matching.flatMap((m) => m.reasons)),
+    ].sort();
+    const hasData = Boolean(
+      entry.errorMessage || entry.errorStack || entry.rlsDetails,
+    );
     if (!hasData) return entry;
     withheldEntries += 1;
     return {
@@ -139,7 +155,11 @@ export function applyReportGuard<E extends GuardableEntry, P extends GuardablePa
   });
 
   return {
-    payload: { ...payload, entries, guardWithheld: { entries: withheldEntries, reasons } } as P,
+    payload: {
+      ...payload,
+      entries,
+      guardWithheld: { entries: withheldEntries, reasons },
+    } as P,
     withheldEntries,
     reasons,
     denied: true,

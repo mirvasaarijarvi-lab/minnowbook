@@ -2,7 +2,11 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Check, X, AlertTriangle, Shield } from "lucide-react";
-import { validatePasswordSync, checkPasswordBreach, MIN_LENGTH } from "@/lib/password-validation";
+import {
+  validatePasswordSync,
+  checkPasswordBreach,
+  MIN_LENGTH,
+} from "@/lib/password-validation";
 import { useT } from "@/contexts/I18nContext";
 import type { TranslationKey } from "@/i18n/translations";
 import { cn } from "@/lib/utils";
@@ -10,7 +14,10 @@ import { Progress } from "@/components/ui/progress";
 
 type StrengthLevel = "weak" | "fair" | "strong" | "veryStrong";
 
-function getPasswordStrength(password: string): { level: StrengthLevel; score: number } {
+function getPasswordStrength(password: string): {
+  level: StrengthLevel;
+  score: number;
+} {
   if (!password) return { level: "weak", score: 0 };
   let score = 0;
   if (password.length >= MIN_LENGTH) score += 25;
@@ -29,7 +36,10 @@ function getPasswordStrength(password: string): { level: StrengthLevel; score: n
   return { level: "veryStrong", score };
 }
 
-const strengthConfig: Record<StrengthLevel, { label: TranslationKey; color: string }> = {
+const strengthConfig: Record<
+  StrengthLevel,
+  { label: TranslationKey; color: string }
+> = {
   weak: { label: "password.strengthWeak", color: "bg-destructive" },
   fair: { label: "password.strengthFair", color: "bg-accent" },
   strong: { label: "password.strengthStrong", color: "bg-primary" },
@@ -61,7 +71,10 @@ const PasswordInput = ({
 }: PasswordInputProps) => {
   const t = useT();
   const [showPassword, setShowPassword] = useState(false);
-  const [breachResult, setBreachResult] = useState<{ isBreached: boolean; count: number } | null>(null);
+  const [breachResult, setBreachResult] = useState<{
+    isBreached: boolean;
+    count: number;
+  } | null>(null);
   const [checkingBreach, setCheckingBreach] = useState(false);
 
   const validation = validatePasswordSync(value);
@@ -88,12 +101,18 @@ const PasswordInput = ({
 
   // Report validity upstream
   useEffect(() => {
-    const isFullyValid = validation.isValid && (breachResult === null || !breachResult.isBreached);
+    const isFullyValid =
+      validation.isValid && (breachResult === null || !breachResult.isBreached);
     onValidChange?.(isFullyValid);
   }, [validation.isValid, breachResult, onValidChange]);
 
   const Indicator = ({ ok, text }: { ok: boolean; text: string }) => (
-    <div className={cn("flex items-center gap-1.5 text-xs transition-colors", ok ? "text-primary" : "text-muted-foreground")}>
+    <div
+      className={cn(
+        "flex items-center gap-1.5 text-xs transition-colors",
+        ok ? "text-primary" : "text-muted-foreground",
+      )}
+    >
       {ok ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
       {text}
     </div>
@@ -120,7 +139,11 @@ const PasswordInput = ({
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
           tabIndex={-1}
         >
-          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {showPassword ? (
+            <EyeOff className="h-4 w-4" />
+          ) : (
+            <Eye className="h-4 w-4" />
+          )}
         </button>
       </div>
 
@@ -134,11 +157,25 @@ const PasswordInput = ({
               <div className="space-y-1">
                 <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-secondary">
                   <div
-                    className={cn("h-full rounded-full transition-all duration-300", config.color)}
+                    className={cn(
+                      "h-full rounded-full transition-all duration-300",
+                      config.color,
+                    )}
                     style={{ width: `${score}%` }}
                   />
                 </div>
-                <p className={cn("text-xs font-medium", level === "weak" ? "text-destructive" : level === "fair" ? "text-accent" : level === "strong" ? "text-primary" : "text-success")}>
+                <p
+                  className={cn(
+                    "text-xs font-medium",
+                    level === "weak"
+                      ? "text-destructive"
+                      : level === "fair"
+                        ? "text-accent"
+                        : level === "strong"
+                          ? "text-primary"
+                          : "text-success",
+                  )}
+                >
                   {t(config.label)}
                 </p>
               </div>
@@ -146,9 +183,18 @@ const PasswordInput = ({
           })()}
 
           <div className="space-y-1">
-            <Indicator ok={validation.lengthOk} text={t("password.minLength")} />
-            <Indicator ok={validation.hasUppercase} text={t("password.uppercase")} />
-            <Indicator ok={validation.hasLowercase} text={t("password.lowercase")} />
+            <Indicator
+              ok={validation.lengthOk}
+              text={t("password.minLength")}
+            />
+            <Indicator
+              ok={validation.hasUppercase}
+              text={t("password.uppercase")}
+            />
+            <Indicator
+              ok={validation.hasLowercase}
+              text={t("password.lowercase")}
+            />
             <Indicator ok={validation.hasNumber} text={t("password.number")} />
           </div>
 

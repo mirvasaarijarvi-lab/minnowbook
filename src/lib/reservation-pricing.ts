@@ -20,7 +20,8 @@ export const DEFAULT_ROOM_TYPE_PRICING: Record<string, number> = {
 
 export const DEFAULT_BREAKFAST_PRICE_EUR = 15;
 
-export type DiscountType = "percentage" | "fixed" | "free_nights" | null | undefined;
+export type DiscountType =
+  "percentage" | "fixed" | "free_nights" | null | undefined;
 
 export interface PricingResource {
   price_per_night?: number | null;
@@ -37,7 +38,10 @@ export interface ComputePriceInput {
   room_type?: string | null;
   guests_count?: number | null;
   breakfast_included?: boolean | null;
-  selected_sub_services?: Array<{ price_eur?: number | null; qty?: number | null }> | null;
+  selected_sub_services?: Array<{
+    price_eur?: number | null;
+    qty?: number | null;
+  }> | null;
   restaurant_sub_type?: string | null;
   pricing_type?: string | null;
   fixed_price_eur?: number | null;
@@ -69,26 +73,40 @@ function round2(n: number | null): number | null {
   return Math.round(n * 100) / 100;
 }
 
-export function computeReservationPrice(input: ComputePriceInput): ComputePriceResult {
+export function computeReservationPrice(
+  input: ComputePriceInput,
+): ComputePriceResult {
   const isAccommodation =
-    input.reservation_type === "hotel" || input.reservation_type === "guesthouse";
+    input.reservation_type === "hotel" ||
+    input.reservation_type === "guesthouse";
   const isRestaurant = input.reservation_type === "restaurant";
 
   let gross: number | null = null;
   let derived = false;
   let nights = 0;
 
-  if (isAccommodation && input.resource?.price_per_night && input.check_out_date) {
+  if (
+    isAccommodation &&
+    input.resource?.price_per_night &&
+    input.check_out_date
+  ) {
     nights = diffNights(input.check_in_date, input.check_out_date);
     if (nights > 0) {
-      const pricing = input.resource.room_type_pricing ?? DEFAULT_ROOM_TYPE_PRICING;
-      const multiplier = input.room_type ? Number(pricing[input.room_type]) || 1.0 : 1.0;
-      const roomTotal = nights * Number(input.resource.price_per_night) * multiplier;
+      const pricing =
+        input.resource.room_type_pricing ?? DEFAULT_ROOM_TYPE_PRICING;
+      const multiplier = input.room_type
+        ? Number(pricing[input.room_type]) || 1.0
+        : 1.0;
+      const roomTotal =
+        nights * Number(input.resource.price_per_night) * multiplier;
       const bfPrice = Number(
-        input.resource.breakfast_price_per_person ?? DEFAULT_BREAKFAST_PRICE_EUR,
+        input.resource.breakfast_price_per_person ??
+          DEFAULT_BREAKFAST_PRICE_EUR,
       );
       const guestsForBf = input.guests_count ?? 1;
-      const bfTotal = input.breakfast_included ? nights * guestsForBf * bfPrice : 0;
+      const bfTotal = input.breakfast_included
+        ? nights * guestsForBf * bfPrice
+        : 0;
       gross = roomTotal + bfTotal;
       derived = true;
     }
@@ -99,7 +117,8 @@ export function computeReservationPrice(input: ComputePriceInput): ComputePriceR
   ) {
     let total = 0;
     for (const s of input.selected_sub_services) {
-      if (s.price_eur != null) total += Number(s.price_eur) * Number(s.qty || 1);
+      if (s.price_eur != null)
+        total += Number(s.price_eur) * Number(s.qty || 1);
     }
     if (total > 0) {
       gross = total;
@@ -147,8 +166,11 @@ export function computeReservationPrice(input: ComputePriceInput): ComputePriceR
       nights > 0 &&
       input.resource?.price_per_night
     ) {
-      const pricing = input.resource.room_type_pricing ?? DEFAULT_ROOM_TYPE_PRICING;
-      const multiplier = input.room_type ? Number(pricing[input.room_type]) || 1.0 : 1.0;
+      const pricing =
+        input.resource.room_type_pricing ?? DEFAULT_ROOM_TYPE_PRICING;
+      const multiplier = input.room_type
+        ? Number(pricing[input.room_type]) || 1.0
+        : 1.0;
       const perNight = Number(input.resource.price_per_night) * multiplier;
       final = Math.max(0, gross - perNight * Math.min(dv, nights));
     }

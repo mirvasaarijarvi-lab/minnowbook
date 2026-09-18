@@ -12,10 +12,17 @@ describe("resolveResourceAvailability", () => {
       resolveResourceAvailability({
         date,
         dayOfWeek,
-        weeklyHours: [{ ...day(3), open_time: "09:00", close_time: "17:00", is_closed: false }],
+        weeklyHours: [
+          {
+            ...day(3),
+            open_time: "09:00",
+            close_time: "17:00",
+            is_closed: false,
+          },
+        ],
         occasionalSlots: [],
         blocks: [],
-      })
+      }),
     ).toEqual([{ start: "09:00", end: "17:00" }]);
   });
 
@@ -24,10 +31,17 @@ describe("resolveResourceAvailability", () => {
       resolveResourceAvailability({
         date,
         dayOfWeek,
-        weeklyHours: [{ ...day(3), open_time: "09:00", close_time: "17:00", is_closed: true }],
+        weeklyHours: [
+          {
+            ...day(3),
+            open_time: "09:00",
+            close_time: "17:00",
+            is_closed: true,
+          },
+        ],
         occasionalSlots: [],
         blocks: [],
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -36,10 +50,17 @@ describe("resolveResourceAvailability", () => {
       resolveResourceAvailability({
         date,
         dayOfWeek,
-        weeklyHours: [{ ...day(1), open_time: "09:00", close_time: "17:00", is_closed: false }],
+        weeklyHours: [
+          {
+            ...day(1),
+            open_time: "09:00",
+            close_time: "17:00",
+            is_closed: false,
+          },
+        ],
         occasionalSlots: [],
         blocks: [],
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -49,9 +70,11 @@ describe("resolveResourceAvailability", () => {
         date,
         dayOfWeek,
         weeklyHours: [],
-        occasionalSlots: [{ slot_date: "2026-06-18", start_time: "10:00", end_time: "12:00" }],
+        occasionalSlots: [
+          { slot_date: "2026-06-18", start_time: "10:00", end_time: "12:00" },
+        ],
         blocks: [],
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -61,9 +84,11 @@ describe("resolveResourceAvailability", () => {
         date,
         dayOfWeek,
         weeklyHours: [],
-        occasionalSlots: [{ slot_date: date, start_time: "10:00", end_time: "12:00" }],
+        occasionalSlots: [
+          { slot_date: date, start_time: "10:00", end_time: "12:00" },
+        ],
         blocks: [],
-      })
+      }),
     ).toEqual([{ start: "10:00", end: "12:00" }]);
   });
 
@@ -73,10 +98,19 @@ describe("resolveResourceAvailability", () => {
       resolveResourceAvailability({
         date,
         dayOfWeek,
-        weeklyHours: [{ ...day(3), open_time: "09:00", close_time: "12:00", is_closed: false }],
-        occasionalSlots: [{ slot_date: date, start_time: "11:00", end_time: "14:00" }],
+        weeklyHours: [
+          {
+            ...day(3),
+            open_time: "09:00",
+            close_time: "12:00",
+            is_closed: false,
+          },
+        ],
+        occasionalSlots: [
+          { slot_date: date, start_time: "11:00", end_time: "14:00" },
+        ],
         blocks: [],
-      })
+      }),
     ).toEqual([{ start: "09:00", end: "14:00" }]);
   });
 
@@ -85,10 +119,19 @@ describe("resolveResourceAvailability", () => {
       resolveResourceAvailability({
         date,
         dayOfWeek,
-        weeklyHours: [{ ...day(3), open_time: "09:00", close_time: "12:00", is_closed: false }],
-        occasionalSlots: [{ slot_date: date, start_time: "14:00", end_time: "17:00" }],
+        weeklyHours: [
+          {
+            ...day(3),
+            open_time: "09:00",
+            close_time: "12:00",
+            is_closed: false,
+          },
+        ],
+        occasionalSlots: [
+          { slot_date: date, start_time: "14:00", end_time: "17:00" },
+        ],
         blocks: [],
-      })
+      }),
     ).toEqual([
       { start: "09:00", end: "12:00" },
       { start: "14:00", end: "17:00" },
@@ -100,10 +143,17 @@ describe("resolveResourceAvailability", () => {
       resolveResourceAvailability({
         date,
         dayOfWeek,
-        weeklyHours: [{ ...day(3), open_time: "09:00", close_time: "17:00", is_closed: false }],
+        weeklyHours: [
+          {
+            ...day(3),
+            open_time: "09:00",
+            close_time: "17:00",
+            is_closed: false,
+          },
+        ],
         occasionalSlots: [],
         blocks: [{ date, start_time: "12:00", end_time: "13:00" }],
-      })
+      }),
     ).toEqual([
       { start: "09:00", end: "12:00" },
       { start: "13:00", end: "17:00" },
@@ -115,10 +165,19 @@ describe("resolveResourceAvailability", () => {
       resolveResourceAvailability({
         date,
         dayOfWeek,
-        weeklyHours: [{ ...day(3), open_time: "09:00", close_time: "17:00", is_closed: false }],
-        occasionalSlots: [{ slot_date: date, start_time: "18:00", end_time: "20:00" }],
+        weeklyHours: [
+          {
+            ...day(3),
+            open_time: "09:00",
+            close_time: "17:00",
+            is_closed: false,
+          },
+        ],
+        occasionalSlots: [
+          { slot_date: date, start_time: "18:00", end_time: "20:00" },
+        ],
         blocks: [{ date, start_time: null, end_time: null }],
-      })
+      }),
     ).toEqual([]);
   });
 
@@ -127,10 +186,19 @@ describe("resolveResourceAvailability", () => {
       resolveResourceAvailability({
         date,
         dayOfWeek,
-        weeklyHours: [{ ...day(3), open_time: "09:00", close_time: "17:00", is_closed: false }],
+        weeklyHours: [
+          {
+            ...day(3),
+            open_time: "09:00",
+            close_time: "17:00",
+            is_closed: false,
+          },
+        ],
         occasionalSlots: [],
-        blocks: [{ date: "2026-06-18", start_time: "09:00", end_time: "17:00" }],
-      })
+        blocks: [
+          { date: "2026-06-18", start_time: "09:00", end_time: "17:00" },
+        ],
+      }),
     ).toEqual([{ start: "09:00", end: "17:00" }]);
   });
 
@@ -139,10 +207,17 @@ describe("resolveResourceAvailability", () => {
       resolveResourceAvailability({
         date,
         dayOfWeek,
-        weeklyHours: [{ ...day(3), open_time: "09:30:00", close_time: "17:45:00", is_closed: false }],
+        weeklyHours: [
+          {
+            ...day(3),
+            open_time: "09:30:00",
+            close_time: "17:45:00",
+            is_closed: false,
+          },
+        ],
         occasionalSlots: [],
         blocks: [],
-      })
+      }),
     ).toEqual([{ start: "09:30", end: "17:45" }]);
   });
 

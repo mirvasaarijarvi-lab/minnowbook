@@ -5,10 +5,30 @@ import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, TrendingUp, Flame, LineChart as LineChartIcon } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Loader2,
+  TrendingUp,
+  Flame,
+  LineChart as LineChartIcon,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { format, addDays, subDays, parseISO } from "date-fns";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { useT } from "@/contexts/I18nContext";
 
 const HISTORY_DAYS = 90;
@@ -36,12 +56,20 @@ const ForecastPanel = () => {
   const forecastEnd = format(addDays(today, FORECAST_DAYS), "yyyy-MM-dd");
 
   const { data = [], isLoading } = useQuery({
-    queryKey: ["forecast-reservations", tenantId, selectedSiteId, historyStart, forecastEnd],
+    queryKey: [
+      "forecast-reservations",
+      tenantId,
+      selectedSiteId,
+      historyStart,
+      forecastEnd,
+    ],
     enabled: !!tenantId,
     queryFn: async () => {
       let query = supabase
         .from("reservations")
-        .select("id, date, start_time, status, guests_count, estimated_guests, site_id, reservation_type")
+        .select(
+          "id, date, start_time, status, guests_count, estimated_guests, site_id, reservation_type",
+        )
         .eq("tenant_id", tenantId!)
         .gte("date", historyStart)
         .lte("date", forecastEnd)
@@ -62,7 +90,13 @@ const ForecastPanel = () => {
    */
   const trendStart = format(subDays(today, 730), "yyyy-MM-dd");
   const { data: trendRows = [] } = useQuery({
-    queryKey: ["forecast-trend", tenantId, selectedSiteId, trendStart, todayStr],
+    queryKey: [
+      "forecast-trend",
+      tenantId,
+      selectedSiteId,
+      trendStart,
+      todayStr,
+    ],
     enabled: !!tenantId,
     queryFn: async () => {
       let query = supabase
@@ -101,7 +135,10 @@ const ForecastPanel = () => {
     for (let i = 11; i >= 0; i--) {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
       const key = format(d, "yyyy-MM");
-      const prevKey = format(new Date(d.getFullYear() - 1, d.getMonth(), 1), "yyyy-MM");
+      const prevKey = format(
+        new Date(d.getFullYear() - 1, d.getMonth(), 1),
+        "yyyy-MM",
+      );
       const cur = totals.get(key) ?? { count: 0, guests: 0 };
       const prev = totals.get(prevKey) ?? { count: 0, guests: 0 };
       months.push({
@@ -111,7 +148,10 @@ const ForecastPanel = () => {
         previous: prev.count,
         guests: cur.guests,
         guestsPrev: prev.guests,
-        delta: prev.count > 0 ? Math.round(((cur.count - prev.count) / prev.count) * 100) : null,
+        delta:
+          prev.count > 0
+            ? Math.round(((cur.count - prev.count) / prev.count) * 100)
+            : null,
       });
     }
     return months;
@@ -123,7 +163,10 @@ const ForecastPanel = () => {
     return {
       current,
       previous,
-      delta: previous > 0 ? Math.round(((current - previous) / previous) * 100) : null,
+      delta:
+        previous > 0
+          ? Math.round(((current - previous) / previous) * 100)
+          : null,
     };
   }, [yoy]);
 
@@ -139,7 +182,11 @@ const ForecastPanel = () => {
       entry.guests += r.guests_count ?? r.estimated_guests ?? 0;
       perDay.set(r.date, entry);
     }
-    const weekdayTotals = Array.from({ length: 7 }, () => ({ count: 0, guests: 0, days: 0 }));
+    const weekdayTotals = Array.from({ length: 7 }, () => ({
+      count: 0,
+      guests: 0,
+      days: 0,
+    }));
     for (const [date, entry] of perDay) {
       const wd = parseISO(date).getDay();
       weekdayTotals[wd].count += entry.count;
@@ -156,7 +203,10 @@ const ForecastPanel = () => {
       const key = format(d, "yyyy-MM-dd");
       const dayRows = upcoming.filter((r) => r.date === key);
       const booked = dayRows.length;
-      const bookedGuests = dayRows.reduce((sum, r) => sum + (r.guests_count ?? r.estimated_guests ?? 0), 0);
+      const bookedGuests = dayRows.reduce(
+        (sum, r) => sum + (r.guests_count ?? r.estimated_guests ?? 0),
+        0,
+      );
       const expected = weekdayAverages[d.getDay()].avgCount;
       return {
         date: key,
@@ -183,8 +233,13 @@ const ForecastPanel = () => {
   }, [data, today, todayStr]);
 
   const weekdayLabels = [
-    t("forecast.sun"), t("forecast.mon"), t("forecast.tue"), t("forecast.wed"),
-    t("forecast.thu"), t("forecast.fri"), t("forecast.sat"),
+    t("forecast.sun"),
+    t("forecast.mon"),
+    t("forecast.tue"),
+    t("forecast.wed"),
+    t("forecast.thu"),
+    t("forecast.fri"),
+    t("forecast.sat"),
   ];
   const orderedDays = [1, 2, 3, 4, 5, 6, 0];
 
@@ -200,7 +255,10 @@ const ForecastPanel = () => {
         Number(r.start_time.slice(0, 2)) === drill.hour &&
         parseISO(r.date).getDay() === drill.wd,
     );
-    const guests = rows.reduce((sum, r) => sum + (r.guests_count ?? r.estimated_guests ?? 0), 0);
+    const guests = rows.reduce(
+      (sum, r) => sum + (r.guests_count ?? r.estimated_guests ?? 0),
+      0,
+    );
     const byType = new Map<string, number>();
     for (const r of rows) {
       const key = r.reservation_type || "other";
@@ -216,15 +274,21 @@ const ForecastPanel = () => {
 
   const busiest = useMemo(() => {
     let best = { wd: 1, hourIdx: 0, value: 0 };
-    heatmap.forEach((row, wd) => row.forEach((v, hourIdx) => {
-      if (v > best.value) best = { wd, hourIdx, value: v };
-    }));
+    heatmap.forEach((row, wd) =>
+      row.forEach((v, hourIdx) => {
+        if (v > best.value) best = { wd, hourIdx, value: v };
+      }),
+    );
     return best;
   }, [heatmap]);
 
   if (isLoading) {
     return (
-      <Card><CardContent className="py-10 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></CardContent></Card>
+      <Card>
+        <CardContent className="py-10 flex justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        </CardContent>
+      </Card>
     );
   }
 
@@ -236,37 +300,70 @@ const ForecastPanel = () => {
             <TrendingUp className="h-5 w-5 text-primary" />
             {t("forecast.title")}
           </CardTitle>
-          <p className="text-sm text-muted-foreground">{t("forecast.subtitle")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("forecast.subtitle")}
+          </p>
         </CardHeader>
         <CardContent>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={forecast}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  className="stroke-border"
+                />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip
-                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
                   labelStyle={{ color: "hsl(var(--foreground))" }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="booked" name={t("forecast.booked")} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="expected" name={t("forecast.expected")} fill="hsl(var(--muted-foreground))" fillOpacity={0.45} radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="booked"
+                  name={t("forecast.booked")}
+                  fill="hsl(var(--primary))"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="expected"
+                  name={t("forecast.expected")}
+                  fill="hsl(var(--muted-foreground))"
+                  fillOpacity={0.45}
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="mt-4 grid gap-2 sm:grid-cols-3 text-sm">
             <div className="rounded-md border border-border p-3">
-              <p className="text-muted-foreground text-xs">{t("forecast.next14Booked")}</p>
-              <p className="text-lg font-semibold">{forecast.reduce((s, f) => s + f.booked, 0)}</p>
+              <p className="text-muted-foreground text-xs">
+                {t("forecast.next14Booked")}
+              </p>
+              <p className="text-lg font-semibold">
+                {forecast.reduce((s, f) => s + f.booked, 0)}
+              </p>
             </div>
             <div className="rounded-md border border-border p-3">
-              <p className="text-muted-foreground text-xs">{t("forecast.next14Guests")}</p>
-              <p className="text-lg font-semibold">{forecast.reduce((s, f) => s + f.bookedGuests, 0)}</p>
+              <p className="text-muted-foreground text-xs">
+                {t("forecast.next14Guests")}
+              </p>
+              <p className="text-lg font-semibold">
+                {forecast.reduce((s, f) => s + f.bookedGuests, 0)}
+              </p>
             </div>
             <div className="rounded-md border border-border p-3">
-              <p className="text-muted-foreground text-xs">{t("forecast.gapToPace")}</p>
-              <p className="text-lg font-semibold">{Math.round(forecast.reduce((s, f) => s + f.gap, 0))}</p>
+              <p className="text-muted-foreground text-xs">
+                {t("forecast.gapToPace")}
+              </p>
+              <p className="text-lg font-semibold">
+                {Math.round(forecast.reduce((s, f) => s + f.gap, 0))}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -278,7 +375,9 @@ const ForecastPanel = () => {
             <Flame className="h-5 w-5 text-primary" />
             {t("forecast.peakHours")}
           </CardTitle>
-          <p className="text-sm text-muted-foreground">{t("forecast.peakSubtitle")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("forecast.peakSubtitle")}
+          </p>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="overflow-x-auto">
@@ -286,12 +385,19 @@ const ForecastPanel = () => {
               <div className="flex">
                 <div className="w-12 shrink-0" />
                 {HOURS.map((h) => (
-                  <div key={h} className="flex-1 text-center text-[10px] text-muted-foreground">{String(h).padStart(2, "0")}</div>
+                  <div
+                    key={h}
+                    className="flex-1 text-center text-[10px] text-muted-foreground"
+                  >
+                    {String(h).padStart(2, "0")}
+                  </div>
                 ))}
               </div>
               {orderedDays.map((wd) => (
                 <div key={wd} className="flex items-center">
-                  <div className="w-12 shrink-0 text-xs text-muted-foreground">{weekdayLabels[wd]}</div>
+                  <div className="w-12 shrink-0 text-xs text-muted-foreground">
+                    {weekdayLabels[wd]}
+                  </div>
                   {HOURS.map((h, i) => {
                     const v = heatmap[wd][i];
                     return (
@@ -302,7 +408,9 @@ const ForecastPanel = () => {
                           aria-label={`${weekdayLabels[wd]} ${String(h).padStart(2, "0")}:00, ${v}`}
                           onClick={() => setDrill({ wd, hour: h })}
                           className="h-6 w-full rounded-sm border border-border/40 transition-colors hover:border-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-                          style={{ backgroundColor: `hsl(var(--primary) / ${v ? 0.12 + (v / maxHeat) * 0.7 : 0.04})` }}
+                          style={{
+                            backgroundColor: `hsl(var(--primary) / ${v ? 0.12 + (v / maxHeat) * 0.7 : 0.04})`,
+                          }}
                         />
                       </div>
                     );
@@ -313,9 +421,13 @@ const ForecastPanel = () => {
           </div>
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             <Badge variant="outline">
-              {t("forecast.busiest")}: {weekdayLabels[busiest.wd]} {String(HOURS[busiest.hourIdx]).padStart(2, "0")}:00 ({busiest.value})
+              {t("forecast.busiest")}: {weekdayLabels[busiest.wd]}{" "}
+              {String(HOURS[busiest.hourIdx]).padStart(2, "0")}:00 (
+              {busiest.value})
             </Badge>
-            <span>{t("forecast.basedOn")} {HISTORY_DAYS}</span>
+            <span>
+              {t("forecast.basedOn")} {HISTORY_DAYS}
+            </span>
             <span>{t("forecast.drilldownHint")}</span>
           </div>
         </CardContent>
@@ -327,73 +439,121 @@ const ForecastPanel = () => {
             <LineChartIcon className="h-5 w-5 text-primary" />
             {t("forecast.yoyTitle")}
           </CardTitle>
-          <p className="text-sm text-muted-foreground">{t("forecast.yoySubtitle")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("forecast.yoySubtitle")}
+          </p>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={yoy}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  className="stroke-border"
+                />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip
-                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{
+                    background: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
                   labelStyle={{ color: "hsl(var(--foreground))" }}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="previous" name={t("forecast.lastYear")} fill="hsl(var(--muted-foreground))" fillOpacity={0.4} radius={[4, 4, 0, 0]} />
-                <Bar dataKey="current" name={t("forecast.thisYear")} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar
+                  dataKey="previous"
+                  name={t("forecast.lastYear")}
+                  fill="hsl(var(--muted-foreground))"
+                  fillOpacity={0.4}
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="current"
+                  name={t("forecast.thisYear")}
+                  fill="hsl(var(--primary))"
+                  radius={[4, 4, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
           <div className="grid gap-2 sm:grid-cols-3 text-sm">
             <div className="rounded-md border border-border p-3">
-              <p className="text-muted-foreground text-xs">{t("forecast.thisYear")}</p>
+              <p className="text-muted-foreground text-xs">
+                {t("forecast.thisYear")}
+              </p>
               <p className="text-lg font-semibold">{yoySummary.current}</p>
             </div>
             <div className="rounded-md border border-border p-3">
-              <p className="text-muted-foreground text-xs">{t("forecast.lastYear")}</p>
+              <p className="text-muted-foreground text-xs">
+                {t("forecast.lastYear")}
+              </p>
               <p className="text-lg font-semibold">{yoySummary.previous}</p>
             </div>
             <div className="rounded-md border border-border p-3">
-              <p className="text-muted-foreground text-xs">{t("forecast.change")}</p>
+              <p className="text-muted-foreground text-xs">
+                {t("forecast.change")}
+              </p>
               <p className="text-lg font-semibold">
-                {yoySummary.delta === null ? "-" : `${yoySummary.delta > 0 ? "+" : ""}${yoySummary.delta} %`}
+                {yoySummary.delta === null
+                  ? "-"
+                  : `${yoySummary.delta > 0 ? "+" : ""}${yoySummary.delta} %`}
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Dialog open={!!drill} onOpenChange={(open) => { if (!open) setDrill(null); }}>
+      <Dialog
+        open={!!drill}
+        onOpenChange={(open) => {
+          if (!open) setDrill(null);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="font-serif">{t("forecast.drilldownTitle")}</DialogTitle>
+            <DialogTitle className="font-serif">
+              {t("forecast.drilldownTitle")}
+            </DialogTitle>
             <DialogDescription>
-              {drill ? `${weekdayLabels[drill.wd]} ${String(drill.hour).padStart(2, "0")}:00` : ""}
+              {drill
+                ? `${weekdayLabels[drill.wd]} ${String(drill.hour).padStart(2, "0")}:00`
+                : ""}
             </DialogDescription>
           </DialogHeader>
           {drillDetail && drillDetail.count === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("forecast.drilldownEmpty")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t("forecast.drilldownEmpty")}
+            </p>
           ) : drillDetail ? (
             <div className="space-y-3">
               <div className="grid grid-cols-3 gap-2 text-sm">
                 <div className="rounded-md border border-border p-2">
-                  <p className="text-xs text-muted-foreground">{t("forecast.bookings")}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("forecast.bookings")}
+                  </p>
                   <p className="font-semibold">{drillDetail.count}</p>
                 </div>
                 <div className="rounded-md border border-border p-2">
-                  <p className="text-xs text-muted-foreground">{t("forecast.next14Guests")}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("forecast.next14Guests")}
+                  </p>
                   <p className="font-semibold">{drillDetail.guests}</p>
                 </div>
                 <div className="rounded-md border border-border p-2">
-                  <p className="text-xs text-muted-foreground">{t("forecast.avgGuests")}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("forecast.avgGuests")}
+                  </p>
                   <p className="font-semibold">{drillDetail.avgGuests}</p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
                 {drillDetail.types.map(([type, count]) => (
-                  <Badge key={type} variant="outline" className="capitalize">{type}: {count}</Badge>
+                  <Badge key={type} variant="outline" className="capitalize">
+                    {type}: {count}
+                  </Badge>
                 ))}
               </div>
             </div>

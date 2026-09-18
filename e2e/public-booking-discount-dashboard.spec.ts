@@ -61,7 +61,10 @@ test.describe("Public booking with a discount code", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("stores the discounted price and shows it with invoice fields in the dashboard", async ({
     ephemeralTenant,
@@ -113,27 +116,30 @@ test.describe("Public booking with a discount code", () => {
     expect(code!.used_count).toBe(0);
 
     // 3. Book through the real public edge function, as a guest would.
-    const res = await request.post(`${SUPABASE_URL}/functions/v1/public-booking`, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        apikey: SUPABASE_ANON_KEY,
+    const res = await request.post(
+      `${SUPABASE_URL}/functions/v1/public-booking`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          apikey: SUPABASE_ANON_KEY,
+        },
+        data: {
+          tenant_id: tenantId,
+          reservation_type: "guesthouse",
+          resource_id: resourceId,
+          date: checkIn,
+          check_out_date: checkOut,
+          guests_count: 2,
+          guest_name: guestName,
+          guest_email: guestEmail,
+          guest_phone: "+358401234567",
+          promo_code: promoCode.toLowerCase(), // case-insensitive claim
+          special_requests: "Created by the E2E discount spec.",
+        },
+        timeout: 30_000,
       },
-      data: {
-        tenant_id: tenantId,
-        reservation_type: "guesthouse",
-        resource_id: resourceId,
-        date: checkIn,
-        check_out_date: checkOut,
-        guests_count: 2,
-        guest_name: guestName,
-        guest_email: guestEmail,
-        guest_phone: "+358401234567",
-        promo_code: promoCode.toLowerCase(), // case-insensitive claim
-        special_requests: "Created by the E2E discount spec.",
-      },
-      timeout: 30_000,
-    });
+    );
     const bodyText = await res.text();
     expect(res.status(), `public-booking failed: ${bodyText}`).toBe(200);
 
@@ -167,24 +173,31 @@ test.describe("Public booking with a discount code", () => {
     expect(claimed!.used_count).toBe(1);
 
     // 5. Sign the owner in and inspect the booking in the dashboard.
-    const { error: pwErr } = await admin.auth.admin.updateUserById(ownerUserId, {
-      password: ownerPassword,
-    });
+    const { error: pwErr } = await admin.auth.admin.updateUserById(
+      ownerUserId,
+      {
+        password: ownerPassword,
+      },
+    );
     expect(pwErr, pwErr?.message).toBeNull();
 
     const anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: signIn, error: signInErr } = await anon.auth.signInWithPassword({
-      email: ownerEmail,
-      password: ownerPassword,
-    });
+    const { data: signIn, error: signInErr } =
+      await anon.auth.signInWithPassword({
+        email: ownerEmail,
+        password: ownerPassword,
+      });
     expect(signInErr, `owner sign-in failed: ${signInErr?.message}`).toBeNull();
     await seedSession(page, signIn.session);
 
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/dashboard/);
-    await page.getByRole("button", { name: "Reservations", exact: true }).first().click();
+    await page
+      .getByRole("button", { name: "Reservations", exact: true })
+      .first()
+      .click();
 
     // The row for this guest: price, discount badge and invoice controls.
     const card = page
@@ -193,10 +206,16 @@ test.describe("Public booking with a discount code", () => {
       .filter({ hasText: `€${FINAL_EUR.toFixed(2)}` })
       .last();
     await expect(card).toBeVisible({ timeout: 20_000 });
-    await expect(card.getByText(`€${FINAL_EUR.toFixed(2)}`).first()).toBeVisible();
+    await expect(
+      card.getByText(`€${FINAL_EUR.toFixed(2)}`).first(),
+    ).toBeVisible();
     // Discount badge uses a minus sign (U+2212) before the percentage.
-    await expect(card.getByText(`\u2212${DISCOUNT_PERCENT}%`).first()).toBeVisible();
-    await expect(card.getByText(new RegExp(promoCode, "i")).first()).toBeVisible();
+    await expect(
+      card.getByText(`\u2212${DISCOUNT_PERCENT}%`).first(),
+    ).toBeVisible();
+    await expect(
+      card.getByText(new RegExp(promoCode, "i")).first(),
+    ).toBeVisible();
 
     const invoicedToggle = card
       .locator("label")
@@ -207,7 +226,9 @@ test.describe("Public booking with a discount code", () => {
 
     // 6. Marking it invoiced from the dashboard persists to the booking.
     await invoicedBox.click();
-    await expect(invoicedBox).toHaveAttribute("data-state", "checked", { timeout: 15_000 });
+    await expect(invoicedBox).toHaveAttribute("data-state", "checked", {
+      timeout: 15_000,
+    });
     await expect
       .poll(
         async () => {
@@ -216,7 +237,9 @@ test.describe("Public booking with a discount code", () => {
             .select("is_invoiced, price_eur")
             .eq("id", row.id)
             .single();
-          return data?.is_invoiced === true && Number(data?.price_eur) === FINAL_EUR;
+          return (
+            data?.is_invoiced === true && Number(data?.price_eur) === FINAL_EUR
+          );
         },
         { timeout: 15_000, intervals: [500, 1000, 2000] },
       )

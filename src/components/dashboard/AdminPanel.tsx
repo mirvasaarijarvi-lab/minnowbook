@@ -8,15 +8,57 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Key, Trash2, Shield, Users, Building2, ShieldCheck, Lock } from "lucide-react";
+import {
+  Plus,
+  Key,
+  Trash2,
+  Shield,
+  Users,
+  Building2,
+  ShieldCheck,
+  Lock,
+} from "lucide-react";
 import { useNavigate } from "@/lib/router-compat";
 import PasswordInput from "@/components/PasswordInput";
 import { useT } from "@/contexts/I18nContext";
@@ -66,7 +108,10 @@ const roleBadgeColors: Record<string, string> = {
 
 const getEffectiveRole = (u: TenantUser) => u.custom_role_key || u.role;
 
-const getRoleLabel = (u: TenantUser, roleDefs: { role_key: string; display_name: string }[]) => {
+const getRoleLabel = (
+  u: TenantUser,
+  roleDefs: { role_key: string; display_name: string }[],
+) => {
   const effective = getEffectiveRole(u);
   const def = roleDefs.find((r) => r.role_key === effective);
   return def?.display_name || effective;
@@ -84,7 +129,9 @@ const AdminPanel = () => {
   // localized message; everything else falls back to the raw server text.
   const showError = (err: unknown) => {
     const tierErr = formatTierError(err);
-    const description = tierErr ? tierErr.message : (err as { message?: string })?.message;
+    const description = tierErr
+      ? tierErr.message
+      : (err as { message?: string })?.message;
     toast({ title: "Error", description, variant: "destructive" });
   };
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -92,7 +139,9 @@ const AdminPanel = () => {
   const [siteDialogOpen, setSiteDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedUserName, setSelectedUserName] = useState<string>("");
-  const [editingAssignments, setEditingAssignments] = useState<Record<string, string>>({});
+  const [editingAssignments, setEditingAssignments] = useState<
+    Record<string, string>
+  >({});
   const [newPassword, setNewPassword] = useState("");
   const [newPasswordValid, setNewPasswordValid] = useState(false);
   const [newUserPasswordValid, setNewUserPasswordValid] = useState(false);
@@ -106,7 +155,9 @@ const AdminPanel = () => {
   const isBusiness = hasMultiSiteAccess;
 
   const invokeAdmin = async (body: any) => {
-    const { data, error } = await supabase.functions.invoke("admin-users", { body });
+    const { data, error } = await supabase.functions.invoke("admin-users", {
+      body,
+    });
     if (error) {
       // Try to extract the actual error message from the response context
       if (data?.error) throw new Error(data.error);
@@ -121,7 +172,8 @@ const AdminPanel = () => {
             if (parsed?.error) throw new Error(parsed.error);
           }
         } catch (parseErr: any) {
-          if (parseErr?.message && parseErr.message !== error.message) throw parseErr;
+          if (parseErr?.message && parseErr.message !== error.message)
+            throw parseErr;
         }
       }
       throw error;
@@ -186,7 +238,6 @@ const AdminPanel = () => {
     return assignableCustomRoles.some((r) => r.role_key === key);
   };
 
-
   const createMutation = useMutation({
     // Re-validate the staff limit at submit time. The user could have been
     // sitting on the dialog while:
@@ -215,7 +266,8 @@ const AdminPanel = () => {
       // we just validated against.
       queryClient.setQueryData(["admin-users", tenantId], freshUsers);
 
-      const freshTier = (freshTenant?.tier as string | undefined) ?? tenant?.tier;
+      const freshTier =
+        (freshTenant?.tier as string | undefined) ?? tenant?.tier;
       const freshMax = getMaxStaffUsers(freshTier);
       const freshCount = Array.isArray(freshUsers) ? freshUsers.length : 0;
 
@@ -240,7 +292,6 @@ const AdminPanel = () => {
         role: isSystemRole ? newUser.role : "staff",
         customRoleKey: isSystemRole ? undefined : newUser.role,
       });
-
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
@@ -276,9 +327,14 @@ const AdminPanel = () => {
     },
   });
 
-
   const updateSiteAssignmentsMutation = useMutation({
-    mutationFn: ({ userId, assignments }: { userId: string; assignments: { siteId: string; role: string }[] }) =>
+    mutationFn: ({
+      userId,
+      assignments,
+    }: {
+      userId: string;
+      assignments: { siteId: string; role: string }[];
+    }) =>
       invokeAdmin({ action: "update_site_assignments", userId, assignments }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
@@ -292,7 +348,11 @@ const AdminPanel = () => {
 
   const changePasswordMutation = useMutation({
     mutationFn: () =>
-      invokeAdmin({ action: "change_password", userId: selectedUserId, newPassword }),
+      invokeAdmin({
+        action: "change_password",
+        userId: selectedUserId,
+        newPassword,
+      }),
     onSuccess: () => {
       setPasswordDialogOpen(false);
       setNewPassword("");
@@ -346,11 +406,16 @@ const AdminPanel = () => {
 
   const saveSiteAssignments = () => {
     if (!selectedUserId) return;
-    const assignments = Object.entries(editingAssignments).map(([siteId, role]) => ({
-      siteId,
-      role,
-    }));
-    updateSiteAssignmentsMutation.mutate({ userId: selectedUserId, assignments });
+    const assignments = Object.entries(editingAssignments).map(
+      ([siteId, role]) => ({
+        siteId,
+        role,
+      }),
+    );
+    updateSiteAssignmentsMutation.mutate({
+      userId: selectedUserId,
+      assignments,
+    });
   };
 
   const getSiteNames = (user: TenantUser) => {
@@ -381,7 +446,9 @@ const AdminPanel = () => {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Users className="h-5 w-5 text-primary" />
-              <CardTitle className="font-serif">{t("admin.userManagement")}</CardTitle>
+              <CardTitle className="font-serif">
+                {t("admin.userManagement")}
+              </CardTitle>
               <DashboardTooltip text={t("admin.userManagementDesc")} />
               <StaffLimitBadge
                 tier={tenant?.tier}
@@ -394,54 +461,119 @@ const AdminPanel = () => {
                 <TooltipTrigger asChild>
                   <span>
                     <DialogTrigger asChild>
-                      <Button size="sm" className="gap-1.5" disabled={isAtStaffLimit}>
+                      <Button
+                        size="sm"
+                        className="gap-1.5"
+                        disabled={isAtStaffLimit}
+                      >
                         {isAtStaffLimit ? (
-                          <><Lock className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{tierMaxStaff ?? "∞"})</>
+                          <>
+                            <Lock className="h-4 w-4" /> {t("admin.addUser")} (
+                            {userList.length}/{tierMaxStaff ?? "∞"})
+                          </>
                         ) : (
-                          <><Plus className="h-4 w-4" /> {t("admin.addUser")} ({userList.length}/{isSystemAdmin || tierMaxStaff === null ? "∞" : tierMaxStaff})</>
+                          <>
+                            <Plus className="h-4 w-4" /> {t("admin.addUser")} (
+                            {userList.length}/
+                            {isSystemAdmin || tierMaxStaff === null
+                              ? "∞"
+                              : tierMaxStaff}
+                            )
+                          </>
                         )}
                       </Button>
                     </DialogTrigger>
                   </span>
                 </TooltipTrigger>
                 {isAtStaffLimit && (
-                  <TooltipContent>{t("admin.staffLimitReached")}</TooltipContent>
+                  <TooltipContent>
+                    {t("admin.staffLimitReached")}
+                  </TooltipContent>
                 )}
               </Tooltip>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle className="font-serif">{t("admin.addUser")}</DialogTitle>
+                  <DialogTitle className="font-serif">
+                    {t("admin.addUser")}
+                  </DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 pt-2">
                   <div>
                     <Label>{t("common.email")}</Label>
-                    <Input type="email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} placeholder="user@example.com" />
+                    <Input
+                      type="email"
+                      value={newUser.email}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, email: e.target.value })
+                      }
+                      placeholder="user@example.com"
+                    />
                   </div>
                   <div>
                     <Label>{t("common.name")}</Label>
-                    <Input value={newUser.displayName} onChange={(e) => setNewUser({ ...newUser, displayName: e.target.value })} placeholder="Display name" />
+                    <Input
+                      value={newUser.displayName}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, displayName: e.target.value })
+                      }
+                      placeholder="Display name"
+                    />
                   </div>
                   <div>
-                    <PasswordInput id="new-user-password" value={newUser.password} onChange={(e) => setNewUser({ ...newUser, password: e.target.value })} label={t("common.password")} onValidChange={setNewUserPasswordValid} />
+                    <PasswordInput
+                      id="new-user-password"
+                      value={newUser.password}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, password: e.target.value })
+                      }
+                      label={t("common.password")}
+                      onValidChange={setNewUserPasswordValid}
+                    />
                   </div>
                   <div>
                     <Label>{t("admin.role")}</Label>
-                    <Select value={newUser.role} onValueChange={(v) => setNewUser({ ...newUser, role: v })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                    <Select
+                      value={newUser.role}
+                      onValueChange={(v) => setNewUser({ ...newUser, role: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="staff">{t("admin.staff")}</SelectItem>
-                        <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
-                        {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
-                        {(isSuperadmin || isSystemAdmin) && <SelectItem value="superadmin">Superadmin</SelectItem>}
+                        <SelectItem value="staff">
+                          {t("admin.staff")}
+                        </SelectItem>
+                        <SelectItem value="admin">
+                          {t("admin.adminRole")}
+                        </SelectItem>
+                        {isOwner && (
+                          <SelectItem value="owner">
+                            {t("admin.owner")}
+                          </SelectItem>
+                        )}
+                        {(isSuperadmin || isSystemAdmin) && (
+                          <SelectItem value="superadmin">Superadmin</SelectItem>
+                        )}
                         {assignableCustomRoles.map((r) => (
-
-                          <SelectItem key={r.role_key} value={r.role_key}>{r.display_name}</SelectItem>
+                          <SelectItem key={r.role_key} value={r.role_key}>
+                            {r.display_name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button className="w-full" onClick={() => createMutation.mutate()} disabled={!newUser.email || !newUserPasswordValid || createMutation.isPending}>
-                    {createMutation.isPending ? t("common.saving") : t("admin.addUser")}
+                  <Button
+                    className="w-full"
+                    onClick={() => createMutation.mutate()}
+                    disabled={
+                      !newUser.email ||
+                      !newUserPasswordValid ||
+                      createMutation.isPending
+                    }
+                  >
+                    {createMutation.isPending
+                      ? t("common.saving")
+                      : t("admin.addUser")}
                   </Button>
                 </div>
               </DialogContent>
@@ -450,22 +582,53 @@ const AdminPanel = () => {
         </CardHeader>
         <CardContent>
           {/* Change password dialog */}
-          <Dialog open={passwordDialogOpen} onOpenChange={(open) => { setPasswordDialogOpen(open); if (!open) { setNewPassword(""); setSelectedUserId(null); } }}>
+          <Dialog
+            open={passwordDialogOpen}
+            onOpenChange={(open) => {
+              setPasswordDialogOpen(open);
+              if (!open) {
+                setNewPassword("");
+                setSelectedUserId(null);
+              }
+            }}
+          >
             <DialogContent>
               <DialogHeader>
-                <DialogTitle className="font-serif">{t("admin.changePassword")}</DialogTitle>
+                <DialogTitle className="font-serif">
+                  {t("admin.changePassword")}
+                </DialogTitle>
               </DialogHeader>
               <div className="space-y-4 pt-2">
-                <PasswordInput id="change-password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} label={t("admin.newPassword")} onValidChange={setNewPasswordValid} />
-                <Button className="w-full" onClick={() => changePasswordMutation.mutate()} disabled={!newPasswordValid || changePasswordMutation.isPending}>
-                  {changePasswordMutation.isPending ? t("common.saving") : t("admin.changePassword")}
+                <PasswordInput
+                  id="change-password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  label={t("admin.newPassword")}
+                  onValidChange={setNewPasswordValid}
+                />
+                <Button
+                  className="w-full"
+                  onClick={() => changePasswordMutation.mutate()}
+                  disabled={
+                    !newPasswordValid || changePasswordMutation.isPending
+                  }
+                >
+                  {changePasswordMutation.isPending
+                    ? t("common.saving")
+                    : t("admin.changePassword")}
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
 
           {/* Site assignments dialog */}
-          <Dialog open={siteDialogOpen} onOpenChange={(open) => { setSiteDialogOpen(open); if (!open) setSelectedUserId(null); }}>
+          <Dialog
+            open={siteDialogOpen}
+            onOpenChange={(open) => {
+              setSiteDialogOpen(open);
+              if (!open) setSelectedUserId(null);
+            }}
+          >
             <DialogContent>
               <DialogHeader>
                 <DialogTitle className="font-serif flex items-center gap-2">
@@ -482,28 +645,41 @@ const AdminPanel = () => {
                   sites.map((site) => {
                     const isAssigned = !!editingAssignments[site.id];
                     return (
-                      <div key={site.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+                      <div
+                        key={site.id}
+                        className="flex items-center gap-3 p-3 rounded-lg border bg-card"
+                      >
                         <Checkbox
                           checked={isAssigned}
                           onCheckedChange={() => toggleSiteAssignment(site.id)}
                           id={`site-${site.id}`}
                         />
-                        <label htmlFor={`site-${site.id}`} className="flex-1 text-sm font-medium cursor-pointer">
+                        <label
+                          htmlFor={`site-${site.id}`}
+                          className="flex-1 text-sm font-medium cursor-pointer"
+                        >
                           {site.name}
                         </label>
                         {isAssigned && (
                           <Select
                             value={editingAssignments[site.id]}
                             onValueChange={(v) =>
-                              setEditingAssignments((prev) => ({ ...prev, [site.id]: v }))
+                              setEditingAssignments((prev) => ({
+                                ...prev,
+                                [site.id]: v,
+                              }))
                             }
                           >
                             <SelectTrigger className="w-[100px] h-8 text-xs">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="staff">{t("admin.staff")}</SelectItem>
-                              <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
+                              <SelectItem value="staff">
+                                {t("admin.staff")}
+                              </SelectItem>
+                              <SelectItem value="admin">
+                                {t("admin.adminRole")}
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                         )}
@@ -516,7 +692,9 @@ const AdminPanel = () => {
                   onClick={saveSiteAssignments}
                   disabled={updateSiteAssignmentsMutation.isPending}
                 >
-                  {updateSiteAssignmentsMutation.isPending ? t("common.saving") : t("common.save")}
+                  {updateSiteAssignmentsMutation.isPending
+                    ? t("common.saving")
+                    : t("common.save")}
                 </Button>
               </div>
             </DialogContent>
@@ -534,11 +712,16 @@ const AdminPanel = () => {
           {isLoading ? (
             <div className="space-y-3">
               {[1, 2].map((i) => (
-                <div key={i} className="h-12 rounded-md bg-muted animate-pulse" />
+                <div
+                  key={i}
+                  className="h-12 rounded-md bg-muted animate-pulse"
+                />
               ))}
             </div>
           ) : !userList.length ? (
-            <p className="text-sm text-muted-foreground text-center py-6">{t("admin.noUsers")}</p>
+            <p className="text-sm text-muted-foreground text-center py-6">
+              {t("admin.noUsers")}
+            </p>
           ) : (
             <Table>
               <TableHeader>
@@ -548,7 +731,9 @@ const AdminPanel = () => {
                   <TableHead>{t("admin.colRole")}</TableHead>
                   {isBusiness && <TableHead>{t("admin.colSites")}</TableHead>}
                   <TableHead>{t("admin.colStatus")}</TableHead>
-                  <TableHead className="text-right">{t("admin.colActions")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("admin.colActions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -556,23 +741,46 @@ const AdminPanel = () => {
                   const siteInfo = isBusiness ? getSiteNames(u) : null;
                   return (
                     <TableRow key={u.id}>
-                      <TableCell className="font-medium">{u.display_name || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{u.email}</TableCell>
+                      <TableCell className="font-medium">
+                        {u.display_name || "—"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {u.email}
+                      </TableCell>
                       <TableCell>
                         <Select
                           value={getEffectiveRole(u)}
-                          onValueChange={(role) => updateRoleMutation.mutate({ userId: u.user_id, role })}
+                          onValueChange={(role) =>
+                            updateRoleMutation.mutate({
+                              userId: u.user_id,
+                              role,
+                            })
+                          }
                         >
                           <SelectTrigger className="w-[120px] h-8 text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="staff">{t("admin.staff")}</SelectItem>
-                            <SelectItem value="admin">{t("admin.adminRole")}</SelectItem>
-                            {isOwner && <SelectItem value="owner">{t("admin.owner")}</SelectItem>}
-                            {(isSuperadmin || isSystemAdmin) && <SelectItem value="superadmin">Superadmin</SelectItem>}
+                            <SelectItem value="staff">
+                              {t("admin.staff")}
+                            </SelectItem>
+                            <SelectItem value="admin">
+                              {t("admin.adminRole")}
+                            </SelectItem>
+                            {isOwner && (
+                              <SelectItem value="owner">
+                                {t("admin.owner")}
+                              </SelectItem>
+                            )}
+                            {(isSuperadmin || isSystemAdmin) && (
+                              <SelectItem value="superadmin">
+                                Superadmin
+                              </SelectItem>
+                            )}
                             {assignableCustomRoles.map((r) => (
-                              <SelectItem key={r.role_key} value={r.role_key}>{r.display_name}</SelectItem>
+                              <SelectItem key={r.role_key} value={r.role_key}>
+                                {r.display_name}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -582,14 +790,22 @@ const AdminPanel = () => {
                           <div className="flex items-center gap-1.5 flex-wrap">
                             {siteInfo?.length ? (
                               siteInfo.map((si, idx) => (
-                                <Badge key={idx} variant="outline" className="text-xs gap-1">
+                                <Badge
+                                  key={idx}
+                                  variant="outline"
+                                  className="text-xs gap-1"
+                                >
                                   <Building2 className="h-3 w-3" />
                                   {si.name}
-                                  <span className="text-muted-foreground">({si.role})</span>
+                                  <span className="text-muted-foreground">
+                                    ({si.role})
+                                  </span>
                                 </Badge>
                               ))
                             ) : (
-                              <span className="text-xs text-muted-foreground">—</span>
+                              <span className="text-xs text-muted-foreground">
+                                —
+                              </span>
                             )}
                             <Button
                               variant="ghost"
@@ -603,29 +819,58 @@ const AdminPanel = () => {
                         </TableCell>
                       )}
                       <TableCell>
-                        <Badge variant="outline" className={`text-xs ${u.is_approved ? "border-success/30 text-success bg-success/10" : "border-warning/30 text-warning bg-warning/10"}`}>
-                          {u.is_approved ? t("admin.statusApproved") : t("admin.statusPending")}
+                        <Badge
+                          variant="outline"
+                          className={`text-xs ${u.is_approved ? "border-success/30 text-success bg-success/10" : "border-warning/30 text-warning bg-warning/10"}`}
+                        >
+                          {u.is_approved
+                            ? t("admin.statusApproved")
+                            : t("admin.statusPending")}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => { setSelectedUserId(u.user_id); setPasswordDialogOpen(true); }}>
-                            <Key className="h-3 w-3" /> {t("admin.changePassword")}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1 text-xs"
+                            onClick={() => {
+                              setSelectedUserId(u.user_id);
+                              setPasswordDialogOpen(true);
+                            }}
+                          >
+                            <Key className="h-3 w-3" />{" "}
+                            {t("admin.changePassword")}
                           </Button>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive"
+                              >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>{t("admin.confirmRemove")}</AlertDialogTitle>
-                                <AlertDialogDescription>{t("admin.confirmRemoveDesc")}</AlertDialogDescription>
+                                <AlertDialogTitle>
+                                  {t("admin.confirmRemove")}
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  {t("admin.confirmRemoveDesc")}
+                                </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>{t("admin.cancel")}</AlertDialogCancel>
-                                <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={() => deleteMutation.mutate(u.user_id)}>
+                                <AlertDialogCancel>
+                                  {t("admin.cancel")}
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  onClick={() =>
+                                    deleteMutation.mutate(u.user_id)
+                                  }
+                                >
                                   {t("admin.remove")}
                                 </AlertDialogAction>
                               </AlertDialogFooter>
@@ -659,7 +904,6 @@ const AdminPanel = () => {
 
       {/* Audit / Change Log */}
       <AuditLogPanel />
-
     </div>
   );
 };

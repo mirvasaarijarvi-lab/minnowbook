@@ -57,11 +57,29 @@ function diffSpecs(label, expected, actual) {
     const got = actual[name];
     if (want === got) continue;
     if (want === undefined) {
-      drifts.push({ source: label, name, kind: "extra-in-lockfile", expected: null, actual: got });
+      drifts.push({
+        source: label,
+        name,
+        kind: "extra-in-lockfile",
+        expected: null,
+        actual: got,
+      });
     } else if (got === undefined) {
-      drifts.push({ source: label, name, kind: "missing-in-lockfile", expected: want, actual: null });
+      drifts.push({
+        source: label,
+        name,
+        kind: "missing-in-lockfile",
+        expected: want,
+        actual: null,
+      });
     } else {
-      drifts.push({ source: label, name, kind: "range-mismatch", expected: want, actual: got });
+      drifts.push({
+        source: label,
+        name,
+        kind: "range-mismatch",
+        expected: want,
+        actual: got,
+      });
     }
   }
   return drifts;
@@ -70,17 +88,26 @@ function diffSpecs(label, expected, actual) {
 // Allow-list of lockfile-adjacent filenames this script is permitted to read.
 // Combined with the path-containment check in `safeJoin`, this prevents a
 // caller-supplied `root` from being abused for arbitrary file inclusion.
-const ALLOWED_FILES = new Set(["package.json", "bun.lock", "package-lock.json"]);
+const ALLOWED_FILES = new Set([
+  "package.json",
+  "bun.lock",
+  "package-lock.json",
+]);
 
 /** Resolve `<root>/<name>` and assert the result stays inside `<root>` and
  *  references one of the allow-listed manifest filenames. Throws otherwise. */
 function safeJoin(rootAbs, name) {
   if (!ALLOWED_FILES.has(name)) {
-    throw new Error(`preflight: refusing to read non-allowlisted file "${name}"`);
+    throw new Error(
+      `preflight: refusing to read non-allowlisted file "${name}"`,
+    );
   }
   const candidate = resolve(rootAbs, name);
   const rootWithSep = rootAbs.endsWith("/") ? rootAbs : `${rootAbs}/`;
-  if (candidate !== resolve(rootAbs, name) || !(`${candidate}/`).startsWith(rootWithSep)) {
+  if (
+    candidate !== resolve(rootAbs, name) ||
+    !`${candidate}/`.startsWith(rootWithSep)
+  ) {
     throw new Error(`preflight: path escapes root: ${candidate}`);
   }
   return candidate;
@@ -93,7 +120,11 @@ export function collectDrift({ root = REPO_ROOT } = {}) {
   const npmPath = safeJoin(rootAbs, "package-lock.json");
 
   if (!existsSync(pkgPath)) {
-    return { ok: false, fatal: `package.json missing at ${pkgPath}`, drifts: [] };
+    return {
+      ok: false,
+      fatal: `package.json missing at ${pkgPath}`,
+      drifts: [],
+    };
   }
   const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
   const expected = {
@@ -106,14 +137,38 @@ export function collectDrift({ root = REPO_ROOT } = {}) {
 
   if (existsSync(bunPath)) {
     const bun = parseBunLock(readFileSync(bunPath, "utf8"));
-    drifts.push(...diffSpecs("bun.lock:dependencies", expected.dependencies, bun.dependencies));
-    drifts.push(...diffSpecs("bun.lock:devDependencies", expected.devDependencies, bun.devDependencies));
+    drifts.push(
+      ...diffSpecs(
+        "bun.lock:dependencies",
+        expected.dependencies,
+        bun.dependencies,
+      ),
+    );
+    drifts.push(
+      ...diffSpecs(
+        "bun.lock:devDependencies",
+        expected.devDependencies,
+        bun.devDependencies,
+      ),
+    );
     checked.push("bun.lock");
   }
   if (existsSync(npmPath)) {
     const npm = parseNpmLock(readFileSync(npmPath, "utf8"));
-    drifts.push(...diffSpecs("package-lock.json:dependencies", expected.dependencies, npm.dependencies));
-    drifts.push(...diffSpecs("package-lock.json:devDependencies", expected.devDependencies, npm.devDependencies));
+    drifts.push(
+      ...diffSpecs(
+        "package-lock.json:dependencies",
+        expected.dependencies,
+        npm.dependencies,
+      ),
+    );
+    drifts.push(
+      ...diffSpecs(
+        "package-lock.json:devDependencies",
+        expected.devDependencies,
+        npm.devDependencies,
+      ),
+    );
     checked.push("package-lock.json");
   }
 
@@ -131,16 +186,24 @@ function formatReport(result) {
   ];
   for (const d of result.drifts) {
     if (d.kind === "missing-in-lockfile") {
-      lines.push(`  [${d.source}] ${d.name}: declared "${d.expected}" but lockfile has no entry`);
+      lines.push(
+        `  [${d.source}] ${d.name}: declared "${d.expected}" but lockfile has no entry`,
+      );
     } else if (d.kind === "extra-in-lockfile") {
-      lines.push(`  [${d.source}] ${d.name}: lockfile pins "${d.actual}" but package.json does not list it`);
+      lines.push(
+        `  [${d.source}] ${d.name}: lockfile pins "${d.actual}" but package.json does not list it`,
+      );
     } else {
-      lines.push(`  [${d.source}] ${d.name}: package.json="${d.expected}" lockfile="${d.actual}"`);
+      lines.push(
+        `  [${d.source}] ${d.name}: package.json="${d.expected}" lockfile="${d.actual}"`,
+      );
     }
   }
   lines.push("", "Fix locally:");
   lines.push("  bun install --save-text-lockfile   # regenerate bun.lock");
-  lines.push("  npm install --package-lock-only    # regenerate package-lock.json");
+  lines.push(
+    "  npm install --package-lock-only    # regenerate package-lock.json",
+  );
   lines.push("Then commit the updated lockfiles.");
   return lines.join("\n");
 }

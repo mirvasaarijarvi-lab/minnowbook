@@ -39,7 +39,10 @@ describe("redeem-preflight: probeRedeemFunction (no-throw probe)", () => {
     const result = await probeRedeemFunction({
       supabaseUrl: FAKE_URL,
       supabasePublishableKey: FAKE_KEY,
-      fetchImpl: fakeFetch(401, { error: "Not authenticated", code: "NOT_AUTHENTICATED" }),
+      fetchImpl: fakeFetch(401, {
+        error: "Not authenticated",
+        code: "NOT_AUTHENTICATED",
+      }),
     });
     expect(result.status).toBe(401);
     expect(result.errorCode).toBe("NOT_AUTHENTICATED");
@@ -160,7 +163,10 @@ describe("redeem-preflight: assertRedeemFunctionReachable (strict probe)", () =>
       assertRedeemFunctionReachable({
         supabaseUrl: FAKE_URL,
         supabasePublishableKey: FAKE_KEY,
-        fetchImpl: fakeFetch(401, { error: "Nope", code: "SOME_OTHER_FUNCTIONS_CODE" }),
+        fetchImpl: fakeFetch(401, {
+          error: "Nope",
+          code: "SOME_OTHER_FUNCTIONS_CODE",
+        }),
       }),
     ).rejects.toThrow(/unexpected code "SOME_OTHER_FUNCTIONS_CODE"/);
   });

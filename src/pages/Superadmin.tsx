@@ -11,8 +11,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -80,13 +91,21 @@ const Superadmin = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [editTenant, setEditTenant] = useState<TenantWithStats | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", tier: "", sample_start_date: "", sample_end_date: "", discount_percentage: 0, discount_reason: "" });
+  const [editForm, setEditForm] = useState({
+    name: "",
+    tier: "",
+    sample_start_date: "",
+    sample_end_date: "",
+    discount_percentage: 0,
+    discount_reason: "",
+  });
   const { startImpersonation, isImpersonating } = useImpersonation();
   const { tenantId, loading: tenantLoading } = useTenant();
 
   // Check system admin via the shared session-long cache so we don't
   // re-query the database on each navigation into /superadmin.
-  const { isSystemAdmin: isSysAdmin, isLoading: adminLoading } = useIsSystemAdmin();
+  const { isSystemAdmin: isSysAdmin, isLoading: adminLoading } =
+    useIsSystemAdmin();
 
   // Fetch all tenants
   const { data: tenants, isLoading: tenantsLoading } = useQuery({
@@ -102,9 +121,18 @@ const Superadmin = () => {
       const enriched: TenantWithStats[] = await Promise.all(
         (allTenants ?? []).map(async (t) => {
           const [usersRes, reservationsRes, resourcesRes] = await Promise.all([
-            supabase.from("tenant_users").select("id", { count: "exact", head: true }).eq("tenant_id", t.id),
-            supabase.from("reservations").select("id", { count: "exact", head: true }).eq("tenant_id", t.id),
-            supabase.from("resources").select("id", { count: "exact", head: true }).eq("tenant_id", t.id),
+            supabase
+              .from("tenant_users")
+              .select("id", { count: "exact", head: true })
+              .eq("tenant_id", t.id),
+            supabase
+              .from("reservations")
+              .select("id", { count: "exact", head: true })
+              .eq("tenant_id", t.id),
+            supabase
+              .from("resources")
+              .select("id", { count: "exact", head: true })
+              .eq("tenant_id", t.id),
           ]);
           return {
             ...t,
@@ -113,7 +141,7 @@ const Superadmin = () => {
             reservationCount: reservationsRes.count ?? 0,
             resourceCount: resourcesRes.count ?? 0,
           };
-        })
+        }),
       );
       return enriched;
     },
@@ -122,8 +150,17 @@ const Superadmin = () => {
 
   // Toggle active
   const toggleActiveMutation = useMutation({
-    mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase.from("tenants").update({ is_active }).eq("id", id);
+    mutationFn: async ({
+      id,
+      is_active,
+    }: {
+      id: string;
+      is_active: boolean;
+    }) => {
+      const { error } = await supabase
+        .from("tenants")
+        .update({ is_active })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -131,17 +168,38 @@ const Superadmin = () => {
       toast({ title: "Tenant updated" });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
   // Edit tenant
   const editMutation = useMutation({
-    mutationFn: async ({ id, name, tier, sample_start_date, sample_end_date, discount_percentage, discount_reason }: { id: string; name: string; tier: string; sample_start_date: string; sample_end_date: string; discount_percentage: number; discount_reason: string }) => {
+    mutationFn: async ({
+      id,
+      name,
+      tier,
+      sample_start_date,
+      sample_end_date,
+      discount_percentage,
+      discount_reason,
+    }: {
+      id: string;
+      name: string;
+      tier: string;
+      sample_start_date: string;
+      sample_end_date: string;
+      discount_percentage: number;
+      discount_reason: string;
+    }) => {
       const { error } = await supabase
         .from("tenants")
         .update({
-          name, tier,
+          name,
+          tier,
           sample_start_date: sample_start_date || null,
           sample_end_date: sample_end_date || null,
           discount_percentage: discount_percentage || 0,
@@ -157,7 +215,11 @@ const Superadmin = () => {
       toast({ title: "Tenant saved" });
     },
     onError: (err: any) => {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -191,12 +253,18 @@ const Superadmin = () => {
   const filtered = (tenants ?? []).filter(
     (t) =>
       t.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.slug.toLowerCase().includes(search.toLowerCase())
+      t.slug.toLowerCase().includes(search.toLowerCase()),
   );
 
   const totalUsers = (tenants ?? []).reduce((sum, t) => sum + t.userCount, 0);
-  const totalReservations = (tenants ?? []).reduce((sum, t) => sum + t.reservationCount, 0);
-  const totalResources = (tenants ?? []).reduce((sum, t) => sum + t.resourceCount, 0);
+  const totalReservations = (tenants ?? []).reduce(
+    (sum, t) => sum + t.reservationCount,
+    0,
+  );
+  const totalResources = (tenants ?? []).reduce(
+    (sum, t) => sum + t.resourceCount,
+    0,
+  );
 
   const openEdit = (t: TenantWithStats) => {
     setEditForm({
@@ -220,7 +288,9 @@ const Superadmin = () => {
             <Separator orientation="vertical" className="h-6" />
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-5 w-5 text-accent" />
-              <h1 className="text-lg font-serif font-semibold text-foreground">Superadmin</h1>
+              <h1 className="text-lg font-serif font-semibold text-foreground">
+                Superadmin
+              </h1>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -259,7 +329,9 @@ const Superadmin = () => {
                   <Building2 className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{tenants?.length ?? 0}</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {tenants?.length ?? 0}
+                  </p>
                   <p className="text-xs text-muted-foreground">Tenants</p>
                 </div>
               </div>
@@ -272,7 +344,9 @@ const Superadmin = () => {
                   <Users className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{totalUsers}</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {totalUsers}
+                  </p>
                   <p className="text-xs text-muted-foreground">Total Users</p>
                 </div>
               </div>
@@ -285,7 +359,9 @@ const Superadmin = () => {
                   <CalendarDays className="h-5 w-5 text-success-foreground" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{totalReservations}</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {totalReservations}
+                  </p>
                   <p className="text-xs text-muted-foreground">Reservations</p>
                 </div>
               </div>
@@ -298,7 +374,9 @@ const Superadmin = () => {
                   <Layers className="h-5 w-5 text-secondary-foreground" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{totalResources}</p>
+                  <p className="text-2xl font-bold text-foreground">
+                    {totalResources}
+                  </p>
                   <p className="text-xs text-muted-foreground">Resources</p>
                 </div>
               </div>
@@ -326,7 +404,9 @@ const Superadmin = () => {
                 <div className="animate-spin h-6 w-6 border-4 border-accent border-t-transparent rounded-full" />
               </div>
             ) : filtered.length === 0 ? (
-              <p className="text-center py-12 text-muted-foreground">No tenants found.</p>
+              <p className="text-center py-12 text-muted-foreground">
+                No tenants found.
+              </p>
             ) : (
               <div className="space-y-3">
                 {filtered.map((t) => (
@@ -336,36 +416,51 @@ const Superadmin = () => {
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-foreground truncate">{t.name}</h3>
+                        <h3 className="font-semibold text-foreground truncate">
+                          {t.name}
+                        </h3>
                         <Badge
                           variant={t.is_active ? "default" : "destructive"}
                           className="text-[10px] px-1.5 py-0"
                         >
                           {t.is_active ? "Active" : "Inactive"}
                         </Badge>
-                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize">
+                        <Badge
+                          variant="outline"
+                          className="text-[10px] px-1.5 py-0 capitalize"
+                        >
                           {t.tier}
                         </Badge>
                         {t.subscription_status && (
-                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 capitalize">
+                          <Badge
+                            variant="secondary"
+                            className="text-[10px] px-1.5 py-0 capitalize"
+                          >
                             {t.subscription_status}
                           </Badge>
                         )}
                         {t.sample_start_date && t.sample_end_date && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1 border-accent/40 text-accent">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] px-1.5 py-0 gap-1 border-accent/40 text-accent"
+                          >
                             <FlaskConical className="h-2.5 w-2.5" />
                             Sample: {t.sample_start_date} → {t.sample_end_date}
                           </Badge>
                         )}
                         {(t.discount_percentage ?? 0) > 0 && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1 border-primary/40 text-primary">
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] px-1.5 py-0 gap-1 border-primary/40 text-primary"
+                          >
                             <Percent className="h-2.5 w-2.5" />
                             {t.discount_percentage}% discount
                           </Badge>
                         )}
                       </div>
                       <p className="text-sm text-muted-foreground break-words">
-                        /{t.slug} · {t.userCount} users · {t.reservationCount} reservations · {t.resourceCount} resources
+                        /{t.slug} · {t.userCount} users · {t.reservationCount}{" "}
+                        reservations · {t.resourceCount} resources
                       </p>
                       {(t.stripe_customer_id || t.stripe_subscription_id) && (
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
@@ -373,26 +468,40 @@ const Superadmin = () => {
                           {t.stripe_customer_id && (
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText(t.stripe_customer_id!);
-                                toast({ title: "Copied", description: "Stripe Customer ID copied" });
+                                navigator.clipboard.writeText(
+                                  t.stripe_customer_id!,
+                                );
+                                toast({
+                                  title: "Copied",
+                                  description: "Stripe Customer ID copied",
+                                });
                               }}
                               className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono max-w-full break-all text-left"
                               title="Click to copy"
                             >
-                              <span className="break-all">{t.stripe_customer_id}</span>
+                              <span className="break-all">
+                                {t.stripe_customer_id}
+                              </span>
                               <Copy className="h-2.5 w-2.5 shrink-0" />
                             </button>
                           )}
                           {t.stripe_subscription_id && (
                             <button
                               onClick={() => {
-                                navigator.clipboard.writeText(t.stripe_subscription_id!);
-                                toast({ title: "Copied", description: "Stripe Subscription ID copied" });
+                                navigator.clipboard.writeText(
+                                  t.stripe_subscription_id!,
+                                );
+                                toast({
+                                  title: "Copied",
+                                  description: "Stripe Subscription ID copied",
+                                });
                               }}
                               className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 font-mono max-w-full break-all text-left"
                               title="Click to copy"
                             >
-                              <span className="break-all">{t.stripe_subscription_id}</span>
+                              <span className="break-all">
+                                {t.stripe_subscription_id}
+                              </span>
                               <Copy className="h-2.5 w-2.5 shrink-0" />
                             </button>
                           )}
@@ -460,7 +569,12 @@ const Superadmin = () => {
                       <Button
                         variant={t.is_active ? "outline" : "default"}
                         size="sm"
-                        onClick={() => toggleActiveMutation.mutate({ id: t.id, is_active: !t.is_active })}
+                        onClick={() =>
+                          toggleActiveMutation.mutate({
+                            id: t.id,
+                            is_active: !t.is_active,
+                          })
+                        }
                         className={`gap-1 ${t.is_active ? "border-destructive/30 text-destructive hover:bg-destructive/10" : ""}`}
                       >
                         <Power className="h-3.5 w-3.5" />
@@ -482,7 +596,6 @@ const Superadmin = () => {
 
         {/* Redemption Metrics (last 24h by default) */}
         <RedemptionMetricsPanel />
-
 
         {/* Login History */}
         <SuperadminLoginHistory />
@@ -510,7 +623,10 @@ const Superadmin = () => {
       </main>
 
       {/* Edit dialog */}
-      <Dialog open={!!editTenant} onOpenChange={(open) => !open && setEditTenant(null)}>
+      <Dialog
+        open={!!editTenant}
+        onOpenChange={(open) => !open && setEditTenant(null)}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-serif">Edit Tenant</DialogTitle>
@@ -520,12 +636,17 @@ const Superadmin = () => {
               <Label>Name</Label>
               <Input
                 value={editForm.name}
-                onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+                onChange={(e) =>
+                  setEditForm((f) => ({ ...f, name: e.target.value }))
+                }
               />
             </div>
             <div className="space-y-2">
               <Label>Tier</Label>
-              <Select value={editForm.tier} onValueChange={(v) => setEditForm((f) => ({ ...f, tier: v }))}>
+              <Select
+                value={editForm.tier}
+                onValueChange={(v) => setEditForm((f) => ({ ...f, tier: v }))}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -533,15 +654,18 @@ const Superadmin = () => {
                   <SelectItem value="basic">Basic</SelectItem>
                   <SelectItem value="professional">Professional</SelectItem>
                   <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="enterprise">Enterprise (by offer)</SelectItem>
+                  <SelectItem value="enterprise">
+                    Enterprise (by offer)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
               <Label>Max Staff Users</Label>
               <p className="text-sm text-muted-foreground">
-                Determined by tier — Basic: 5, Pro: 25, Business: 50, Enterprise: unlimited.
-                Enforced by the backend on new staff additions.
+                Determined by tier — Basic: 5, Pro: 25, Business: 50,
+                Enterprise: unlimited. Enforced by the backend on new staff
+                additions.
               </p>
             </div>
             <Separator />
@@ -550,7 +674,10 @@ const Superadmin = () => {
                 <FlaskConical className="h-3.5 w-3.5 text-accent" />
                 Free Sample Period
               </Label>
-              <p className="text-xs text-muted-foreground">Set start and end dates for a free trial. Leave empty to disable.</p>
+              <p className="text-xs text-muted-foreground">
+                Set start and end dates for a free trial. Leave empty to
+                disable.
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -558,7 +685,12 @@ const Superadmin = () => {
                 <Input
                   type="date"
                   value={editForm.sample_start_date}
-                  onChange={(e) => setEditForm((f) => ({ ...f, sample_start_date: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      sample_start_date: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div className="space-y-1.5">
@@ -566,7 +698,12 @@ const Superadmin = () => {
                 <Input
                   type="date"
                   value={editForm.sample_end_date}
-                  onChange={(e) => setEditForm((f) => ({ ...f, sample_end_date: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      sample_end_date: e.target.value,
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -576,7 +713,10 @@ const Superadmin = () => {
                 <Percent className="h-3.5 w-3.5 text-primary" />
                 Platform Discount
               </Label>
-              <p className="text-xs text-muted-foreground">Grant a subscription discount to this tenant. Only superadmins can set this.</p>
+              <p className="text-xs text-muted-foreground">
+                Grant a subscription discount to this tenant. Only superadmins
+                can set this.
+              </p>
             </div>
             <div className="space-y-2">
               <Label className="text-xs">Discount Percentage (%)</Label>
@@ -585,7 +725,12 @@ const Superadmin = () => {
                 min={0}
                 max={100}
                 value={editForm.discount_percentage}
-                onChange={(e) => setEditForm((f) => ({ ...f, discount_percentage: parseFloat(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setEditForm((f) => ({
+                    ...f,
+                    discount_percentage: parseFloat(e.target.value) || 0,
+                  }))
+                }
               />
             </div>
             <div className="space-y-2">
@@ -593,7 +738,12 @@ const Superadmin = () => {
               <Textarea
                 placeholder="e.g. Early adopter, partnership deal..."
                 value={editForm.discount_reason}
-                onChange={(e) => setEditForm((f) => ({ ...f, discount_reason: e.target.value }))}
+                onChange={(e) =>
+                  setEditForm((f) => ({
+                    ...f,
+                    discount_reason: e.target.value,
+                  }))
+                }
                 className="resize-none"
                 rows={2}
               />

@@ -21,7 +21,9 @@ const BlogPost = () => {
         <MarketingHeader />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-serif font-bold text-foreground mb-4">Post not found</h1>
+            <h1 className="text-2xl font-serif font-bold text-foreground mb-4">
+              Post not found
+            </h1>
             <Link to="/blog">
               <Button variant="outline">Back to Blog</Button>
             </Link>
@@ -33,8 +35,6 @@ const BlogPost = () => {
   }
 
   const jsonLd = buildBlogPostJsonLd(post, (k) => t(k as any));
-
-
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -48,13 +48,15 @@ const BlogPost = () => {
         jsonLd={jsonLd}
       />
 
-
       <MarketingHeader />
 
       <article className="py-16 md:py-24">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8">
+            <Link
+              to="/blog"
+              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-8"
+            >
               <ArrowLeft className="h-4 w-4" />
               {t("blog.backToBlog")}
             </Link>
@@ -74,7 +76,8 @@ const BlogPost = () => {
               {t(post.titleKey as any)}
             </h1>
 
-            {post.slug === "MimmoBook_compared_to_other_bookingsystems_for_wellness" && (
+            {post.slug ===
+              "MimmoBook_compared_to_other_bookingsystems_for_wellness" && (
               <WellnessComparisonTable />
             )}
 
@@ -84,15 +87,24 @@ const BlogPost = () => {
 
             <div className="prose prose-lg max-w-none">
               {post.contentKeys.map((key, i) => (
-                <p key={i} className="text-muted-foreground leading-relaxed mb-6">
+                <p
+                  key={i}
+                  className="text-muted-foreground leading-relaxed mb-6"
+                >
                   {t(key as any)}
                 </p>
               ))}
             </div>
 
             {post.relatedSlugs && post.relatedSlugs.length > 0 && (
-              <aside className="mt-12 pt-8 border-t border-border" aria-labelledby="related-reading-heading">
-                <h2 id="related-reading-heading" className="font-serif text-xl font-bold text-foreground mb-4">
+              <aside
+                className="mt-12 pt-8 border-t border-border"
+                aria-labelledby="related-reading-heading"
+              >
+                <h2
+                  id="related-reading-heading"
+                  className="font-serif text-xl font-bold text-foreground mb-4"
+                >
                   {t("blog.relatedReading")}
                 </h2>
                 <ul className="space-y-3">
@@ -114,9 +126,13 @@ const BlogPost = () => {
             )}
 
             <div className="mt-12 p-8 rounded-xl bg-primary/5 text-center">
-              <h3 className="font-serif text-xl font-bold text-foreground mb-3">{t("blog.postCta")}</h3>
+              <h3 className="font-serif text-xl font-bold text-foreground mb-3">
+                {t("blog.postCta")}
+              </h3>
               <Link to="/signup">
-                <Button variant="hero" size="lg">{t("common.startFreeTrial")}</Button>
+                <Button variant="hero" size="lg">
+                  {t("common.startFreeTrial")}
+                </Button>
               </Link>
             </div>
           </div>

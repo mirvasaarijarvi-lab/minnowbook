@@ -71,9 +71,9 @@ const INTERNAL_MARKERS = [
   "select ",
   "insert into",
   "update public.",
-  "relation \"",
-  "column \"",
-  "constraint \"",
+  'relation "',
+  'column "',
+  'constraint "',
   "public.reservations",
   "function public.",
   "http/1.1",
@@ -88,8 +88,14 @@ const INTERNAL_MARKERS = [
 const CLASSIFIERS: ReadonlyArray<[RegExp, InvoiceRefusalCode]> = [
   [/add a price before marking/i, "NO_PRICE"],
   [/invoice amount must match/i, "AMOUNT_MISMATCH"],
-  [/already invoiced|invoiced reservation|cannot be changed after invoicing/i, "INVOICED_LOCKED"],
-  [/\bcancelled\b|\bcanceled\b|archived reservation|booking is archived/i, "CANCELLED"],
+  [
+    /already invoiced|invoiced reservation|cannot be changed after invoicing/i,
+    "INVOICED_LOCKED",
+  ],
+  [
+    /\bcancelled\b|\bcanceled\b|archived reservation|booking is archived/i,
+    "CANCELLED",
+  ],
   [
     /jwt (?:is )?expired|token (?:is )?expired|session (?:has )?expired|invalid jwt|not logged in|no active session/i,
     "SESSION_EXPIRED",
@@ -111,11 +117,16 @@ const CLASSIFIERS: ReadonlyArray<[RegExp, InvoiceRefusalCode]> = [
     /failed to fetch|fetch failed|network ?error|networkerror|load failed|offline|timed? ?out|timeout|econnrefused|enotfound|dns/i,
     "OFFLINE",
   ],
-  [/internal server error|unexpected server error|edge function .*non-2xx|502|503|504/i, "SERVER_ERROR"],
+  [
+    /internal server error|unexpected server error|edge function .*non-2xx|502|503|504/i,
+    "SERVER_ERROR",
+  ],
 ];
 
 /** HTTP status codes mapped to a refusal code, for errors that carry one. */
-const STATUS_CODES: ReadonlyArray<[(status: number) => boolean, InvoiceRefusalCode]> = [
+const STATUS_CODES: ReadonlyArray<
+  [(status: number) => boolean, InvoiceRefusalCode]
+> = [
   [(s) => s === 401, "SESSION_EXPIRED"],
   [(s) => s === 403, "NOT_PERMITTED"],
   [(s) => s === 404 || s === 410, "NOT_FOUND"],
@@ -143,7 +154,12 @@ const statusOf = (err: unknown): number | null => {
 const rawMessageOf = (err: unknown): string => {
   if (typeof err === "string") return err;
   if (err && typeof err === "object") {
-    const e = err as { message?: unknown; error?: unknown; details?: unknown; hint?: unknown };
+    const e = err as {
+      message?: unknown;
+      error?: unknown;
+      details?: unknown;
+      hint?: unknown;
+    };
     for (const candidate of [e.message, e.error, e.details, e.hint]) {
       if (typeof candidate === "string" && candidate.trim()) return candidate;
     }
@@ -161,7 +177,9 @@ const extractServerReason = (raw: string): string | null => {
   // Postgres wraps trigger exceptions in noise; keep only the first line.
   text = text.split(/\r?\n/)[0].trim();
   // Strip severity and code prefixes such as "ERROR: " or "P0001: ".
-  text = text.replace(/^(error|fatal|warning)\s*:\s*/i, "").replace(/^[A-Z0-9]{5}\s*:\s*/, "");
+  text = text
+    .replace(/^(error|fatal|warning)\s*:\s*/i, "")
+    .replace(/^[A-Z0-9]{5}\s*:\s*/, "");
   // Some clients prefix the trigger message with the failing statement.
   const marker = text.match(/(add a price.*|invoice amount must match.*)/i);
   if (marker) text = marker[1].trim();
@@ -182,7 +200,9 @@ export const classifyInvoiceRefusal = (err: unknown): InvoiceRefusal => {
   const byMessage = CLASSIFIERS.find(([re]) => re.test(raw))?.[1];
   const status = statusOf(err);
   const byStatus =
-    status === null ? undefined : STATUS_CODES.find(([matches]) => matches(status))?.[1];
+    status === null
+      ? undefined
+      : STATUS_CODES.find(([matches]) => matches(status))?.[1];
   return {
     code: byMessage ?? byStatus ?? "UNKNOWN",
     serverReason: extractServerReason(raw),
@@ -198,7 +218,10 @@ export const classifyInvoiceRefusal = (err: unknown): InvoiceRefusal => {
 export const invoiceRefusalTranslationKey = (
   code: InvoiceRefusalCode,
   surface: InvoiceRefusalSurface = "staff",
-): string => (surface === "guest" ? `invoiceRefusalGuest.${code}` : `invoiceRefusal.${code}`);
+): string =>
+  surface === "guest"
+    ? `invoiceRefusalGuest.${code}`
+    : `invoiceRefusal.${code}`;
 
 /**
  * Codes that mean "the write never landed for a reason unrelated to the
@@ -206,7 +229,10 @@ export const invoiceRefusalTranslationKey = (
  * sense to offer.
  */
 export const isRetriableInvoiceRefusal = (code: InvoiceRefusalCode): boolean =>
-  code === "OFFLINE" || code === "RATE_LIMITED" || code === "CONFLICT" || code === "SERVER_ERROR";
+  code === "OFFLINE" ||
+  code === "RATE_LIMITED" ||
+  code === "CONFLICT" ||
+  code === "SERVER_ERROR";
 
 /**
  * Compose the text to show: the localized explanation, followed by the exact
@@ -219,7 +245,11 @@ export const composeInvoiceRefusalMessage = (
 ): string => {
   const reason = refusal.serverReason;
   if (!reason) return explanation;
-  const normalize = (s: string) => s.replace(/[.\s]+/g, " ").trim().toLowerCase();
+  const normalize = (s: string) =>
+    s
+      .replace(/[.\s]+/g, " ")
+      .trim()
+      .toLowerCase();
   if (normalize(explanation).includes(normalize(reason))) return explanation;
   return `${explanation} ${reasonLabel} ${reason}`;
 };

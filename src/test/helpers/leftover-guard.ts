@@ -25,7 +25,9 @@ export async function checkForLeftoverCiRows(opts?: {
     process.env.SUPABASE_SERVICE_ROLE_KEY ??
     "";
   if (!url || !key) {
-    throw new Error("checkForLeftoverCiRows requires SUPABASE_URL and SERVICE_ROLE_KEY");
+    throw new Error(
+      "checkForLeftoverCiRows requires SUPABASE_URL and SERVICE_ROLE_KEY",
+    );
   }
 
   const admin = createClient(url, key, {
@@ -39,7 +41,8 @@ export async function checkForLeftoverCiRows(opts?: {
     .select("id, slug, name, created_at")
     .like("slug", "ci-%")
     .limit(50);
-  if (tenantRows && tenantRows.length) details.push({ table: "tenants", sample: tenantRows });
+  if (tenantRows && tenantRows.length)
+    details.push({ table: "tenants", sample: tenantRows });
 
   const { data: reservationRows = [] } = await admin
     .from("reservations")
@@ -52,12 +55,18 @@ export async function checkForLeftoverCiRows(opts?: {
   // auth.users is not accessible via PostgREST; rely on `admin.auth.admin.listUsers`.
   let userCount = 0;
   try {
-    const { data: usersPage } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-    const leaked = (usersPage?.users ?? []).filter((u) =>
-      (u.email ?? "").startsWith("ci+") && (u.email ?? "").endsWith("@mimmobook.test"),
+    const { data: usersPage } = await admin.auth.admin.listUsers({
+      page: 1,
+      perPage: 200,
+    });
+    const leaked = (usersPage?.users ?? []).filter(
+      (u) =>
+        (u.email ?? "").startsWith("ci+") &&
+        (u.email ?? "").endsWith("@mimmobook.test"),
     );
     userCount = leaked.length;
-    if (leaked.length) details.push({ table: "auth.users", sample: leaked.map((u) => u.email) });
+    if (leaked.length)
+      details.push({ table: "auth.users", sample: leaked.map((u) => u.email) });
   } catch {
     /* ignore — service role may not have listUsers in some configs */
   }

@@ -17,10 +17,7 @@
  */
 
 export type OfferStatusFocusDecision =
-  | "focus"
-  | "skip-no-panel"
-  | "skip-already-inside"
-  | "skip-user-moved";
+  "focus" | "skip-no-panel" | "skip-already-inside" | "skip-user-moved";
 
 export interface OfferStatusFocusInput {
   /** The status panel, or null when it is not rendered. */
@@ -39,7 +36,8 @@ export function decideOfferStatusFocus({
   trigger,
 }: OfferStatusFocusInput): OfferStatusFocusDecision {
   if (!panel) return "skip-no-panel";
-  if (active && (active === panel || panel.contains(active))) return "skip-already-inside";
+  if (active && (active === panel || panel.contains(active)))
+    return "skip-already-inside";
 
   // Focus never left the trigger, or the trigger is gone and focus was dropped:
   // both mean nobody is relying on the current focus position.

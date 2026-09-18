@@ -34,10 +34,14 @@ export const SIGNED_URL_MARKERS = [
   "Expires=",
 ] as const;
 
-export const isPersistedPublicBrandingUrl = (url: string | null | undefined): boolean => {
+export const isPersistedPublicBrandingUrl = (
+  url: string | null | undefined,
+): boolean => {
   if (!url) return true; // absence is fine, the preview just hides the logo
   const lowered = url.toLowerCase();
-  return !SIGNED_URL_MARKERS.some((marker) => lowered.includes(marker.toLowerCase()));
+  return !SIGNED_URL_MARKERS.some((marker) =>
+    lowered.includes(marker.toLowerCase()),
+  );
 };
 
 interface ReservationData {
@@ -98,10 +102,11 @@ const ConfirmationEmailPreview = ({
       };
       return defaults[type] ?? type;
     },
-    [t]
+    [t],
   );
   const { language } = useLanguage();
-  const dateLocale: Locale = language === "fi" ? fiFns : language === "sv" ? svFns : enUS;
+  const dateLocale: Locale =
+    language === "fi" ? fiFns : language === "sv" ? svFns : enUS;
   const isCancellation = variant === "cancellation";
   const primaryColor = business.primary_color || "#1e3a5f";
   const accentColor = business.accent_color || "#d4a853";
@@ -112,8 +117,10 @@ const ConfirmationEmailPreview = ({
   // and render as a broken image. We warn loudly in development so callers
   // (e.g. dashboard previews) catch this before it ships to production.
   useEffect(() => {
-    if (import.meta.env.DEV && !isPersistedPublicBrandingUrl(business.logo_url)) {
-      // eslint-disable-next-line no-console
+    if (
+      import.meta.env.DEV &&
+      !isPersistedPublicBrandingUrl(business.logo_url)
+    ) {
       console.warn(
         "[ConfirmationEmailPreview] business.logo_url looks like a signed/expiring URL. " +
           "Emails must use the persisted public tenant-assets URL so the logo keeps " +
@@ -131,7 +138,7 @@ const ConfirmationEmailPreview = ({
 
   const typeLabel = useMemo(
     () => getTypeLabel(reservation.reservation_type),
-    [reservation.reservation_type, getTypeLabel]
+    [reservation.reservation_type, getTypeLabel],
   );
 
   const roomTypeLabel = useMemo(() => {
@@ -159,7 +166,11 @@ const ConfirmationEmailPreview = ({
 
   const formattedDate = useMemo(() => {
     try {
-      return format(new Date(reservation.date + "T00:00:00"), "EEEE, d. MMMM yyyy", { locale: dateLocale });
+      return format(
+        new Date(reservation.date + "T00:00:00"),
+        "EEEE, d. MMMM yyyy",
+        { locale: dateLocale },
+      );
     } catch {
       return reservation.date;
     }
@@ -168,7 +179,11 @@ const ConfirmationEmailPreview = ({
   const formattedCheckOut = useMemo(() => {
     if (!reservation.check_out_date) return null;
     try {
-      return format(new Date(reservation.check_out_date + "T00:00:00"), "EEEE, d. MMMM yyyy", { locale: dateLocale });
+      return format(
+        new Date(reservation.check_out_date + "T00:00:00"),
+        "EEEE, d. MMMM yyyy",
+        { locale: dateLocale },
+      );
     } catch {
       return reservation.check_out_date;
     }
@@ -178,7 +193,10 @@ const ConfirmationEmailPreview = ({
     if (!reservation.check_out_date || !reservation.date) return 0;
     const checkIn = new Date(reservation.date + "T00:00:00");
     const checkOut = new Date(reservation.check_out_date + "T00:00:00");
-    return Math.max(0, Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000));
+    return Math.max(
+      0,
+      Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000),
+    );
   }, [reservation.date, reservation.check_out_date]);
 
   const defaultSubject = isCancellation
@@ -207,11 +225,21 @@ const ConfirmationEmailPreview = ({
 
   const detailRows: { label: string; value: string }[] = [
     { label: t("common.type"), value: typeLabel },
-    { label: t("common.date"), value: formattedDate + (reservation.start_time ? ` ${t("email.at")} ${reservation.start_time.slice(0, 5)}` : "") },
+    {
+      label: t("common.date"),
+      value:
+        formattedDate +
+        (reservation.start_time
+          ? ` ${t("email.at")} ${reservation.start_time.slice(0, 5)}`
+          : ""),
+    },
   ];
 
   if (isAccommodation && formattedCheckOut) {
-    detailRows.push({ label: t("booking.checkOutDate"), value: formattedCheckOut });
+    detailRows.push({
+      label: t("booking.checkOutDate"),
+      value: formattedCheckOut,
+    });
     if (nights > 0) {
       detailRows.push({
         label: t("email.duration"),
@@ -233,11 +261,17 @@ const ConfirmationEmailPreview = ({
   }
 
   if (reservation.guests_count) {
-    detailRows.push({ label: t("common.guests"), value: String(reservation.guests_count) });
+    detailRows.push({
+      label: t("common.guests"),
+      value: String(reservation.guests_count),
+    });
   }
 
   if (isVenue && reservation.estimated_guests) {
-    detailRows.push({ label: t("booking.estimatedGuests"), value: String(reservation.estimated_guests) });
+    detailRows.push({
+      label: t("booking.estimatedGuests"),
+      value: String(reservation.estimated_guests),
+    });
   }
 
   if (isVenue && reservation.catering_needed) {
@@ -245,11 +279,17 @@ const ConfirmationEmailPreview = ({
   }
 
   if (reservation.price_eur != null) {
-    detailRows.push({ label: t("common.price"), value: `€${Number(reservation.price_eur).toFixed(2)}` });
+    detailRows.push({
+      label: t("common.price"),
+      value: `€${Number(reservation.price_eur).toFixed(2)}`,
+    });
   }
 
   if (reservation.special_requests) {
-    detailRows.push({ label: t("booking.specialRequests"), value: reservation.special_requests });
+    detailRows.push({
+      label: t("booking.specialRequests"),
+      value: reservation.special_requests,
+    });
   }
 
   return (
@@ -259,9 +299,13 @@ const ConfirmationEmailPreview = ({
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {t("email.subject")}
         </span>
-        <p className="text-sm font-medium text-foreground mt-0.5" data-testid="email-preview-subject">{subject}</p>
+        <p
+          className="text-sm font-medium text-foreground mt-0.5"
+          data-testid="email-preview-subject"
+        >
+          {subject}
+        </p>
       </div>
-
 
       {/* Email body preview */}
       <div
@@ -281,7 +325,10 @@ const ConfirmationEmailPreview = ({
               style={{ border: "2px solid rgba(255,255,255,0.3)" }}
             />
           )}
-          <h2 className="text-lg font-bold text-white font-serif" data-testid="email-preview-business-name">
+          <h2
+            className="text-lg font-bold text-white font-serif"
+            data-testid="email-preview-business-name"
+          >
             {businessName}
           </h2>
         </div>
@@ -293,7 +340,10 @@ const ConfirmationEmailPreview = ({
               className="inline-flex items-center justify-center h-12 w-12 rounded-full mx-auto"
               style={{ backgroundColor: iconBg }}
             >
-              <span className="text-2xl" style={iconColor ? { color: iconColor } : undefined}>
+              <span
+                className="text-2xl"
+                style={iconColor ? { color: iconColor } : undefined}
+              >
                 {iconEmoji}
               </span>
             </div>
@@ -306,22 +356,43 @@ const ConfirmationEmailPreview = ({
             </h3>
             <p className="text-sm text-gray-600">
               {t("email.greeting")}{" "}
-              <strong data-testid="email-preview-guest-name">{reservation.guest_name}</strong>,
+              <strong data-testid="email-preview-guest-name">
+                {reservation.guest_name}
+              </strong>
+              ,
             </p>
-
           </div>
 
           {/* Custom message */}
           {customMessage && (
             <div
               className="text-sm text-gray-700 leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(customMessage, { ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'span', 'div'], ALLOWED_ATTR: ['href', 'target', 'style', 'class'] }) }}
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(customMessage, {
+                  ALLOWED_TAGS: [
+                    "b",
+                    "i",
+                    "em",
+                    "strong",
+                    "a",
+                    "p",
+                    "br",
+                    "ul",
+                    "ol",
+                    "li",
+                    "h1",
+                    "h2",
+                    "h3",
+                    "span",
+                    "div",
+                  ],
+                  ALLOWED_ATTR: ["href", "target", "style", "class"],
+                }),
+              }}
             />
           )}
 
-          <p className="text-sm text-gray-600">
-            {bodyText}
-          </p>
+          <p className="text-sm text-gray-600">{bodyText}</p>
 
           {/* Details table */}
           <div className="rounded-md border border-gray-200 overflow-hidden">
@@ -342,9 +413,7 @@ const ConfirmationEmailPreview = ({
             </table>
           </div>
 
-          <p className="text-sm text-gray-600">
-            {footerText}
-          </p>
+          <p className="text-sm text-gray-600">{footerText}</p>
         </div>
 
         {/* Footer */}

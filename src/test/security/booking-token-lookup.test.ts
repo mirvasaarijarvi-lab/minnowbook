@@ -56,10 +56,7 @@ async function lookup(token: string) {
   return await anon.rpc("lookup_booking_token", { p_token: token });
 }
 
-function expectNoRow(
-  result: { data: unknown; error: unknown },
-  label: string,
-) {
+function expectNoRow(result: { data: unknown; error: unknown }, label: string) {
   const { data, error } = result;
   // The RPC may legitimately return [] (no match) — that's the desired outcome.
   // It must NOT return any row for our probes.
@@ -180,9 +177,16 @@ describe("booking token lookup — security & determinism", () => {
       lookup(TYPICAL_HEX),
     ]);
     const shapes = calls.map((c) =>
-      c.error ? "error" : Array.isArray(c.data) && c.data.length === 0 ? "empty" : "leak",
+      c.error
+        ? "error"
+        : Array.isArray(c.data) && c.data.length === 0
+          ? "empty"
+          : "leak",
     );
-    expect(new Set(shapes).size, "all repeated calls must share one shape").toBe(1);
+    expect(
+      new Set(shapes).size,
+      "all repeated calls must share one shape",
+    ).toBe(1);
     expect(shapes[0]).not.toBe("leak");
   });
 

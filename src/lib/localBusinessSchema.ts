@@ -32,12 +32,100 @@ export type LocalBusinessType =
  * more specific trades are listed before the generic wellness ones.
  */
 const TRADE_KEYWORDS: { type: LocalBusinessType; words: string[] }[] = [
-  { type: "HairSalon", words: ["barber", "barbershop", "parturi", "barberare", "hairdress", "hair salon", "haircut", "kampaaja", "hiustenleikkaus", "frisör", "frisor", "klippning"] },
-  { type: "HealthAndBeautyBusiness", words: ["massage", "massag", "hieroja", "hieronta", "massör", "massor", "physio", "fysioterapia", "reiki", "acupunct", "akupunkt"] },
-  { type: "Bakery", words: ["bakery", "baker", "leipomo", "leipuri", "kakku", "bageri", "bagare", "cake", "pastry", "konditori"] },
-  { type: "HealthClub", words: ["personal train", "personal trän", "pt-", "gym", "kuntosali", "fitness", "yoga", "jooga", "pilates", "coaching", "valmennus"] },
-  { type: "BeautySalon", words: ["make-up", "makeup", "meikki", "nail", "manikyyri", "kynsi", "lash", "ripsi", "kosmetolog", "beauty", "kauneus", "skönhet", "skonhet"] },
-  { type: "DaySpa", words: ["spa", "sauna", "kylpylä", "kylpyla", "wellness", "hyvinvointi", "välbefinnande"] },
+  {
+    type: "HairSalon",
+    words: [
+      "barber",
+      "barbershop",
+      "parturi",
+      "barberare",
+      "hairdress",
+      "hair salon",
+      "haircut",
+      "kampaaja",
+      "hiustenleikkaus",
+      "frisör",
+      "frisor",
+      "klippning",
+    ],
+  },
+  {
+    type: "HealthAndBeautyBusiness",
+    words: [
+      "massage",
+      "massag",
+      "hieroja",
+      "hieronta",
+      "massör",
+      "massor",
+      "physio",
+      "fysioterapia",
+      "reiki",
+      "acupunct",
+      "akupunkt",
+    ],
+  },
+  {
+    type: "Bakery",
+    words: [
+      "bakery",
+      "baker",
+      "leipomo",
+      "leipuri",
+      "kakku",
+      "bageri",
+      "bagare",
+      "cake",
+      "pastry",
+      "konditori",
+    ],
+  },
+  {
+    type: "HealthClub",
+    words: [
+      "personal train",
+      "personal trän",
+      "pt-",
+      "gym",
+      "kuntosali",
+      "fitness",
+      "yoga",
+      "jooga",
+      "pilates",
+      "coaching",
+      "valmennus",
+    ],
+  },
+  {
+    type: "BeautySalon",
+    words: [
+      "make-up",
+      "makeup",
+      "meikki",
+      "nail",
+      "manikyyri",
+      "kynsi",
+      "lash",
+      "ripsi",
+      "kosmetolog",
+      "beauty",
+      "kauneus",
+      "skönhet",
+      "skonhet",
+    ],
+  },
+  {
+    type: "DaySpa",
+    words: [
+      "spa",
+      "sauna",
+      "kylpylä",
+      "kylpyla",
+      "wellness",
+      "hyvinvointi",
+      "välbefinnande",
+    ],
+  },
 ];
 
 const TYPE_BY_RESERVATION_TYPE: Record<string, LocalBusinessType> = {
@@ -77,7 +165,15 @@ export function inferLocalBusinessType(
   );
   // A single reservation type describes the business; several mean a mixed
   // operation, where the most guest-facing one wins in this order.
-  for (const key of ["restaurant", "hotel", "guesthouse", "venue", "sauna", "cottage", "wellness"]) {
+  for (const key of [
+    "restaurant",
+    "hotel",
+    "guesthouse",
+    "venue",
+    "sauna",
+    "cottage",
+    "wellness",
+  ]) {
     if (types.includes(key)) return TYPE_BY_RESERVATION_TYPE[key];
   }
   return "LocalBusiness";
@@ -117,18 +213,30 @@ const toHhMm = (value: string): string | null => {
 export function buildOpeningHoursSpecification(
   rows: readonly OpeningHourRow[] | null | undefined,
 ): Record<string, unknown>[] {
-  const byWindow = new Map<string, { opens: string; closes: string; days: Set<string> }>();
+  const byWindow = new Map<
+    string,
+    { opens: string; closes: string; days: Set<string> }
+  >();
 
   for (const row of rows ?? []) {
     if (!row || row.is_closed) continue;
-    if (!Number.isInteger(row.day_of_week) || row.day_of_week < 0 || row.day_of_week > 6) continue;
+    if (
+      !Number.isInteger(row.day_of_week) ||
+      row.day_of_week < 0 ||
+      row.day_of_week > 6
+    )
+      continue;
     if (!row.open_time || !row.close_time) continue;
     const opens = toHhMm(row.open_time);
     const closes = toHhMm(row.close_time);
     if (!opens || !closes || opens === closes) continue;
 
     const key = `${opens}-${closes}`;
-    const entry = byWindow.get(key) ?? { opens, closes, days: new Set<string>() };
+    const entry = byWindow.get(key) ?? {
+      opens,
+      closes,
+      days: new Set<string>(),
+    };
     entry.days.add(DAY_NAMES[row.day_of_week]);
     byWindow.set(key, entry);
   }
@@ -171,7 +279,10 @@ export function buildLocalBusinessSchema(
   const name = (input.name ?? "").trim();
   if (!name) return null;
 
-  const type = inferLocalBusinessType(input.reservationTypes, input.serviceLabels);
+  const type = inferLocalBusinessType(
+    input.reservationTypes,
+    input.serviceLabels,
+  );
 
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -216,7 +327,11 @@ export function buildLocalBusinessSchema(
           "@type": "Offer",
           itemOffered: { "@type": "Service", name: s.name.trim() },
         };
-        if (typeof s.priceEur === "number" && Number.isFinite(s.priceEur) && s.priceEur > 0) {
+        if (
+          typeof s.priceEur === "number" &&
+          Number.isFinite(s.priceEur) &&
+          s.priceEur > 0
+        ) {
           offer.price = s.priceEur.toFixed(2);
           offer.priceCurrency = "EUR";
         }

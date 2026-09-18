@@ -51,7 +51,9 @@ export interface AccessDecision {
 }
 
 const normalize = (value: unknown): string | undefined =>
-  typeof value === "string" && value.trim().length > 0 ? value.trim().toLowerCase() : undefined;
+  typeof value === "string" && value.trim().length > 0
+    ? value.trim().toLowerCase()
+    : undefined;
 
 /**
  * The single decision function. Deliberately history-free: it looks only at
@@ -71,9 +73,12 @@ export function decideSessionAccess(
 
   if (!resource || !isUuid(resource)) reasons.push("malformed_resource_tenant");
 
-  if (active && resource && active !== resource) reasons.push("tenant_mismatch");
+  if (active && resource && active !== resource)
+    reasons.push("tenant_mismatch");
 
-  const membership = session.memberships.find((m) => normalize(m.tenantId) === active);
+  const membership = session.memberships.find(
+    (m) => normalize(m.tenantId) === active,
+  );
   if (active && !membership) reasons.push("not_a_member");
   if (membership?.revoked) reasons.push("membership_revoked");
   if (membership && !membership.revoked && !membership.isApproved)
@@ -88,7 +93,10 @@ export function decideSessionAccess(
  * not an approved member of still sets the active tenant (the server does the
  * same) but every later decision denies it.
  */
-export function switchTenant(session: TenantSession, tenantId: string | undefined): TenantSession {
+export function switchTenant(
+  session: TenantSession,
+  tenantId: string | undefined,
+): TenantSession {
   return {
     ...session,
     activeTenantId: tenantId,
@@ -99,11 +107,16 @@ export function switchTenant(session: TenantSession, tenantId: string | undefine
 }
 
 /** Revokes a membership while the session stays open. */
-export function revokeMembership(session: TenantSession, tenantId: string): TenantSession {
+export function revokeMembership(
+  session: TenantSession,
+  tenantId: string,
+): TenantSession {
   return {
     ...session,
     memberships: session.memberships.map((m) =>
-      normalize(m.tenantId) === normalize(tenantId) ? { ...m, revoked: true } : m,
+      normalize(m.tenantId) === normalize(tenantId)
+        ? { ...m, revoked: true }
+        : m,
     ),
   };
 }

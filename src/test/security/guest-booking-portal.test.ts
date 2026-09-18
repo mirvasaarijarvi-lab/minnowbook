@@ -21,7 +21,8 @@ import "@/test/setup";
 import { describe, it, expect } from "vitest";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
@@ -50,14 +51,21 @@ async function callPortal(body: unknown, init: RequestInit = {}) {
   } catch {
     parsed = null;
   }
-  return { status: res.status, text, body: parsed as Record<string, unknown> | null };
+  return {
+    status: res.status,
+    text,
+    body: parsed as Record<string, unknown> | null,
+  };
 }
 
 /** Rate limiting (429) is a valid, non-leaking outcome for any probe. */
 const isRateLimited = (status: number) => status === 429;
 
 const HEX64 = (seed: string) =>
-  Array.from({ length: 64 }, (_, i) => "0123456789abcdef"[(seed.charCodeAt(i % seed.length) + i) % 16]).join("");
+  Array.from(
+    { length: 64 },
+    (_, i) => "0123456789abcdef"[(seed.charCodeAt(i % seed.length) + i) % 16],
+  ).join("");
 
 liveDescribe("guest-booking-portal — public endpoint hardening", () => {
   it("responds to CORS preflight", async () => {
@@ -76,7 +84,10 @@ liveDescribe("guest-booking-portal — public endpoint hardening", () => {
   it("rejects non-POST methods", async () => {
     const res = await fetch(FN_URL, {
       method: "GET",
-      headers: { apikey: SUPABASE_ANON_KEY ?? "", Authorization: `Bearer ${SUPABASE_ANON_KEY ?? ""}` },
+      headers: {
+        apikey: SUPABASE_ANON_KEY ?? "",
+        Authorization: `Bearer ${SUPABASE_ANON_KEY ?? ""}`,
+      },
     });
     await res.text();
     expect([405, 401, 429]).toContain(res.status);
@@ -96,7 +107,10 @@ liveDescribe("guest-booking-portal — public endpoint hardening", () => {
   });
 
   it("rejects an invalid email for lookup", async () => {
-    const { status } = await callPortal({ action: "lookup", email: "not-an-email" });
+    const { status } = await callPortal({
+      action: "lookup",
+      email: "not-an-email",
+    });
     if (isRateLimited(status)) return;
     expect(status).toBe(400);
   });
@@ -113,8 +127,13 @@ liveDescribe("guest-booking-portal — public endpoint hardening", () => {
       if (isRateLimited(r.status)) return;
       results.push(r);
     }
-    const shapes = new Set(results.map((r) => `${r.status}:${JSON.stringify(r.body)}`));
-    expect(shapes.size, "lookup response must not vary by email existence").toBe(1);
+    const shapes = new Set(
+      results.map((r) => `${r.status}:${JSON.stringify(r.body)}`),
+    );
+    expect(
+      shapes.size,
+      "lookup response must not vary by email existence",
+    ).toBe(1);
     expect(results[0].status).toBe(200);
     expect(results[0].body).toEqual({ ok: true });
   });
@@ -126,13 +145,24 @@ liveDescribe("guest-booking-portal — public endpoint hardening", () => {
       language: "fi",
     });
     if (isRateLimited(status)) return;
-    for (const forbidden of ["reservation_id", "tenant_id", "token", "guest_name", "start_time"]) {
-      expect(text.includes(forbidden), `response must not include ${forbidden}`).toBe(false);
+    for (const forbidden of [
+      "reservation_id",
+      "tenant_id",
+      "token",
+      "guest_name",
+      "start_time",
+    ]) {
+      expect(
+        text.includes(forbidden),
+        `response must not include ${forbidden}`,
+      ).toBe(false);
     }
   });
 
   it("reschedule rejects unknown tokens with a generic error (no enumeration)", async () => {
-    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + 86_400_000)
+      .toISOString()
+      .slice(0, 10);
     const tokens = [HEX64("alpha"), HEX64("beta"), HEX64("gamma")];
     const results = [];
     for (const token of tokens) {
@@ -151,11 +181,16 @@ liveDescribe("guest-booking-portal — public endpoint hardening", () => {
       expect(r.text.includes("reservation_id")).toBe(false);
     }
     const shapes = new Set(results.map((r) => `${r.status}:${r.text}`));
-    expect(shapes.size, "all unknown tokens must share one response shape").toBe(1);
+    expect(
+      shapes.size,
+      "all unknown tokens must share one response shape",
+    ).toBe(1);
   });
 
   it("reschedule rejects malformed tokens (wrong length, injection shapes)", async () => {
-    const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + 86_400_000)
+      .toISOString()
+      .slice(0, 10);
     const bad = ["", "abc", "z".repeat(128), "' OR '1'='1", "а".repeat(64)];
     for (const token of bad) {
       const r = await callPortal({
@@ -165,7 +200,10 @@ liveDescribe("guest-booking-portal — public endpoint hardening", () => {
         requested_start_time: "18:00",
       });
       if (isRateLimited(r.status)) return;
-      expect([400, 403], `token=${JSON.stringify(token)} must be rejected`).toContain(r.status);
+      expect(
+        [400, 403],
+        `token=${JSON.stringify(token)} must be rejected`,
+      ).toContain(r.status);
     }
   });
 
@@ -174,7 +212,12 @@ liveDescribe("guest-booking-portal — public endpoint hardening", () => {
     const payloads = [
       { requested_date: "not-a-date", requested_start_time: "18:00" },
       { requested_date: "2026-13-45", requested_start_time: "18:00" },
-      { requested_date: new Date(Date.now() + 86_400_000).toISOString().slice(0, 10), requested_start_time: "99:99" },
+      {
+        requested_date: new Date(Date.now() + 86_400_000)
+          .toISOString()
+          .slice(0, 10),
+        requested_start_time: "99:99",
+      },
     ];
     for (const p of payloads) {
       const r = await callPortal({ action: "reschedule", token, ...p });

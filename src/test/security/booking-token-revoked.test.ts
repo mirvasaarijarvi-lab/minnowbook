@@ -25,7 +25,8 @@ import {
 } from "@/test/security/fixtures/tenant-pair";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
@@ -36,8 +37,8 @@ const liveAvailable =
 const liveDescribe = liveAvailable ? describe : describe.skip;
 const skipReason = liveAvailable
   ? null
-  : tenantPairFixtureSkipReason() ??
-    "SUPABASE_SERVICE_ROLE_KEY required to seed revoked booking_tokens";
+  : (tenantPairFixtureSkipReason() ??
+    "SUPABASE_SERVICE_ROLE_KEY required to seed revoked booking_tokens");
 
 interface SeededToken {
   tenantId: string;
@@ -95,7 +96,10 @@ async function seedToken(
   };
 }
 
-async function cleanup(admin: SupabaseClient, seed: SeededToken): Promise<void> {
+async function cleanup(
+  admin: SupabaseClient,
+  seed: SeededToken,
+): Promise<void> {
   await admin.from("booking_tokens").delete().eq("id", seed.tokenId);
   await admin.from("reservations").delete().eq("id", seed.reservationId);
 }
@@ -129,7 +133,10 @@ liveDescribe("lookup_booking_token — revoked tokens are never returned", () =>
 
   afterAll(async () => {
     if (!admin) return;
-    await Promise.allSettled([cleanup(admin, activeSeed), cleanup(admin, bornRevokedSeed)]);
+    await Promise.allSettled([
+      cleanup(admin, activeSeed),
+      cleanup(admin, bornRevokedSeed),
+    ]);
   });
 
   it("baseline: an ACTIVE token of correct length is returned by the RPC", async () => {
@@ -184,7 +191,9 @@ liveDescribe("lookup_booking_token — revoked tokens are never returned", () =>
   it("revoked token of correct length cannot be probed via repeated calls (no timing/state leak shape)", async () => {
     const calls = await Promise.all(
       Array.from({ length: 5 }, () =>
-        anon.rpc("lookup_booking_token", { p_token: bornRevokedSeed.tokenPlaintext }),
+        anon.rpc("lookup_booking_token", {
+          p_token: bornRevokedSeed.tokenPlaintext,
+        }),
       ),
     );
     for (const c of calls) {
@@ -212,7 +221,9 @@ liveDescribe("lookup_booking_token — revoked tokens are never returned", () =>
       });
       expect(visible.error).toBeNull();
       expect((visible.data ?? []).length).toBe(1);
-      const row = (visible.data as Array<{ id: string; is_revoked: boolean }>)[0];
+      const row = (
+        visible.data as Array<{ id: string; is_revoked: boolean }>
+      )[0];
       expect(row.id).toBe(bornRevokedSeed.tokenId);
       expect(row.is_revoked).toBe(false);
     } finally {
@@ -225,9 +236,12 @@ liveDescribe("lookup_booking_token — revoked tokens are never returned", () =>
   });
 
   it("revoked token is invisible to authenticated tenant member calling the RPC too", async () => {
-    const { data, error } = await fixture.a!.client.rpc("lookup_booking_token", {
-      p_token: bornRevokedSeed.tokenPlaintext,
-    });
+    const { data, error } = await fixture.a!.client.rpc(
+      "lookup_booking_token",
+      {
+        p_token: bornRevokedSeed.tokenPlaintext,
+      },
+    );
     expect(error).toBeNull();
     expect((data ?? []).length).toBe(0);
   });

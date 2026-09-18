@@ -36,11 +36,15 @@ export function CIStatusBadges() {
       <CardContent>
         {!REPO ? (
           <p className="text-sm text-muted-foreground">
-            Set the <code className="px-1 py-0.5 rounded bg-muted">VITE_GITHUB_REPO</code> environment
-            variable to <code className="px-1 py-0.5 rounded bg-muted">owner/repo</code> to display
-            live build, e2e, and security badges. You can find the slug by opening the GitHub
-            integration menu in Lovable (Plus icon, then GitHub), or by checking the repository URL
-            once it's connected.
+            Set the{" "}
+            <code className="px-1 py-0.5 rounded bg-muted">
+              VITE_GITHUB_REPO
+            </code>{" "}
+            environment variable to{" "}
+            <code className="px-1 py-0.5 rounded bg-muted">owner/repo</code> to
+            display live build, e2e, and security badges. You can find the slug
+            by opening the GitHub integration menu in Lovable (Plus icon, then
+            GitHub), or by checking the repository URL once it's connected.
           </p>
         ) : (
           <div className="flex flex-wrap items-center gap-3">
@@ -58,7 +62,12 @@ export function CIStatusBadges() {
                   aria-label={`${w.label} workflow status`}
                   className="inline-flex"
                 >
-                  <img src={badge} alt={`${w.label} workflow status`} height={20} loading="lazy" />
+                  <img
+                    src={badge}
+                    alt={`${w.label} workflow status`}
+                    height={20}
+                    loading="lazy"
+                  />
                 </a>
               );
             })}

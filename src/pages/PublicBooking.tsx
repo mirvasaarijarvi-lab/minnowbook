@@ -10,14 +10,58 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, CheckCircle, UtensilsCrossed, Building2, Home, Clock, CalendarDays, CalendarIcon, CalendarPlus, BedDouble, Coffee, Users, Truck, ShoppingBag, ChefHat, Plug, Droplets, Tag, Mail, Phone, MapPin, Sparkles, HeartPulse, Minus, Plus, Info } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Loader2,
+  CheckCircle,
+  UtensilsCrossed,
+  Building2,
+  Home,
+  Clock,
+  CalendarDays,
+  CalendarIcon,
+  CalendarPlus,
+  BedDouble,
+  Coffee,
+  Users,
+  Truck,
+  ShoppingBag,
+  ChefHat,
+  Plug,
+  Droplets,
+  Tag,
+  Mail,
+  Phone,
+  MapPin,
+  Sparkles,
+  HeartPulse,
+  Minus,
+  Plus,
+  Info,
+} from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay } from "date-fns";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  addMonths,
+  subMonths,
+  isSameDay,
+} from "date-fns";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { useDateLocale } from "@/hooks/useDateLocale";
@@ -57,7 +101,11 @@ const bookingSchema = z.object({
   guest_name: z.string().trim().min(1, "Name is required").max(100),
   guest_email: z.string().trim().email("Invalid email").max(255),
   guest_phone: z.string().trim().max(30).optional(),
-  guests_count: z.number().int().min(1, "Number of guests is required").max(500),
+  guests_count: z
+    .number()
+    .int()
+    .min(1, "Number of guests is required")
+    .max(500),
   reservation_type: z.string().min(1, "Type is required"),
   date: z.string().min(1, "Date is required"),
   start_time: z.string().optional(),
@@ -124,12 +172,20 @@ const AvailabilityCalendar = ({
   // Map public booking types to the reservation_types used in the backend calendar
   const mappedTypes = useMemo(() => {
     if (!reservationType) return [];
-    if (reservationType === "hotel" || reservationType === "guesthouse") return ["hotel", "guesthouse"];
+    if (reservationType === "hotel" || reservationType === "guesthouse")
+      return ["hotel", "guesthouse"];
     return [reservationType];
   }, [reservationType]);
 
   const { data: monthReservations = [] } = useQuery({
-    queryKey: ["public-availability", tenantId, siteId, monthStart, monthEnd, reservationType],
+    queryKey: [
+      "public-availability",
+      tenantId,
+      siteId,
+      monthStart,
+      monthEnd,
+      reservationType,
+    ],
     queryFn: async () => {
       let query = supabase
         .from("reservations")
@@ -162,7 +218,8 @@ const AvailabilityCalendar = ({
 
   // Use the max threshold across all types as the general full limit
   const fullThreshold = useMemo(() => {
-    if (reservationType && thresholds[reservationType]) return thresholds[reservationType];
+    if (reservationType && thresholds[reservationType])
+      return thresholds[reservationType];
     const values = Object.values(thresholds);
     return values.length > 0 ? Math.min(...values) : 5;
   }, [thresholds, reservationType]);
@@ -181,11 +238,16 @@ const AvailabilityCalendar = ({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+        <CardTitle
+          className="text-lg font-serif flex items-center gap-2"
+          style={{ color: primaryColor }}
+        >
           <CalendarDays className="h-5 w-5" />
           {t("booking.availabilityCalendar")}
         </CardTitle>
-        <p className="text-sm text-muted-foreground">{t("booking.availabilityDesc")}</p>
+        <p className="text-sm text-muted-foreground">
+          {t("booking.availabilityDesc")}
+        </p>
       </CardHeader>
       <CardContent>
         <Calendar
@@ -195,28 +257,60 @@ const AvailabilityCalendar = ({
           disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
           className={cn("p-3 pointer-events-auto rounded-md border")}
           modifiers={{
-            available: (date) => getDayStatus(date) === "available" && date >= new Date(new Date().setHours(0, 0, 0, 0)),
+            available: (date) =>
+              getDayStatus(date) === "available" &&
+              date >= new Date(new Date().setHours(0, 0, 0, 0)),
             busy: (date) => getDayStatus(date) === "busy",
             full: (date) => getDayStatus(date) === "full",
           }}
           modifiersStyles={{
-            available: { backgroundColor: "#dcfce7", color: "#166534", fontWeight: 600 },
-            busy: { backgroundColor: "#fef9c3", color: "#854d0e", fontWeight: 600 },
-            full: { backgroundColor: "#fecaca", color: "#991b1b", fontWeight: 600 },
+            available: {
+              backgroundColor: "#dcfce7",
+              color: "#166534",
+              fontWeight: 600,
+            },
+            busy: {
+              backgroundColor: "#fef9c3",
+              color: "#854d0e",
+              fontWeight: 600,
+            },
+            full: {
+              backgroundColor: "#fecaca",
+              color: "#991b1b",
+              fontWeight: 600,
+            },
           }}
           showOutsideDays={false}
         />
         <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#dcfce7", border: "1px solid #bbf7d0" }} />
+            <span
+              className="w-3 h-3 rounded-full"
+              style={{
+                backgroundColor: "#dcfce7",
+                border: "1px solid #bbf7d0",
+              }}
+            />
             {t("booking.available")}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#fef9c3", border: "1px solid #fde68a" }} />
+            <span
+              className="w-3 h-3 rounded-full"
+              style={{
+                backgroundColor: "#fef9c3",
+                border: "1px solid #fde68a",
+              }}
+            />
             {t("booking.busy")}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#fecaca", border: "1px solid #fca5a5" }} />
+            <span
+              className="w-3 h-3 rounded-full"
+              style={{
+                backgroundColor: "#fecaca",
+                border: "1px solid #fca5a5",
+              }}
+            />
             {t("booking.full")}
           </span>
         </div>
@@ -290,7 +384,13 @@ const PublicBookingInner = () => {
     food_permits: "",
     stall_fee: "",
     // Custom type sub-services: { id, name, qty }
-    selected_sub_services: [] as { id: string; name: string; price_eur?: number; qty: number; duration_min?: number }[],
+    selected_sub_services: [] as {
+      id: string;
+      name: string;
+      price_eur?: number;
+      qty: number;
+      duration_min?: number;
+    }[],
   });
 
   // Pre-select booking type from URL query param (?type=venue, ?type=guesthouse, etc.)
@@ -405,7 +505,7 @@ const PublicBookingInner = () => {
     return {
       ...tenantSettings,
       ...Object.fromEntries(
-        Object.entries(siteSettings).filter(([_, v]) => v != null && v !== "")
+        Object.entries(siteSettings).filter(([_, v]) => v != null && v !== ""),
       ),
     };
   }, [tenantSettings, siteSettings]);
@@ -414,7 +514,8 @@ const PublicBookingInner = () => {
   // example a signed-in staff member without access to the settings rows)
   // the page keeps working, but say so instead of silently dropping the
   // logo, colours and business details.
-  const brandingBlocked = !settings && !!(tenantSettingsError || siteSettingsError);
+  const brandingBlocked =
+    !settings && !!(tenantSettingsError || siteSettingsError);
 
   // Record the permission-driven empty state once per blocked page view so
   // we can see how often guests/staff land on an unbranded booking page.
@@ -443,8 +544,16 @@ const PublicBookingInner = () => {
   // Resolve branding URLs to short-lived signed URLs at render time, with
   // a graceful fallback path if the signed URL ever fails (e.g. expired
   // or revoked) so the booking page still renders without broken images.
-  const logoBranding = useBrandingSignedUrlState(settings?.logo_url, undefined, { tenantId: tenant?.id });
-  const heroBranding = useBrandingSignedUrlState(settings?.hero_image_url, undefined, { tenantId: tenant?.id });
+  const logoBranding = useBrandingSignedUrlState(
+    settings?.logo_url,
+    undefined,
+    { tenantId: tenant?.id },
+  );
+  const heroBranding = useBrandingSignedUrlState(
+    settings?.hero_image_url,
+    undefined,
+    { tenantId: tenant?.id },
+  );
   const logoSignedUrl = logoBranding.url;
   const heroSignedUrl = heroBranding.url;
   const logoFailed = logoBranding.status === "error";
@@ -453,15 +562,22 @@ const PublicBookingInner = () => {
   // placeholders that occupy the final layout slot. This keeps the
   // header height + logo footprint stable instead of collapsing into
   // the no-hero layout for a frame and then jumping back.
-  const logoLoading = logoBranding.status === "loading" || logoBranding.status === "idle";
-  const heroLoading = heroBranding.status === "loading" || heroBranding.status === "idle";
+  const logoLoading =
+    logoBranding.status === "loading" || logoBranding.status === "idle";
+  const heroLoading =
+    heroBranding.status === "loading" || heroBranding.status === "idle";
 
   // The resolved site ID for filtering queries
   const activeSiteId = siteLockedByUrl ? (site?.id ?? null) : pickedSiteId;
 
   // Fetch active resources — filter by site when site is selected
   const { data: resources } = useQuery({
-    queryKey: ["public-resources", tenant?.id, form.reservation_type, activeSiteId],
+    queryKey: [
+      "public-resources",
+      tenant?.id,
+      form.reservation_type,
+      activeSiteId,
+    ],
     queryFn: async () => {
       if (!tenant?.id) return [];
       let query = supabase
@@ -520,22 +636,32 @@ const PublicBookingInner = () => {
   });
 
   // Group images by resource
-  const imagesByResource = resourceImages.reduce((acc: Record<string, any[]>, img: any) => {
-    acc[img.resource_id] = acc[img.resource_id] || [];
-    acc[img.resource_id].push(img);
-    return acc;
-  }, {});
+  const imagesByResource = resourceImages.reduce(
+    (acc: Record<string, any[]>, img: any) => {
+      acc[img.resource_id] = acc[img.resource_id] || [];
+      acc[img.resource_id].push(img);
+      return acc;
+    },
+    {},
+  );
 
   // Fetch opening hours — filter by site when site is selected
   const { data: openingHours } = useQuery({
-    queryKey: ["public-opening-hours", tenant?.id, form.reservation_type, activeSiteId],
+    queryKey: [
+      "public-opening-hours",
+      tenant?.id,
+      form.reservation_type,
+      activeSiteId,
+    ],
     queryFn: async () => {
       if (!tenant?.id || !form.reservation_type) return [];
       let query = supabase
         .from("tenant_opening_hours")
         // Explicit columns: internal staff fields (rejection_reason, approved_by)
         // are not readable by anonymous visitors.
-        .select("id, tenant_id, site_id, resource_type, day_of_week, open_time, close_time, is_closed, approval_status")
+        .select(
+          "id, tenant_id, site_id, resource_type, day_of_week, open_time, close_time, is_closed, approval_status",
+        )
 
         .eq("tenant_id", tenant.id)
         .eq("resource_type", form.reservation_type);
@@ -550,7 +676,10 @@ const PublicBookingInner = () => {
   });
 
   // Fetch resource-level opening hours for restaurant resources
-  const restaurantResourceIds = resources?.filter((r: any) => r.resource_type === "restaurant").map((r: any) => r.id) ?? [];
+  const restaurantResourceIds =
+    resources
+      ?.filter((r: any) => r.resource_type === "restaurant")
+      .map((r: any) => r.id) ?? [];
   const { data: resourceOpeningHours } = useQuery({
     queryKey: ["public-resource-opening-hours", restaurantResourceIds],
     queryFn: async () => {
@@ -578,7 +707,12 @@ const PublicBookingInner = () => {
   // Fetch occasional availability slots (positive windows for sporadic workers).
   // Scoped to currently visible resources and future dates only.
   const { data: occasionalSlots } = useQuery({
-    queryKey: ["public-occasional-slots", tenant?.id, resourceIds, activeSiteId],
+    queryKey: [
+      "public-occasional-slots",
+      tenant?.id,
+      resourceIds,
+      activeSiteId,
+    ],
     queryFn: async () => {
       if (!tenant?.id || resourceIds.length === 0) return [];
       const today = format(new Date(), "yyyy-MM-dd");
@@ -596,7 +730,10 @@ const PublicBookingInner = () => {
 
   // Index occasional slots by resource_id + date for O(1) lookups.
   const occasionalSlotsByResourceDate = useMemo(() => {
-    const map: Record<string, Array<{ start_time: string; end_time: string }>> = {};
+    const map: Record<
+      string,
+      Array<{ start_time: string; end_time: string }>
+    > = {};
     (occasionalSlots ?? []).forEach((s: any) => {
       const key = `${s.resource_id}__${s.slot_date}`;
       if (!map[key]) map[key] = [];
@@ -612,10 +749,15 @@ const PublicBookingInner = () => {
     (date: Date): Array<{ start_time: string; end_time: string }> => {
       const dateStr = format(date, "yyyy-MM-dd");
       if (form.resource_id) {
-        return occasionalSlotsByResourceDate[`${form.resource_id}__${dateStr}`] ?? [];
+        return (
+          occasionalSlotsByResourceDate[`${form.resource_id}__${dateStr}`] ?? []
+        );
       }
       const matchingResourceIds = (resources ?? [])
-        .filter((r: any) => !form.reservation_type || r.resource_type === form.reservation_type)
+        .filter(
+          (r: any) =>
+            !form.reservation_type || r.resource_type === form.reservation_type,
+        )
         .map((r: any) => r.id);
       const ranges: Array<{ start_time: string; end_time: string }> = [];
       matchingResourceIds.forEach((rid: string) => {
@@ -624,7 +766,12 @@ const PublicBookingInner = () => {
       });
       return ranges;
     },
-    [occasionalSlotsByResourceDate, form.resource_id, form.reservation_type, resources],
+    [
+      occasionalSlotsByResourceDate,
+      form.resource_id,
+      form.reservation_type,
+      resources,
+    ],
   );
 
   // Fetch blocked slots — filter by site
@@ -636,7 +783,9 @@ const PublicBookingInner = () => {
         .from("blocked_slots")
         // Internal-only columns (reason, rejection_reason, created_by) are not
         // exposed to anonymous booking visitors.
-        .select("id, tenant_id, site_id, resource_id, resource_type, date, start_time, end_time, approval_status")
+        .select(
+          "id, tenant_id, site_id, resource_id, resource_type, date, start_time, end_time, approval_status",
+        )
 
         .eq("tenant_id", tenant.id)
         .gte("date", format(new Date(), "yyyy-MM-dd"));
@@ -659,7 +808,9 @@ const PublicBookingInner = () => {
         .from("recurring_blocked_slots")
         // Internal-only columns (reason, rejection_reason, created_by) are not
         // exposed to anonymous booking visitors.
-        .select("id, tenant_id, site_id, resource_id, resource_type, day_of_week, start_time, end_time, is_active, approval_status")
+        .select(
+          "id, tenant_id, site_id, resource_id, resource_type, day_of_week, start_time, end_time, is_active, approval_status",
+        )
 
         .eq("tenant_id", tenant.id)
         .eq("is_active", true);
@@ -685,7 +836,10 @@ const PublicBookingInner = () => {
       while (h < closeH || (h === closeH && m < closeM)) {
         out.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
         m += 30;
-        if (m >= 60) { h++; m = 0; }
+        if (m >= 60) {
+          h++;
+          m = 0;
+        }
       }
       return out;
     };
@@ -695,8 +849,15 @@ const PublicBookingInner = () => {
     // Weekly recurring opening hours
     const dayOfWeek = selectedDate.getDay();
     const dayHours = openingHours?.find((h) => h.day_of_week === dayOfWeek);
-    if (dayHours && !dayHours.is_closed && dayHours.open_time && dayHours.close_time) {
-      expand(dayHours.open_time, dayHours.close_time).forEach((s) => merged.add(s));
+    if (
+      dayHours &&
+      !dayHours.is_closed &&
+      dayHours.open_time &&
+      dayHours.close_time
+    ) {
+      expand(dayHours.open_time, dayHours.close_time).forEach((s) =>
+        merged.add(s),
+      );
     }
 
     // Occasional availability slots (positive windows, e.g. sporadic workers)
@@ -708,90 +869,132 @@ const PublicBookingInner = () => {
   }, [selectedDate, openingHours, getOccasionalSlotsForDate]);
 
   // Check if a date is fully blocked for the selected resource type (and optionally specific resource)
-  const isDateFullyBlocked = useCallback((date: Date) => {
-    if (!form.reservation_type) return false;
-    const dateStr = format(date, "yyyy-MM-dd");
-    const dayOfWeek = date.getDay();
+  const isDateFullyBlocked = useCallback(
+    (date: Date) => {
+      if (!form.reservation_type) return false;
+      const dateStr = format(date, "yyyy-MM-dd");
+      const dayOfWeek = date.getDay();
 
-    // Check one-off blocked slots
-    if (blockedSlots?.length) {
-      const matchingBlocks = blockedSlots.filter((b: any) => {
-        if (b.date !== dateStr) return false;
-        if (b.resource_type !== form.reservation_type) return false;
-        if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return false;
-        if (!b.start_time && !b.end_time) {
-          if (!b.resource_id) return true;
-          if (!form.resource_id || b.resource_id === form.resource_id) return true;
-        }
-        return false;
-      });
-      if (matchingBlocks.length > 0) return true;
-    }
+      // Check one-off blocked slots
+      if (blockedSlots?.length) {
+        const matchingBlocks = blockedSlots.filter((b: any) => {
+          if (b.date !== dateStr) return false;
+          if (b.resource_type !== form.reservation_type) return false;
+          if (
+            b.resource_id &&
+            form.resource_id &&
+            b.resource_id !== form.resource_id
+          )
+            return false;
+          if (!b.start_time && !b.end_time) {
+            if (!b.resource_id) return true;
+            if (!form.resource_id || b.resource_id === form.resource_id)
+              return true;
+          }
+          return false;
+        });
+        if (matchingBlocks.length > 0) return true;
+      }
 
-    // Check recurring blocked slots
-    if (recurringBlocks?.length) {
-      const matchingRecurring = recurringBlocks.filter((b: any) => {
-        if (b.day_of_week !== dayOfWeek) return false;
-        if (b.resource_type !== form.reservation_type) return false;
-        if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return false;
-        if (!b.start_time && !b.end_time) {
-          if (!b.resource_id) return true;
-          if (!form.resource_id || b.resource_id === form.resource_id) return true;
-        }
-        return false;
-      });
-      if (matchingRecurring.length > 0) return true;
-    }
+      // Check recurring blocked slots
+      if (recurringBlocks?.length) {
+        const matchingRecurring = recurringBlocks.filter((b: any) => {
+          if (b.day_of_week !== dayOfWeek) return false;
+          if (b.resource_type !== form.reservation_type) return false;
+          if (
+            b.resource_id &&
+            form.resource_id &&
+            b.resource_id !== form.resource_id
+          )
+            return false;
+          if (!b.start_time && !b.end_time) {
+            if (!b.resource_id) return true;
+            if (!form.resource_id || b.resource_id === form.resource_id)
+              return true;
+          }
+          return false;
+        });
+        if (matchingRecurring.length > 0) return true;
+      }
 
-    return false;
-  }, [blockedSlots, recurringBlocks, form.reservation_type, form.resource_id]);
+      return false;
+    },
+    [blockedSlots, recurringBlocks, form.reservation_type, form.resource_id],
+  );
 
   // Get blocked time ranges for a specific date (one-off + recurring)
-  const getBlockedTimeRanges = useCallback((date: Date) => {
-    if (!form.reservation_type) return [];
-    const dateStr = format(date, "yyyy-MM-dd");
-    const dayOfWeek = date.getDay();
-    const ranges: Array<{ start_time: string; end_time: string }> = [];
+  const getBlockedTimeRanges = useCallback(
+    (date: Date) => {
+      if (!form.reservation_type) return [];
+      const dateStr = format(date, "yyyy-MM-dd");
+      const dayOfWeek = date.getDay();
+      const ranges: Array<{ start_time: string; end_time: string }> = [];
 
-    // One-off time blocks
-    if (blockedSlots?.length) {
-      blockedSlots.forEach((b: any) => {
-        if (b.date !== dateStr) return;
-        if (b.resource_type !== form.reservation_type) return;
-        if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return;
-        if (b.start_time && b.end_time) {
-          if (!b.resource_id || !form.resource_id || b.resource_id === form.resource_id) {
-            ranges.push({ start_time: b.start_time, end_time: b.end_time });
+      // One-off time blocks
+      if (blockedSlots?.length) {
+        blockedSlots.forEach((b: any) => {
+          if (b.date !== dateStr) return;
+          if (b.resource_type !== form.reservation_type) return;
+          if (
+            b.resource_id &&
+            form.resource_id &&
+            b.resource_id !== form.resource_id
+          )
+            return;
+          if (b.start_time && b.end_time) {
+            if (
+              !b.resource_id ||
+              !form.resource_id ||
+              b.resource_id === form.resource_id
+            ) {
+              ranges.push({ start_time: b.start_time, end_time: b.end_time });
+            }
           }
-        }
-      });
-    }
+        });
+      }
 
-    // Recurring time blocks
-    if (recurringBlocks?.length) {
-      recurringBlocks.forEach((b: any) => {
-        if (b.day_of_week !== dayOfWeek) return;
-        if (b.resource_type !== form.reservation_type) return;
-        if (b.resource_id && form.resource_id && b.resource_id !== form.resource_id) return;
-        if (b.start_time && b.end_time) {
-          if (!b.resource_id || !form.resource_id || b.resource_id === form.resource_id) {
-            ranges.push({ start_time: b.start_time, end_time: b.end_time });
+      // Recurring time blocks
+      if (recurringBlocks?.length) {
+        recurringBlocks.forEach((b: any) => {
+          if (b.day_of_week !== dayOfWeek) return;
+          if (b.resource_type !== form.reservation_type) return;
+          if (
+            b.resource_id &&
+            form.resource_id &&
+            b.resource_id !== form.resource_id
+          )
+            return;
+          if (b.start_time && b.end_time) {
+            if (
+              !b.resource_id ||
+              !form.resource_id ||
+              b.resource_id === form.resource_id
+            ) {
+              ranges.push({ start_time: b.start_time, end_time: b.end_time });
+            }
           }
-        }
-      });
-    }
+        });
+      }
 
-    return ranges;
-  }, [blockedSlots, recurringBlocks, form.reservation_type, form.resource_id]);
+      return ranges;
+    },
+    [blockedSlots, recurringBlocks, form.reservation_type, form.resource_id],
+  );
 
   // Check if a specific time slot falls within any blocked range
-  const isTimeSlotBlocked = useCallback((time: string, date: Date) => {
-    const ranges = getBlockedTimeRanges(date);
-    return ranges.some((b: any) => {
-      const slotTime = time;
-      return slotTime >= b.start_time.slice(0, 5) && slotTime < b.end_time.slice(0, 5);
-    });
-  }, [getBlockedTimeRanges]);
+  const isTimeSlotBlocked = useCallback(
+    (time: string, date: Date) => {
+      const ranges = getBlockedTimeRanges(date);
+      return ranges.some((b: any) => {
+        const slotTime = time;
+        return (
+          slotTime >= b.start_time.slice(0, 5) &&
+          slotTime < b.end_time.slice(0, 5)
+        );
+      });
+    },
+    [getBlockedTimeRanges],
+  );
 
   // Check if a date's day of week is closed
   const isDateDisabled = (date: Date) => {
@@ -809,17 +1012,26 @@ const PublicBookingInner = () => {
   // ----- Special occasions (staff-defined event days) -----
   const occasionDate = selectedDate ? format(selectedDate, "yyyy-MM-dd") : "";
   const { data: specialOccasions = [] } = useQuery({
-    queryKey: ["public-special-occasions", tenant?.id, activeSiteId, form.reservation_type, occasionDate],
+    queryKey: [
+      "public-special-occasions",
+      tenant?.id,
+      activeSiteId,
+      form.reservation_type,
+      occasionDate,
+    ],
     queryFn: async () => {
       if (!tenant?.id || !occasionDate || !form.reservation_type) return [];
       let query = supabase
         .from("special_occasions")
-        .select("id, name, description, occasion_date, reservation_type, capacity, booking_type, seating_times, site_id")
+        .select(
+          "id, name, description, occasion_date, reservation_type, capacity, booking_type, seating_times, site_id",
+        )
         .eq("tenant_id", tenant.id)
         .eq("occasion_date", occasionDate)
         .eq("reservation_type", form.reservation_type)
         .eq("is_active", true);
-      if (activeSiteId) query = query.or(`site_id.eq.${activeSiteId},site_id.is.null`);
+      if (activeSiteId)
+        query = query.or(`site_id.eq.${activeSiteId},site_id.is.null`);
       const { data, error } = await query.order("name");
       if (error) return [];
       return data ?? [];
@@ -832,7 +1044,12 @@ const PublicBookingInner = () => {
   // Upcoming occasions for this service, used to tell a guest which days
   // actually have an occasion when the chosen day has none.
   const { data: upcomingOccasions = [] } = useQuery({
-    queryKey: ["public-upcoming-occasions", tenant?.id, activeSiteId, form.reservation_type],
+    queryKey: [
+      "public-upcoming-occasions",
+      tenant?.id,
+      activeSiteId,
+      form.reservation_type,
+    ],
     queryFn: async () => {
       if (!tenant?.id || !form.reservation_type) return [];
       const today = format(new Date(), "yyyy-MM-dd");
@@ -843,7 +1060,8 @@ const PublicBookingInner = () => {
         .eq("reservation_type", form.reservation_type)
         .eq("is_active", true)
         .gte("occasion_date", today);
-      if (activeSiteId) query = query.or(`site_id.eq.${activeSiteId},site_id.is.null`);
+      if (activeSiteId)
+        query = query.or(`site_id.eq.${activeSiteId},site_id.is.null`);
       const { data, error } = await query.order("occasion_date").limit(5);
       if (error) return [];
       return data ?? [];
@@ -851,11 +1069,15 @@ const PublicBookingInner = () => {
     enabled: !!tenant?.id && !!form.reservation_type,
   });
 
-  const [selectedOccasionId, setSelectedOccasionId] = useState<string | null>(null);
+  const [selectedOccasionId, setSelectedOccasionId] = useState<string | null>(
+    null,
+  );
   const [occasionSeating, setOccasionSeating] = useState<string>("");
   const selectedOccasion = useMemo(
-    () => (specialOccasions as any[]).find((o) => o.id === selectedOccasionId) ?? null,
-    [specialOccasions, selectedOccasionId]
+    () =>
+      (specialOccasions as any[]).find((o) => o.id === selectedOccasionId) ??
+      null,
+    [specialOccasions, selectedOccasionId],
   );
 
   const submitMutation = useMutation({
@@ -874,11 +1096,15 @@ const PublicBookingInner = () => {
         resource_id: form.resource_id || undefined,
       });
 
-      const isAccommodation = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+      const isAccommodation =
+        form.reservation_type === "hotel" ||
+        form.reservation_type === "guesthouse";
 
       // Validate check-out date for accommodation
       if (isAccommodation && !form.check_out_date) {
-        throw new Error("Check-out date is required for accommodation bookings");
+        throw new Error(
+          "Check-out date is required for accommodation bookings",
+        );
       }
       const isVenue = form.reservation_type === "venue";
 
@@ -901,7 +1127,8 @@ const PublicBookingInner = () => {
       }
 
       if (
-        (parsed.reservation_type === "custom" || parsed.reservation_type === "wellness") &&
+        (parsed.reservation_type === "custom" ||
+          parsed.reservation_type === "wellness") &&
         form.selected_sub_services.length > 0
       ) {
         payload.selected_sub_services = form.selected_sub_services.map((s) => ({
@@ -929,7 +1156,10 @@ const PublicBookingInner = () => {
         payload.restaurant_sub_type = form.restaurant_sub_type;
         if (form.restaurant_sub_type === "dine_in") {
           payload.pricing_type = form.pricing_type || null;
-          payload.fixed_price = form.pricing_type === "fixed_price" && form.fixed_price ? parseFloat(form.fixed_price) : null;
+          payload.fixed_price =
+            form.pricing_type === "fixed_price" && form.fixed_price
+              ? parseFloat(form.fixed_price)
+              : null;
         }
         if (form.restaurant_sub_type === "catering") {
           payload.delivery_address = form.delivery_address || null;
@@ -943,14 +1173,17 @@ const PublicBookingInner = () => {
           payload.electricity_needed = form.electricity_needed;
           payload.water_needed = form.water_needed;
           payload.food_permits = form.food_permits || null;
-          payload.stall_fee = form.stall_fee ? parseFloat(form.stall_fee) : null;
+          payload.stall_fee = form.stall_fee
+            ? parseFloat(form.stall_fee)
+            : null;
         }
       }
 
       // Special occasion (staff-defined event day, for example a Christmas dinner)
       if (selectedOccasion) {
         if (selectedOccasion.booking_type === "seatings") {
-          if (!occasionSeating) throw new Error(t("booking.occasionErrSeatingRequired"));
+          if (!occasionSeating)
+            throw new Error(t("booking.occasionErrSeatingRequired"));
           payload.start_time = occasionSeating;
         }
         payload.special_occasion_id = selectedOccasion.id;
@@ -961,9 +1194,12 @@ const PublicBookingInner = () => {
         payload.promo_code = form.promo_code.trim().toUpperCase();
       }
 
-      const { data, error } = await supabase.functions.invoke("public-booking", {
-        body: payload,
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "public-booking",
+        {
+          body: payload,
+        },
+      );
       // The edge function returns 400 + { error_code: SERVICE_ROLE_KEY_MISSING }
       // when SUPABASE_SERVICE_ROLE_KEY is not configured. supabase-js wraps
       // non-2xx responses in a FunctionsHttpError whose body must be parsed
@@ -1027,17 +1263,22 @@ const PublicBookingInner = () => {
       const occasionInfo = parseOccasionError(err);
       if (occasionInfo) {
         const template = t(occasionErrorTranslationKey(occasionInfo));
-        toast.error(applyOccasionErrorPlaceholders(template, occasionInfo), { duration: 8000 });
+        toast.error(applyOccasionErrorPlaceholders(template, occasionInfo), {
+          duration: 8000,
+        });
         // Drop a stale sitting choice so the guest must pick again from
         // the times that are actually still open.
         if (
-          occasionInfo.code === OCCASION_ERROR_CODES.OCCASION_SEATING_UNAVAILABLE ||
+          occasionInfo.code ===
+            OCCASION_ERROR_CODES.OCCASION_SEATING_UNAVAILABLE ||
           occasionInfo.code === OCCASION_ERROR_CODES.OCCASION_FULL
         ) {
           setOccasionSeating("");
           updateField("start_time", "");
         }
-        queryClient.invalidateQueries({ queryKey: ["public-special-occasions"] });
+        queryClient.invalidateQueries({
+          queryKey: ["public-special-occasions"],
+        });
         return;
       }
       const descriptor = resolveBookingError(err, { isStaff });
@@ -1057,7 +1298,9 @@ const PublicBookingInner = () => {
           locale: language,
         });
       }
-      toast.error(t(descriptor.i18nKey), { duration: descriptor.toastDuration });
+      toast.error(t(descriptor.i18nKey), {
+        duration: descriptor.toastDuration,
+      });
     },
   });
 
@@ -1071,7 +1314,9 @@ const PublicBookingInner = () => {
     // re-surface the toast so the guest gets immediate feedback.
     if (serviceMisconfigured) {
       // Re-surface the same staff-aware copy as the original toast.
-      const key = isStaff ? "booking.serviceMisconfiguredAdmin" : "booking.serviceMisconfigured";
+      const key = isStaff
+        ? "booking.serviceMisconfiguredAdmin"
+        : "booking.serviceMisconfigured";
       toast.error(t(key), { duration: 10000 });
       return;
     }
@@ -1113,9 +1358,14 @@ const PublicBookingInner = () => {
       });
 
       // Additional validation for accommodation
-      const isAccomType = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+      const isAccomType =
+        form.reservation_type === "hotel" ||
+        form.reservation_type === "guesthouse";
       if (isAccomType && !form.check_out_date) {
-        setErrors((prev) => ({ ...prev, check_out_date: "Check-out date is required" }));
+        setErrors((prev) => ({
+          ...prev,
+          check_out_date: "Check-out date is required",
+        }));
         return;
       }
 
@@ -1140,7 +1390,8 @@ const PublicBookingInner = () => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const isAccommodationType = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
+  const isAccommodationType =
+    form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
   const isVenueType = form.reservation_type === "venue";
 
   const primaryColor = settings?.primary_color ?? "#1e3a5f";
@@ -1154,7 +1405,9 @@ const PublicBookingInner = () => {
     const tenantTypes: string[] = tenant?.allowed_reservation_types ?? [];
     if (activeSiteId && allSiteResources && allSiteResources.length > 0) {
       // Get unique resource types available at this site
-      const siteResourceTypes = [...new Set(allSiteResources.map((r) => r.resource_type))];
+      const siteResourceTypes = [
+        ...new Set(allSiteResources.map((r) => r.resource_type)),
+      ];
       // Intersect with tenant's allowed types to respect tenant config
       return tenantTypes.filter((t) => siteResourceTypes.includes(t));
     }
@@ -1167,8 +1420,30 @@ const PublicBookingInner = () => {
   // labelled with `custom_type_label` (or the resource name as fallback).
   type TypeTile =
     | { kind: "builtin"; key: string; type: string }
-    | { kind: "custom"; key: string; resourceId: string; label: string; subServices: { id: string; name: string; price_eur?: number; duration_min?: number }[] }
-    | { kind: "wellness"; key: string; resourceId: string; label: string; subServices: { id: string; name: string; price_eur?: number; duration_min?: number }[] };
+    | {
+        kind: "custom";
+        key: string;
+        resourceId: string;
+        label: string;
+        subServices: {
+          id: string;
+          name: string;
+          price_eur?: number;
+          duration_min?: number;
+        }[];
+      }
+    | {
+        kind: "wellness";
+        key: string;
+        resourceId: string;
+        label: string;
+        subServices: {
+          id: string;
+          name: string;
+          price_eur?: number;
+          duration_min?: number;
+        }[];
+      };
 
   const typeTiles: TypeTile[] = useMemo(
     () => buildTypeTiles(allowedTypes, allSiteResources as any) as TypeTile[],
@@ -1178,7 +1453,9 @@ const PublicBookingInner = () => {
   // Helper: resolve site name from site_id
   const siteNameMap = useMemo(() => {
     const map: Record<string, string> = {};
-    (allSites ?? []).forEach((s) => { map[s.id] = s.name; });
+    (allSites ?? []).forEach((s) => {
+      map[s.id] = s.name;
+    });
     return map;
   }, [allSites]);
   const showSiteBadges = hasMultipleSites && !activeSiteId;
@@ -1246,8 +1523,14 @@ const PublicBookingInner = () => {
 
   if (loadingTenant) {
     return (
-      <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: secondaryColor }}>
-        <Loader2 className="h-8 w-8 animate-spin" style={{ color: primaryColor }} />
+      <main
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: secondaryColor }}
+      >
+        <Loader2
+          className="h-8 w-8 animate-spin"
+          style={{ color: primaryColor }}
+        />
       </main>
     );
   }
@@ -1256,7 +1539,9 @@ const PublicBookingInner = () => {
     return (
       <main className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-serif font-bold text-foreground">{t("booking.notFound")}</h1>
+          <h1 className="text-2xl font-serif font-bold text-foreground">
+            {t("booking.notFound")}
+          </h1>
           <p className="text-muted-foreground">{t("booking.notFoundDesc")}</p>
         </div>
       </main>
@@ -1265,17 +1550,26 @@ const PublicBookingInner = () => {
 
   if (submitted) {
     return (
-        <main className="min-h-screen p-4 sm:p-8" style={{ backgroundColor: secondaryColor }}>
-          <div className="flex justify-end mb-4 max-w-2xl mx-auto">
-            <LanguageSwitcher />
-          </div>
-          <div className="max-w-2xl mx-auto space-y-6">
+      <main
+        className="min-h-screen p-4 sm:p-8"
+        style={{ backgroundColor: secondaryColor }}
+      >
+        <div className="flex justify-end mb-4 max-w-2xl mx-auto">
+          <LanguageSwitcher />
+        </div>
+        <div className="max-w-2xl mx-auto space-y-6">
           <Card className="text-center">
             <CardContent className="pt-8 pb-8 space-y-4">
               {duplicateDetected ? (
                 <>
-                  <Info className="h-16 w-16 mx-auto text-amber-600" aria-hidden="true" />
-                  <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
+                  <Info
+                    className="h-16 w-16 mx-auto text-amber-600"
+                    aria-hidden="true"
+                  />
+                  <h2
+                    className="text-2xl font-serif font-bold"
+                    style={{ color: primaryColor }}
+                  >
                     {t("booking.duplicateTitle")}
                   </h2>
                   <div
@@ -1289,11 +1583,22 @@ const PublicBookingInner = () => {
                 </>
               ) : (
                 <>
-                  <CheckCircle className="h-16 w-16 mx-auto" style={{ color: accentColor }} />
-                  <h2 className="text-2xl font-serif font-bold" style={{ color: primaryColor }}>
+                  <CheckCircle
+                    className="h-16 w-16 mx-auto"
+                    style={{ color: accentColor }}
+                  />
+                  <h2
+                    className="text-2xl font-serif font-bold"
+                    style={{ color: primaryColor }}
+                  >
                     {t("booking.thankYou")}
                   </h2>
-                  <p className="text-muted-foreground">{t("booking.confirmationMsg").replace("{name}", displayName)}</p>
+                  <p className="text-muted-foreground">
+                    {t("booking.confirmationMsg").replace(
+                      "{name}",
+                      displayName,
+                    )}
+                  </p>
                   <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800 text-left">
                     <Mail className="h-4 w-4 mt-0.5 shrink-0" />
                     <p>{t("booking.checkSpam")}</p>
@@ -1304,28 +1609,50 @@ const PublicBookingInner = () => {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    const escIcal = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
-                    const dateStr = selectedDate ? format(selectedDate, "yyyyMMdd") : "";
-                    const timeStr = form.start_time ? form.start_time.replace(/:/g, "") + "00" : "";
+                    const escIcal = (s: string) =>
+                      s
+                        .replace(/\\/g, "\\\\")
+                        .replace(/;/g, "\\;")
+                        .replace(/,/g, "\\,")
+                        .replace(/\n/g, "\\n");
+                    const dateStr = selectedDate
+                      ? format(selectedDate, "yyyyMMdd")
+                      : "";
+                    const timeStr = form.start_time
+                      ? form.start_time.replace(/:/g, "") + "00"
+                      : "";
                     const dtStart = timeStr ? `${dateStr}T${timeStr}` : dateStr;
                     let dtEnd = dtStart;
                     if (form.check_out_date) {
                       dtEnd = form.check_out_date.replace(/-/g, "");
                     }
-                    const summary = escIcal(`${displayName} — ${form.reservation_type}`);
-                    const desc = escIcal([
-                      form.guest_name,
-                      form.guests_count ? `${form.guests_count} guests` : "",
-                      form.special_requests || "",
-                    ].filter(Boolean).join("\\n"));
+                    const summary = escIcal(
+                      `${displayName} — ${form.reservation_type}`,
+                    );
+                    const desc = escIcal(
+                      [
+                        form.guest_name,
+                        form.guests_count ? `${form.guests_count} guests` : "",
+                        form.special_requests || "",
+                      ]
+                        .filter(Boolean)
+                        .join("\\n"),
+                    );
                     const lines = [
-                      "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//MimmoBook//Booking//EN",
+                      "BEGIN:VCALENDAR",
+                      "VERSION:2.0",
+                      "PRODID:-//MimmoBook//Booking//EN",
                       "BEGIN:VEVENT",
-                      `DTSTART:${dtStart}`, `DTEND:${dtEnd}`,
-                      `SUMMARY:${summary}`, `DESCRIPTION:${desc}`,
-                      "END:VEVENT", "END:VCALENDAR",
+                      `DTSTART:${dtStart}`,
+                      `DTEND:${dtEnd}`,
+                      `SUMMARY:${summary}`,
+                      `DESCRIPTION:${desc}`,
+                      "END:VEVENT",
+                      "END:VCALENDAR",
                     ];
-                    const blob = new Blob([lines.join("\r\n")], { type: "text/calendar" });
+                    const blob = new Blob([lines.join("\r\n")], {
+                      type: "text/calendar",
+                    });
                     const a = document.createElement("a");
                     a.href = URL.createObjectURL(blob);
                     a.download = "reservation.ics";
@@ -1338,7 +1665,42 @@ const PublicBookingInner = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => { setSubmitted(false); setDuplicateDetected(false); setForm({ guest_name: "", guest_email: "", guest_phone: "", guests_count: "", reservation_type: "", start_time: "", special_requests: "", resource_id: "", check_out_date: "", room_type: "", breakfast_included: false, event_type: "", estimated_guests: "", catering_needed: false, pricing_type: "", fixed_price: "", restaurant_sub_type: "dine_in", delivery_address: "", dietary_notes: "", equipment_needed: false, staff_needed: false, festival_name: "", stall_size: "", electricity_needed: false, water_needed: false, food_permits: "", stall_fee: "", promo_code: "", selected_sub_services: [] }); setSelectedDate(undefined); }}
+                  onClick={() => {
+                    setSubmitted(false);
+                    setDuplicateDetected(false);
+                    setForm({
+                      guest_name: "",
+                      guest_email: "",
+                      guest_phone: "",
+                      guests_count: "",
+                      reservation_type: "",
+                      start_time: "",
+                      special_requests: "",
+                      resource_id: "",
+                      check_out_date: "",
+                      room_type: "",
+                      breakfast_included: false,
+                      event_type: "",
+                      estimated_guests: "",
+                      catering_needed: false,
+                      pricing_type: "",
+                      fixed_price: "",
+                      restaurant_sub_type: "dine_in",
+                      delivery_address: "",
+                      dietary_notes: "",
+                      equipment_needed: false,
+                      staff_needed: false,
+                      festival_name: "",
+                      stall_size: "",
+                      electricity_needed: false,
+                      water_needed: false,
+                      food_permits: "",
+                      stall_fee: "",
+                      promo_code: "",
+                      selected_sub_services: [],
+                    });
+                    setSelectedDate(undefined);
+                  }}
                 >
                   {t("booking.makeAnother")}
                 </Button>
@@ -1348,44 +1710,76 @@ const PublicBookingInner = () => {
 
           {/* Booking summary with price breakdown */}
           {(() => {
-            const isAccommodation = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
-            const selectedResource = resources?.find((r: any) => r.id === form.resource_id);
+            const isAccommodation =
+              form.reservation_type === "hotel" ||
+              form.reservation_type === "guesthouse";
+            const selectedResource = resources?.find(
+              (r: any) => r.id === form.resource_id,
+            );
             const basePrice = selectedResource?.price_per_night;
-            const breakfastPrice = selectedResource?.breakfast_price_per_person ?? 15;
-            const guestsCount = form.guests_count ? parseInt(form.guests_count) : 1;
+            const breakfastPrice =
+              selectedResource?.breakfast_price_per_person ?? 15;
+            const guestsCount = form.guests_count
+              ? parseInt(form.guests_count)
+              : 1;
 
             let nights = 0;
             if (isAccommodation && selectedDate && form.check_out_date) {
-              const checkIn = new Date(format(selectedDate, "yyyy-MM-dd") + "T00:00:00");
+              const checkIn = new Date(
+                format(selectedDate, "yyyy-MM-dd") + "T00:00:00",
+              );
               const checkOut = new Date(form.check_out_date + "T00:00:00");
-              nights = Math.max(0, Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000));
+              nights = Math.max(
+                0,
+                Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000),
+              );
             }
 
-            const roomTotal = basePrice && nights > 0 ? nights * basePrice : null;
-            const breakfastTotal = form.breakfast_included && breakfastPrice ? nights * guestsCount * breakfastPrice : 0;
-            const grandTotal = roomTotal !== null ? roomTotal + breakfastTotal : null;
+            const roomTotal =
+              basePrice && nights > 0 ? nights * basePrice : null;
+            const breakfastTotal =
+              form.breakfast_included && breakfastPrice
+                ? nights * guestsCount * breakfastPrice
+                : 0;
+            const grandTotal =
+              roomTotal !== null ? roomTotal + breakfastTotal : null;
 
             return (
               <Card>
                 <CardContent className="pt-6 space-y-3">
-                  <h3 className="text-sm font-semibold" style={{ color: primaryColor }}>
+                  <h3
+                    className="text-sm font-semibold"
+                    style={{ color: primaryColor }}
+                  >
                     {t("booking.priceSummary")}
                   </h3>
                   <div className="text-sm space-y-2 text-muted-foreground">
                     <div className="flex justify-between">
                       <span>{t("common.date")}</span>
-                      <span>{selectedDate ? format(selectedDate, "d.M.yyyy") : "-"}</span>
+                      <span>
+                        {selectedDate ? format(selectedDate, "d.M.yyyy") : "-"}
+                      </span>
                     </div>
                     {isAccommodation && form.check_out_date && (
                       <>
                         <div className="flex justify-between">
                           <span>{t("booking.checkOutDate")}</span>
-                          <span>{format(new Date(form.check_out_date + "T00:00:00"), "d.M.yyyy")}</span>
+                          <span>
+                            {format(
+                              new Date(form.check_out_date + "T00:00:00"),
+                              "d.M.yyyy",
+                            )}
+                          </span>
                         </div>
                         {nights > 0 && (
                           <div className="flex justify-between">
                             <span>{t("email.duration")}</span>
-                            <span>{nights} {nights === 1 ? t("booking.night") : t("booking.nights")}</span>
+                            <span>
+                              {nights}{" "}
+                              {nights === 1
+                                ? t("booking.night")
+                                : t("booking.nights")}
+                            </span>
                           </div>
                         )}
                       </>
@@ -1393,7 +1787,12 @@ const PublicBookingInner = () => {
                     {selectedResource && (
                       <div className="flex justify-between">
                         <span>{selectedResource.name}</span>
-                        {basePrice != null && <span>€{Number(basePrice).toFixed(2)} / {t("booking.night")}</span>}
+                        {basePrice != null && (
+                          <span>
+                            €{Number(basePrice).toFixed(2)} /{" "}
+                            {t("booking.night")}
+                          </span>
+                        )}
                       </div>
                     )}
                     {roomTotal != null && (
@@ -1404,12 +1803,21 @@ const PublicBookingInner = () => {
                     )}
                     {form.breakfast_included && breakfastTotal > 0 && (
                       <div className="flex justify-between">
-                        <span>{t("booking.breakfastIncluded")} ({guestsCount} × {nights} × €{breakfastPrice})</span>
+                        <span>
+                          {t("booking.breakfastIncluded")} ({guestsCount} ×{" "}
+                          {nights} × €{breakfastPrice})
+                        </span>
                         <span>€{breakfastTotal.toFixed(2)}</span>
                       </div>
                     )}
                     {grandTotal != null && (
-                      <div className="flex justify-between font-semibold pt-2 border-t" style={{ borderColor: `${accentColor}30`, color: primaryColor }}>
+                      <div
+                        className="flex justify-between font-semibold pt-2 border-t"
+                        style={{
+                          borderColor: `${accentColor}30`,
+                          color: primaryColor,
+                        }}
+                      >
                         <span>{t("booking.estimatedTotal")}</span>
                         <span>€{grandTotal.toFixed(2)}</span>
                       </div>
@@ -1432,21 +1840,48 @@ const PublicBookingInner = () => {
                 date: selectedDate ? format(selectedDate, "yyyy-MM-dd") : "",
                 start_time: form.start_time || null,
                 reservation_type: form.reservation_type,
-                guests_count: form.guests_count ? parseInt(form.guests_count) : null,
+                guests_count: form.guests_count
+                  ? parseInt(form.guests_count)
+                  : null,
                 check_out_date: form.check_out_date || null,
                 room_type: form.room_type || null,
                 breakfast_included: form.breakfast_included,
                 event_type: form.event_type || null,
-                estimated_guests: form.estimated_guests ? parseInt(form.estimated_guests) : null,
+                estimated_guests: form.estimated_guests
+                  ? parseInt(form.estimated_guests)
+                  : null,
                 catering_needed: form.catering_needed,
                 special_requests: form.special_requests || null,
                 price_eur: (() => {
-                  const isAcc = form.reservation_type === "hotel" || form.reservation_type === "guesthouse";
-                  const res = resources?.find((r: any) => r.id === form.resource_id);
-                  if (!isAcc || !res?.price_per_night || !selectedDate || !form.check_out_date) return null;
-                  const n = Math.max(0, Math.round((new Date(form.check_out_date + "T00:00:00").getTime() - new Date(format(selectedDate, "yyyy-MM-dd") + "T00:00:00").getTime()) / 86400000));
+                  const isAcc =
+                    form.reservation_type === "hotel" ||
+                    form.reservation_type === "guesthouse";
+                  const res = resources?.find(
+                    (r: any) => r.id === form.resource_id,
+                  );
+                  if (
+                    !isAcc ||
+                    !res?.price_per_night ||
+                    !selectedDate ||
+                    !form.check_out_date
+                  )
+                    return null;
+                  const n = Math.max(
+                    0,
+                    Math.round(
+                      (new Date(form.check_out_date + "T00:00:00").getTime() -
+                        new Date(
+                          format(selectedDate, "yyyy-MM-dd") + "T00:00:00",
+                        ).getTime()) /
+                        86400000,
+                    ),
+                  );
                   const roomT = n * res.price_per_night;
-                  const bfT = form.breakfast_included ? n * (form.guests_count ? parseInt(form.guests_count) : 1) * (res.breakfast_price_per_person ?? 15) : 0;
+                  const bfT = form.breakfast_included
+                    ? n *
+                      (form.guests_count ? parseInt(form.guests_count) : 1) *
+                      (res.breakfast_price_per_person ?? 15)
+                    : 0;
                   return roomT + bfT;
                 })(),
               }}
@@ -1467,114 +1902,134 @@ const PublicBookingInner = () => {
   }
 
   return (
-    <div className={isEmbed ? "" : "min-h-screen"} style={{ backgroundColor: secondaryColor }}>
+    <div
+      className={isEmbed ? "" : "min-h-screen"}
+      style={{ backgroundColor: secondaryColor }}
+    >
       {/* Header with optional hero image */}
-      {!isEmbed && (settings?.hero_image_url && !heroFailed ? (
-        <header className="relative overflow-hidden" style={{ backgroundColor: primaryColor }}>
-          <FadeInImage
-            src={heroSignedUrl || undefined}
-            alt=""
-            onError={heroBranding.handleImgError}
-            wrapperClassName="absolute inset-0 w-full h-full block"
-            className="absolute inset-0 w-full h-full object-cover"
-            loadedOpacity={0.4}
-            placeholder={
-              <span className="absolute inset-0 w-full h-full bg-white/10 animate-pulse" />
-            }
-          />
-          <div className="relative">
-            <div className="border-b border-white/20 py-4 px-4 sm:px-6">
-              <div className="max-w-3xl mx-auto flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  {settings?.logo_url ? (
-                    <FadeInImage
-                      src={logoSignedUrl || undefined}
-                      alt=""
-                      onError={logoBranding.handleImgError}
-                      wrapperClassName="h-8 w-8 shrink-0"
-                      className="absolute inset-0 h-8 w-8 rounded-full object-cover"
-                      placeholder={
-                        logoFailed ? (
-                          <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center">
-                            {(displayName || "?").trim().charAt(0).toUpperCase()}
-                          </span>
-                        ) : (
-                          <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 animate-pulse" />
-                        )
-                      }
-                    />
-                  ) : null}
-                  <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
+      {!isEmbed &&
+        (settings?.hero_image_url && !heroFailed ? (
+          <header
+            className="relative overflow-hidden"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <FadeInImage
+              src={heroSignedUrl || undefined}
+              alt=""
+              onError={heroBranding.handleImgError}
+              wrapperClassName="absolute inset-0 w-full h-full block"
+              className="absolute inset-0 w-full h-full object-cover"
+              loadedOpacity={0.4}
+              placeholder={
+                <span className="absolute inset-0 w-full h-full bg-white/10 animate-pulse" />
+              }
+            />
+            <div className="relative">
+              <div className="border-b border-white/20 py-4 px-4 sm:px-6">
+                <div className="max-w-3xl mx-auto flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {settings?.logo_url ? (
+                      <FadeInImage
+                        src={logoSignedUrl || undefined}
+                        alt=""
+                        onError={logoBranding.handleImgError}
+                        wrapperClassName="h-8 w-8 shrink-0"
+                        className="absolute inset-0 h-8 w-8 rounded-full object-cover"
+                        placeholder={
+                          logoFailed ? (
+                            <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center">
+                              {(displayName || "?")
+                                .trim()
+                                .charAt(0)
+                                .toUpperCase()}
+                            </span>
+                          ) : (
+                            <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 animate-pulse" />
+                          )
+                        }
+                      />
+                    ) : null}
+                    <h1 className="text-xl font-serif font-bold text-white">
+                      {displayName}
+                    </h1>
+                  </div>
+                  <LanguageSwitcher variant="dark" />
                 </div>
-                <LanguageSwitcher variant="dark" />
+              </div>
+              <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+                <h2 className="text-3xl sm:text-4xl font-serif font-bold text-white drop-shadow-md">
+                  {t("booking.title")}
+                </h2>
+                {displayDescription && (
+                  <p className="mt-2 text-sm text-white/80 max-w-lg">
+                    {displayDescription}
+                  </p>
+                )}
+                {(displayEmail || displayPhone || displayAddress) && (
+                  <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-white/70">
+                    {displayPhone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {displayPhone}
+                      </span>
+                    )}
+                    {displayEmail && (
+                      <span className="flex items-center gap-1">
+                        <Mail className="h-3 w-3" />
+                        {displayEmail}
+                      </span>
+                    )}
+                    {displayAddress && (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {displayAddress}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-              <h2 className="text-3xl sm:text-4xl font-serif font-bold text-white drop-shadow-md">
-                {t("booking.title")}
-              </h2>
-              {displayDescription && (
-                <p className="mt-2 text-sm text-white/80 max-w-lg">
-                  {displayDescription}
-                </p>
-              )}
-              {(displayEmail || displayPhone || displayAddress) && (
-                <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-white/70">
-                  {displayPhone && (
-                    <span className="flex items-center gap-1">
-                      <Phone className="h-3 w-3" />
-                      {displayPhone}
-                    </span>
-                  )}
-                  {displayEmail && (
-                    <span className="flex items-center gap-1">
-                      <Mail className="h-3 w-3" />
-                      {displayEmail}
-                    </span>
-                  )}
-                  {displayAddress && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {displayAddress}
-                    </span>
-                  )}
-                </div>
-              )}
+          </header>
+        ) : (
+          <header
+            className="border-b py-4 px-4 sm:px-6"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <div className="max-w-3xl mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {settings?.logo_url ? (
+                  <FadeInImage
+                    src={logoSignedUrl || undefined}
+                    alt=""
+                    onError={logoBranding.handleImgError}
+                    wrapperClassName="h-8 w-8 shrink-0"
+                    className="absolute inset-0 h-8 w-8 rounded-full object-cover"
+                    placeholder={
+                      logoFailed ? (
+                        <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center">
+                          {(displayName || "?").trim().charAt(0).toUpperCase()}
+                        </span>
+                      ) : (
+                        <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 animate-pulse" />
+                      )
+                    }
+                  />
+                ) : null}
+                <h1 className="text-xl font-serif font-bold text-white">
+                  {displayName}
+                </h1>
+              </div>
+              <LanguageSwitcher variant="dark" />
             </div>
-          </div>
-        </header>
-      ) : (
-        <header className="border-b py-4 px-4 sm:px-6" style={{ backgroundColor: primaryColor }}>
-          <div className="max-w-3xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {settings?.logo_url ? (
-                <FadeInImage
-                  src={logoSignedUrl || undefined}
-                  alt=""
-                  onError={logoBranding.handleImgError}
-                  wrapperClassName="h-8 w-8 shrink-0"
-                  className="absolute inset-0 h-8 w-8 rounded-full object-cover"
-                  placeholder={
-                    logoFailed ? (
-                      <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 text-white text-xs font-semibold flex items-center justify-center">
-                        {(displayName || "?").trim().charAt(0).toUpperCase()}
-                      </span>
-                    ) : (
-                      <span className="absolute inset-0 h-8 w-8 rounded-full bg-white/20 animate-pulse" />
-                    )
-                  }
-                />
-              ) : null}
-              <h1 className="text-xl font-serif font-bold text-white">{displayName}</h1>
-            </div>
-            <LanguageSwitcher variant="dark" />
-          </div>
-        </header>
-      ))}
+          </header>
+        ))}
 
       <SEOHead
         title={`Book at ${displayName} – MimmoBook`}
-        description={(displayDescription ?? `Reserve online at ${displayName}. Quick, mobile-friendly booking powered by MimmoBook.`).slice(0, 155)}
+        description={(
+          displayDescription ??
+          `Reserve online at ${displayName}. Quick, mobile-friendly booking powered by MimmoBook.`
+        ).slice(0, 155)}
         path={`/book/${slug ?? ""}`}
         jsonLd={localBusinessJsonLd ?? undefined}
       />
@@ -1582,11 +2037,17 @@ const PublicBookingInner = () => {
         {/* Show title below only when no hero (or when the hero failed and we degraded) */}
         {(!settings?.hero_image_url || heroFailed) && (
           <div>
-            <h2 className="text-2xl sm:text-3xl font-serif font-bold" style={{ color: primaryColor }}>
+            <h2
+              className="text-2xl sm:text-3xl font-serif font-bold"
+              style={{ color: primaryColor }}
+            >
               {t("booking.title")}
             </h2>
             {displayDescription && (
-              <p className="mt-1 text-sm" style={{ color: `${primaryColor}99` }}>
+              <p
+                className="mt-1 text-sm"
+                style={{ color: `${primaryColor}99` }}
+              >
                 {displayDescription}
               </p>
             )}
@@ -1615,7 +2076,6 @@ const PublicBookingInner = () => {
           </div>
         )}
 
-
         {brandingBlocked && (
           <div
             role="status"
@@ -1628,7 +2088,17 @@ const PublicBookingInner = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Honeypot field - hidden from real users, bots will fill it */}
-          <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", top: "-9999px", opacity: 0, height: 0, overflow: "hidden" }}>
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              left: "-9999px",
+              top: "-9999px",
+              opacity: 0,
+              height: 0,
+              overflow: "hidden",
+            }}
+          >
             <label htmlFor="website_url">Website</label>
             <input
               type="text"
@@ -1645,7 +2115,10 @@ const PublicBookingInner = () => {
           {hasMultipleSites && !siteLockedByUrl && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                <CardTitle
+                  className="text-lg font-serif flex items-center gap-2"
+                  style={{ color: primaryColor }}
+                >
                   <MapPin className="h-5 w-5" />
                   {t("booking.selectLocation")}
                 </CardTitle>
@@ -1662,15 +2135,41 @@ const PublicBookingInner = () => {
                     className="group relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300 text-center hover:scale-105 hover:shadow-lg"
                     style={{
                       borderColor: !pickedSiteId ? accentColor : "#e5e7eb",
-                      backgroundColor: !pickedSiteId ? `${accentColor}10` : "transparent",
-                      boxShadow: !pickedSiteId ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                      backgroundColor: !pickedSiteId
+                        ? `${accentColor}10`
+                        : "transparent",
+                      boxShadow: !pickedSiteId
+                        ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15`
+                        : undefined,
                     }}
                   >
-                    {!pickedSiteId && <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full" style={{ backgroundColor: accentColor }} />}
-                    <span className="flex items-center justify-center h-10 w-10 rounded-full" style={{ backgroundColor: !pickedSiteId ? `${accentColor}20` : `${primaryColor}10` }}>
-                      <Building2 className="h-5 w-5" style={{ color: !pickedSiteId ? accentColor : primaryColor }} />
+                    {!pickedSiteId && (
+                      <span
+                        className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full"
+                        style={{ backgroundColor: accentColor }}
+                      />
+                    )}
+                    <span
+                      className="flex items-center justify-center h-10 w-10 rounded-full"
+                      style={{
+                        backgroundColor: !pickedSiteId
+                          ? `${accentColor}20`
+                          : `${primaryColor}10`,
+                      }}
+                    >
+                      <Building2
+                        className="h-5 w-5"
+                        style={{
+                          color: !pickedSiteId ? accentColor : primaryColor,
+                        }}
+                      />
                     </span>
-                    <span className="text-sm font-semibold" style={{ color: primaryColor }}>{t("booking.allLocations")}</span>
+                    <span
+                      className="text-sm font-semibold"
+                      style={{ color: primaryColor }}
+                    >
+                      {t("booking.allLocations")}
+                    </span>
                   </button>
 
                   {allSites?.map((s) => {
@@ -1686,16 +2185,49 @@ const PublicBookingInner = () => {
                         className="group relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-300 text-center hover:scale-105 hover:shadow-lg"
                         style={{
                           borderColor: isSelected ? accentColor : "#e5e7eb",
-                          backgroundColor: isSelected ? `${accentColor}10` : "transparent",
-                          boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                          backgroundColor: isSelected
+                            ? `${accentColor}10`
+                            : "transparent",
+                          boxShadow: isSelected
+                            ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15`
+                            : undefined,
                         }}
                       >
-                        {isSelected && <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full" style={{ backgroundColor: accentColor }} />}
-                        <span className="flex items-center justify-center h-10 w-10 rounded-full" style={{ backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10` }}>
-                          <MapPin className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
+                        {isSelected && (
+                          <span
+                            className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full"
+                            style={{ backgroundColor: accentColor }}
+                          />
+                        )}
+                        <span
+                          className="flex items-center justify-center h-10 w-10 rounded-full"
+                          style={{
+                            backgroundColor: isSelected
+                              ? `${accentColor}20`
+                              : `${primaryColor}10`,
+                          }}
+                        >
+                          <MapPin
+                            className="h-5 w-5"
+                            style={{
+                              color: isSelected ? accentColor : primaryColor,
+                            }}
+                          />
                         </span>
-                        <span className="text-sm font-semibold" style={{ color: primaryColor }}>{s.name}</span>
-                        {s.location && <span className="text-xs" style={{ color: `${primaryColor}60` }}>{s.location}</span>}
+                        <span
+                          className="text-sm font-semibold"
+                          style={{ color: primaryColor }}
+                        >
+                          {s.name}
+                        </span>
+                        {s.location && (
+                          <span
+                            className="text-xs"
+                            style={{ color: `${primaryColor}60` }}
+                          >
+                            {s.location}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -1708,7 +2240,10 @@ const PublicBookingInner = () => {
           {typeTiles.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
+                <CardTitle
+                  className="text-lg font-serif"
+                  style={{ color: primaryColor }}
+                >
                   {t("booking.selectType")}
                 </CardTitle>
               </CardHeader>
@@ -1718,25 +2253,46 @@ const PublicBookingInner = () => {
                     const isCustom = tile.kind === "custom";
                     const isWellness = tile.kind === "wellness";
                     const isResourceTile = isCustom || isWellness;
-                    const tileResType = isCustom ? "custom" : isWellness ? "wellness" : tile.type;
+                    const tileResType = isCustom
+                      ? "custom"
+                      : isWellness
+                        ? "wellness"
+                        : tile.type;
                     const Icon = isCustom
                       ? Sparkles
                       : isWellness
-                      ? HeartPulse
-                      : (typeIcons[tile.type] ?? Building2);
+                        ? HeartPulse
+                        : (typeIcons[tile.type] ?? Building2);
                     const isSelected = isResourceTile
-                      ? form.reservation_type === tileResType && form.resource_id === (tile as any).resourceId
-                      : form.reservation_type === tile.type && !form.resource_id?.startsWith?.("");
+                      ? form.reservation_type === tileResType &&
+                        form.resource_id === (tile as any).resourceId
+                      : form.reservation_type === tile.type &&
+                        !form.resource_id?.startsWith?.("");
                     // Built-in selection check (ignore resource_id specifics for non-resource tiles)
-                    const isSelectedBuiltin = !isResourceTile && form.reservation_type === tile.type;
-                    const tileSelected = isResourceTile ? isSelected : isSelectedBuiltin;
-                    const descKey = isResourceTile ? "" : (typeDescKeys[tile.type] ?? "");
+                    const isSelectedBuiltin =
+                      !isResourceTile && form.reservation_type === tile.type;
+                    const tileSelected = isResourceTile
+                      ? isSelected
+                      : isSelectedBuiltin;
+                    const descKey = isResourceTile
+                      ? ""
+                      : (typeDescKeys[tile.type] ?? "");
                     const label = isResourceTile
                       ? (tile as any).label
-                      : ((settings?.resource_type_names as Record<string, string>)?.[tile.type] || tDynamic(`dashboard.${tile.type}`));
+                      : (
+                          settings?.resource_type_names as Record<
+                            string,
+                            string
+                          >
+                        )?.[tile.type] || tDynamic(`dashboard.${tile.type}`);
                     const desc = isResourceTile
                       ? ""
-                      : ((settings?.resource_type_descriptions as Record<string, string>)?.[tile.type] || (descKey ? t(descKey) : ""));
+                      : (
+                          settings?.resource_type_descriptions as Record<
+                            string,
+                            string
+                          >
+                        )?.[tile.type] || (descKey ? t(descKey) : "");
                     return (
                       <button
                         key={tile.key}
@@ -1745,10 +2301,14 @@ const PublicBookingInner = () => {
                           // Clear type-specific fields when switching booking types
                           setForm((prev) => ({
                             ...prev,
-                            reservation_type: isResourceTile ? tileResType : tile.type,
+                            reservation_type: isResourceTile
+                              ? tileResType
+                              : tile.type,
                             resource_id: isResourceTile
                               ? (tile as any).resourceId
-                              : (tile.type === "restaurant" ? "" : prev.resource_id),
+                              : tile.type === "restaurant"
+                                ? ""
+                                : prev.resource_id,
                             check_out_date: "",
                             room_type: "",
                             breakfast_included: false,
@@ -1769,13 +2329,21 @@ const PublicBookingInner = () => {
                             stall_fee: "",
                             selected_sub_services: [],
                           }));
-                          if (errors.reservation_type) setErrors((prev) => ({ ...prev, reservation_type: "" }));
+                          if (errors.reservation_type)
+                            setErrors((prev) => ({
+                              ...prev,
+                              reservation_type: "",
+                            }));
                         }}
                         className="group relative flex flex-col items-center gap-2 p-3 sm:p-6 rounded-xl border-2 transition-all duration-300 text-center hover:scale-105 hover:shadow-lg"
                         style={{
                           borderColor: tileSelected ? accentColor : "#e5e7eb",
-                          backgroundColor: tileSelected ? `${accentColor}10` : "transparent",
-                          boxShadow: tileSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                          backgroundColor: tileSelected
+                            ? `${accentColor}10`
+                            : "transparent",
+                          boxShadow: tileSelected
+                            ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15`
+                            : undefined,
                         }}
                       >
                         {tileSelected && (
@@ -1786,19 +2354,31 @@ const PublicBookingInner = () => {
                         )}
                         <span
                           className="flex items-center justify-center h-12 w-12 rounded-full transition-colors duration-200"
-                          style={{ backgroundColor: tileSelected ? `${accentColor}20` : `${primaryColor}10` }}
+                          style={{
+                            backgroundColor: tileSelected
+                              ? `${accentColor}20`
+                              : `${primaryColor}10`,
+                          }}
                         >
                           <Icon
                             className="h-6 w-6 transition-colors duration-200"
-                            style={{ color: tileSelected ? accentColor : primaryColor }}
+                            style={{
+                              color: tileSelected ? accentColor : primaryColor,
+                            }}
                           />
                         </span>
                         <div className="space-y-1">
-                          <span className="text-sm font-semibold block" style={{ color: primaryColor }}>
+                          <span
+                            className="text-sm font-semibold block"
+                            style={{ color: primaryColor }}
+                          >
                             {label}
                           </span>
                           {desc && (
-                            <span className="text-xs block leading-relaxed" style={{ color: `${primaryColor}80` }}>
+                            <span
+                              className="text-xs block leading-relaxed"
+                              style={{ color: `${primaryColor}80` }}
+                            >
                               {desc}
                             </span>
                           )}
@@ -1808,253 +2388,361 @@ const PublicBookingInner = () => {
                   })}
                 </div>
                 {errors.reservation_type && (
-                  <p className="text-sm text-destructive mt-2">{errors.reservation_type}</p>
+                  <p className="text-sm text-destructive mt-2">
+                    {errors.reservation_type}
+                  </p>
                 )}
 
                 {/* Sub-services picker for selected custom resource */}
-                {(form.reservation_type === "custom" || form.reservation_type === "wellness") && form.resource_id && (() => {
-                  const isWellnessTile = form.reservation_type === "wellness";
-                  const tile = typeTiles.find(
-                    (t) => (t.kind === "custom" || t.kind === "wellness") && (t as any).resourceId === form.resource_id,
-                  ) as
-                    | (Extract<TypeTile, { kind: "custom" }>)
-                    | (Extract<TypeTile, { kind: "wellness" }>)
-                    | undefined;
-                  const subs = tile?.subServices ?? [];
-                  // Wellness with no services: friendly fallback, no menu.
-                  if (subs.length === 0) {
-                    if (isWellnessTile) {
-                      return (
-                        <div className="mt-6 p-3 rounded-md border bg-muted/30">
-                          <p className="text-xs text-muted-foreground">{t("booking.noServicesYet")}</p>
-                        </div>
-                      );
+                {(form.reservation_type === "custom" ||
+                  form.reservation_type === "wellness") &&
+                  form.resource_id &&
+                  (() => {
+                    const isWellnessTile = form.reservation_type === "wellness";
+                    const tile = typeTiles.find(
+                      (t) =>
+                        (t.kind === "custom" || t.kind === "wellness") &&
+                        (t as any).resourceId === form.resource_id,
+                    ) as
+                      | Extract<TypeTile, { kind: "custom" }>
+                      | Extract<TypeTile, { kind: "wellness" }>
+                      | undefined;
+                    const subs = tile?.subServices ?? [];
+                    // Wellness with no services: friendly fallback, no menu.
+                    if (subs.length === 0) {
+                      if (isWellnessTile) {
+                        return (
+                          <div className="mt-6 p-3 rounded-md border bg-muted/30">
+                            <p className="text-xs text-muted-foreground">
+                              {t("booking.noServicesYet")}
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
                     }
-                    return null;
-                  }
-                  // Totals for the wellness summary line.
-                  const totals = form.selected_sub_services.reduce(
-                    (acc, x) => ({
-                      duration: acc.duration + ((x as any).duration_min ?? 0),
-                      price: acc.price + ((x.price_eur ?? 0) * (x.qty ?? 1)),
-                    }),
-                    { duration: 0, price: 0 },
-                  );
-                  const fmtDuration = (min: number) => {
-                    if (min <= 0) return "0 min";
-                    const h = Math.floor(min / 60);
-                    const m = min % 60;
-                    if (h > 0 && m > 0) return `${h} h ${m} min`;
-                    if (h > 0) return `${h} h`;
-                    return `${m} min`;
-                  };
-                  return (
-                    <div className="mt-6 space-y-3">
-                      <Label className="text-sm font-semibold" style={{ color: primaryColor }}>
-                        {isWellnessTile ? t("booking.servicesMenu") : t("booking.subServices")}
-                      </Label>
-                      {isWellnessTile && (
-                        <p className="text-xs text-muted-foreground">{t("booking.servicesMenuHelp")}</p>
-                      )}
-                      <div className="space-y-2">
-                        {subs.map((s) => {
-                          const sel = form.selected_sub_services.find((x) => x.id === s.id);
-                          const checked = !!sel;
-                          const qty = sel?.qty ?? 1;
-                          return (
-                            <div key={s.id} className="flex items-center justify-between gap-3 p-3 rounded-md border">
-                              <label className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
-                                <Checkbox
-                                  checked={checked}
-                                  onCheckedChange={(c) => {
-                                    setForm((prev) => {
-                                      const list = prev.selected_sub_services.filter((x) => x.id !== s.id);
-                                      if (c) list.push({
-                                        id: s.id,
-                                        name: s.name,
-                                        price_eur: s.price_eur,
-                                        qty: 1,
-                                        duration_min: (s as any).duration_min,
+                    // Totals for the wellness summary line.
+                    const totals = form.selected_sub_services.reduce(
+                      (acc, x) => ({
+                        duration: acc.duration + ((x as any).duration_min ?? 0),
+                        price: acc.price + (x.price_eur ?? 0) * (x.qty ?? 1),
+                      }),
+                      { duration: 0, price: 0 },
+                    );
+                    const fmtDuration = (min: number) => {
+                      if (min <= 0) return "0 min";
+                      const h = Math.floor(min / 60);
+                      const m = min % 60;
+                      if (h > 0 && m > 0) return `${h} h ${m} min`;
+                      if (h > 0) return `${h} h`;
+                      return `${m} min`;
+                    };
+                    return (
+                      <div className="mt-6 space-y-3">
+                        <Label
+                          className="text-sm font-semibold"
+                          style={{ color: primaryColor }}
+                        >
+                          {isWellnessTile
+                            ? t("booking.servicesMenu")
+                            : t("booking.subServices")}
+                        </Label>
+                        {isWellnessTile && (
+                          <p className="text-xs text-muted-foreground">
+                            {t("booking.servicesMenuHelp")}
+                          </p>
+                        )}
+                        <div className="space-y-2">
+                          {subs.map((s) => {
+                            const sel = form.selected_sub_services.find(
+                              (x) => x.id === s.id,
+                            );
+                            const checked = !!sel;
+                            const qty = sel?.qty ?? 1;
+                            return (
+                              <div
+                                key={s.id}
+                                className="flex items-center justify-between gap-3 p-3 rounded-md border"
+                              >
+                                <label className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                                  <Checkbox
+                                    checked={checked}
+                                    onCheckedChange={(c) => {
+                                      setForm((prev) => {
+                                        const list =
+                                          prev.selected_sub_services.filter(
+                                            (x) => x.id !== s.id,
+                                          );
+                                        if (c)
+                                          list.push({
+                                            id: s.id,
+                                            name: s.name,
+                                            price_eur: s.price_eur,
+                                            qty: 1,
+                                            duration_min: (s as any)
+                                              .duration_min,
+                                          });
+                                        return {
+                                          ...prev,
+                                          selected_sub_services: list,
+                                        };
                                       });
-                                      return { ...prev, selected_sub_services: list };
-                                    });
-                                  }}
-                                />
-                                <div className="min-w-0">
-                                  <div className="text-sm font-medium truncate">{s.name}</div>
-                                  <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3">
-                                    {(s as any).duration_min != null && (
-                                      <span>{fmtDuration(Number((s as any).duration_min))}</span>
-                                    )}
-                                    {s.price_eur != null && (
-                                      <span>€{Number(s.price_eur).toFixed(2)}</span>
-                                    )}
+                                    }}
+                                  />
+                                  <div className="min-w-0">
+                                    <div className="text-sm font-medium truncate">
+                                      {s.name}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground flex flex-wrap gap-x-3">
+                                      {(s as any).duration_min != null && (
+                                        <span>
+                                          {fmtDuration(
+                                            Number((s as any).duration_min),
+                                          )}
+                                        </span>
+                                      )}
+                                      {s.price_eur != null && (
+                                        <span>
+                                          €{Number(s.price_eur).toFixed(2)}
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              </label>
-                              {/* Quantity controls only for "custom" — wellness is single-tick. */}
-                              {checked && !isWellnessTile && (
-                                <div className="flex items-center gap-1 shrink-0">
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => {
-                                      setForm((prev) => ({
-                                        ...prev,
-                                        selected_sub_services: prev.selected_sub_services.map((x) =>
-                                          x.id === s.id ? { ...x, qty: Math.max(1, x.qty - 1) } : x
-                                        ),
-                                      }));
-                                    }}
-                                    aria-label={t("booking.subServiceQty")}
-                                  >
-                                    <Minus className="h-3 w-3" />
-                                  </Button>
-                                  <span className="w-8 text-center text-sm">{qty}</span>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={() => {
-                                      setForm((prev) => ({
-                                        ...prev,
-                                        selected_sub_services: prev.selected_sub_services.map((x) =>
-                                          x.id === s.id ? { ...x, qty: Math.min(99, x.qty + 1) } : x
-                                        ),
-                                      }));
-                                    }}
-                                    aria-label={t("booking.subServiceQty")}
-                                  >
-                                    <Plus className="h-3 w-3" />
-                                  </Button>
-                                </div>
+                                </label>
+                                {/* Quantity controls only for "custom" — wellness is single-tick. */}
+                                {checked && !isWellnessTile && (
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      onClick={() => {
+                                        setForm((prev) => ({
+                                          ...prev,
+                                          selected_sub_services:
+                                            prev.selected_sub_services.map(
+                                              (x) =>
+                                                x.id === s.id
+                                                  ? {
+                                                      ...x,
+                                                      qty: Math.max(
+                                                        1,
+                                                        x.qty - 1,
+                                                      ),
+                                                    }
+                                                  : x,
+                                            ),
+                                        }));
+                                      }}
+                                      aria-label={t("booking.subServiceQty")}
+                                    >
+                                      <Minus className="h-3 w-3" />
+                                    </Button>
+                                    <span className="w-8 text-center text-sm">
+                                      {qty}
+                                    </span>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-8 w-8"
+                                      onClick={() => {
+                                        setForm((prev) => ({
+                                          ...prev,
+                                          selected_sub_services:
+                                            prev.selected_sub_services.map(
+                                              (x) =>
+                                                x.id === s.id
+                                                  ? {
+                                                      ...x,
+                                                      qty: Math.min(
+                                                        99,
+                                                        x.qty + 1,
+                                                      ),
+                                                    }
+                                                  : x,
+                                            ),
+                                        }));
+                                      }}
+                                      aria-label={t("booking.subServiceQty")}
+                                    >
+                                      <Plus className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {isWellnessTile &&
+                          form.selected_sub_services.length > 0 && (
+                            <div
+                              className="flex flex-wrap justify-between gap-2 p-3 rounded-md border text-sm font-medium"
+                              style={{
+                                borderColor: primaryColor,
+                                color: primaryColor,
+                                backgroundColor: `${primaryColor}10`,
+                              }}
+                            >
+                              <span>
+                                {t("booking.totalDuration")}:{" "}
+                                <strong>{fmtDuration(totals.duration)}</strong>
+                              </span>
+                              {totals.price > 0 && (
+                                <span>
+                                  {t("booking.totalPrice")}:{" "}
+                                  <strong>€{totals.price.toFixed(2)}</strong>
+                                </span>
                               )}
                             </div>
-                          );
-                        })}
-                      </div>
-                      {isWellnessTile && form.selected_sub_services.length > 0 && (
-                        <div
-                          className="flex flex-wrap justify-between gap-2 p-3 rounded-md border text-sm font-medium"
-                          style={{ borderColor: primaryColor, color: primaryColor, backgroundColor: `${primaryColor}10` }}
-                        >
-                          <span>
-                            {t("booking.totalDuration")}: <strong>{fmtDuration(totals.duration)}</strong>
-                          </span>
-                          {totals.price > 0 && (
-                            <span>
-                              {t("booking.totalPrice")}: <strong>€{totals.price.toFixed(2)}</strong>
-                            </span>
                           )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
+                      </div>
+                    );
+                  })()}
               </CardContent>
             </Card>
           )}
 
           {/* Availability + Date/Time side by side */}
           <div className="grid gap-6 lg:grid-cols-2">
-              {/* Left: Availability Calendar (read-only) */}
-              <AvailabilityCalendar
-                tenantId={tenant.id}
-                siteId={activeSiteId}
-                primaryColor={primaryColor}
-                accentColor={accentColor}
-                thresholds={(settings?.availability_thresholds as Record<string, number>) ?? { restaurant: 5, venue: 5, guesthouse: 5, hotel: 5, wellness: 5, custom: 5 }}
-                reservationType={form.reservation_type}
-                t={t}
-              />
+            {/* Left: Availability Calendar (read-only) */}
+            <AvailabilityCalendar
+              tenantId={tenant.id}
+              siteId={activeSiteId}
+              primaryColor={primaryColor}
+              accentColor={accentColor}
+              thresholds={
+                (settings?.availability_thresholds as Record<
+                  string,
+                  number
+                >) ?? {
+                  restaurant: 5,
+                  venue: 5,
+                  guesthouse: 5,
+                  hotel: 5,
+                  wellness: 5,
+                  custom: 5,
+                }
+              }
+              reservationType={form.reservation_type}
+              t={t}
+            />
 
-              {/* Right: Date & Time picker */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
-                    {t("booking.selectDateTime")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>{t("common.date")} *</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !selectedDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {selectedDate
-                            ? format(selectedDate, "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })
-                            : <span>{t("booking.pickDate")}</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => { setSelectedDate(date); updateField("start_time", ""); }}
-                          disabled={isDateDisabled}
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  {selectedDate && (specialOccasions as any[]).length > 0 && (
-                    <div className="space-y-2 rounded-md border p-3" style={{ borderColor: `${accentColor}55` }}>
-                      <Label className="flex items-center gap-1">
-                        <Sparkles className="h-3.5 w-3.5" />
-                        {t("booking.occasionSectionTitle")}
-                      </Label>
-                      <p className="text-xs text-muted-foreground">{t("booking.occasionHint")}</p>
-                      <div className="space-y-2">
-                        {(specialOccasions as any[]).map((occasion) => {
-                          const isSelected = selectedOccasionId === occasion.id;
-                          const times = Array.isArray(occasion.seating_times)
-                            ? (occasion.seating_times as unknown[]).map((x) => String(x).slice(0, 5))
-                            : [];
-                          return (
-                            <div
-                              key={occasion.id}
-                              className="rounded-md border p-3"
-                              style={{
-                                borderColor: isSelected ? accentColor : "#e5e5e5",
-                                backgroundColor: isSelected ? `${accentColor}12` : "transparent",
+            {/* Right: Date & Time picker */}
+            <Card>
+              <CardHeader>
+                <CardTitle
+                  className="text-lg font-serif"
+                  style={{ color: primaryColor }}
+                >
+                  {t("booking.selectDateTime")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>{t("common.date")} *</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !selectedDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {selectedDate ? (
+                          format(selectedDate, "EEEE, MMMM d, yyyy", {
+                            locale: dateFnsLocale,
+                          })
+                        ) : (
+                          <span>{t("booking.pickDate")}</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={(date) => {
+                          setSelectedDate(date);
+                          updateField("start_time", "");
+                        }}
+                        disabled={isDateDisabled}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                {selectedDate && (specialOccasions as any[]).length > 0 && (
+                  <div
+                    className="space-y-2 rounded-md border p-3"
+                    style={{ borderColor: `${accentColor}55` }}
+                  >
+                    <Label className="flex items-center gap-1">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      {t("booking.occasionSectionTitle")}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      {t("booking.occasionHint")}
+                    </p>
+                    <div className="space-y-2">
+                      {(specialOccasions as any[]).map((occasion) => {
+                        const isSelected = selectedOccasionId === occasion.id;
+                        const times = Array.isArray(occasion.seating_times)
+                          ? (occasion.seating_times as unknown[]).map((x) =>
+                              String(x).slice(0, 5),
+                            )
+                          : [];
+                        return (
+                          <div
+                            key={occasion.id}
+                            className="rounded-md border p-3"
+                            style={{
+                              borderColor: isSelected ? accentColor : "#e5e5e5",
+                              backgroundColor: isSelected
+                                ? `${accentColor}12`
+                                : "transparent",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              className="text-left w-full"
+                              onClick={() => {
+                                setSelectedOccasionId(
+                                  isSelected ? null : occasion.id,
+                                );
+                                setOccasionSeating("");
+                                updateField("start_time", "");
                               }}
                             >
-                              <button
-                                type="button"
-                                className="text-left w-full"
-                                onClick={() => {
-                                  setSelectedOccasionId(isSelected ? null : occasion.id);
-                                  setOccasionSeating("");
-                                  updateField("start_time", "");
-                                }}
+                              <span
+                                className="font-medium"
+                                style={{ color: primaryColor }}
                               >
-                                <span className="font-medium" style={{ color: primaryColor }}>
-                                  {occasion.name}
+                                {occasion.name}
+                              </span>
+                              {occasion.description && (
+                                <span className="block text-sm text-muted-foreground">
+                                  {occasion.description}
                                 </span>
-                                {occasion.description && (
-                                  <span className="block text-sm text-muted-foreground">{occasion.description}</span>
-                                )}
-                                {occasion.booking_type === "open" && (
-                                  <span className="block text-xs text-muted-foreground mt-1">
-                                    {t("booking.occasionOpenHint")}
-                                  </span>
-                                )}
-                              </button>
+                              )}
+                              {occasion.booking_type === "open" && (
+                                <span className="block text-xs text-muted-foreground mt-1">
+                                  {t("booking.occasionOpenHint")}
+                                </span>
+                              )}
+                            </button>
 
-                              {isSelected && occasion.booking_type === "seatings" && times.length > 0 && (
+                            {isSelected &&
+                              occasion.booking_type === "seatings" &&
+                              times.length > 0 && (
                                 <div className="mt-3 space-y-2">
-                                  <Label className="text-xs">{t("booking.occasionSeating")}</Label>
+                                  <Label className="text-xs">
+                                    {t("booking.occasionSeating")}
+                                  </Label>
                                   <div className="flex flex-wrap gap-2">
                                     {times.map((time: string) => (
                                       <button
@@ -2066,8 +2754,14 @@ const PublicBookingInner = () => {
                                         }}
                                         className="px-3 py-1.5 text-sm rounded-md border transition-all"
                                         style={{
-                                          borderColor: occasionSeating === time ? accentColor : "#e5e5e5",
-                                          backgroundColor: occasionSeating === time ? `${accentColor}15` : "transparent",
+                                          borderColor:
+                                            occasionSeating === time
+                                              ? accentColor
+                                              : "#e5e5e5",
+                                          backgroundColor:
+                                            occasionSeating === time
+                                              ? `${accentColor}15`
+                                              : "transparent",
                                           color: primaryColor,
                                         }}
                                       >
@@ -2077,61 +2771,85 @@ const PublicBookingInner = () => {
                                   </div>
                                 </div>
                               )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                          </div>
+                        );
+                      })}
                     </div>
+                  </div>
+                )}
+                {selectedDate &&
+                  (specialOccasions as any[]).length === 0 &&
+                  (upcomingOccasions as any[]).length > 0 && (
+                    <p
+                      className="text-xs text-muted-foreground"
+                      aria-live="polite"
+                    >
+                      {t("booking.occasionNoneOnDate")}{" "}
+                      {t("booking.occasionNextDates").replace(
+                        "{dates}",
+                        (upcomingOccasions as any[])
+                          .map(
+                            (o) =>
+                              `${o.name} (${format(new Date(o.occasion_date), "d.M.yyyy")})`,
+                          )
+                          .join(", "),
+                      )}
+                    </p>
                   )}
-                  {selectedDate &&
-                    (specialOccasions as any[]).length === 0 &&
-                    (upcomingOccasions as any[]).length > 0 && (
-                      <p className="text-xs text-muted-foreground" aria-live="polite">
-                        {t("booking.occasionNoneOnDate")}{" "}
-                        {t("booking.occasionNextDates").replace(
-                          "{dates}",
-                          (upcomingOccasions as any[])
-                            .map((o) => `${o.name} (${format(new Date(o.occasion_date), "d.M.yyyy")})`)
-                            .join(", "),
-                        )}
+                {selectedDate && !selectedOccasion && timeSlots.length > 0 && (
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" />
+                      {t("booking.selectTime")}
+                    </Label>
+                    <div className="flex flex-wrap gap-2">
+                      {timeSlots.map((slot) => {
+                        const blocked = selectedDate
+                          ? isTimeSlotBlocked(slot, selectedDate)
+                          : false;
+                        return (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() =>
+                              !blocked && updateField("start_time", slot)
+                            }
+                            disabled={blocked}
+                            className={cn(
+                              "px-3 py-1.5 text-sm rounded-md border transition-all",
+                              blocked &&
+                                "opacity-40 cursor-not-allowed line-through",
+                            )}
+                            style={{
+                              borderColor: blocked
+                                ? "#ef4444"
+                                : form.start_time === slot
+                                  ? accentColor
+                                  : "#e5e5e5",
+                              backgroundColor: blocked
+                                ? "#fef2f2"
+                                : form.start_time === slot
+                                  ? `${accentColor}15`
+                                  : "transparent",
+                              color: blocked ? "#991b1b" : primaryColor,
+                            }}
+                            title={blocked ? t("booking.blocked") : undefined}
+                          >
+                            {slot}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {selectedDate &&
+                  timeSlots.length === 0 &&
+                  openingHours &&
+                  openingHours.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        {t("booking.closedDay")}
                       </p>
-                    )}
-                  {selectedDate && !selectedOccasion && timeSlots.length > 0 && (
-                    <div className="space-y-2">
-                      <Label className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        {t("booking.selectTime")}
-                      </Label>
-                      <div className="flex flex-wrap gap-2">
-                        {timeSlots.map((slot) => {
-                          const blocked = selectedDate ? isTimeSlotBlocked(slot, selectedDate) : false;
-                          return (
-                            <button
-                              key={slot}
-                              type="button"
-                              onClick={() => !blocked && updateField("start_time", slot)}
-                              disabled={blocked}
-                              className={cn(
-                                "px-3 py-1.5 text-sm rounded-md border transition-all",
-                                blocked && "opacity-40 cursor-not-allowed line-through"
-                              )}
-                              style={{
-                                borderColor: blocked ? "#ef4444" : form.start_time === slot ? accentColor : "#e5e5e5",
-                                backgroundColor: blocked ? "#fef2f2" : form.start_time === slot ? `${accentColor}15` : "transparent",
-                                color: blocked ? "#991b1b" : primaryColor,
-                              }}
-                              title={blocked ? t("booking.blocked") : undefined}
-                            >
-                              {slot}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                  {selectedDate && timeSlots.length === 0 && openingHours && openingHours.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">{t("booking.closedDay")}</p>
                       {form.reservation_type && (
                         <WaitlistButton
                           tenantId={tenant.id}
@@ -2143,27 +2861,37 @@ const PublicBookingInner = () => {
                       )}
                     </div>
                   )}
-                  {selectedDate && (!openingHours || openingHours.length === 0) && (
+                {selectedDate &&
+                  (!openingHours || openingHours.length === 0) && (
                     <div className="space-y-2">
-                      <Label htmlFor="start_time_inline">{t("booking.preferredTime")}</Label>
+                      <Label htmlFor="start_time_inline">
+                        {t("booking.preferredTime")}
+                      </Label>
                       <Input
                         id="start_time_inline"
                         type="time"
                         value={form.start_time}
-                        onChange={(e) => updateField("start_time", e.target.value)}
+                        onChange={(e) =>
+                          updateField("start_time", e.target.value)
+                        }
                       />
                     </div>
                   )}
-                  {errors.date && <p className="text-sm text-destructive">{errors.date}</p>}
-                </CardContent>
-              </Card>
-            </div>
+                {errors.date && (
+                  <p className="text-sm text-destructive">{errors.date}</p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Type-specific fields: Hotel / Guesthouse */}
           {isAccommodationType && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                <CardTitle
+                  className="text-lg font-serif flex items-center gap-2"
+                  style={{ color: primaryColor }}
+                >
                   <BedDouble className="h-5 w-5" />
                   {t("booking.stayDetails")}
                 </CardTitle>
@@ -2177,21 +2905,35 @@ const PublicBookingInner = () => {
                         variant="outline"
                         className={cn(
                           "w-full justify-start text-left font-normal",
-                          !form.check_out_date && "text-muted-foreground"
+                          !form.check_out_date && "text-muted-foreground",
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {form.check_out_date
-                          ? format(new Date(form.check_out_date + "T00:00:00"), "PPP", { locale: dateFnsLocale })
-                          : <span>{t("booking.pickDate")}</span>}
+                        {form.check_out_date ? (
+                          format(
+                            new Date(form.check_out_date + "T00:00:00"),
+                            "PPP",
+                            { locale: dateFnsLocale },
+                          )
+                        ) : (
+                          <span>{t("booking.pickDate")}</span>
+                        )}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        selected={form.check_out_date ? new Date(form.check_out_date + "T00:00:00") : undefined}
+                        selected={
+                          form.check_out_date
+                            ? new Date(form.check_out_date + "T00:00:00")
+                            : undefined
+                        }
                         onSelect={(date) => {
-                          if (date) updateField("check_out_date", format(date, "yyyy-MM-dd"));
+                          if (date)
+                            updateField(
+                              "check_out_date",
+                              format(date, "yyyy-MM-dd"),
+                            );
                         }}
                         disabled={(date) =>
                           !selectedDate || date <= selectedDate
@@ -2201,15 +2943,30 @@ const PublicBookingInner = () => {
                       />
                     </PopoverContent>
                   </Popover>
-                  {errors.check_out_date && <p className="text-sm text-destructive">{errors.check_out_date}</p>}
+                  {errors.check_out_date && (
+                    <p className="text-sm text-destructive">
+                      {errors.check_out_date}
+                    </p>
+                  )}
                   {(() => {
                     if (!form.check_out_date || !selectedDate) return null;
-                    const checkOut = new Date(form.check_out_date + "T00:00:00");
-                    const nights = Math.max(0, Math.round((checkOut.getTime() - selectedDate.getTime()) / 86400000));
+                    const checkOut = new Date(
+                      form.check_out_date + "T00:00:00",
+                    );
+                    const nights = Math.max(
+                      0,
+                      Math.round(
+                        (checkOut.getTime() - selectedDate.getTime()) /
+                          86400000,
+                      ),
+                    );
                     if (nights <= 0) return null;
                     return (
                       <p className="text-xs text-muted-foreground">
-                        {nights} {nights === 1 ? t("booking.night") : t("booking.nights")}
+                        {nights}{" "}
+                        {nights === 1
+                          ? t("booking.night")
+                          : t("booking.nights")}
                       </p>
                     );
                   })()}
@@ -2218,17 +2975,29 @@ const PublicBookingInner = () => {
                   <Checkbox
                     id="breakfast_included"
                     checked={form.breakfast_included}
-                    onCheckedChange={(checked) => updateBoolField("breakfast_included", !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateBoolField("breakfast_included", !!checked)
+                    }
                   />
-                  <Label htmlFor="breakfast_included" className="flex items-center gap-1.5 cursor-pointer">
+                  <Label
+                    htmlFor="breakfast_included"
+                    className="flex items-center gap-1.5 cursor-pointer"
+                  >
                     <Coffee className="h-4 w-4" />
                     {t("booking.breakfastIncluded")}
                     {(() => {
-                      const selectedResource = resources?.find((r: any) => r.id === form.resource_id);
-                      const bfPrice = selectedResource?.breakfast_price_per_person ?? 15;
+                      const selectedResource = resources?.find(
+                        (r: any) => r.id === form.resource_id,
+                      );
+                      const bfPrice =
+                        selectedResource?.breakfast_price_per_person ?? 15;
                       return (
-                        <span className="text-xs font-normal" style={{ color: `${primaryColor}80` }}>
-                          (€{Number(bfPrice).toFixed(0)} / {t("common.guests") || "guest"})
+                        <span
+                          className="text-xs font-normal"
+                          style={{ color: `${primaryColor}80` }}
+                        >
+                          (€{Number(bfPrice).toFixed(0)} /{" "}
+                          {t("common.guests") || "guest"})
                         </span>
                       );
                     })()}
@@ -2239,48 +3008,85 @@ const PublicBookingInner = () => {
                 {(() => {
                   if (!form.check_out_date || !selectedDate) return null;
                   const checkOut = new Date(form.check_out_date + "T00:00:00");
-                  const nights = Math.max(0, Math.round((checkOut.getTime() - selectedDate.getTime()) / 86400000));
+                  const nights = Math.max(
+                    0,
+                    Math.round(
+                      (checkOut.getTime() - selectedDate.getTime()) / 86400000,
+                    ),
+                  );
                   if (nights <= 0) return null;
 
-                  const selectedResource = resources?.find((r: any) => r.id === form.resource_id);
+                  const selectedResource = resources?.find(
+                    (r: any) => r.id === form.resource_id,
+                  );
                   const basePrice = selectedResource?.price_per_night;
-                  const breakfastPrice = selectedResource?.breakfast_price_per_person;
-                  const guestsCount = form.guests_count ? parseInt(form.guests_count) : 1;
+                  const breakfastPrice =
+                    selectedResource?.breakfast_price_per_person;
+                  const guestsCount = form.guests_count
+                    ? parseInt(form.guests_count)
+                    : 1;
 
                   const roomTotal = basePrice ? nights * basePrice : null;
-                  const breakfastTotal = form.breakfast_included && breakfastPrice ? nights * guestsCount * breakfastPrice : 0;
-                  const grandTotal = roomTotal !== null ? roomTotal + breakfastTotal : null;
+                  const breakfastTotal =
+                    form.breakfast_included && breakfastPrice
+                      ? nights * guestsCount * breakfastPrice
+                      : 0;
+                  const grandTotal =
+                    roomTotal !== null ? roomTotal + breakfastTotal : null;
 
                   return (
                     <div
                       className="rounded-lg border p-4 space-y-2"
-                      style={{ backgroundColor: `${accentColor}08`, borderColor: `${accentColor}30` }}
+                      style={{
+                        backgroundColor: `${accentColor}08`,
+                        borderColor: `${accentColor}30`,
+                      }}
                     >
-                      <h4 className="text-sm font-semibold flex items-center gap-1.5" style={{ color: primaryColor }}>
+                      <h4
+                        className="text-sm font-semibold flex items-center gap-1.5"
+                        style={{ color: primaryColor }}
+                      >
                         {t("booking.priceSummary")}
                       </h4>
                       <div className="text-sm space-y-1 text-muted-foreground">
                         {basePrice != null && selectedResource && (
                           <div className="flex justify-between">
                             <span>{selectedResource.name}</span>
-                            <span>€{Number(basePrice).toFixed(2)} / {t("booking.night")}</span>
+                            <span>
+                              €{Number(basePrice).toFixed(2)} /{" "}
+                              {t("booking.night")}
+                            </span>
                           </div>
                         )}
                         <div className="flex justify-between">
-                          <span>{nights} {nights === 1 ? t("booking.night") : t("booking.nights")}</span>
+                          <span>
+                            {nights}{" "}
+                            {nights === 1
+                              ? t("booking.night")
+                              : t("booking.nights")}
+                          </span>
                           {roomTotal != null && (
                             <span>€{roomTotal.toFixed(2)}</span>
                           )}
                         </div>
                         {form.breakfast_included && breakfastPrice != null && (
                           <div className="flex justify-between">
-                            <span>{t("booking.breakfastIncluded")} ({guestsCount} × {nights} × €{breakfastPrice})</span>
+                            <span>
+                              {t("booking.breakfastIncluded")} ({guestsCount} ×{" "}
+                              {nights} × €{breakfastPrice})
+                            </span>
                             <span>€{breakfastTotal.toFixed(2)}</span>
                           </div>
                         )}
                       </div>
                       {grandTotal != null ? (
-                        <div className="flex justify-between font-semibold text-sm pt-2 border-t" style={{ borderColor: `${accentColor}30`, color: primaryColor }}>
+                        <div
+                          className="flex justify-between font-semibold text-sm pt-2 border-t"
+                          style={{
+                            borderColor: `${accentColor}30`,
+                            color: primaryColor,
+                          }}
+                        >
                           <span>{t("booking.estimatedTotal")}</span>
                           <span>€{grandTotal.toFixed(2)}</span>
                         </div>
@@ -2300,30 +3106,50 @@ const PublicBookingInner = () => {
           {isVenueType && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                <CardTitle
+                  className="text-lg font-serif flex items-center gap-2"
+                  style={{ color: primaryColor }}
+                >
                   <Users className="h-5 w-5" />
                   {t("booking.eventType")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    <Label>{t("booking.eventType")}</Label>
-                    <Select value={form.event_type} onValueChange={(v) => updateField("event_type", v)}>
-                      <SelectTrigger><SelectValue placeholder={t("booking.eventType")} /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="wedding">{t("booking.eventWedding")}</SelectItem>
-                        <SelectItem value="corporate">{t("booking.eventCorporate")}</SelectItem>
-                        <SelectItem value="birthday">{t("booking.eventBirthday")}</SelectItem>
-                        <SelectItem value="conference">{t("booking.eventConference")}</SelectItem>
-                        <SelectItem value="other">{t("booking.eventOther")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <Label>{t("booking.eventType")}</Label>
+                  <Select
+                    value={form.event_type}
+                    onValueChange={(v) => updateField("event_type", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("booking.eventType")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="wedding">
+                        {t("booking.eventWedding")}
+                      </SelectItem>
+                      <SelectItem value="corporate">
+                        {t("booking.eventCorporate")}
+                      </SelectItem>
+                      <SelectItem value="birthday">
+                        {t("booking.eventBirthday")}
+                      </SelectItem>
+                      <SelectItem value="conference">
+                        {t("booking.eventConference")}
+                      </SelectItem>
+                      <SelectItem value="other">
+                        {t("booking.eventOther")}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="catering_needed"
                     checked={form.catering_needed}
-                    onCheckedChange={(checked) => updateBoolField("catering_needed", !!checked)}
+                    onCheckedChange={(checked) =>
+                      updateBoolField("catering_needed", !!checked)
+                    }
                   />
                   <Label htmlFor="catering_needed" className="cursor-pointer">
                     {t("booking.cateringNeeded")}
@@ -2336,299 +3162,553 @@ const PublicBookingInner = () => {
           {/* Type-specific fields: Restaurant */}
           {form.reservation_type === "restaurant" && (
             <>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
-                  <UtensilsCrossed className="h-5 w-5" />
-                  {t("booking.restaurantSubType")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Pop-up sub-type selector — only show when popup is available */}
-                {(() => {
+              <Card>
+                <CardHeader>
+                  <CardTitle
+                    className="text-lg font-serif flex items-center gap-2"
+                    style={{ color: primaryColor }}
+                  >
+                    <UtensilsCrossed className="h-5 w-5" />
+                    {t("booking.restaurantSubType")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Pop-up sub-type selector — only show when popup is available */}
+                  {(() => {
                     const restaurantResources = resources ?? [];
-                    const anyPopup = restaurantResources.some((r: any) => r.offers_popup);
+                    const anyPopup = restaurantResources.some(
+                      (r: any) => r.offers_popup,
+                    );
                     if (!anyPopup) return null;
                     const allSubTypes = [
-                      { value: "dine_in", icon: UtensilsCrossed, labelKey: "booking.subTypeDineIn", descKey: "booking.subTypeDineInDesc" },
-                      ...(anyPopup ? [{ value: "popup", icon: ShoppingBag, labelKey: "booking.subTypePopup", descKey: "booking.subTypePopupDesc" }] : []),
+                      {
+                        value: "dine_in",
+                        icon: UtensilsCrossed,
+                        labelKey: "booking.subTypeDineIn",
+                        descKey: "booking.subTypeDineInDesc",
+                      },
+                      ...(anyPopup
+                        ? [
+                            {
+                              value: "popup",
+                              icon: ShoppingBag,
+                              labelKey: "booking.subTypePopup",
+                              descKey: "booking.subTypePopupDesc",
+                            },
+                          ]
+                        : []),
                     ] as const;
                     return (
                       <div className="grid gap-3 sm:grid-cols-2">
-                        {allSubTypes.map(({ value, icon: Icon, labelKey, descKey }) => {
-                          const isSelected = form.restaurant_sub_type === value && form.restaurant_sub_type !== "catering";
-                          return (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() => setForm((prev) => ({ ...prev, restaurant_sub_type: value as any }))}
-                              className="flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all text-center"
-                              style={{
-                                borderColor: isSelected ? accentColor : "#e5e7eb",
-                                backgroundColor: isSelected ? `${accentColor}10` : "transparent",
-                              }}
-                            >
-                              <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
-                              <span className="text-sm font-medium" style={{ color: primaryColor }}>{tDynamic(labelKey)}</span>
-                              <span className="text-xs" style={{ color: `${primaryColor}60` }}>{tDynamic(descKey)}</span>
-                            </button>
-                          );
-                        })}
+                        {allSubTypes.map(
+                          ({ value, icon: Icon, labelKey, descKey }) => {
+                            const isSelected =
+                              form.restaurant_sub_type === value &&
+                              form.restaurant_sub_type !== "catering";
+                            return (
+                              <button
+                                key={value}
+                                type="button"
+                                onClick={() =>
+                                  setForm((prev) => ({
+                                    ...prev,
+                                    restaurant_sub_type: value as any,
+                                  }))
+                                }
+                                className="flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all text-center"
+                                style={{
+                                  borderColor: isSelected
+                                    ? accentColor
+                                    : "#e5e7eb",
+                                  backgroundColor: isSelected
+                                    ? `${accentColor}10`
+                                    : "transparent",
+                                }}
+                              >
+                                <Icon
+                                  className="h-5 w-5"
+                                  style={{
+                                    color: isSelected
+                                      ? accentColor
+                                      : primaryColor,
+                                  }}
+                                />
+                                <span
+                                  className="text-sm font-medium"
+                                  style={{ color: primaryColor }}
+                                >
+                                  {tDynamic(labelKey)}
+                                </span>
+                                <span
+                                  className="text-xs"
+                                  style={{ color: `${primaryColor}60` }}
+                                >
+                                  {tDynamic(descKey)}
+                                </span>
+                              </button>
+                            );
+                          },
+                        )}
                       </div>
                     );
-                })()}
+                  })()}
 
-                {/* Dine-in: service type selection */}
-                {form.restaurant_sub_type === "dine_in" && (() => {
-                  const restaurantResources = resources ?? [];
-                  const anyTable = restaurantResources.some((r: any) => r.offers_table_reservation !== false);
-                  const anyQuote = restaurantResources.some((r: any) => r.offers_quote !== false);
-                  const anySetMenu = restaurantResources.some((r: any) => r.offers_set_menu !== false);
-                  const allOptions = [
-                    ...(anyTable ? [{ value: "menu" as const, icon: UtensilsCrossed, labelKey: "booking.pricingReserveTable", descKey: "booking.pricingReserveTableDesc" }] : []),
-                    ...(anyQuote ? [{ value: "quote" as const, icon: Mail, labelKey: "booking.pricingQuote", descKey: "booking.pricingQuoteDesc" }] : []),
-                    ...(anySetMenu ? [{ value: "fixed_price" as const, icon: Tag, labelKey: "booking.pricingSetMenu", descKey: "booking.pricingSetMenuDesc" }] : []),
-                  ];
-                  if (allOptions.length === 0) return null;
-                  // Auto-select if only one option
-                  if (allOptions.length === 1 && form.pricing_type !== allOptions[0].value) {
-                    setTimeout(() => setForm((prev) => ({ ...prev, pricing_type: allOptions[0].value, fixed_price: "" })), 0);
-                  }
-                  if (allOptions.length === 1) return null;
-                  return (
+                  {/* Dine-in: service type selection */}
+                  {form.restaurant_sub_type === "dine_in" &&
+                    (() => {
+                      const restaurantResources = resources ?? [];
+                      const anyTable = restaurantResources.some(
+                        (r: any) => r.offers_table_reservation !== false,
+                      );
+                      const anyQuote = restaurantResources.some(
+                        (r: any) => r.offers_quote !== false,
+                      );
+                      const anySetMenu = restaurantResources.some(
+                        (r: any) => r.offers_set_menu !== false,
+                      );
+                      const allOptions = [
+                        ...(anyTable
+                          ? [
+                              {
+                                value: "menu" as const,
+                                icon: UtensilsCrossed,
+                                labelKey: "booking.pricingReserveTable",
+                                descKey: "booking.pricingReserveTableDesc",
+                              },
+                            ]
+                          : []),
+                        ...(anyQuote
+                          ? [
+                              {
+                                value: "quote" as const,
+                                icon: Mail,
+                                labelKey: "booking.pricingQuote",
+                                descKey: "booking.pricingQuoteDesc",
+                              },
+                            ]
+                          : []),
+                        ...(anySetMenu
+                          ? [
+                              {
+                                value: "fixed_price" as const,
+                                icon: Tag,
+                                labelKey: "booking.pricingSetMenu",
+                                descKey: "booking.pricingSetMenuDesc",
+                              },
+                            ]
+                          : []),
+                      ];
+                      if (allOptions.length === 0) return null;
+                      // Auto-select if only one option
+                      if (
+                        allOptions.length === 1 &&
+                        form.pricing_type !== allOptions[0].value
+                      ) {
+                        setTimeout(
+                          () =>
+                            setForm((prev) => ({
+                              ...prev,
+                              pricing_type: allOptions[0].value,
+                              fixed_price: "",
+                            })),
+                          0,
+                        );
+                      }
+                      if (allOptions.length === 1) return null;
+                      return (
+                        <div className="space-y-3 rounded-lg border border-border p-3">
+                          <Label className="font-medium">
+                            {t("booking.pricingType")}
+                          </Label>
+                          <div
+                            className={cn(
+                              "grid gap-3",
+                              allOptions.length === 3
+                                ? "sm:grid-cols-3"
+                                : allOptions.length === 2
+                                  ? "sm:grid-cols-2"
+                                  : "",
+                            )}
+                          >
+                            {allOptions.map(
+                              ({ value, icon: Icon, labelKey, descKey }) => {
+                                const isSelected = form.pricing_type === value;
+                                return (
+                                  <button
+                                    key={value}
+                                    type="button"
+                                    onClick={() =>
+                                      setForm((prev) => ({
+                                        ...prev,
+                                        pricing_type: value,
+                                        fixed_price: "",
+                                      }))
+                                    }
+                                    className="flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all text-center"
+                                    style={{
+                                      borderColor: isSelected
+                                        ? accentColor
+                                        : "#e5e7eb",
+                                      backgroundColor: isSelected
+                                        ? `${accentColor}10`
+                                        : "transparent",
+                                    }}
+                                  >
+                                    <Icon
+                                      className="h-5 w-5"
+                                      style={{
+                                        color: isSelected
+                                          ? accentColor
+                                          : primaryColor,
+                                      }}
+                                    />
+                                    <span
+                                      className="text-sm font-medium"
+                                      style={{ color: primaryColor }}
+                                    >
+                                      {tDynamic(labelKey)}
+                                    </span>
+                                    <span
+                                      className="text-xs"
+                                      style={{ color: `${primaryColor}60` }}
+                                    >
+                                      {tDynamic(descKey)}
+                                    </span>
+                                  </button>
+                                );
+                              },
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                  {/* Pop-up fields */}
+                  {form.restaurant_sub_type === "popup" && (
                     <div className="space-y-3 rounded-lg border border-border p-3">
-                      <Label className="font-medium">{t("booking.pricingType")}</Label>
-                      <div className={cn("grid gap-3", allOptions.length === 3 ? "sm:grid-cols-3" : allOptions.length === 2 ? "sm:grid-cols-2" : "")}>
-                        {allOptions.map(({ value, icon: Icon, labelKey, descKey }) => {
-                          const isSelected = form.pricing_type === value;
-                          return (
-                            <button
-                              key={value}
-                              type="button"
-                              onClick={() => setForm((prev) => ({ ...prev, pricing_type: value, fixed_price: "" }))}
-                              className="flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all text-center"
-                              style={{
-                                borderColor: isSelected ? accentColor : "#e5e7eb",
-                                backgroundColor: isSelected ? `${accentColor}10` : "transparent",
-                              }}
-                            >
-                              <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
-                              <span className="text-sm font-medium" style={{ color: primaryColor }}>{tDynamic(labelKey)}</span>
-                              <span className="text-xs" style={{ color: `${primaryColor}60` }}>{tDynamic(descKey)}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* Pop-up fields */}
-                {form.restaurant_sub_type === "popup" && (
-                  <div className="space-y-3 rounded-lg border border-border p-3">
-                    <Label className="font-medium flex items-center gap-1.5">
-                      <ShoppingBag className="h-4 w-4" />
-                      {t("booking.popupDetails")}
-                    </Label>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label>{t("booking.festivalName")}</Label>
-                        <Input
-                          value={form.festival_name}
-                          onChange={(e) => updateField("festival_name", e.target.value)}
-                          maxLength={100}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("booking.stallSize")}</Label>
-                        <Select value={form.stall_size} onValueChange={(v) => updateField("stall_size", v)}>
-                          <SelectTrigger><SelectValue placeholder="—" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="small">{t("booking.stallSizeSmall")}</SelectItem>
-                            <SelectItem value="medium">{t("booking.stallSizeMedium")}</SelectItem>
-                            <SelectItem value="large">{t("booking.stallSizeLarge")}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          id="electricity_needed"
-                          checked={form.electricity_needed}
-                          onCheckedChange={(checked) => updateBoolField("electricity_needed", !!checked)}
-                        />
-                        <Label htmlFor="electricity_needed" className="cursor-pointer text-sm flex items-center gap-1">
-                          <Plug className="h-3.5 w-3.5" />
-                          {t("booking.electricityNeeded")}
-                        </Label>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          id="water_needed"
-                          checked={form.water_needed}
-                          onCheckedChange={(checked) => updateBoolField("water_needed", !!checked)}
-                        />
-                        <Label htmlFor="water_needed" className="cursor-pointer text-sm flex items-center gap-1">
-                          <Droplets className="h-3.5 w-3.5" />
-                          {t("booking.waterNeeded")}
-                        </Label>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>{t("booking.foodPermits")}</Label>
-                      <Textarea
-                        rows={2}
-                        value={form.food_permits}
-                        onChange={(e) => updateField("food_permits", e.target.value)}
-                        maxLength={500}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>{t("booking.stallFee")}</Label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min={0}
-                        value={form.stall_fee}
-                        onChange={(e) => updateField("stall_fee", e.target.value)}
-                      />
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Catering — separate card */}
-            {(() => {
-              const restaurantResources = resources ?? [];
-              const anyCatering = restaurantResources.some((r: any) => r.offers_catering);
-              if (!anyCatering) return null;
-              const isCatering = form.restaurant_sub_type === "catering";
-              return (
-                <Card
-                  className="cursor-pointer transition-all"
-                  style={{
-                    borderColor: isCatering ? accentColor : undefined,
-                    borderWidth: isCatering ? 2 : undefined,
-                    backgroundColor: isCatering ? `${accentColor}08` : undefined,
-                  }}
-                  onClick={() => setForm((prev) => ({ ...prev, restaurant_sub_type: "catering", pricing_type: "" }))}
-                >
-                  <CardHeader>
-                    <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: isCatering ? accentColor : primaryColor }}>
-                      <Truck className="h-5 w-5" />
-                      {t("booking.subTypeCatering")}
-                    </CardTitle>
-                    <p className="text-sm" style={{ color: `${primaryColor}99` }}>
-                      {t("booking.cateringQuoteDesc")}
-                    </p>
-                  </CardHeader>
-                  {isCatering && (
-                    <CardContent className="space-y-3" onClick={(e) => e.stopPropagation()}>
-                      <div className="space-y-2">
-                        <Label>{t("booking.deliveryAddress")}</Label>
-                        <Input
-                          value={form.delivery_address}
-                          onChange={(e) => updateField("delivery_address", e.target.value)}
-                          maxLength={200}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("booking.dietaryNotes")}</Label>
-                        <Textarea
-                          rows={2}
-                          value={form.dietary_notes}
-                          onChange={(e) => updateField("dietary_notes", e.target.value)}
-                          maxLength={500}
-                        />
+                      <Label className="font-medium flex items-center gap-1.5">
+                        <ShoppingBag className="h-4 w-4" />
+                        {t("booking.popupDetails")}
+                      </Label>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>{t("booking.festivalName")}</Label>
+                          <Input
+                            value={form.festival_name}
+                            onChange={(e) =>
+                              updateField("festival_name", e.target.value)
+                            }
+                            maxLength={100}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>{t("booking.stallSize")}</Label>
+                          <Select
+                            value={form.stall_size}
+                            onValueChange={(v) => updateField("stall_size", v)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="—" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="small">
+                                {t("booking.stallSizeSmall")}
+                              </SelectItem>
+                              <SelectItem value="medium">
+                                {t("booking.stallSizeMedium")}
+                              </SelectItem>
+                              <SelectItem value="large">
+                                {t("booking.stallSizeLarge")}
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                           <Checkbox
-                            id="equipment_needed"
-                            checked={form.equipment_needed}
-                            onCheckedChange={(checked) => updateBoolField("equipment_needed", !!checked)}
+                            id="electricity_needed"
+                            checked={form.electricity_needed}
+                            onCheckedChange={(checked) =>
+                              updateBoolField("electricity_needed", !!checked)
+                            }
                           />
-                          <Label htmlFor="equipment_needed" className="cursor-pointer text-sm">
-                            {t("booking.equipmentNeeded")}
+                          <Label
+                            htmlFor="electricity_needed"
+                            className="cursor-pointer text-sm flex items-center gap-1"
+                          >
+                            <Plug className="h-3.5 w-3.5" />
+                            {t("booking.electricityNeeded")}
                           </Label>
                         </div>
                         <div className="flex items-center gap-2">
                           <Checkbox
-                            id="staff_needed"
-                            checked={form.staff_needed}
-                            onCheckedChange={(checked) => updateBoolField("staff_needed", !!checked)}
+                            id="water_needed"
+                            checked={form.water_needed}
+                            onCheckedChange={(checked) =>
+                              updateBoolField("water_needed", !!checked)
+                            }
                           />
-                          <Label htmlFor="staff_needed" className="cursor-pointer text-sm">
-                            {t("booking.staffNeeded")}
+                          <Label
+                            htmlFor="water_needed"
+                            className="cursor-pointer text-sm flex items-center gap-1"
+                          >
+                            <Droplets className="h-3.5 w-3.5" />
+                            {t("booking.waterNeeded")}
                           </Label>
                         </div>
                       </div>
-                    </CardContent>
+                      <div className="space-y-2">
+                        <Label>{t("booking.foodPermits")}</Label>
+                        <Textarea
+                          rows={2}
+                          value={form.food_permits}
+                          onChange={(e) =>
+                            updateField("food_permits", e.target.value)
+                          }
+                          maxLength={500}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>{t("booking.stallFee")}</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          value={form.stall_fee}
+                          onChange={(e) =>
+                            updateField("stall_fee", e.target.value)
+                          }
+                        />
+                      </div>
+                    </div>
                   )}
-                </Card>
-              );
-            })()}
+                </CardContent>
+              </Card>
+
+              {/* Catering — separate card */}
+              {(() => {
+                const restaurantResources = resources ?? [];
+                const anyCatering = restaurantResources.some(
+                  (r: any) => r.offers_catering,
+                );
+                if (!anyCatering) return null;
+                const isCatering = form.restaurant_sub_type === "catering";
+                return (
+                  <Card
+                    className="cursor-pointer transition-all"
+                    style={{
+                      borderColor: isCatering ? accentColor : undefined,
+                      borderWidth: isCatering ? 2 : undefined,
+                      backgroundColor: isCatering
+                        ? `${accentColor}08`
+                        : undefined,
+                    }}
+                    onClick={() =>
+                      setForm((prev) => ({
+                        ...prev,
+                        restaurant_sub_type: "catering",
+                        pricing_type: "",
+                      }))
+                    }
+                  >
+                    <CardHeader>
+                      <CardTitle
+                        className="text-lg font-serif flex items-center gap-2"
+                        style={{
+                          color: isCatering ? accentColor : primaryColor,
+                        }}
+                      >
+                        <Truck className="h-5 w-5" />
+                        {t("booking.subTypeCatering")}
+                      </CardTitle>
+                      <p
+                        className="text-sm"
+                        style={{ color: `${primaryColor}99` }}
+                      >
+                        {t("booking.cateringQuoteDesc")}
+                      </p>
+                    </CardHeader>
+                    {isCatering && (
+                      <CardContent
+                        className="space-y-3"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="space-y-2">
+                          <Label>{t("booking.deliveryAddress")}</Label>
+                          <Input
+                            value={form.delivery_address}
+                            onChange={(e) =>
+                              updateField("delivery_address", e.target.value)
+                            }
+                            maxLength={200}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>{t("booking.dietaryNotes")}</Label>
+                          <Textarea
+                            rows={2}
+                            value={form.dietary_notes}
+                            onChange={(e) =>
+                              updateField("dietary_notes", e.target.value)
+                            }
+                            maxLength={500}
+                          />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="equipment_needed"
+                              checked={form.equipment_needed}
+                              onCheckedChange={(checked) =>
+                                updateBoolField("equipment_needed", !!checked)
+                              }
+                            />
+                            <Label
+                              htmlFor="equipment_needed"
+                              className="cursor-pointer text-sm"
+                            >
+                              {t("booking.equipmentNeeded")}
+                            </Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="staff_needed"
+                              checked={form.staff_needed}
+                              onCheckedChange={(checked) =>
+                                updateBoolField("staff_needed", !!checked)
+                              }
+                            />
+                            <Label
+                              htmlFor="staff_needed"
+                              className="cursor-pointer text-sm"
+                            >
+                              {t("booking.staffNeeded")}
+                            </Label>
+                          </div>
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                );
+              })()}
             </>
           )}
 
           {/* Restaurant resource opening hours display */}
-          {form.reservation_type === "restaurant" && resources && resources.length > 0 && Object.keys(resourceHoursByResource).length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
-                  <Clock className="h-5 w-5" />
-                  {t("resourceHours.openingHoursLabel")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {resources.filter((r: any) => resourceHoursByResource[r.id]?.length > 0).map((res: any) => {
-                    const hours = resourceHoursByResource[res.id] ?? [];
-                    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-                    const sortedHours = [1, 2, 3, 4, 5, 6, 0].map((dow) => {
-                      const h = hours.find((x: any) => x.day_of_week === dow);
-                      return { dow, ...h };
-                    });
-                    const openDays = sortedHours.filter((h) => h.open_time && !h.is_closed);
-                    const allSame = openDays.length > 0 && openDays.every((h) => h.open_time?.slice(0, 5) === openDays[0].open_time?.slice(0, 5) && h.close_time?.slice(0, 5) === openDays[0].close_time?.slice(0, 5));
+          {form.reservation_type === "restaurant" &&
+            resources &&
+            resources.length > 0 &&
+            Object.keys(resourceHoursByResource).length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle
+                    className="text-lg font-serif flex items-center gap-2"
+                    style={{ color: primaryColor }}
+                  >
+                    <Clock className="h-5 w-5" />
+                    {t("resourceHours.openingHoursLabel")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {resources
+                      .filter(
+                        (r: any) => resourceHoursByResource[r.id]?.length > 0,
+                      )
+                      .map((res: any) => {
+                        const hours = resourceHoursByResource[res.id] ?? [];
+                        const dayNames = [
+                          "Sun",
+                          "Mon",
+                          "Tue",
+                          "Wed",
+                          "Thu",
+                          "Fri",
+                          "Sat",
+                        ];
+                        const sortedHours = [1, 2, 3, 4, 5, 6, 0].map((dow) => {
+                          const h = hours.find(
+                            (x: any) => x.day_of_week === dow,
+                          );
+                          return { dow, ...h };
+                        });
+                        const openDays = sortedHours.filter(
+                          (h) => h.open_time && !h.is_closed,
+                        );
+                        const allSame =
+                          openDays.length > 0 &&
+                          openDays.every(
+                            (h) =>
+                              h.open_time?.slice(0, 5) ===
+                                openDays[0].open_time?.slice(0, 5) &&
+                              h.close_time?.slice(0, 5) ===
+                                openDays[0].close_time?.slice(0, 5),
+                          );
 
-                    return (
-                      <div key={res.id} className="rounded-lg border p-3" style={{ borderColor: `${accentColor}30` }}>
-                        <p className="font-semibold text-sm mb-2" style={{ color: primaryColor }}>{res.name}</p>
-                        {allSame ? (
-                          <div className="text-sm text-muted-foreground">
-                            <span>{openDays[0].open_time?.slice(0, 5)} – {openDays[0].close_time?.slice(0, 5)}</span>
-                            {sortedHours.some((h) => h.is_closed) && (
-                              <div className="mt-1 text-xs">
-                                {sortedHours.filter((h) => h.is_closed).map((h) => dayNames[h.dow]).join(", ")}: {t("booking.closedDay")}
+                        return (
+                          <div
+                            key={res.id}
+                            className="rounded-lg border p-3"
+                            style={{ borderColor: `${accentColor}30` }}
+                          >
+                            <p
+                              className="font-semibold text-sm mb-2"
+                              style={{ color: primaryColor }}
+                            >
+                              {res.name}
+                            </p>
+                            {allSame ? (
+                              <div className="text-sm text-muted-foreground">
+                                <span>
+                                  {openDays[0].open_time?.slice(0, 5)} –{" "}
+                                  {openDays[0].close_time?.slice(0, 5)}
+                                </span>
+                                {sortedHours.some((h) => h.is_closed) && (
+                                  <div className="mt-1 text-xs">
+                                    {sortedHours
+                                      .filter((h) => h.is_closed)
+                                      .map((h) => dayNames[h.dow])
+                                      .join(", ")}
+                                    : {t("booking.closedDay")}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
+                                {sortedHours.map((h) => (
+                                  <div
+                                    key={h.dow}
+                                    className="flex justify-between"
+                                  >
+                                    <span>{dayNames[h.dow]}</span>
+                                    <span>
+                                      {h.is_closed
+                                        ? t("booking.closedDay")
+                                        : h.open_time
+                                          ? `${h.open_time.slice(0, 5)}–${h.close_time?.slice(0, 5)}`
+                                          : "–"}
+                                    </span>
+                                  </div>
+                                ))}
                               </div>
                             )}
                           </div>
-                        ) : (
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
-                            {sortedHours.map((h) => (
-                              <div key={h.dow} className="flex justify-between">
-                                <span>{dayNames[h.dow]}</span>
-                                <span>{h.is_closed ? t("booking.closedDay") : h.open_time ? `${h.open_time.slice(0, 5)}–${h.close_time?.slice(0, 5)}` : "–"}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                        );
+                      })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
           {/* Room type selection for hotel/guesthouse */}
           {isAccommodationType && resources && resources.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg font-serif flex items-center gap-2" style={{ color: primaryColor }}>
+                <CardTitle
+                  className="text-lg font-serif flex items-center gap-2"
+                  style={{ color: primaryColor }}
+                >
                   <BedDouble className="h-5 w-5" />
                   {t("booking.roomTypeLabel")} *
                 </CardTitle>
@@ -2636,43 +3716,114 @@ const PublicBookingInner = () => {
               <CardContent className="space-y-4">
                 {(() => {
                   // Get unique room types from resources
-                  const roomTypesAvailable = [...new Set(
-                    resources
-                      .filter((r: any) => r.room_type)
-                      .map((r: any) => r.room_type as string)
-                  )];
+                  const roomTypesAvailable = [
+                    ...new Set(
+                      resources
+                        .filter((r: any) => r.room_type)
+                        .map((r: any) => r.room_type as string),
+                    ),
+                  ];
                   if (roomTypesAvailable.length === 0) {
                     // Fallback: show resources as before if no room types configured
                     return (
                       <div className="grid gap-4 sm:grid-cols-2">
                         {resources.map((res: any) => {
                           const isSelected = form.resource_id === res.id;
-                          const Icon = typeIcons[res.resource_type] ?? Building2;
-                          const hasImages = res.image_url || (imagesByResource[res.id]?.length > 0);
+                          const Icon =
+                            typeIcons[res.resource_type] ?? Building2;
+                          const hasImages =
+                            res.image_url ||
+                            imagesByResource[res.id]?.length > 0;
                           return (
                             <button
                               key={res.id}
                               type="button"
-                              onClick={() => updateField("resource_id", isSelected ? "" : res.id)}
+                              onClick={() =>
+                                updateField(
+                                  "resource_id",
+                                  isSelected ? "" : res.id,
+                                )
+                              }
                               className="group relative text-left rounded-xl border-2 transition-all duration-300 overflow-hidden hover:scale-105 hover:shadow-lg hover:-translate-y-0.5"
                               style={{
-                                borderColor: isSelected ? accentColor : "#e5e7eb",
-                                backgroundColor: isSelected ? `${accentColor}10` : "transparent",
-                                boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                                borderColor: isSelected
+                                  ? accentColor
+                                  : "#e5e7eb",
+                                backgroundColor: isSelected
+                                  ? `${accentColor}10`
+                                  : "transparent",
+                                boxShadow: isSelected
+                                  ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15`
+                                  : undefined,
                               }}
                             >
-                              {isSelected && <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full z-10" style={{ backgroundColor: accentColor }} />}
-                              {hasImages && <ResourceCarousel images={imagesByResource[res.id] ?? []} mainImage={res.image_url} alt={res.name} className="w-full h-28 object-cover" />}
+                              {isSelected && (
+                                <span
+                                  className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full z-10"
+                                  style={{ backgroundColor: accentColor }}
+                                />
+                              )}
+                              {hasImages && (
+                                <ResourceCarousel
+                                  images={imagesByResource[res.id] ?? []}
+                                  mainImage={res.image_url}
+                                  alt={res.name}
+                                  className="w-full h-28 object-cover"
+                                />
+                              )}
                               <div className="p-4 flex gap-3">
-                                <span className="flex items-center justify-center h-10 w-10 rounded-full shrink-0" style={{ backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10` }}>
-                                  <Icon className="h-5 w-5" style={{ color: isSelected ? accentColor : primaryColor }} />
+                                <span
+                                  className="flex items-center justify-center h-10 w-10 rounded-full shrink-0"
+                                  style={{
+                                    backgroundColor: isSelected
+                                      ? `${accentColor}20`
+                                      : `${primaryColor}10`,
+                                  }}
+                                >
+                                  <Icon
+                                    className="h-5 w-5"
+                                    style={{
+                                      color: isSelected
+                                        ? accentColor
+                                        : primaryColor,
+                                    }}
+                                  />
                                 </span>
                                 <div className="min-w-0 space-y-1">
-                                  <p className="font-semibold text-sm" style={{ color: primaryColor }}>{res.name}</p>
-                                  {res.description && <p className="text-xs leading-relaxed" style={{ color: `${primaryColor}80` }}>{res.description}</p>}
+                                  <p
+                                    className="font-semibold text-sm"
+                                    style={{ color: primaryColor }}
+                                  >
+                                    {res.name}
+                                  </p>
+                                  {res.description && (
+                                    <p
+                                      className="text-xs leading-relaxed"
+                                      style={{ color: `${primaryColor}80` }}
+                                    >
+                                      {res.description}
+                                    </p>
+                                  )}
                                   <div className="flex flex-wrap gap-1.5 mt-1.5">
-                                    {res.capacity && <Badge variant="outline" className="text-xs"><Users className="h-3 w-3 mr-1" />{res.capacity} {t("common.guests")}</Badge>}
-                                    {res.price_per_night != null && <Badge variant="outline" className="text-xs">€{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}</Badge>}
+                                    {res.capacity && (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
+                                        <Users className="h-3 w-3 mr-1" />
+                                        {res.capacity} {t("common.guests")}
+                                      </Badge>
+                                    )}
+                                    {res.price_per_night != null && (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs"
+                                      >
+                                        €
+                                        {Number(res.price_per_night).toFixed(0)}
+                                        {t("dashboard.perNight")}
+                                      </Badge>
+                                    )}
                                   </div>
                                 </div>
                               </div>
@@ -2702,31 +3853,80 @@ const PublicBookingInner = () => {
                       {roomTypesAvailable.map((rt) => {
                         const isSelected = form.room_type === rt;
                         // Get first resource of this type for pricing info
-                        const sampleRes = resources.find((r: any) => r.room_type === rt);
+                        const sampleRes = resources.find(
+                          (r: any) => r.room_type === rt,
+                        );
                         return (
                           <button
                             key={rt}
                             type="button"
-                            onClick={() => updateField("room_type", isSelected ? "" : rt)}
+                            onClick={() =>
+                              updateField("room_type", isSelected ? "" : rt)
+                            }
                             className="text-left rounded-xl border-2 p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg"
                             style={{
                               borderColor: isSelected ? accentColor : "#e5e7eb",
-                              backgroundColor: isSelected ? `${accentColor}10` : "transparent",
-                              boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
+                              backgroundColor: isSelected
+                                ? `${accentColor}10`
+                                : "transparent",
+                              boxShadow: isSelected
+                                ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15`
+                                : undefined,
                             }}
                           >
-                            {isSelected && <span className="float-right h-2 w-2 rounded-full" style={{ backgroundColor: accentColor }} />}
-                            <p className="font-semibold text-sm" style={{ color: primaryColor }}>{ROOM_TYPE_LABELS[rt] ?? rt}</p>
+                            {isSelected && (
+                              <span
+                                className="float-right h-2 w-2 rounded-full"
+                                style={{ backgroundColor: accentColor }}
+                              />
+                            )}
+                            <p
+                              className="font-semibold text-sm"
+                              style={{ color: primaryColor }}
+                            >
+                              {ROOM_TYPE_LABELS[rt] ?? rt}
+                            </p>
                             {sampleRes?.description && (
-                              <p className="text-xs mt-1" style={{ color: `${primaryColor}70` }}>{sampleRes.description}</p>
+                              <p
+                                className="text-xs mt-1"
+                                style={{ color: `${primaryColor}70` }}
+                              >
+                                {sampleRes.description}
+                              </p>
                             )}
                             {sampleRes?.room_description && (
-                              <p className="text-xs mt-1 italic" style={{ color: `${primaryColor}60` }}>{sampleRes.room_description}</p>
+                              <p
+                                className="text-xs mt-1 italic"
+                                style={{ color: `${primaryColor}60` }}
+                              >
+                                {sampleRes.room_description}
+                              </p>
                             )}
                             <div className="flex flex-wrap gap-1.5 mt-2">
-                              {showSiteBadges && sampleRes?.site_id && siteNameMap[sampleRes.site_id] && <Badge variant="secondary" className="text-xs"><MapPin className="h-3 w-3 mr-1" />{siteNameMap[sampleRes.site_id]}</Badge>}
-                              {sampleRes?.capacity && <Badge variant="outline" className="text-xs"><Users className="h-3 w-3 mr-1" />{sampleRes.capacity} {t("common.guests")}</Badge>}
-                              {sampleRes?.price_per_night != null && <Badge variant="outline" className="text-xs">€{Number(sampleRes.price_per_night).toFixed(0)}{t("dashboard.perNight")}</Badge>}
+                              {showSiteBadges &&
+                                sampleRes?.site_id &&
+                                siteNameMap[sampleRes.site_id] && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    <MapPin className="h-3 w-3 mr-1" />
+                                    {siteNameMap[sampleRes.site_id]}
+                                  </Badge>
+                                )}
+                              {sampleRes?.capacity && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Users className="h-3 w-3 mr-1" />
+                                  {sampleRes.capacity} {t("common.guests")}
+                                </Badge>
+                              )}
+                              {sampleRes?.price_per_night != null && (
+                                <Badge variant="outline" className="text-xs">
+                                  €
+                                  {Number(sampleRes.price_per_night).toFixed(0)}
+                                  {t("dashboard.perNight")}
+                                </Badge>
+                              )}
                             </div>
                           </button>
                         );
@@ -2734,64 +3934,141 @@ const PublicBookingInner = () => {
                     </div>
                   );
                 })()}
-                {errors.room_type && <p className="text-sm text-destructive">{errors.room_type}</p>}
+                {errors.room_type && (
+                  <p className="text-sm text-destructive">{errors.room_type}</p>
+                )}
               </CardContent>
             </Card>
           )}
 
           {/* Resource selection for venue (non-accommodation, non-restaurant) */}
-          {resources && resources.length > 0 && form.reservation_type && form.reservation_type !== "restaurant" && !isAccommodationType && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
-                  {t("booking.selectResource")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {resources.map((res: any) => {
-                    const isSelected = form.resource_id === res.id;
-                    const Icon = typeIcons[res.resource_type] ?? Building2;
-                    const hasImages = res.image_url || (imagesByResource[res.id]?.length > 0);
-                    return (
-                      <button
-                        key={res.id}
-                        type="button"
-                        onClick={() => updateField("resource_id", isSelected ? "" : res.id)}
-                        className="group relative text-left rounded-xl border-2 transition-all duration-300 overflow-hidden hover:scale-105 hover:shadow-lg hover:-translate-y-0.5"
-                        style={{
-                          borderColor: isSelected ? accentColor : "#e5e7eb",
-                          backgroundColor: isSelected ? `${accentColor}10` : "transparent",
-                          boxShadow: isSelected ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15` : undefined,
-                        }}
-                      >
-                        {isSelected && <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full z-10" style={{ backgroundColor: accentColor }} />}
-                        {hasImages && <ResourceCarousel images={imagesByResource[res.id] ?? []} mainImage={res.image_url} alt={res.name} className="w-full h-28 object-cover" />}
-                        <div className="p-4 flex gap-3">
-                          <span className="flex items-center justify-center h-10 w-10 rounded-full shrink-0 transition-colors duration-200" style={{ backgroundColor: isSelected ? `${accentColor}20` : `${primaryColor}10` }}>
-                            <Icon className="h-5 w-5 transition-colors duration-200" style={{ color: isSelected ? accentColor : primaryColor }} />
-                          </span>
-                          <div className="min-w-0 space-y-1">
-                            <p className="font-semibold text-sm" style={{ color: primaryColor }}>{res.name}</p>
-                            {res.description && <p className="text-xs leading-relaxed" style={{ color: `${primaryColor}80` }}>{res.description}</p>}
-                            <div className="flex flex-wrap gap-1.5 mt-1.5">
-                              {showSiteBadges && res.site_id && siteNameMap[res.site_id] && <Badge variant="secondary" className="text-xs"><MapPin className="h-3 w-3 mr-1" />{siteNameMap[res.site_id]}</Badge>}
-                              {res.capacity && <Badge variant="outline" className="text-xs"><Users className="h-3 w-3 mr-1" />{res.capacity} {t("common.guests")}</Badge>}
-                              {res.price_per_night != null && <Badge variant="outline" className="text-xs">€{Number(res.price_per_night).toFixed(0)}{t("dashboard.perNight")}</Badge>}
+          {resources &&
+            resources.length > 0 &&
+            form.reservation_type &&
+            form.reservation_type !== "restaurant" &&
+            !isAccommodationType && (
+              <Card>
+                <CardHeader>
+                  <CardTitle
+                    className="text-lg font-serif"
+                    style={{ color: primaryColor }}
+                  >
+                    {t("booking.selectResource")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {resources.map((res: any) => {
+                      const isSelected = form.resource_id === res.id;
+                      const Icon = typeIcons[res.resource_type] ?? Building2;
+                      const hasImages =
+                        res.image_url || imagesByResource[res.id]?.length > 0;
+                      return (
+                        <button
+                          key={res.id}
+                          type="button"
+                          onClick={() =>
+                            updateField("resource_id", isSelected ? "" : res.id)
+                          }
+                          className="group relative text-left rounded-xl border-2 transition-all duration-300 overflow-hidden hover:scale-105 hover:shadow-lg hover:-translate-y-0.5"
+                          style={{
+                            borderColor: isSelected ? accentColor : "#e5e7eb",
+                            backgroundColor: isSelected
+                              ? `${accentColor}10`
+                              : "transparent",
+                            boxShadow: isSelected
+                              ? `0 0 0 1px ${accentColor}40, 0 4px 12px ${accentColor}15`
+                              : undefined,
+                          }}
+                        >
+                          {isSelected && (
+                            <span
+                              className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full z-10"
+                              style={{ backgroundColor: accentColor }}
+                            />
+                          )}
+                          {hasImages && (
+                            <ResourceCarousel
+                              images={imagesByResource[res.id] ?? []}
+                              mainImage={res.image_url}
+                              alt={res.name}
+                              className="w-full h-28 object-cover"
+                            />
+                          )}
+                          <div className="p-4 flex gap-3">
+                            <span
+                              className="flex items-center justify-center h-10 w-10 rounded-full shrink-0 transition-colors duration-200"
+                              style={{
+                                backgroundColor: isSelected
+                                  ? `${accentColor}20`
+                                  : `${primaryColor}10`,
+                              }}
+                            >
+                              <Icon
+                                className="h-5 w-5 transition-colors duration-200"
+                                style={{
+                                  color: isSelected
+                                    ? accentColor
+                                    : primaryColor,
+                                }}
+                              />
+                            </span>
+                            <div className="min-w-0 space-y-1">
+                              <p
+                                className="font-semibold text-sm"
+                                style={{ color: primaryColor }}
+                              >
+                                {res.name}
+                              </p>
+                              {res.description && (
+                                <p
+                                  className="text-xs leading-relaxed"
+                                  style={{ color: `${primaryColor}80` }}
+                                >
+                                  {res.description}
+                                </p>
+                              )}
+                              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                {showSiteBadges &&
+                                  res.site_id &&
+                                  siteNameMap[res.site_id] && (
+                                    <Badge
+                                      variant="secondary"
+                                      className="text-xs"
+                                    >
+                                      <MapPin className="h-3 w-3 mr-1" />
+                                      {siteNameMap[res.site_id]}
+                                    </Badge>
+                                  )}
+                                {res.capacity && (
+                                  <Badge variant="outline" className="text-xs">
+                                    <Users className="h-3 w-3 mr-1" />
+                                    {res.capacity} {t("common.guests")}
+                                  </Badge>
+                                )}
+                                {res.price_per_night != null && (
+                                  <Badge variant="outline" className="text-xs">
+                                    €{Number(res.price_per_night).toFixed(0)}
+                                    {t("dashboard.perNight")}
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-serif" style={{ color: primaryColor }}>
+              <CardTitle
+                className="text-lg font-serif"
+                style={{ color: primaryColor }}
+              >
                 {t("booking.yourDetails")}
               </CardTitle>
             </CardHeader>
@@ -2806,7 +4083,11 @@ const PublicBookingInner = () => {
                     maxLength={100}
                     required
                   />
-                  {errors.guest_name && <p className="text-sm text-destructive">{errors.guest_name}</p>}
+                  {errors.guest_name && (
+                    <p className="text-sm text-destructive">
+                      {errors.guest_name}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="guest_email">{t("common.email")} *</Label>
@@ -2818,7 +4099,11 @@ const PublicBookingInner = () => {
                     maxLength={255}
                     required
                   />
-                  {errors.guest_email && <p className="text-sm text-destructive">{errors.guest_email}</p>}
+                  {errors.guest_email && (
+                    <p className="text-sm text-destructive">
+                      {errors.guest_email}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="guest_phone">{t("common.phone")}</Label>
@@ -2831,26 +4116,38 @@ const PublicBookingInner = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="guests_count">{t("booking.guestCount")} *</Label>
+                  <Label htmlFor="guests_count">
+                    {t("booking.guestCount")} *
+                  </Label>
                   <Input
                     id="guests_count"
                     type="number"
                     min={1}
                     max={500}
                     value={form.guests_count}
-                    onChange={(e) => updateField("guests_count", e.target.value)}
+                    onChange={(e) =>
+                      updateField("guests_count", e.target.value)
+                    }
                     required
                   />
-                  {errors.guests_count && <p className="text-sm text-destructive">{errors.guests_count}</p>}
+                  {errors.guests_count && (
+                    <p className="text-sm text-destructive">
+                      {errors.guests_count}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="special_requests">{t("booking.specialRequests")}</Label>
+                <Label htmlFor="special_requests">
+                  {t("booking.specialRequests")}
+                </Label>
                 <Textarea
                   id="special_requests"
                   rows={3}
                   value={form.special_requests}
-                  onChange={(e) => updateField("special_requests", e.target.value)}
+                  onChange={(e) =>
+                    updateField("special_requests", e.target.value)
+                  }
                   maxLength={1000}
                 />
               </div>
@@ -2861,7 +4158,9 @@ const PublicBookingInner = () => {
                   <Input
                     id="promo_code"
                     value={form.promo_code}
-                    onChange={(e) => updateField("promo_code", e.target.value.toUpperCase())}
+                    onChange={(e) =>
+                      updateField("promo_code", e.target.value.toUpperCase())
+                    }
                     maxLength={50}
                     className="pl-9 uppercase"
                     placeholder={t("discount.promoCodePlaceholder")}
@@ -2882,9 +4181,13 @@ const PublicBookingInner = () => {
               data-testid="booking-misconfig-banner"
               className="rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive space-y-2"
             >
-              <p className="font-semibold">{t("booking.misconfigBannerTitle")}</p>
+              <p className="font-semibold">
+                {t("booking.misconfigBannerTitle")}
+              </p>
               <p>{t("booking.misconfigBannerNoReservation")}</p>
-              <p className="text-destructive/80">{t("booking.misconfigBannerDisabled")}</p>
+              <p className="text-destructive/80">
+                {t("booking.misconfigBannerDisabled")}
+              </p>
               <div className="pt-1">
                 <Button
                   type="button"
@@ -2937,7 +4240,12 @@ const PublicBookingInner = () => {
           <footer className="text-center py-6 text-xs text-muted-foreground space-y-1">
             <p>
               <span>{t("guest.find.linkHint")} </span>
-              <a href="/find-booking" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">
+              <a
+                href="/find-booking"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
                 {t("guest.find.linkLabel")}
               </a>
             </p>
@@ -2946,7 +4254,6 @@ const PublicBookingInner = () => {
             {settings?.business_phone && <p>{settings.business_phone}</p>}
           </footer>
         )}
-
       </main>
     </div>
   );

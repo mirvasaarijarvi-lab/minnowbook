@@ -107,7 +107,10 @@ describe("check-security-regressions", () => {
   });
 
   it("exit code 2 on non-JSON stdin", () => {
-    const res = spawnSync("node", [SCRIPT], { input: "not json", encoding: "utf8" });
+    const res = spawnSync("node", [SCRIPT], {
+      input: "not json",
+      encoding: "utf8",
+    });
     expect(res.status).toBe(2);
   });
 });

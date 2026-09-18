@@ -93,7 +93,13 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
   });
 
   const updateItem = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<MenuItem> }) => {
+    mutationFn: async ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: Partial<MenuItem>;
+    }) => {
       const { error } = await supabase
         .from("kitchen_menu_items")
         .update(patch)
@@ -106,7 +112,10 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
 
   const deleteItem = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("kitchen_menu_items").delete().eq("id", id);
+      const { error } = await supabase
+        .from("kitchen_menu_items")
+        .delete()
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -139,7 +148,10 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
             />
           </div>
           <div className="col-span-6 sm:col-span-3">
-            <Select value={draftCategory} onValueChange={(v) => setDraftCategory(v as Category)}>
+            <Select
+              value={draftCategory}
+              onValueChange={(v) => setDraftCategory(v as Category)}
+            >
               <SelectTrigger className="h-9" aria-label={t("kitchen.category")}>
                 <SelectValue />
               </SelectTrigger>
@@ -197,7 +209,10 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
                       onBlur={(e) => {
                         const next = e.target.value.trim();
                         if (next && next !== item.name) {
-                          updateItem.mutate({ id: item.id, patch: { name: next } });
+                          updateItem.mutate({
+                            id: item.id,
+                            patch: { name: next },
+                          });
                         }
                       }}
                       className="h-8"
@@ -213,13 +228,22 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
                         })
                       }
                     >
-                      <SelectTrigger className="h-8" aria-label={t("kitchen.category")}>
+                      <SelectTrigger
+                        className="h-8"
+                        aria-label={t("kitchen.category")}
+                      >
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="food">{t("kitchen.cat.food")}</SelectItem>
-                        <SelectItem value="drink">{t("kitchen.cat.drink")}</SelectItem>
-                        <SelectItem value="other">{t("kitchen.cat.other")}</SelectItem>
+                        <SelectItem value="food">
+                          {t("kitchen.cat.food")}
+                        </SelectItem>
+                        <SelectItem value="drink">
+                          {t("kitchen.cat.drink")}
+                        </SelectItem>
+                        <SelectItem value="other">
+                          {t("kitchen.cat.other")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -232,9 +256,15 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
                       defaultValue={item.unit_price_eur ?? ""}
                       placeholder="€"
                       onBlur={(e) => {
-                        const v = e.target.value === "" ? null : parseFloat(e.target.value);
+                        const v =
+                          e.target.value === ""
+                            ? null
+                            : parseFloat(e.target.value);
                         if (v !== item.unit_price_eur) {
-                          updateItem.mutate({ id: item.id, patch: { unit_price_eur: v } });
+                          updateItem.mutate({
+                            id: item.id,
+                            patch: { unit_price_eur: v },
+                          });
                         }
                       }}
                       className="h-8"
@@ -246,7 +276,10 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
                       size="icon"
                       className="h-8 w-8 text-destructive"
                       onClick={() => deleteItem.mutate(item.id)}
-                      aria-label={t("kitchen.deleteItemNamed").replace("{name}", item.name)}
+                      aria-label={t("kitchen.deleteItemNamed").replace(
+                        "{name}",
+                        item.name,
+                      )}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

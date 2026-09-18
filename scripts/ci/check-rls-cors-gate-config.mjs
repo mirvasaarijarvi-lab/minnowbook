@@ -29,7 +29,10 @@ const argValue = (name, fallback) => {
 };
 
 const ROOT = resolve(argValue("--root", process.cwd()));
-const WORKFLOW = resolve(ROOT, argValue("--workflow", ".github/workflows/rls-cors-gate.yml"));
+const WORKFLOW = resolve(
+  ROOT,
+  argValue("--workflow", ".github/workflows/rls-cors-gate.yml"),
+);
 const PREFLIGHT_SCRIPT = "scripts/ci/rls-cors-gate-preflight.mjs";
 const LIVE_CONFIG = "vitest.security-live.config.ts";
 
@@ -40,7 +43,6 @@ const REQUIRED_JOBS = [
   "gate-summary",
   "notify-tenant-denial",
 ];
-
 
 /** Secrets the preflight and the live suites need to run against a project. */
 const REQUIRED_TEST_SECRETS = [
@@ -56,7 +58,10 @@ const REQUIRED_TEST_SECRETS = [
 ];
 
 /** Secrets the advisor job needs. */
-const REQUIRED_ADVISOR_SECRETS = ["SUPABASE_ACCESS_TOKEN", "SUPABASE_PROJECT_REF"];
+const REQUIRED_ADVISOR_SECRETS = [
+  "SUPABASE_ACCESS_TOKEN",
+  "SUPABASE_PROJECT_REF",
+];
 
 /**
  * Test files the gate must keep running. These are the RLS and CORS slices the
@@ -92,7 +97,10 @@ const yml = readFileSync(WORKFLOW, "utf8");
 
 // ---------------------------------------------------------------- triggers
 if (!/^on:/m.test(yml)) {
-  fail("Gate has no triggers", "The workflow has no `on:` block, so it never runs.");
+  fail(
+    "Gate has no triggers",
+    "The workflow has no `on:` block, so it never runs.",
+  );
 } else {
   if (!/\bpush:\s*\n\s*branches:\s*\[[^\]]*main/.test(yml)) {
     fail(
@@ -197,9 +205,9 @@ for (const test of REQUIRED_TESTS) {
 
 // Every test file the workflow names must exist, so a rename cannot leave a
 // step that runs zero files (Vitest treats that as success in some setups).
-const referencedTests = [...yml.matchAll(/src\/test\/security\/[\w.-]+\.test\.ts/g)].map(
-  (m) => m[0],
-);
+const referencedTests = [
+  ...yml.matchAll(/src\/test\/security\/[\w.-]+\.test\.ts/g),
+].map((m) => m[0]);
 for (const test of new Set(referencedTests)) {
   if (!existsSync(join(ROOT, test))) {
     fail(
@@ -212,7 +220,11 @@ note(`Referenced security test files: ${new Set(referencedTests).size}`);
 
 // Live network steps must cap stalled sockets, otherwise one hung request
 // burns the whole job timeout and the gate reports a timeout, not a cause.
-const liveSteps = [...yml.matchAll(/bunx vitest run --config vitest\.security-live\.config\.ts/g)];
+const liveSteps = [
+  ...yml.matchAll(
+    /bunx vitest run --config vitest\.security-live\.config\.ts/g,
+  ),
+];
 const timeoutCount = [...yml.matchAll(/LIVE_FETCH_TIMEOUT_MS/g)].length;
 if (liveSteps.length > 0 && timeoutCount < liveSteps.length) {
   fail(
@@ -253,7 +265,6 @@ function stepBlocks(text) {
   return blocks.map((b) => b.join("\n"));
 }
 
-
 if (!yml.includes("actions/upload-artifact@")) {
   fail(
     "Gate uploads no run logs",
@@ -276,7 +287,9 @@ if (!yml.includes("actions/upload-artifact@")) {
   // the artifact exists.
   // Split into step blocks by line, so a long workflow cannot make a nested
   // regex backtrack.
-  const uploadBlocks = stepBlocks(yml).filter((b) => b.includes("actions/upload-artifact@"));
+  const uploadBlocks = stepBlocks(yml).filter((b) =>
+    b.includes("actions/upload-artifact@"),
+  );
   for (const block of uploadBlocks) {
     if (!/if:\s*always\(\)/.test(block)) {
       fail(
@@ -298,7 +311,8 @@ if (!yml.includes("actions/upload-artifact@")) {
 // failure can be read from the artifact instead of the truncating log viewer.
 let loggedSteps = 0;
 for (const block of stepBlocks(yml)) {
-  const runsTests = block.includes("bunx vitest run") || block.includes(PREFLIGHT_SCRIPT);
+  const runsTests =
+    block.includes("bunx vitest run") || block.includes(PREFLIGHT_SCRIPT);
   if (!runsTests) continue;
   const name = (/- name:\s*(.+)/.exec(block)?.[1] ?? "unnamed step").trim();
   if (new RegExp(`${LOGS_DIR}/[\\w.-]+\\.log`).test(block)) {
@@ -329,7 +343,9 @@ if (notifyStart !== -1) {
       "Add `needs: [rls-cors-tests]` to notify-tenant-denial, otherwise it cannot read the preflight result and never reports a blocked tenant.",
     );
   }
-  if (!/if:\s*always\(\)[^\n]*tenant_access\s*==\s*'denied'/.test(notifyBlock)) {
+  if (
+    !/if:\s*always\(\)[^\n]*tenant_access\s*==\s*'denied'/.test(notifyBlock)
+  ) {
     fail(
       "Denial notification never triggers",
       "notify-tenant-denial must use `if: always() && needs.rls-cors-tests.outputs.tenant_access == 'denied'`; without it the job is skipped when the gate job fails, which is exactly when a denial happens.",
@@ -388,7 +404,6 @@ if (summaryBlock) {
   }
 }
 
-
 report();
 
 function report() {
@@ -400,7 +415,13 @@ function report() {
 
   if (problems.length === 0) {
     console.log("✅ RLS/CORS gate configuration is complete.");
-    writeSummary(["### RLS/CORS gate configuration", "", "✅ complete.", "", ...summary]);
+    writeSummary([
+      "### RLS/CORS gate configuration",
+      "",
+      "✅ complete.",
+      "",
+      ...summary,
+    ]);
     process.exit(0);
   }
 

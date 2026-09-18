@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, addDays, parseISO, isToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +19,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,7 +57,14 @@ import { toast } from "sonner";
 import DashboardTooltip from "./DashboardTooltip";
 import { cn } from "@/lib/utils";
 import KitchenMenuManager, { type MenuItem } from "./KitchenMenuManager";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 type Category = "food" | "drink" | "other";
 type Status = "received" | "preparing" | "ready" | "served";
@@ -119,7 +136,9 @@ const KitchenOrdersPanel = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
-  const [pendingOrderDelete, setPendingOrderDelete] = useState<string | null>(null);
+  const [pendingOrderDelete, setPendingOrderDelete] = useState<string | null>(
+    null,
+  );
   const [menuManagerOpen, setMenuManagerOpen] = useState(false);
   const [hiddenCards, setHiddenCards] = useState<string[]>([]);
 
@@ -177,7 +196,9 @@ const KitchenOrdersPanel = () => {
     queryFn: async () => {
       let query = supabase
         .from("reservations")
-        .select("id, reservation_type, date, start_time, end_time, guest_name, guests_count, estimated_guests, status, site_id, special_requests")
+        .select(
+          "id, reservation_type, date, start_time, end_time, guest_name, guests_count, estimated_guests, status, site_id, special_requests",
+        )
         .eq("tenant_id", tenantId!)
         .eq("date", selectedDate)
         .in("reservation_type", ["restaurant", "venue"])
@@ -269,8 +290,17 @@ const KitchenOrdersPanel = () => {
   });
 
   const updateOrder = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Partial<KitchenOrder> }) => {
-      const { error } = await supabase.from("kitchen_orders").update(patch).eq("id", id);
+    mutationFn: async ({
+      id,
+      patch,
+    }: {
+      id: string;
+      patch: Partial<KitchenOrder>;
+    }) => {
+      const { error } = await supabase
+        .from("kitchen_orders")
+        .update(patch)
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => invalidate(),
@@ -279,7 +309,10 @@ const KitchenOrdersPanel = () => {
 
   const deleteOrder = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("kitchen_orders").delete().eq("id", id);
+      const { error } = await supabase
+        .from("kitchen_orders")
+        .delete()
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -307,7 +340,6 @@ const KitchenOrdersPanel = () => {
     onError: () => toast.error(t("kitchen.error")),
   });
 
-
   const bulkUpdateStatus = useMutation({
     mutationFn: async ({ ids, status }: { ids: string[]; status: Status }) => {
       if (ids.length === 0) return 0;
@@ -321,7 +353,9 @@ const KitchenOrdersPanel = () => {
     onSuccess: (count) => {
       invalidate();
       if (count && count > 0) {
-        toast.success(t("kitchen.bulk.updated").replace("{count}", String(count)));
+        toast.success(
+          t("kitchen.bulk.updated").replace("{count}", String(count)),
+        );
       } else {
         toast.info(t("kitchen.bulk.nothingToUpdate"));
       }
@@ -334,13 +368,16 @@ const KitchenOrdersPanel = () => {
     [reservations, hiddenCards],
   );
 
-  const guestsLabel = (r: Reservation) => r.guests_count ?? r.estimated_guests ?? "—";
+  const guestsLabel = (r: Reservation) =>
+    r.guests_count ?? r.estimated_guests ?? "—";
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">{t("kitchen.title")}</h2>
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-foreground">
+            {t("kitchen.title")}
+          </h2>
           <DashboardTooltip text={t("kitchen.tooltip")} />
         </div>
         <div className="flex items-center gap-2 print:hidden flex-wrap">
@@ -411,12 +448,22 @@ const KitchenOrdersPanel = () => {
             <BookOpen className="h-4 w-4" />
             {t("kitchen.menu.manage")}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.print()}
+            className="gap-1.5"
+          >
             <Printer className="h-4 w-4" />
             {t("kitchen.print")}
           </Button>
           {hiddenReservations.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={restoreAllCards} className="gap-1.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={restoreAllCards}
+              className="gap-1.5"
+            >
               <RotateCcw className="h-4 w-4" />
               {t("kitchen.restoreHidden").replace(
                 "{count}",
@@ -441,46 +488,64 @@ const KitchenOrdersPanel = () => {
           {visibleReservations.map((r) => {
             const items = ordersByReservation.get(r.id) ?? [];
             const total = items.reduce(
-              (sum, it) => sum + (it.unit_price_eur != null ? Number(it.unit_price_eur) * it.quantity : 0),
+              (sum, it) =>
+                sum +
+                (it.unit_price_eur != null
+                  ? Number(it.unit_price_eur) * it.quantity
+                  : 0),
               0,
             );
             return (
               <li key={r.id}>
-              <Card aria-label={t("kitchen.ordersFor").replace("{name}", r.guest_name ?? "")}>
-                <CardHeader className="pb-3">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <CardTitle className="text-base">{r.guest_name}</CardTitle>
-                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
-                        <Badge variant="outline" className="text-xs capitalize">
-                          {r.reservation_type}
-                        </Badge>
-                        {r.start_time && (
+                <Card
+                  aria-label={t("kitchen.ordersFor").replace(
+                    "{name}",
+                    r.guest_name ?? "",
+                  )}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <CardTitle className="text-base">
+                          {r.guest_name}
+                        </CardTitle>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
+                          <Badge
+                            variant="outline"
+                            className="text-xs capitalize"
+                          >
+                            {r.reservation_type}
+                          </Badge>
+                          {r.start_time && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {r.start_time.slice(0, 5)}
+                              {r.end_time && `–${r.end_time.slice(0, 5)}`}
+                            </span>
+                          )}
                           <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {r.start_time.slice(0, 5)}
-                            {r.end_time && `–${r.end_time.slice(0, 5)}`}
+                            <Users className="h-3 w-3" />
+                            {guestsLabel(r)} {t("kitchen.guests")}
                           </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          {guestsLabel(r)} {t("kitchen.guests")}
-                        </span>
-                      </div>
-                      {r.special_requests && (
-                        <p className="text-xs text-muted-foreground mt-1.5 italic">
-                          {r.special_requests}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-start gap-3">
-                      {total > 0 && (
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground">{t("kitchen.total")}</p>
-                          <p className="text-base font-semibold">{total.toFixed(2)} €</p>
                         </div>
-                      )}
-                      <Button
+                        {r.special_requests && (
+                          <p className="text-xs text-muted-foreground mt-1.5 italic">
+                            {r.special_requests}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-start gap-3">
+                        {total > 0 && (
+                          <div className="text-right">
+                            <p className="text-xs text-muted-foreground">
+                              {t("kitchen.total")}
+                            </p>
+                            <p className="text-base font-semibold">
+                              {total.toFixed(2)} €
+                            </p>
+                          </div>
+                        )}
+                        <Button
                           variant="ghost"
                           size="icon"
                           className="h-9 w-9 text-destructive hover:text-destructive print:hidden"
@@ -492,67 +557,81 @@ const KitchenOrdersPanel = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {items.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">{t("kitchen.noOrders")}</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {items.map((item) => (
-                        <KitchenOrderRow
-                          key={item.id}
-                          item={item}
-                          onChange={(patch) => updateOrder.mutate({ id: item.id, patch })}
-                          onDelete={() => setPendingDelete(item.id)}
-                          t={t}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  {items.length > 0 && (
-                    <BulkStatusToolbar
-                      items={items}
-                      onBulk={(ids, status) => bulkUpdateStatus.mutate({ ids, status })}
-                      disabled={bulkUpdateStatus.isPending}
-                      t={t}
-                    />
-                  )}
-                  <div className="flex flex-wrap gap-2 print:hidden">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5"
-                      onClick={() => addOrder.mutate(r.id)}
-                      disabled={addOrder.isPending}
-                    >
-                      <Plus className="h-4 w-4" />
-                      {t("kitchen.addItem")}
-                    </Button>
-                    {menuItems.length > 0 && (
-                      <MenuPicker
-                        menuItems={menuItems}
-                        onPick={(menuItem) =>
-                          addOrderFromMenu.mutate({ reservationId: r.id, menuItem })
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {items.length === 0 ? (
+                      <p className="text-xs text-muted-foreground italic">
+                        {t("kitchen.noOrders")}
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {items.map((item) => (
+                          <KitchenOrderRow
+                            key={item.id}
+                            item={item}
+                            onChange={(patch) =>
+                              updateOrder.mutate({ id: item.id, patch })
+                            }
+                            onDelete={() => setPendingDelete(item.id)}
+                            t={t}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {items.length > 0 && (
+                      <BulkStatusToolbar
+                        items={items}
+                        onBulk={(ids, status) =>
+                          bulkUpdateStatus.mutate({ ids, status })
                         }
+                        disabled={bulkUpdateStatus.isPending}
                         t={t}
                       />
                     )}
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="flex flex-wrap gap-2 print:hidden">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() => addOrder.mutate(r.id)}
+                        disabled={addOrder.isPending}
+                      >
+                        <Plus className="h-4 w-4" />
+                        {t("kitchen.addItem")}
+                      </Button>
+                      {menuItems.length > 0 && (
+                        <MenuPicker
+                          menuItems={menuItems}
+                          onPick={(menuItem) =>
+                            addOrderFromMenu.mutate({
+                              reservationId: r.id,
+                              menuItem,
+                            })
+                          }
+                          t={t}
+                        />
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               </li>
             );
           })}
         </ul>
       )}
 
-      <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
+      <AlertDialog
+        open={!!pendingDelete}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("kitchen.deleteConfirm")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("kitchen.delete")}</AlertDialogDescription>
+            <AlertDialogDescription>
+              {t("kitchen.delete")}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
@@ -574,14 +653,19 @@ const KitchenOrdersPanel = () => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("kitchen.deleteOrderConfirm")}</AlertDialogTitle>
-            <AlertDialogDescription>{t("kitchen.deleteOrderHint")}</AlertDialogDescription>
+            <AlertDialogTitle>
+              {t("kitchen.deleteOrderConfirm")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("kitchen.deleteOrderHint")}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (pendingOrderDelete) deleteOrderForReservation.mutate(pendingOrderDelete);
+                if (pendingOrderDelete)
+                  deleteOrderForReservation.mutate(pendingOrderDelete);
                 setPendingOrderDelete(null);
               }}
             >
@@ -591,8 +675,10 @@ const KitchenOrdersPanel = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <KitchenMenuManager open={menuManagerOpen} onOpenChange={setMenuManagerOpen} />
-
+      <KitchenMenuManager
+        open={menuManagerOpen}
+        onOpenChange={setMenuManagerOpen}
+      />
     </div>
   );
 };
@@ -617,11 +703,21 @@ const NEXT_STATUS: Record<Status, Status | null> = {
   served: null,
 };
 
-const BulkStatusToolbar = ({ items, onBulk, disabled, t }: BulkStatusToolbarProps) => {
+const BulkStatusToolbar = ({
+  items,
+  onBulk,
+  disabled,
+  t,
+}: BulkStatusToolbarProps) => {
   // For "Advance all": every non-served item moves to its next status.
   // We split into groups by current status, then call onBulk once per group.
   const advanceAll = () => {
-    const groups: Record<Status, string[]> = { received: [], preparing: [], ready: [], served: [] };
+    const groups: Record<Status, string[]> = {
+      received: [],
+      preparing: [],
+      ready: [],
+      served: [],
+    };
     for (const it of items) {
       const next = NEXT_STATUS[it.status];
       if (next) groups[it.status].push(it.id);
@@ -643,7 +739,13 @@ const BulkStatusToolbar = ({ items, onBulk, disabled, t }: BulkStatusToolbarProp
     onBulk(ids, status);
   };
 
-  const StatusButton = ({ status, label }: { status: Status; label: string }) => {
+  const StatusButton = ({
+    status,
+    label,
+  }: {
+    status: Status;
+    label: string;
+  }) => {
     const Icon = STATUS_ICON[status];
     return (
       <Button
@@ -756,7 +858,8 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
           placeholder={t("kitchen.itemNamePlaceholder")}
           onChange={(e) => setLocal({ ...local, item_name: e.target.value })}
           onBlur={() => {
-            if (local.item_name !== item.item_name) commit({ item_name: local.item_name });
+            if (local.item_name !== item.item_name)
+              commit({ item_name: local.item_name });
           }}
           className="h-9"
         />
@@ -769,9 +872,12 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
           min={1}
           aria-label={t("kitchen.quantity")}
           value={local.quantity}
-          onChange={(e) => setLocal({ ...local, quantity: parseInt(e.target.value) || 1 })}
+          onChange={(e) =>
+            setLocal({ ...local, quantity: parseInt(e.target.value) || 1 })
+          }
           onBlur={() => {
-            if (local.quantity !== item.quantity) commit({ quantity: local.quantity });
+            if (local.quantity !== item.quantity)
+              commit({ quantity: local.quantity });
           }}
           className="h-9"
         />
@@ -817,8 +923,12 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="received">{t("kitchen.status.received")}</SelectItem>
-            <SelectItem value="preparing">{t("kitchen.status.preparing")}</SelectItem>
+            <SelectItem value="received">
+              {t("kitchen.status.received")}
+            </SelectItem>
+            <SelectItem value="preparing">
+              {t("kitchen.status.preparing")}
+            </SelectItem>
             <SelectItem value="ready">{t("kitchen.status.ready")}</SelectItem>
             <SelectItem value="served">{t("kitchen.status.served")}</SelectItem>
           </SelectContent>
@@ -837,7 +947,8 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
           onChange={(e) =>
             setLocal({
               ...local,
-              unit_price_eur: e.target.value === "" ? null : parseFloat(e.target.value),
+              unit_price_eur:
+                e.target.value === "" ? null : parseFloat(e.target.value),
             })
           }
           onBlur={() => {

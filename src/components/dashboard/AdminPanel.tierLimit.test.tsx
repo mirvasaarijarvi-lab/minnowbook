@@ -34,7 +34,14 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, within, act, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  within,
+  act,
+  cleanup,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -44,9 +51,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // and racing with the next test's render in the same worker, which surfaced
 // as intermittent "5 staff users" toast misses on full-suite runs.
 vi.mock("@/lib/password-validation", async () => {
-  const actual = await vi.importActual<typeof import("@/lib/password-validation")>(
-    "@/lib/password-validation",
-  );
+  const actual = await vi.importActual<
+    typeof import("@/lib/password-validation")
+  >("@/lib/password-validation");
   return {
     ...actual,
     checkPasswordBreach: vi.fn(async () => ({ isBreached: false, count: 0 })),
@@ -122,7 +129,9 @@ vi.mock("@/integrations/supabase/client", () => {
     chain.select = vi.fn(() => chain);
     chain.eq = vi.fn(() => chain);
     chain.order = vi.fn(() => Promise.resolve({ data: [], error: null }));
-    chain.maybeSingle = vi.fn(() => Promise.resolve({ data: null, error: null }));
+    chain.maybeSingle = vi.fn(() =>
+      Promise.resolve({ data: null, error: null }),
+    );
     chain.then = (resolve: (v: any) => void) =>
       resolve({ data: [], error: null });
     return chain;
@@ -279,7 +288,10 @@ describe("AdminPanel: tier-limit enforcement (Basic = 5 staff users)", () => {
 
     let lastToasts: any[] = [];
     const client = new QueryClient({
-      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+      defaultOptions: {
+        queries: { retry: false },
+        mutations: { retry: false },
+      },
     });
 
     render(
@@ -328,8 +340,10 @@ describe("AdminPanel: tier-limit enforcement (Basic = 5 staff users)", () => {
           /Add User/i.test(b.textContent ?? "") &&
           !(b as HTMLButtonElement).disabled,
       );
-    expect(submit, "submit button should be enabled once the form is valid")
-      .toBeTruthy();
+    expect(
+      submit,
+      "submit button should be enabled once the form is valid",
+    ).toBeTruthy();
 
     await act(async () => {
       await user.click(submit!);
@@ -374,9 +388,7 @@ describe("AdminPanel: tier-limit enforcement (Basic = 5 staff users)", () => {
       // Defensive: the raw DB message must NOT leak through unchanged.
       expect(tierToast.description).not.toBe(triggerMessage);
       // And it must NOT collapse into the generic "unexpected error" copy.
-      expect(tierToast.description).not.toMatch(
-        /unexpected error/i,
-      );
+      expect(tierToast.description).not.toMatch(/unexpected error/i);
     });
   });
 });

@@ -50,7 +50,10 @@ test.describe("Repeated identical booking submissions", () => {
     !(process.env.SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY),
     "Set SERVICE_ROLE_KEY to run this spec.",
   );
-  test.skip(!SUPABASE_ANON_KEY, "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.");
+  test.skip(
+    !SUPABASE_ANON_KEY,
+    "Set VITE_SUPABASE_PUBLISHABLE_KEY to run this spec.",
+  );
 
   test("produce identical totals and report figures without double-charging", async ({
     ephemeralTenant,
@@ -130,7 +133,10 @@ test.describe("Repeated identical booking submissions", () => {
         date: isoDate(70 + i * 10),
         check_out_date: isoDate(70 + i * 10 + NIGHTS),
       });
-      expect(res.status(), `submission ${i + 1} failed: ${await res.text()}`).toBe(200);
+      expect(
+        res.status(),
+        `submission ${i + 1} failed: ${await res.text()}`,
+      ).toBe(200);
     }
 
     // 3. Every stored booking is priced identically: no accumulation, no
@@ -150,7 +156,9 @@ test.describe("Repeated identical booking submissions", () => {
       expect(Number(row.original_price_eur)).toBe(GROSS_EUR);
       expect(Number(row.price_eur)).toBe(FINAL_EUR);
       // The discount is applied once per booking, never compounded.
-      expect(Number(row.price_eur)).not.toBe(roundCents(FINAL_EUR * (1 - PERCENT_OFF / 100)));
+      expect(Number(row.price_eur)).not.toBe(
+        roundCents(FINAL_EUR * (1 - PERCENT_OFF / 100)),
+      );
       expect(row.discount_type).toBe("percentage");
       expect(Number(row.discount_value)).toBe(PERCENT_OFF);
       expect(row.discount_code_id).toBe(code!.id);

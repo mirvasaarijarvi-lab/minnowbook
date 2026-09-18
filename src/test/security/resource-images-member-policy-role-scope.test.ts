@@ -32,13 +32,16 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
-  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ?? process.env.SUPABASE_URL;
+  (import.meta.env?.VITE_SUPABASE_URL as string | undefined) ??
+  process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY =
   (import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ??
   process.env.SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const canRun = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
+const canRun = Boolean(
+  SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY,
+);
 
 const newService = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!, {
@@ -95,13 +98,16 @@ describe.runIf(canRun)(
       ): Promise<{ id: string; client: SupabaseClient | null }> {
         const email = `ci-resimg-${prefix}+${stamp}-${rand}@example.invalid`;
         const password = `Pw!${rand}${stamp}${rand}`;
-        const { data: created, error: createErr } = await service.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true,
-        });
+        const { data: created, error: createErr } =
+          await service.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+          });
         if (createErr || !created?.user) {
-          throw createErr ?? new Error(`auth user creation failed for ${prefix}`);
+          throw (
+            createErr ?? new Error(`auth user creation failed for ${prefix}`)
+          );
         }
         if (!signIn) return { id: created.user.id, client: null };
         const client = newAnon();
@@ -133,7 +139,8 @@ describe.runIf(canRun)(
         })
         .select("id")
         .single();
-      if (tenantErr || !tenant) throw tenantErr ?? new Error("tenant insert returned no row");
+      if (tenantErr || !tenant)
+        throw tenantErr ?? new Error("tenant insert returned no row");
       const tenantId = tenant.id as string;
 
       async function seedOne(
@@ -152,7 +159,8 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (resErr || !res) throw resErr ?? new Error(`resource insert failed for ${label}`);
+        if (resErr || !res)
+          throw resErr ?? new Error(`resource insert failed for ${label}`);
 
         const imageUrl = `https://example.invalid/${label}-${stamp}.jpg`;
         const { data: img, error: imgErr } = await service
@@ -165,9 +173,14 @@ describe.runIf(canRun)(
           })
           .select("id")
           .single();
-        if (imgErr || !img) throw imgErr ?? new Error(`image insert failed for ${label}`);
+        if (imgErr || !img)
+          throw imgErr ?? new Error(`image insert failed for ${label}`);
 
-        return { imageId: img.id as string, resourceId: res.id as string, imageUrl };
+        return {
+          imageId: img.id as string,
+          resourceId: res.id as string,
+          imageUrl,
+        };
       }
 
       const hidden = await seedOne("hidden", false, "pending");
@@ -206,10 +219,15 @@ describe.runIf(canRun)(
         .from("resources")
         .delete()
         .in("id", [seeded.hidden.resourceId, seeded.visible.resourceId]);
-      await service.from("tenant_users").delete().eq("tenant_id", seeded.tenantId);
+      await service
+        .from("tenant_users")
+        .delete()
+        .eq("tenant_id", seeded.tenantId);
       await service.from("tenants").delete().eq("id", seeded.tenantId);
       await service.auth.admin.deleteUser(seeded.memberUserId).catch(() => {});
-      await service.auth.admin.deleteUser(seeded.outsiderUserId).catch(() => {});
+      await service.auth.admin
+        .deleteUser(seeded.outsiderUserId)
+        .catch(() => {});
       await service.auth.admin.deleteUser(seeded.ownerUserId).catch(() => {});
     }, 90_000);
 
@@ -232,7 +250,9 @@ describe.runIf(canRun)(
         .eq("tenant_id", seeded.tenantId);
       expect(error).toBeNull();
       const ids = (data ?? []).map((r) => r.id).sort();
-      expect(ids).toEqual([seeded.hidden.imageId, seeded.visible.imageId].sort());
+      expect(ids).toEqual(
+        [seeded.hidden.imageId, seeded.visible.imageId].sort(),
+      );
     });
 
     it("anon does NOT see the hidden image (member policy no longer applies to anon)", async () => {

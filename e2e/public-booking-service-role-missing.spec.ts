@@ -17,8 +17,16 @@
  * fallback that writes to the table directly from the client would fail
  * this spec immediately.
  */
-import { test, expect, SUPABASE_URL, TEST_TENANT } from "./fixtures/test-tenant";
-import { gotoAndWaitForSpa, assertPublicBookingReady } from "./fixtures/spa-waits";
+import {
+  test,
+  expect,
+  SUPABASE_URL,
+  TEST_TENANT,
+} from "./fixtures/test-tenant";
+import {
+  gotoAndWaitForSpa,
+  assertPublicBookingReady,
+} from "./fixtures/spa-waits";
 import { BOOKING_ERROR_CODES } from "../supabase/functions/_shared/booking-error-codes";
 
 const PUBLIC_BOOKING_URL_RE = /\/functions\/v1\/public-booking(\?|$)/;
@@ -31,17 +39,25 @@ const SAFE_MESSAGES = {
 };
 
 test.describe("public-booking: SUPABASE_SERVICE_ROLE_KEY missing", () => {
-  test("UI shows a safe error and writes no reservation row", async ({ page }) => {
+  test("UI shows a safe error and writes no reservation row", async ({
+    page,
+  }) => {
     // Track every public-booking invocation and reservations REST call so we
     // can assert exactly-one invoke, zero direct DB writes, and inspect the
     // body the page sent.
-    const publicBookingHits: Array<{ method: string; postData: string | null }> = [];
+    const publicBookingHits: Array<{
+      method: string;
+      postData: string | null;
+    }> = [];
     const reservationsWriteHits: Array<{ method: string; url: string }> = [];
 
     page.on("request", (req) => {
       const url = req.url();
       if (PUBLIC_BOOKING_URL_RE.test(url)) {
-        publicBookingHits.push({ method: req.method(), postData: req.postData() });
+        publicBookingHits.push({
+          method: req.method(),
+          postData: req.postData(),
+        });
       }
       if (RESERVATIONS_REST_RE.test(url)) {
         const m = req.method().toUpperCase();

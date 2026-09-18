@@ -41,7 +41,8 @@ export const WRITE_DENIAL_MATRIX: WriteDenialCase[] = [
     kind: "insert",
     operation: "INSERT",
     table: "reservations",
-    attemptedQuery: "from('reservations').insert({ tenant_id: TARGET, ... }).select()",
+    attemptedQuery:
+      "from('reservations').insert({ tenant_id: TARGET, ... }).select()",
     unfiltered: false,
     leakedRows: [leaked({ guest_name: "Foreign Guest" })],
     scenario: "denied user inserts into another tenant",
@@ -51,7 +52,8 @@ export const WRITE_DENIAL_MATRIX: WriteDenialCase[] = [
     kind: "insert",
     operation: "INSERT",
     table: "reservations",
-    attemptedQuery: "from('reservations').insert({ guest_name: '...' }).select()",
+    attemptedQuery:
+      "from('reservations').insert({ guest_name: '...' }).select()",
     unfiltered: true,
     leakedRows: [leaked()],
   },
@@ -90,9 +92,13 @@ export const WRITE_DENIAL_MATRIX: WriteDenialCase[] = [
     kind: "update",
     operation: "UPDATE",
     table: "reservations",
-    attemptedQuery: "from('reservations').update({ status: 'cancelled' }).neq('id', ZERO).select()",
+    attemptedQuery:
+      "from('reservations').update({ status: 'cancelled' }).neq('id', ZERO).select()",
     unfiltered: true,
-    leakedRows: [leaked({ status: "cancelled" }), leaked({ status: "cancelled" })],
+    leakedRows: [
+      leaked({ status: "cancelled" }),
+      leaked({ status: "cancelled" }),
+    ],
     scenario: "denied user runs an unfiltered UPDATE",
   },
   {
@@ -130,7 +136,8 @@ export const WRITE_DENIAL_MATRIX: WriteDenialCase[] = [
     kind: "upsert",
     operation: "INSERT",
     table: "resources",
-    attemptedQuery: "from('resources').upsert({ id: FOREIGN_ID, tenant_id: TARGET }).select()",
+    attemptedQuery:
+      "from('resources').upsert({ id: FOREIGN_ID, tenant_id: TARGET }).select()",
     unfiltered: false,
     leakedRows: [leaked({ name: "Foreign Sauna" })],
   },
@@ -139,7 +146,8 @@ export const WRITE_DENIAL_MATRIX: WriteDenialCase[] = [
     kind: "upsert",
     operation: "INSERT",
     table: "resources",
-    attemptedQuery: "from('resources').upsert([{ id: FOREIGN_ID }, { id: OWN_ID }]).select()",
+    attemptedQuery:
+      "from('resources').upsert([{ id: FOREIGN_ID }, { id: OWN_ID }]).select()",
     unfiltered: true,
     leakedRows: [leaked()],
   },
@@ -148,7 +156,8 @@ export const WRITE_DENIAL_MATRIX: WriteDenialCase[] = [
     kind: "delete",
     operation: "DELETE",
     table: "reservations",
-    attemptedQuery: "from('reservations').delete().eq('id', FOREIGN_ID).select()",
+    attemptedQuery:
+      "from('reservations').delete().eq('id', FOREIGN_ID).select()",
     unfiltered: false,
     leakedRows: [leaked()],
   },
@@ -167,7 +176,8 @@ export const WRITE_DENIAL_MATRIX: WriteDenialCase[] = [
     kind: "delete",
     operation: "DELETE",
     table: "booking_tokens",
-    attemptedQuery: "from('booking_tokens').delete().eq('token', FOREIGN_TOKEN).select()",
+    attemptedQuery:
+      "from('booking_tokens').delete().eq('token', FOREIGN_TOKEN).select()",
     unfiltered: true,
     leakedRows: [leaked({ token: "tok_foreign" })],
   },
@@ -176,7 +186,8 @@ export const WRITE_DENIAL_MATRIX: WriteDenialCase[] = [
     kind: "delete",
     operation: "DELETE",
     table: "audit_log",
-    attemptedQuery: "from('audit_log').delete().eq('tenant_id', TARGET).select()",
+    attemptedQuery:
+      "from('audit_log').delete().eq('tenant_id', TARGET).select()",
     unfiltered: false,
     leakedRows: [leaked()],
   },
@@ -185,7 +196,8 @@ export const WRITE_DENIAL_MATRIX: WriteDenialCase[] = [
     kind: "rpc",
     operation: "UPDATE",
     table: "claim_discount_code",
-    attemptedQuery: "rpc('claim_discount_code', { tenant_id: TARGET, code: 'X' })",
+    attemptedQuery:
+      "rpc('claim_discount_code', { tenant_id: TARGET, code: 'X' })",
     unfiltered: false,
     leakedRows: [leaked({ used_count: 1 })],
   },

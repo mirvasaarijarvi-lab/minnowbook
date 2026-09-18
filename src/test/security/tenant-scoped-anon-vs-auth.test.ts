@@ -61,7 +61,7 @@ beforeAll(() => {
 /** Strong denial signal for SELECT: explicit error OR zero rows returned. */
 function expectReadDeniedOrEmpty(
   result: { data: unknown; error: unknown },
-  ctx: string
+  ctx: string,
 ) {
   const { data, error } = result as {
     data: unknown[] | null;
@@ -74,7 +74,7 @@ function expectReadDeniedOrEmpty(
   expect(Array.isArray(data), `${ctx}: data must be an array`).toBe(true);
   expect(
     (data ?? []).length,
-    `${ctx}: anon must not receive rows (got ${(data ?? []).length})`
+    `${ctx}: anon must not receive rows (got ${(data ?? []).length})`,
   ).toBe(0);
 }
 
@@ -84,14 +84,14 @@ function expectReadDeniedOrEmpty(
  */
 function expectInsertDenied(
   result: { data: unknown; error: { message?: string } | null },
-  ctx: string
+  ctx: string,
 ) {
   const { data, error } = result;
   expect(error, `${ctx}: anon INSERT must produce an error`).toBeTruthy();
   if (Array.isArray(data)) {
     expect(
       data.length,
-      `${ctx}: anon INSERT must not return persisted rows`
+      `${ctx}: anon INSERT must not return persisted rows`,
     ).toBe(0);
   }
 }
@@ -108,7 +108,9 @@ async function rowCountAnon(table: string, tenantId: string): Promise<number> {
     .select("id", { count: "exact", head: true })
     .eq("tenant_id", tenantId);
   if (error) {
-    throw new Error(`Failed to read ${table} count for ${tenantId}: ${error.message}`);
+    throw new Error(
+      `Failed to read ${table} count for ${tenantId}: ${error.message}`,
+    );
   }
   return count ?? 0;
 }
@@ -174,7 +176,9 @@ d("tenant_opening_hours — anon read for active tenants only, no writes", () =>
       .update({ is_closed: true } as never)
       .eq("tenant_id", LIVE_TENANT_ID);
     const after = await rowCountAnon("tenant_opening_hours", LIVE_TENANT_ID);
-    expect(after, "tenant_opening_hours rows must not be deleted by anon").toBe(before);
+    expect(after, "tenant_opening_hours rows must not be deleted by anon").toBe(
+      before,
+    );
     // Spot-check: the row should still report is_closed=false (or its
     // original value, which we didn't capture). What we CAN assert is that
     // there is no row where the anon-attempted UPDATE took effect with the
@@ -190,7 +194,9 @@ d("tenant_opening_hours — anon read for active tenants only, no writes", () =>
       .delete()
       .eq("tenant_id", LIVE_TENANT_ID);
     const after = await rowCountAnon("tenant_opening_hours", LIVE_TENANT_ID);
-    expect(after, "tenant_opening_hours rows must not be deleted by anon").toBe(before);
+    expect(after, "tenant_opening_hours rows must not be deleted by anon").toBe(
+      before,
+    );
   });
 });
 
@@ -220,59 +226,81 @@ d("blocked_slots — anon read for active tenants only, no writes", () => {
       .update({ reason: "tampered" } as never)
       .eq("tenant_id", LIVE_TENANT_ID);
     const after = await rowCountAnon("blocked_slots", LIVE_TENANT_ID);
-    expect(after, "blocked_slots rows must not change due to anon").toBe(before);
+    expect(after, "blocked_slots rows must not change due to anon").toBe(
+      before,
+    );
   });
 
   it("anon DELETE leaves the live tenant's row count unchanged", async () => {
     const before = await rowCountAnon("blocked_slots", LIVE_TENANT_ID);
-    await anon
-      .from("blocked_slots")
-      .delete()
-      .eq("tenant_id", LIVE_TENANT_ID);
+    await anon.from("blocked_slots").delete().eq("tenant_id", LIVE_TENANT_ID);
     const after = await rowCountAnon("blocked_slots", LIVE_TENANT_ID);
-    expect(after, "blocked_slots rows must not be deleted by anon").toBe(before);
+    expect(after, "blocked_slots rows must not be deleted by anon").toBe(
+      before,
+    );
   });
 });
 
-d("recurring_blocked_slots — anon read for active tenants only, no writes", () => {
-  it("anon SELECT is permitted by policy and does not error on auth", async () => {
-    const { error } = await anon
-      .from("recurring_blocked_slots")
-      .select("id,tenant_id,day_of_week,start_time,end_time")
-      .limit(10);
-    expect(error?.message ?? "").not.toMatch(/permission denied|JWT/i);
-  });
+d(
+  "recurring_blocked_slots — anon read for active tenants only, no writes",
+  () => {
+    it("anon SELECT is permitted by policy and does not error on auth", async () => {
+      const { error } = await anon
+        .from("recurring_blocked_slots")
+        .select("id,tenant_id,day_of_week,start_time,end_time")
+        .limit(10);
+      expect(error?.message ?? "").not.toMatch(/permission denied|JWT/i);
+    });
 
-  it("anon INSERT into recurring_blocked_slots is denied", async () => {
-    const result = await anon.from("recurring_blocked_slots").insert({
-      tenant_id: PROBE_TENANT_ID,
-      resource_type: "restaurant",
-      day_of_week: 2,
-      reason: "anon-injection",
-    } as never);
-    expectInsertDenied(result, "recurring_blocked_slots insert");
-  });
+    it("anon INSERT into recurring_blocked_slots is denied", async () => {
+      const result = await anon.from("recurring_blocked_slots").insert({
+        tenant_id: PROBE_TENANT_ID,
+        resource_type: "restaurant",
+        day_of_week: 2,
+        reason: "anon-injection",
+      } as never);
+      expectInsertDenied(result, "recurring_blocked_slots insert");
+    });
 
-  it("anon UPDATE leaves the live tenant's row count unchanged", async () => {
-    const before = await rowCountAnon("recurring_blocked_slots", LIVE_TENANT_ID);
-    await anon
-      .from("recurring_blocked_slots")
-      .update({ is_active: false } as never)
-      .eq("tenant_id", LIVE_TENANT_ID);
-    const after = await rowCountAnon("recurring_blocked_slots", LIVE_TENANT_ID);
-    expect(after, "recurring_blocked_slots rows must not change due to anon").toBe(before);
-  });
+    it("anon UPDATE leaves the live tenant's row count unchanged", async () => {
+      const before = await rowCountAnon(
+        "recurring_blocked_slots",
+        LIVE_TENANT_ID,
+      );
+      await anon
+        .from("recurring_blocked_slots")
+        .update({ is_active: false } as never)
+        .eq("tenant_id", LIVE_TENANT_ID);
+      const after = await rowCountAnon(
+        "recurring_blocked_slots",
+        LIVE_TENANT_ID,
+      );
+      expect(
+        after,
+        "recurring_blocked_slots rows must not change due to anon",
+      ).toBe(before);
+    });
 
-  it("anon DELETE leaves the live tenant's row count unchanged", async () => {
-    const before = await rowCountAnon("recurring_blocked_slots", LIVE_TENANT_ID);
-    await anon
-      .from("recurring_blocked_slots")
-      .delete()
-      .eq("tenant_id", LIVE_TENANT_ID);
-    const after = await rowCountAnon("recurring_blocked_slots", LIVE_TENANT_ID);
-    expect(after, "recurring_blocked_slots rows must not be deleted by anon").toBe(before);
-  });
-});
+    it("anon DELETE leaves the live tenant's row count unchanged", async () => {
+      const before = await rowCountAnon(
+        "recurring_blocked_slots",
+        LIVE_TENANT_ID,
+      );
+      await anon
+        .from("recurring_blocked_slots")
+        .delete()
+        .eq("tenant_id", LIVE_TENANT_ID);
+      const after = await rowCountAnon(
+        "recurring_blocked_slots",
+        LIVE_TENANT_ID,
+      );
+      expect(
+        after,
+        "recurring_blocked_slots rows must not be deleted by anon",
+      ).toBe(before);
+    });
+  },
+);
 
 d("resource_images — anon read public, no writes", () => {
   it("anon SELECT does not error (public-read policy is intentional)", async () => {
@@ -300,17 +328,18 @@ d("resource_images — anon read public, no writes", () => {
       .update({ image_url: "https://evil.example.com/x.png" } as never)
       .eq("tenant_id", LIVE_TENANT_ID);
     const after = await rowCountAnon("resource_images", LIVE_TENANT_ID);
-    expect(after, "resource_images rows must not change due to anon").toBe(before);
+    expect(after, "resource_images rows must not change due to anon").toBe(
+      before,
+    );
   });
 
   it("anon DELETE leaves the live tenant's row count unchanged", async () => {
     const before = await rowCountAnon("resource_images", LIVE_TENANT_ID);
-    await anon
-      .from("resource_images")
-      .delete()
-      .eq("tenant_id", LIVE_TENANT_ID);
+    await anon.from("resource_images").delete().eq("tenant_id", LIVE_TENANT_ID);
     const after = await rowCountAnon("resource_images", LIVE_TENANT_ID);
-    expect(after, "resource_images rows must not be deleted by anon").toBe(before);
+    expect(after, "resource_images rows must not be deleted by anon").toBe(
+      before,
+    );
   });
 });
 

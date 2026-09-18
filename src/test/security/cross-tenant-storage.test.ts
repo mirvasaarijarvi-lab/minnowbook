@@ -31,23 +31,33 @@ function parseTimeoutMs(value: string | undefined, fallback: number) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
-const STORAGE_FETCH_TIMEOUT_MS = parseTimeoutMs(process.env.RLS_STORAGE_FETCH_TIMEOUT_MS, 15_000);
+const STORAGE_FETCH_TIMEOUT_MS = parseTimeoutMs(
+  process.env.RLS_STORAGE_FETCH_TIMEOUT_MS,
+  15_000,
+);
 const timeoutFetch: typeof fetch = async (input, init?: RequestInit) => {
   const requestInit = init ?? {};
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), STORAGE_FETCH_TIMEOUT_MS);
+  const timeout = setTimeout(
+    () => controller.abort(),
+    STORAGE_FETCH_TIMEOUT_MS,
+  );
   const upstreamSignal = requestInit.signal;
   if (upstreamSignal?.aborted) {
     controller.abort();
   } else {
-    upstreamSignal?.addEventListener("abort", () => controller.abort(), { once: true });
+    upstreamSignal?.addEventListener("abort", () => controller.abort(), {
+      once: true,
+    });
   }
 
   try {
     return await fetch(input, { ...requestInit, signal: controller.signal });
   } catch (err) {
     if (controller.signal.aborted && !upstreamSignal?.aborted) {
-      throw new Error(`Storage fetch timed out after ${STORAGE_FETCH_TIMEOUT_MS}ms`);
+      throw new Error(
+        `Storage fetch timed out after ${STORAGE_FETCH_TIMEOUT_MS}ms`,
+      );
     }
     throw err;
   } finally {
@@ -56,14 +66,18 @@ const timeoutFetch: typeof fetch = async (input, init?: RequestInit) => {
 };
 const adminClient: SupabaseClient | null =
   SERVICE_ROLE_KEY && import.meta.env.VITE_SUPABASE_URL
-    ? createClient(import.meta.env.VITE_SUPABASE_URL as string, SERVICE_ROLE_KEY, {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-          storageKey: nextAuthStorageKey("admin"),
+    ? createClient(
+        import.meta.env.VITE_SUPABASE_URL as string,
+        SERVICE_ROLE_KEY,
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            storageKey: nextAuthStorageKey("admin"),
+          },
+          global: { fetch: timeoutFetch },
         },
-        global: { fetch: timeoutFetch },
-      })
+      )
     : null;
 
 /**
@@ -91,10 +105,16 @@ const adminClient: SupabaseClient | null =
  * with the sweep disabled would always fail and would obscure the
  * RLS-comparison signal we're trying to capture.
  */
-const MULTIPART_SWEEP_RAW = (process.env.RLS_MULTIPART_SWEEP ?? "").trim().toLowerCase();
-const MULTIPART_SWEEP_ENABLED = !["off", "0", "false", "disabled", "no"].includes(
-  MULTIPART_SWEEP_RAW,
-);
+const MULTIPART_SWEEP_RAW = (process.env.RLS_MULTIPART_SWEEP ?? "")
+  .trim()
+  .toLowerCase();
+const MULTIPART_SWEEP_ENABLED = ![
+  "off",
+  "0",
+  "false",
+  "disabled",
+  "no",
+].includes(MULTIPART_SWEEP_RAW);
 const isUnsupportedStorageSchemaError = (message: string) =>
   /Invalid schema:\s*storage|schema .*storage.*does not exist|relation .*s3_multipart_uploads.*does not exist/i.test(
     message,
@@ -102,7 +122,7 @@ const isUnsupportedStorageSchemaError = (message: string) =>
 if (!MULTIPART_SWEEP_ENABLED) {
   // Single startup banner so it's obvious in CI logs which mode the run
   // is in. Printed once, regardless of how many describe blocks run.
-  // eslint-disable-next-line no-console
+
   console.log(
     `[cross-tenant-storage] RLS_MULTIPART_SWEEP=${process.env.RLS_MULTIPART_SWEEP} ` +
       `→ multipart sweep DISABLED for this run (compare-mode)`,
@@ -157,13 +177,21 @@ async function safeRemove(
   client: SupabaseClient,
   bucket: string,
   path: string,
-): Promise<{ removed: boolean; timedOut: boolean; errorMessage: string | null }> {
+): Promise<{
+  removed: boolean;
+  timedOut: boolean;
+  errorMessage: string | null;
+}> {
   try {
     const result = await withTimeout(() =>
       client.storage.from(bucket).remove([path]),
     );
     if (result === TEARDOWN_TIMEOUT_SENTINEL) {
-      return { removed: false, timedOut: true, errorMessage: "teardown-timeout" };
+      return {
+        removed: false,
+        timedOut: true,
+        errorMessage: "teardown-timeout",
+      };
     }
     const removed =
       !result.error && Array.isArray(result.data) && result.data.length > 0;
@@ -218,7 +246,7 @@ async function teardownAttemptPaths(
           removed,
           note: timedOut
             ? "timed out — handed off to admin sweep"
-            : errorMessage ?? undefined,
+            : (errorMessage ?? undefined),
         });
       }
     }
@@ -249,7 +277,7 @@ async function teardownOwnedPaths(
         removed,
         note: timedOut
           ? "timed out — handed off to admin sweep"
-          : errorMessage ?? "remove returned no rows",
+          : (errorMessage ?? "remove returned no rows"),
       });
     }
   }
@@ -294,7 +322,9 @@ async function sweepRunIdFolder(
   // Storage's `list()` is non-recursive, so we walk depth-first.
   // Each list() call is wrapped in withTimeout — a hung page never blocks
   // the rest of the sweep (we just abandon that subtree and move on).
-  const collect = async (root: string): Promise<{ paths: string[]; timedOut: boolean }> => {
+  const collect = async (
+    root: string,
+  ): Promise<{ paths: string[]; timedOut: boolean }> => {
     const out: string[] = [];
     let anyTimeout = false;
     const stack: string[] = [root];
@@ -302,10 +332,11 @@ async function sweepRunIdFolder(
       const dir = stack.pop()!;
       let offset = 0;
       const pageSize = 100;
-      // eslint-disable-next-line no-constant-condition
+
       while (true) {
         const result = await withTimeout(
-          () => client.storage.from(bucket).list(dir, { limit: pageSize, offset }),
+          () =>
+            client.storage.from(bucket).list(dir, { limit: pageSize, offset }),
           SWEEP_OP_TIMEOUT_MS,
         );
         if (result === TEARDOWN_TIMEOUT_SENTINEL) {
@@ -507,7 +538,10 @@ async function sweepRunIdFolder(
  * `{tenantId}/__rls_test__/` and only those tagged with RUN_ID, so a bug
  * here can never delete a real tenant's in-flight upload.
  */
-async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) {
+async function sweepMultipartIntermediates(
+  bucket: string,
+  tenantIds: string[],
+) {
   if (!adminClient) return;
 
   // Honour the per-run kill switch BEFORE doing any DB work. We still
@@ -523,7 +557,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
         note: `SKIPPED: RLS_MULTIPART_SWEEP=${process.env.RLS_MULTIPART_SWEEP ?? ""} (compare-mode)`,
       });
     }
-    // eslint-disable-next-line no-console
+
     console.log(
       `[multipart-sweep] bucket="${bucket}" SKIPPED for ${tenantIds.length} tenant(s) ` +
         `— RLS_MULTIPART_SWEEP is off`,
@@ -578,7 +612,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       // these tests against a shared database.
       const { data: orphans, error: selectErr } = await adminClient
         .schema("storage")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         .from("s3_multipart_uploads" as any)
         .select("id, key")
         .eq("bucket_id", bucket)
@@ -632,7 +666,8 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       // doesn't match `{tenantId}/__rls_test__/...{RUN_ID}...`.
       const expectedPrefix = `${tenantId}/__rls_test__/`;
       const unexpected = orphanRows.filter(
-        (row) => !row.key.startsWith(expectedPrefix) || !row.key.includes(RUN_ID),
+        (row) =>
+          !row.key.startsWith(expectedPrefix) || !row.key.includes(RUN_ID),
       );
       if (unexpected.length > 0) {
         // Ledger every offending row before throwing so the PDF captures
@@ -665,12 +700,14 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
         // per-tenant "parts deleted" figure for the summary line.
         const { data: deletedParts } = await adminClient
           .schema("storage")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           .from("s3_multipart_uploads_parts" as any)
           .delete()
           .in("upload_id", ids)
           .select("id");
-        const deletedCount = Array.isArray(deletedParts) ? deletedParts.length : 0;
+        const deletedCount = Array.isArray(deletedParts)
+          ? deletedParts.length
+          : 0;
         if (deletedCount > 0) bumpStats(tenantId, "partsDeleted", deletedCount);
       } catch {
         /* ignore — parts table may not exist on this version */
@@ -679,7 +716,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
       try {
         const { error: delErr } = await adminClient
           .schema("storage")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           .from("s3_multipart_uploads" as any)
           .delete()
           .in("id", ids);
@@ -744,7 +781,7 @@ async function sweepMultipartIntermediates(bucket: string, tenantIds: string[]) 
   // actual storage key during PDF rendering or grep-based audits.
   for (const [tenantId, stats] of statsByTenant) {
     const shortTid = tenantId.slice(0, 8);
-    // eslint-disable-next-line no-console
+
     console.log(
       `[multipart-sweep] bucket="${bucket}" tenant=${shortTid} ` +
         `orphans_found=${stats.orphansFound} ` +
@@ -851,7 +888,10 @@ async function cleanupPreflight(opts: {
     } else {
       // Single-tenant cleanup (anon synthetic): just confirm UUID shape.
       const id = (tenantIds[0] ?? "").trim();
-      const ok = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      const ok =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+          id,
+        );
       if (!ok) {
         throw new Error(
           `Cleanup preflight: tenant id "${id}" is not a valid UUID — refusing to sweep.`,
@@ -884,7 +924,7 @@ async function cleanupPreflight(opts: {
         note: `cleanup-preflight skipped scope="${scope}": ${reason}`,
       });
     }
-    // eslint-disable-next-line no-console
+
     console.warn(
       `[cross-tenant-storage] cleanup preflight FAILED for "${scope}" — ` +
         `skipping deletions to avoid touching the wrong folder.\n  reason: ${reason}`,
@@ -929,7 +969,8 @@ async function cleanupPreflight(opts: {
  */
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
+  string | undefined;
 
 const PRIVATE_BUCKET = "tenant-private";
 const ASSETS_BUCKET = "tenant-assets";
@@ -951,11 +992,11 @@ const liveCreds = {
 
 const liveModeEnabled = Boolean(
   liveCreds.a.email &&
-    liveCreds.a.password &&
-    liveCreds.a.tenantId &&
-    liveCreds.b.email &&
-    liveCreds.b.password &&
-    liveCreds.b.tenantId,
+  liveCreds.a.password &&
+  liveCreds.a.tenantId &&
+  liveCreds.b.email &&
+  liveCreds.b.password &&
+  liveCreds.b.tenantId,
 );
 
 const newAnonClient = (): SupabaseClient =>
@@ -983,7 +1024,8 @@ const STORAGE_DENIAL_CALL_TIMEOUT_MS = parseTimeoutMs(
 );
 const STORAGE_ALLOWED_CALL_TIMEOUT_MS = Math.max(
   parseTimeoutMs(
-    process.env.RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS ?? process.env.RLS_STORAGE_CALL_TIMEOUT_MS,
+    process.env.RLS_STORAGE_ALLOWED_CALL_TIMEOUT_MS ??
+      process.env.RLS_STORAGE_CALL_TIMEOUT_MS,
     15_000,
   ),
   STORAGE_DENIAL_CALL_TIMEOUT_MS,
@@ -999,7 +1041,10 @@ async function storageCall<T>(
 ): Promise<TimedStorageResult<T>> {
   const result = await withTimeout(op, ms);
   if (result === TEARDOWN_TIMEOUT_SENTINEL) {
-    return { data: null, error: new Error(`${label} timed out after ${ms}ms`) } as TimedStorageResult<T>;
+    return {
+      data: null,
+      error: new Error(`${label} timed out after ${ms}ms`),
+    } as TimedStorageResult<T>;
   }
   return result as TimedStorageResult<T>;
 }
@@ -1024,11 +1069,17 @@ const allowedStorageCall = async <T>(
   for (let attempt = 1; attempt <= STORAGE_ALLOWED_RETRY_ATTEMPTS; attempt++) {
     const attemptLabel =
       attempt === 1 ? label : `${label} (retry ${attempt - 1})`;
-    const result = await storageCall(op, attemptLabel, STORAGE_ALLOWED_CALL_TIMEOUT_MS);
+    const result = await storageCall(
+      op,
+      attemptLabel,
+      STORAGE_ALLOWED_CALL_TIMEOUT_MS,
+    );
     lastResult = result;
     const err = (result as { error?: { message?: string } | null }).error;
     const timedOut =
-      err && typeof err.message === "string" && err.message.includes("timed out after");
+      err &&
+      typeof err.message === "string" &&
+      err.message.includes("timed out after");
     if (!timedOut) return result;
     if (attempt < STORAGE_ALLOWED_RETRY_ATTEMPTS) {
       await new Promise((r) => setTimeout(r, 500 * attempt));
@@ -1092,12 +1143,23 @@ const nestedOwnPathFor = (
     : nestedOwnPath(tenantId, segments, label);
 
 const runRootForBucket = (bucket: string, tenantId: string) =>
-  bucket === "tenant-assets" ? assetsRunRootFor(tenantId) : runRootFor(tenantId);
+  bucket === "tenant-assets"
+    ? assetsRunRootFor(tenantId)
+    : runRootFor(tenantId);
 
 const NESTED_SCENARIOS: Array<{ name: string; segments: string[] }> = [
-  { name: "documents/2026/invoices", segments: ["documents", "2026", "invoices"] },
-  { name: "uploads/avatars/user-123", segments: ["uploads", "avatars", "user-123"] },
-  { name: "exports/q1/reports/pdf", segments: ["exports", "q1", "reports", "pdf"] },
+  {
+    name: "documents/2026/invoices",
+    segments: ["documents", "2026", "invoices"],
+  },
+  {
+    name: "uploads/avatars/user-123",
+    segments: ["uploads", "avatars", "user-123"],
+  },
+  {
+    name: "exports/q1/reports/pdf",
+    segments: ["exports", "q1", "reports", "pdf"],
+  },
 ];
 
 describe("Cross-Tenant Storage RLS Tests", () => {
@@ -1116,168 +1178,179 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     flushLedger();
   });
 
-  describe.runIf(hasSupabaseConfig)("Anonymous client storage enforcement", () => {
-    let anon: SupabaseClient;
-    const fakeTenantId = "00000000-0000-0000-0000-000000000000";
-    const anonPath = ownPath(fakeTenantId, "anon");
+  describe.runIf(hasSupabaseConfig)(
+    "Anonymous client storage enforcement",
+    () => {
+      let anon: SupabaseClient;
+      const fakeTenantId = "00000000-0000-0000-0000-000000000000";
+      const anonPath = ownPath(fakeTenantId, "anon");
 
-    beforeAll(() => {
-      anon = newAnonClient();
-    });
-
-    afterAll(async () => {
-      // The anon attempts SHOULD all be denied, but if a regression let
-      // anything through we want to scrub it before the next CI run. The
-      // admin sweep is a no-op when SUPABASE_SERVICE_ROLE_KEY isn't set.
-      await sweepTestArtifacts(PRIVATE_BUCKET, [fakeTenantId]);
-      await sweepTestArtifacts(ASSETS_BUCKET, [fakeTenantId]);
-    });
-
-    // Upload calls may be denied either via an explicit RLS error response
-    // or by a network-level rejection that surfaces as a hang/timeout in
-    // jsdom. Either way, the file MUST NOT end up in storage. We bound the
-    // attempt with our own timeout and treat timeout-as-denial.
-    const tryUpload = async (bucket: string) => {
-      const result = await Promise.race([
-        anon.storage.from(bucket).upload(anonPath, fileText(`anon-${bucket}`), { upsert: true }),
-        new Promise<{ error: Error; data: null }>((resolve) =>
-          setTimeout(() => resolve({ error: new Error("network-timeout"), data: null }), 4000),
-        ),
-      ]);
-      // Ledger every anon upload attempt so the PDF report shows them
-      // alongside the live cross-tenant attempts. Anon WRITES are always
-      // expected to be denied, so `outcome: "allowed"` would be a leak.
-      const { httpStatus, errorCode } = extractStorageError(result);
-      recordUpload({
-        bucket,
-        path: anonPath,
-        attacker: "anon",
-        owner: "fake-tenant",
-        expected: "denied",
-        outcome: result.error ? "denied" : "allowed",
-        errorMessage: result.error?.message,
-        httpStatus,
-        errorCode,
-        scenario: "anon-upload",
+      beforeAll(() => {
+        anon = newAnonClient();
       });
-      return result;
-    };
 
-    it(
-      "anon cannot upload to tenant-private bucket",
-      async () => {
+      afterAll(async () => {
+        // The anon attempts SHOULD all be denied, but if a regression let
+        // anything through we want to scrub it before the next CI run. The
+        // admin sweep is a no-op when SUPABASE_SERVICE_ROLE_KEY isn't set.
+        await sweepTestArtifacts(PRIVATE_BUCKET, [fakeTenantId]);
+        await sweepTestArtifacts(ASSETS_BUCKET, [fakeTenantId]);
+      });
+
+      // Upload calls may be denied either via an explicit RLS error response
+      // or by a network-level rejection that surfaces as a hang/timeout in
+      // jsdom. Either way, the file MUST NOT end up in storage. We bound the
+      // attempt with our own timeout and treat timeout-as-denial.
+      const tryUpload = async (bucket: string) => {
+        const result = await Promise.race([
+          anon.storage
+            .from(bucket)
+            .upload(anonPath, fileText(`anon-${bucket}`), { upsert: true }),
+          new Promise<{ error: Error; data: null }>((resolve) =>
+            setTimeout(
+              () =>
+                resolve({ error: new Error("network-timeout"), data: null }),
+              4000,
+            ),
+          ),
+        ]);
+        // Ledger every anon upload attempt so the PDF report shows them
+        // alongside the live cross-tenant attempts. Anon WRITES are always
+        // expected to be denied, so `outcome: "allowed"` would be a leak.
+        const { httpStatus, errorCode } = extractStorageError(result);
+        recordUpload({
+          bucket,
+          path: anonPath,
+          attacker: "anon",
+          owner: "fake-tenant",
+          expected: "denied",
+          outcome: result.error ? "denied" : "allowed",
+          errorMessage: result.error?.message,
+          httpStatus,
+          errorCode,
+          scenario: "anon-upload",
+        });
+        return result;
+      };
+
+      it("anon cannot upload to tenant-private bucket", async () => {
         const { error } = await tryUpload(PRIVATE_BUCKET);
         expect(error).toBeTruthy();
-      },
-      15000,
-    );
+      }, 15000);
 
-    it(
-      "anon cannot upload to tenant-assets bucket",
-      async () => {
+      it("anon cannot upload to tenant-assets bucket", async () => {
         const { error } = await tryUpload(ASSETS_BUCKET);
         expect(error).toBeTruthy();
-      },
-      15000,
-    );
+      }, 15000);
 
-    it("anon cannot download from tenant-private bucket", async () => {
-      // Even guessing a path should fail — bucket is private, no SELECT for anon.
-      const { data, error } = await anon.storage.from(PRIVATE_BUCKET).download(anonPath);
-      const denied = Boolean(error) || !data;
-      expect(denied).toBe(true);
-    });
-
-    it("anon cannot list files in tenant-private bucket", async () => {
-      const { data, error } = await anon.storage
-        .from(PRIVATE_BUCKET)
-        .list(fakeTenantId, { limit: 5 });
-      // Either errored or returned empty — never leaks a real tenant's files.
-      const denied = Boolean(error) || !data || data.length === 0;
-      expect(denied).toBe(true);
-    });
-
-    it("anon cannot delete from tenant-private bucket", async () => {
-      const result = await anon.storage.from(PRIVATE_BUCKET).remove([anonPath]);
-      const { data, error } = result;
-      const denied = Boolean(error) || !data || data.length === 0;
-      const { httpStatus, errorCode } = extractStorageError(result);
-      // Ledger the negative-control delete so the PDF shows what happened
-      // alongside the per-attacker upload rows. `removed: !denied` means
-      // a row only counts as "removed" when the API actually returned a
-      // deleted record — RLS denials show up as removed=false with a
-      // human-readable note.
-      recordCleanup({
-        bucket: PRIVATE_BUCKET,
-        path: anonPath,
-        role: "attacker",
-        removed: !denied,
-        httpStatus,
-        errorCode,
-        note: denied
-          ? `negative-control: anon DELETE denied (${error?.message ?? "empty rows"})`
-          : `negative-control: anon DELETE UNEXPECTEDLY succeeded — RLS LEAK`,
+      it("anon cannot download from tenant-private bucket", async () => {
+        // Even guessing a path should fail — bucket is private, no SELECT for anon.
+        const { data, error } = await anon.storage
+          .from(PRIVATE_BUCKET)
+          .download(anonPath);
+        const denied = Boolean(error) || !data;
+        expect(denied).toBe(true);
       });
-      expect(denied).toBe(true);
-    });
 
-    it("anon cannot delete from tenant-assets bucket", async () => {
-      const result = await anon.storage.from(ASSETS_BUCKET).remove([anonPath]);
-      const { data, error } = result;
-      const denied = Boolean(error) || !data || data.length === 0;
-      const { httpStatus, errorCode } = extractStorageError(result);
-      recordCleanup({
-        bucket: ASSETS_BUCKET,
-        path: anonPath,
-        role: "attacker",
-        removed: !denied,
-        httpStatus,
-        errorCode,
-        note: denied
-          ? `negative-control: anon DELETE denied (${error?.message ?? "empty rows"})`
-          : `negative-control: anon DELETE UNEXPECTEDLY succeeded — RLS LEAK`,
+      it("anon cannot list files in tenant-private bucket", async () => {
+        const { data, error } = await anon.storage
+          .from(PRIVATE_BUCKET)
+          .list(fakeTenantId, { limit: 5 });
+        // Either errored or returned empty — never leaks a real tenant's files.
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
       });
-      expect(denied).toBe(true);
-    });
 
-    // ---------- Anonymous access to tenant-assets via AUTHENTICATED endpoints ----------
-    // `tenant-assets` is a public bucket — its intended public surface is
-    // the CDN URL returned by `getPublicUrl()`. The authenticated storage
-    // endpoints (`download()` and `list()`) must NOT be usable by an
-    // unauthenticated client to enumerate or bulk-fetch tenant content,
-    // even on a public bucket. Two regressions we're guarding against:
-    //   1. RLS SELECT policy is loosened for `tenant-assets` to `true` for
-    //      `anon`, which would let an attacker enumerate every tenant's
-    //      filenames via `list()`.
-    //   2. `download()` (which routes through the authenticated path,
-    //      not the CDN) is permitted for anon, giving a uniform exfil
-    //      channel that bypasses any future CDN-level access controls.
-    it("anon cannot LIST tenant-assets at the bucket root via authenticated client", async () => {
-      const { data, error } = await anon.storage.from(ASSETS_BUCKET).list("", { limit: 5 });
-      // A bucket-root listing must never reveal real tenant folder names
-      // to an anonymous caller. Either an error or an empty listing is
-      // acceptable; any non-empty payload here is a leak.
-      const denied = Boolean(error) || !data || data.length === 0;
-      expect(denied).toBe(true);
-    });
+      it("anon cannot delete from tenant-private bucket", async () => {
+        const result = await anon.storage
+          .from(PRIVATE_BUCKET)
+          .remove([anonPath]);
+        const { data, error } = result;
+        const denied = Boolean(error) || !data || data.length === 0;
+        const { httpStatus, errorCode } = extractStorageError(result);
+        // Ledger the negative-control delete so the PDF shows what happened
+        // alongside the per-attacker upload rows. `removed: !denied` means
+        // a row only counts as "removed" when the API actually returned a
+        // deleted record — RLS denials show up as removed=false with a
+        // human-readable note.
+        recordCleanup({
+          bucket: PRIVATE_BUCKET,
+          path: anonPath,
+          role: "attacker",
+          removed: !denied,
+          httpStatus,
+          errorCode,
+          note: denied
+            ? `negative-control: anon DELETE denied (${error?.message ?? "empty rows"})`
+            : `negative-control: anon DELETE UNEXPECTEDLY succeeded — RLS LEAK`,
+        });
+        expect(denied).toBe(true);
+      });
 
-    it("anon cannot LIST a fake tenant folder in tenant-assets via authenticated client", async () => {
-      const { data, error } = await anon.storage
-        .from(ASSETS_BUCKET)
-        .list(fakeTenantId, { limit: 5 });
-      const denied = Boolean(error) || !data || data.length === 0;
-      expect(denied).toBe(true);
-    });
+      it("anon cannot delete from tenant-assets bucket", async () => {
+        const result = await anon.storage
+          .from(ASSETS_BUCKET)
+          .remove([anonPath]);
+        const { data, error } = result;
+        const denied = Boolean(error) || !data || data.length === 0;
+        const { httpStatus, errorCode } = extractStorageError(result);
+        recordCleanup({
+          bucket: ASSETS_BUCKET,
+          path: anonPath,
+          role: "attacker",
+          removed: !denied,
+          httpStatus,
+          errorCode,
+          note: denied
+            ? `negative-control: anon DELETE denied (${error?.message ?? "empty rows"})`
+            : `negative-control: anon DELETE UNEXPECTEDLY succeeded — RLS LEAK`,
+        });
+        expect(denied).toBe(true);
+      });
 
-    it("anon cannot DOWNLOAD from tenant-assets via authenticated client (guessed path)", async () => {
-      // The anon path lives under a fake tenant id and is guaranteed not
-      // to exist — but `download()` should fail for any non-CDN call from
-      // an unauthenticated client regardless of whether the object exists.
-      const { data, error } = await anon.storage.from(ASSETS_BUCKET).download(anonPath);
-      const denied = Boolean(error) || !data;
-      expect(denied).toBe(true);
-    });
-  });
+      // ---------- Anonymous access to tenant-assets via AUTHENTICATED endpoints ----------
+      // `tenant-assets` is a public bucket — its intended public surface is
+      // the CDN URL returned by `getPublicUrl()`. The authenticated storage
+      // endpoints (`download()` and `list()`) must NOT be usable by an
+      // unauthenticated client to enumerate or bulk-fetch tenant content,
+      // even on a public bucket. Two regressions we're guarding against:
+      //   1. RLS SELECT policy is loosened for `tenant-assets` to `true` for
+      //      `anon`, which would let an attacker enumerate every tenant's
+      //      filenames via `list()`.
+      //   2. `download()` (which routes through the authenticated path,
+      //      not the CDN) is permitted for anon, giving a uniform exfil
+      //      channel that bypasses any future CDN-level access controls.
+      it("anon cannot LIST tenant-assets at the bucket root via authenticated client", async () => {
+        const { data, error } = await anon.storage
+          .from(ASSETS_BUCKET)
+          .list("", { limit: 5 });
+        // A bucket-root listing must never reveal real tenant folder names
+        // to an anonymous caller. Either an error or an empty listing is
+        // acceptable; any non-empty payload here is a leak.
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+
+      it("anon cannot LIST a fake tenant folder in tenant-assets via authenticated client", async () => {
+        const { data, error } = await anon.storage
+          .from(ASSETS_BUCKET)
+          .list(fakeTenantId, { limit: 5 });
+        const denied = Boolean(error) || !data || data.length === 0;
+        expect(denied).toBe(true);
+      });
+
+      it("anon cannot DOWNLOAD from tenant-assets via authenticated client (guessed path)", async () => {
+        // The anon path lives under a fake tenant id and is guaranteed not
+        // to exist — but `download()` should fail for any non-CDN call from
+        // an unauthenticated client regardless of whether the object exists.
+        const { data, error } = await anon.storage
+          .from(ASSETS_BUCKET)
+          .download(anonPath);
+        const denied = Boolean(error) || !data;
+        expect(denied).toBe(true);
+      });
+    },
+  );
 
   describe.runIf(hasSupabaseConfig && liveModeEnabled)(
     "Live cross-tenant storage denial",
@@ -1287,7 +1360,11 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       // Files we successfully created (own-tenant, sanity-check uploads). The
       // owning client is responsible for removing these in afterAll.
-      const uploadedPaths: Array<{ bucket: string; path: string; client: "a" | "b" }> = [];
+      const uploadedPaths: Array<{
+        bucket: string;
+        path: string;
+        client: "a" | "b";
+      }> = [];
 
       // Every cross-tenant write *attempt* — regardless of whether the SDK
       // returned an error. RLS should reject these, but a regression could
@@ -1325,11 +1402,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           attacker,
           owner,
           expected: "denied",
-          outcome: result === undefined
-            ? "denied" // assume denial; positive controls are recorded separately
-            : result.error
-              ? "denied"
-              : "allowed",
+          outcome:
+            result === undefined
+              ? "denied" // assume denial; positive controls are recorded separately
+              : result.error
+                ? "denied"
+                : "allowed",
           errorMessage: result?.error?.message,
           scenario: "live-cross-tenant-upload",
         });
@@ -1350,18 +1428,28 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           email: liveCreds.a.email!,
           password: liveCreds.a.password!,
         });
-        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+        if (signInAError)
+          throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
 
         const { error: signInBError } = await clientB.auth.signInWithPassword({
           email: liveCreds.b.email!,
           password: liveCreds.b.password!,
         });
-        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+        if (signInBError)
+          throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
 
         await guardTenantPair({
           suite: "cross-tenant-storage",
-          a: { client: clientA, tenantId: liveCreds.a.tenantId, email: liveCreds.a.email },
-          b: { client: clientB, tenantId: liveCreds.b.tenantId, email: liveCreds.b.email },
+          a: {
+            client: clientA,
+            tenantId: liveCreds.a.tenantId,
+            email: liveCreds.a.email,
+          },
+          b: {
+            client: clientB,
+            tenantId: liveCreds.b.tenantId,
+            email: liveCreds.b.email,
+          },
         });
       });
 
@@ -1376,8 +1464,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // artifacts under our own RUN_ID than to delete from the wrong
         // tenant folder. The failure is ledgered for the PDF report.
         const preflightClients = {
-          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
-          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+          [liveCreds.a.tenantId!]: {
+            client: clientA,
+            email: liveCreds.a.email,
+          },
+          [liveCreds.b.tenantId!]: {
+            client: clientB,
+            email: liveCreds.b.email,
+          },
         };
         const preflight = await cleanupPreflight({
           tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
@@ -1427,13 +1521,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A CAN upload + download in their own tenant-private folder (sanity)", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-own-private");
         const { error: upErr } = await allowedStorageCall(
-          () => clientA.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileText("a-own-private"), { upsert: true }),
+          () =>
+            clientA.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileText("a-own-private"), { upsert: true }),
           "A own private upload",
         );
         expect(upErr).toBeNull();
-        if (!upErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
+        if (!upErr)
+          uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
 
         const { data, error: dlErr } = await allowedStorageCall(
           () => clientA.storage.from(PRIVATE_BUCKET).download(path),
@@ -1446,13 +1542,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user B CAN upload + download in their own tenant-private folder (sanity)", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
         const { error: upErr } = await allowedStorageCall(
-          () => clientB.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileText("b-own-private"), { upsert: true }),
+          () =>
+            clientB.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileText("b-own-private"), { upsert: true }),
           "B own private upload",
         );
         expect(upErr).toBeNull();
-        if (!upErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "b" });
+        if (!upErr)
+          uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "b" });
 
         const { data, error: dlErr } = await allowedStorageCall(
           () => clientB.storage.from(PRIVATE_BUCKET).download(path),
@@ -1465,22 +1563,25 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A CAN upload to their own tenant-assets folder (sanity)", async () => {
         const path = assetsOwnPath(liveCreds.a.tenantId!, "a-own-assets");
         const { error } = await allowedStorageCall(
-          () => clientA.storage
-            .from(ASSETS_BUCKET)
-            .upload(path, fileText("a-own-assets"), { upsert: true }),
+          () =>
+            clientA.storage
+              .from(ASSETS_BUCKET)
+              .upload(path, fileText("a-own-assets"), { upsert: true }),
           "A own assets upload",
         );
         expect(error).toBeNull();
-        if (!error) uploadedPaths.push({ bucket: ASSETS_BUCKET, path, client: "a" });
+        if (!error)
+          uploadedPaths.push({ bucket: ASSETS_BUCKET, path, client: "a" });
       });
 
       // ---------- Cross-tenant write denial ----------
       it("user A cannot UPLOAD to tenant B's tenant-private folder", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "a-cross-private");
         const result = await storageCall(
-          () => clientA.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileText("a-cross-private"), { upsert: true }),
+          () =>
+            clientA.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileText("a-cross-private"), { upsert: true }),
           "A cross private upload",
         );
         recordAttempt(PRIVATE_BUCKET, path, "a", "b", result);
@@ -1490,9 +1591,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user B cannot UPLOAD to tenant A's tenant-private folder", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "b-cross-private");
         const result = await storageCall(
-          () => clientB.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileText("b-cross-private"), { upsert: true }),
+          () =>
+            clientB.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileText("b-cross-private"), { upsert: true }),
           "B cross private upload",
         );
         recordAttempt(PRIVATE_BUCKET, path, "b", "a", result);
@@ -1502,9 +1604,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A cannot UPLOAD to tenant B's tenant-assets folder", async () => {
         const path = assetsOwnPath(liveCreds.b.tenantId!, "a-cross-assets");
         const result = await storageCall(
-          () => clientA.storage
-            .from(ASSETS_BUCKET)
-            .upload(path, fileText("a-cross-assets"), { upsert: true }),
+          () =>
+            clientA.storage
+              .from(ASSETS_BUCKET)
+              .upload(path, fileText("a-cross-assets"), { upsert: true }),
           "A cross assets upload",
         );
         recordAttempt(ASSETS_BUCKET, path, "a", "b", result);
@@ -1514,9 +1617,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user B cannot UPLOAD to tenant A's tenant-assets folder", async () => {
         const path = assetsOwnPath(liveCreds.a.tenantId!, "b-cross-assets");
         const result = await storageCall(
-          () => clientB.storage
-            .from(ASSETS_BUCKET)
-            .upload(path, fileText("b-cross-assets"), { upsert: true }),
+          () =>
+            clientB.storage
+              .from(ASSETS_BUCKET)
+              .upload(path, fileText("b-cross-assets"), { upsert: true }),
           "B cross assets upload",
         );
         recordAttempt(ASSETS_BUCKET, path, "b", "a", result);
@@ -1547,9 +1651,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user A cannot LIST tenant B's tenant-private folder", async () => {
         const { data, error } = await storageCall(
-          () => clientA.storage
-            .from(PRIVATE_BUCKET)
-            .list(liveCreds.b.tenantId!, { limit: 5 }),
+          () =>
+            clientA.storage
+              .from(PRIVATE_BUCKET)
+              .list(liveCreds.b.tenantId!, { limit: 5 }),
           "A cross private list",
         );
         // RLS-denied list returns either error or empty array.
@@ -1559,9 +1664,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user B cannot LIST tenant A's tenant-private folder", async () => {
         const { data, error } = await storageCall(
-          () => clientB.storage
-            .from(PRIVATE_BUCKET)
-            .list(liveCreds.a.tenantId!, { limit: 5 }),
+          () =>
+            clientB.storage
+              .from(PRIVATE_BUCKET)
+              .list(liveCreds.a.tenantId!, { limit: 5 }),
           "B cross private list",
         );
         const denied = Boolean(error) || !data || data.length === 0;
@@ -1572,13 +1678,17 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A cannot DELETE tenant B's tenant-private file", async () => {
         const path = ownPath(liveCreds.b.tenantId!, "b-private-delete-victim");
         const { error: seedErr } = await allowedStorageCall(
-          () => clientB.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileText("b-private-delete-victim"), { upsert: true }),
+          () =>
+            clientB.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileText("b-private-delete-victim"), {
+                upsert: true,
+              }),
           "B private delete seed upload",
         );
         expect(seedErr).toBeNull();
-        if (!seedErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "b" });
+        if (!seedErr)
+          uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "b" });
 
         const { data, error } = await storageCall(
           () => clientA.storage.from(PRIVATE_BUCKET).remove([path]),
@@ -1608,13 +1718,17 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user B cannot DELETE tenant A's tenant-private file", async () => {
         const path = ownPath(liveCreds.a.tenantId!, "a-private-delete-victim");
         const { error: seedErr } = await allowedStorageCall(
-          () => clientA.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileText("a-private-delete-victim"), { upsert: true }),
+          () =>
+            clientA.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileText("a-private-delete-victim"), {
+                upsert: true,
+              }),
           "A private delete seed upload",
         );
         expect(seedErr).toBeNull();
-        if (!seedErr) uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
+        if (!seedErr)
+          uploadedPaths.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
 
         const { data, error } = await storageCall(
           () => clientB.storage.from(PRIVATE_BUCKET).remove([path]),
@@ -1641,15 +1755,22 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it("user A cannot DELETE tenant B's tenant-assets file", async () => {
         // Upload a file as B first so there's something to attempt deletion on.
-        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-own-assets-for-delete");
+        const path = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-own-assets-for-delete",
+        );
         const { error: upErr } = await allowedStorageCall(
-          () => clientB.storage
-            .from(ASSETS_BUCKET)
-            .upload(path, fileText("b-own-assets-for-delete"), { upsert: true }),
+          () =>
+            clientB.storage
+              .from(ASSETS_BUCKET)
+              .upload(path, fileText("b-own-assets-for-delete"), {
+                upsert: true,
+              }),
           "B assets delete seed upload",
         );
         expect(upErr).toBeNull();
-        if (!upErr) uploadedPaths.push({ bucket: ASSETS_BUCKET, path, client: "b" });
+        if (!upErr)
+          uploadedPaths.push({ bucket: ASSETS_BUCKET, path, client: "b" });
 
         const { data, error } = await storageCall(
           () => clientA.storage.from(ASSETS_BUCKET).remove([path]),
@@ -1672,9 +1793,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         const path = ownPath(liveCreds.b.tenantId!, "b-own-private");
         recordAttempt(PRIVATE_BUCKET, path, "a", "b");
         const { error } = await storageCall(
-          () => clientA.storage
-            .from(PRIVATE_BUCKET)
-            .upload(path, fileText("a-overwrite-attempt"), { upsert: true }),
+          () =>
+            clientA.storage
+              .from(PRIVATE_BUCKET)
+              .upload(path, fileText("a-overwrite-attempt"), { upsert: true }),
           "A cross private overwrite",
         );
         expect(error).toBeTruthy();
@@ -1691,70 +1813,79 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   // `{tenant_id}/documents/2026/invoices/...`) does NOT bypass the
   // policy — the first-segment check must still reject foreign tenants.
   // ============================================================
-  describe.runIf(hasSupabaseConfig)("Anonymous client nested-path enforcement", () => {
-    let anon: SupabaseClient;
-    const fakeTenantId = "00000000-0000-0000-0000-000000000000";
+  describe.runIf(hasSupabaseConfig)(
+    "Anonymous client nested-path enforcement",
+    () => {
+      let anon: SupabaseClient;
+      const fakeTenantId = "00000000-0000-0000-0000-000000000000";
 
-    beforeAll(() => {
-      anon = newAnonClient();
-    });
+      beforeAll(() => {
+        anon = newAnonClient();
+      });
 
-    afterAll(async () => {
-      await sweepTestArtifacts(PRIVATE_BUCKET, [fakeTenantId]);
-      await sweepTestArtifacts(ASSETS_BUCKET, [fakeTenantId]);
-    });
+      afterAll(async () => {
+        await sweepTestArtifacts(PRIVATE_BUCKET, [fakeTenantId]);
+        await sweepTestArtifacts(ASSETS_BUCKET, [fakeTenantId]);
+      });
 
-    for (const scenario of NESTED_SCENARIOS) {
-      it(
-        `anon cannot upload to nested path '${scenario.name}' in tenant-private`,
-        async () => {
-          const path = nestedOwnPath(fakeTenantId, scenario.segments, "anon-nested");
+      for (const scenario of NESTED_SCENARIOS) {
+        it(`anon cannot upload to nested path '${scenario.name}' in tenant-private`, async () => {
+          const path = nestedOwnPath(
+            fakeTenantId,
+            scenario.segments,
+            "anon-nested",
+          );
           const result = await Promise.race([
             anon.storage
               .from(PRIVATE_BUCKET)
-              .upload(path, fileText(`anon-nested-${scenario.name}`), { upsert: true }),
+              .upload(path, fileText(`anon-nested-${scenario.name}`), {
+                upsert: true,
+              }),
             new Promise<{ error: Error; data: null }>((resolve) =>
               setTimeout(
-                () => resolve({ error: new Error("network-timeout"), data: null }),
+                () =>
+                  resolve({ error: new Error("network-timeout"), data: null }),
                 4000,
               ),
             ),
           ]);
           expect(result.error).toBeTruthy();
-        },
-        15000,
-      );
+        }, 15000);
 
-      it(
-        `anon cannot upload to nested path '${scenario.name}' in tenant-assets`,
-        async () => {
-          const path = nestedOwnPath(fakeTenantId, scenario.segments, "anon-nested-assets");
+        it(`anon cannot upload to nested path '${scenario.name}' in tenant-assets`, async () => {
+          const path = nestedOwnPath(
+            fakeTenantId,
+            scenario.segments,
+            "anon-nested-assets",
+          );
           const result = await Promise.race([
             anon.storage
               .from(ASSETS_BUCKET)
-              .upload(path, fileText(`anon-nested-assets-${scenario.name}`), { upsert: true }),
+              .upload(path, fileText(`anon-nested-assets-${scenario.name}`), {
+                upsert: true,
+              }),
             new Promise<{ error: Error; data: null }>((resolve) =>
               setTimeout(
-                () => resolve({ error: new Error("network-timeout"), data: null }),
+                () =>
+                  resolve({ error: new Error("network-timeout"), data: null }),
                 4000,
               ),
             ),
           ]);
           expect(result.error).toBeTruthy();
-        },
-        15000,
-      );
+        }, 15000);
 
-      it(`anon cannot list nested folder '${scenario.name}' in tenant-private`, async () => {
-        const folder = `${fakeTenantId}/${scenario.segments.join("/")}`;
-        const { data, error } = await anon.storage
-          .from(PRIVATE_BUCKET)
-          .list(folder, { limit: 5 });
-        const denied = Boolean(error) || !data || data.length === 0;
-        expect(denied).toBe(true);
-      });
-    }
-  });
+        it(`anon cannot list nested folder '${scenario.name}' in tenant-private`, async () => {
+          const folder = `${fakeTenantId}/${scenario.segments.join("/")}`;
+          const { data, error } = await anon.storage
+            .from(PRIVATE_BUCKET)
+            .list(folder, { limit: 5 });
+          const denied = Boolean(error) || !data || data.length === 0;
+          expect(denied).toBe(true);
+        });
+      }
+    },
+  );
 
   describe.runIf(hasSupabaseConfig && liveModeEnabled)(
     "Live cross-tenant nested-path denial",
@@ -1773,7 +1904,11 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       }> = [];
 
       // Files we successfully created on our OWN tenant during sanity checks.
-      const ownNestedUploads: Array<{ bucket: string; path: string; client: "a" | "b" }> = [];
+      const ownNestedUploads: Array<{
+        bucket: string;
+        path: string;
+        client: "a" | "b";
+      }> = [];
 
       beforeAll(async () => {
         clientA = newAnonClient();
@@ -1783,13 +1918,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           email: liveCreds.a.email!,
           password: liveCreds.a.password!,
         });
-        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+        if (signInAError)
+          throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
 
         const { error: signInBError } = await clientB.auth.signInWithPassword({
           email: liveCreds.b.email!,
           password: liveCreds.b.password!,
         });
-        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+        if (signInBError)
+          throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
       });
 
       afterAll(async () => {
@@ -1799,8 +1936,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // full rationale). Without this, a bad env var or expired sign-in
         // could send the admin sweep against the wrong tenant folder.
         const preflightClients = {
-          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
-          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+          [liveCreds.a.tenantId!]: {
+            client: clientA,
+            email: liveCreds.a.email,
+          },
+          [liveCreds.b.tenantId!]: {
+            client: clientB,
+            email: liveCreds.b.email,
+          },
         };
         const preflight = await cleanupPreflight({
           tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
@@ -1820,27 +1963,45 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         await sweepTestArtifacts(
           PRIVATE_BUCKET,
           [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
-          { scope: "live-cross-tenant-nested:sweep", clients: preflightClients },
+          {
+            scope: "live-cross-tenant-nested:sweep",
+            clients: preflightClients,
+          },
         );
         await sweepTestArtifacts(
           ASSETS_BUCKET,
           [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
-          { scope: "live-cross-tenant-nested:sweep", clients: preflightClients },
+          {
+            scope: "live-cross-tenant-nested:sweep",
+            clients: preflightClients,
+          },
         );
       });
 
       for (const scenario of NESTED_SCENARIOS) {
         // ---- Sanity: own-tenant nested upload works ----
         it(`user A CAN upload + read own nested path '${scenario.name}' (sanity)`, async () => {
-          const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "a-own-nested");
+          const path = nestedOwnPath(
+            liveCreds.a.tenantId!,
+            scenario.segments,
+            "a-own-nested",
+          );
           const { error: upErr } = await allowedStorageCall(
-            () => clientA.storage
-              .from(PRIVATE_BUCKET)
-              .upload(path, fileText(`a-own-nested-${scenario.name}`), { upsert: true }),
+            () =>
+              clientA.storage
+                .from(PRIVATE_BUCKET)
+                .upload(path, fileText(`a-own-nested-${scenario.name}`), {
+                  upsert: true,
+                }),
             `A own nested private upload ${scenario.name}`,
           );
           expect(upErr).toBeNull();
-          if (!upErr) ownNestedUploads.push({ bucket: PRIVATE_BUCKET, path, client: "a" });
+          if (!upErr)
+            ownNestedUploads.push({
+              bucket: PRIVATE_BUCKET,
+              path,
+              client: "a",
+            });
 
           const { data, error: dlErr } = await allowedStorageCall(
             () => clientA.storage.from(PRIVATE_BUCKET).download(path),
@@ -1852,24 +2013,48 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
         // ---- Cross-tenant nested upload denial (private + assets) ----
         it(`user A cannot UPLOAD to tenant B's nested '${scenario.name}' in tenant-private`, async () => {
-          const path = nestedOwnPath(liveCreds.b.tenantId!, scenario.segments, "a-cross-nested");
-          nestedAttempts.push({ bucket: PRIVATE_BUCKET, path, attacker: "a", owner: "b" });
+          const path = nestedOwnPath(
+            liveCreds.b.tenantId!,
+            scenario.segments,
+            "a-cross-nested",
+          );
+          nestedAttempts.push({
+            bucket: PRIVATE_BUCKET,
+            path,
+            attacker: "a",
+            owner: "b",
+          });
           const { error } = await storageCall(
-            () => clientA.storage
-              .from(PRIVATE_BUCKET)
-              .upload(path, fileText(`a-cross-nested-${scenario.name}`), { upsert: true }),
+            () =>
+              clientA.storage
+                .from(PRIVATE_BUCKET)
+                .upload(path, fileText(`a-cross-nested-${scenario.name}`), {
+                  upsert: true,
+                }),
             `A cross nested private upload ${scenario.name}`,
           );
           expect(error).toBeTruthy();
         });
 
         it(`user B cannot UPLOAD to tenant A's nested '${scenario.name}' in tenant-private`, async () => {
-          const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "b-cross-nested");
-          nestedAttempts.push({ bucket: PRIVATE_BUCKET, path, attacker: "b", owner: "a" });
+          const path = nestedOwnPath(
+            liveCreds.a.tenantId!,
+            scenario.segments,
+            "b-cross-nested",
+          );
+          nestedAttempts.push({
+            bucket: PRIVATE_BUCKET,
+            path,
+            attacker: "b",
+            owner: "a",
+          });
           const { error } = await storageCall(
-            () => clientB.storage
-              .from(PRIVATE_BUCKET)
-              .upload(path, fileText(`b-cross-nested-${scenario.name}`), { upsert: true }),
+            () =>
+              clientB.storage
+                .from(PRIVATE_BUCKET)
+                .upload(path, fileText(`b-cross-nested-${scenario.name}`), {
+                  upsert: true,
+                }),
             `B cross nested private upload ${scenario.name}`,
           );
           expect(error).toBeTruthy();
@@ -1881,11 +2066,21 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             scenario.segments,
             "a-cross-nested-assets",
           );
-          nestedAttempts.push({ bucket: ASSETS_BUCKET, path, attacker: "a", owner: "b" });
+          nestedAttempts.push({
+            bucket: ASSETS_BUCKET,
+            path,
+            attacker: "a",
+            owner: "b",
+          });
           const { error } = await storageCall(
-            () => clientA.storage
-              .from(ASSETS_BUCKET)
-              .upload(path, fileText(`a-cross-nested-assets-${scenario.name}`), { upsert: true }),
+            () =>
+              clientA.storage
+                .from(ASSETS_BUCKET)
+                .upload(
+                  path,
+                  fileText(`a-cross-nested-assets-${scenario.name}`),
+                  { upsert: true },
+                ),
             `A cross nested assets upload ${scenario.name}`,
           );
           expect(error).toBeTruthy();
@@ -1893,8 +2088,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
         // ---- Cross-tenant nested read/list/delete denial ----
         it(`user B cannot DOWNLOAD tenant A's nested '${scenario.name}' file`, async () => {
-          const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "a-own-nested");
-          const { data, error } = await clientB.storage.from(PRIVATE_BUCKET).download(path);
+          const path = nestedOwnPath(
+            liveCreds.a.tenantId!,
+            scenario.segments,
+            "a-own-nested",
+          );
+          const { data, error } = await clientB.storage
+            .from(PRIVATE_BUCKET)
+            .download(path);
           const denied = Boolean(error) || !data;
           expect(denied).toBe(true);
         });
@@ -1909,8 +2110,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         });
 
         it(`user B cannot DELETE tenant A's nested '${scenario.name}' file`, async () => {
-          const path = nestedOwnPath(liveCreds.a.tenantId!, scenario.segments, "a-own-nested");
-          const { data, error } = await clientB.storage.from(PRIVATE_BUCKET).remove([path]);
+          const path = nestedOwnPath(
+            liveCreds.a.tenantId!,
+            scenario.segments,
+            "a-own-nested",
+          );
+          const { data, error } = await clientB.storage
+            .from(PRIVATE_BUCKET)
+            .remove([path]);
           const denied = Boolean(error) || !data || data.length === 0;
           recordCleanup({
             bucket: PRIVATE_BUCKET,
@@ -1955,7 +2162,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // attacker's failed write target points at the SAME key, so the
         // dual-cleanup pass already covers any RLS bypass that might
         // have actually overwritten it).
-        const ATTACKER_PAYLOAD_TAG = "ATTACKER_OVERWRITE_PAYLOAD_DO_NOT_PERSIST";
+        const ATTACKER_PAYLOAD_TAG =
+          "ATTACKER_OVERWRITE_PAYLOAD_DO_NOT_PERSIST";
         const seedVictimFile = async (
           ownerClient: SupabaseClient,
           ownerKey: "a" | "b",
@@ -1963,12 +2171,18 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           bucket: string,
           label: string,
         ): Promise<{ path: string; originalBytes: ArrayBuffer } | null> => {
-          const path = nestedOwnPathFor(bucket, ownerTenantId, scenario.segments, label);
+          const path = nestedOwnPathFor(
+            bucket,
+            ownerTenantId,
+            scenario.segments,
+            label,
+          );
           const originalContent = `victim-original-${label}-${scenario.name}-${Date.now()}`;
           const { error: seedErr } = await allowedStorageCall(
-            () => ownerClient.storage
-              .from(bucket)
-              .upload(path, fileText(originalContent), { upsert: true }),
+            () =>
+              ownerClient.storage
+                .from(bucket)
+                .upload(path, fileText(originalContent), { upsert: true }),
             `seed victim ${bucket} ${label} ${scenario.name}`,
           );
           if (seedErr) return null;
@@ -2044,11 +2258,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
               });
 
               const { error } = await storageCall(
-                () => clientB.storage
-                  .from(PRIVATE_BUCKET)
-                  .upload(seeded.path, fileText(ATTACKER_PAYLOAD_TAG), {
-                    upsert: upsertMode,
-                  }),
+                () =>
+                  clientB.storage
+                    .from(PRIVATE_BUCKET)
+                    .upload(seeded.path, fileText(ATTACKER_PAYLOAD_TAG), {
+                      upsert: upsertMode,
+                    }),
                 `B overwrite private ${scenario.name} upsert=${upsertMode}`,
               );
               // Either path MUST error: upsert=true would be an overwrite
@@ -2090,11 +2305,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
               });
 
               const { error } = await storageCall(
-                () => clientA.storage
-                  .from(PRIVATE_BUCKET)
-                  .upload(seeded.path, fileText(ATTACKER_PAYLOAD_TAG), {
-                    upsert: upsertMode,
-                  }),
+                () =>
+                  clientA.storage
+                    .from(PRIVATE_BUCKET)
+                    .upload(seeded.path, fileText(ATTACKER_PAYLOAD_TAG), {
+                      upsert: upsertMode,
+                    }),
                 `A overwrite private ${scenario.name} upsert=${upsertMode}`,
               );
               expect(error).toBeTruthy();
@@ -2136,11 +2352,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
               });
 
               const { error } = await storageCall(
-                () => clientB.storage
-                  .from(ASSETS_BUCKET)
-                  .upload(seeded.path, fileText(ATTACKER_PAYLOAD_TAG), {
-                    upsert: upsertMode,
-                  }),
+                () =>
+                  clientB.storage
+                    .from(ASSETS_BUCKET)
+                    .upload(seeded.path, fileText(ATTACKER_PAYLOAD_TAG), {
+                      upsert: upsertMode,
+                    }),
                 `B overwrite assets ${scenario.name} upsert=${upsertMode}`,
               );
               expect(error).toBeTruthy();
@@ -2214,7 +2431,9 @@ describe("Cross-Tenant Storage RLS Tests", () => {
    * invalid after normalisation (empty, only dots, etc.) — RLS denies
    * those automatically because `foldername()[1]` will be NULL.
    */
-  const normalizeStoragePath = (raw: string): { canonical: string; firstSegment: string | null } => {
+  const normalizeStoragePath = (
+    raw: string,
+  ): { canonical: string; firstSegment: string | null } => {
     let s = raw;
 
     // 1. Backslash → slash
@@ -2290,7 +2509,9 @@ describe("Cross-Tenant Storage RLS Tests", () => {
    * still counts as denial for our purposes — the goal is "no bytes ever
    * land in tenant B's folder", not "request reaches the server".
    */
-  const adversarialPaths = (victimTenantId: string): Array<{ label: string; path: string }> => [
+  const adversarialPaths = (
+    victimTenantId: string,
+  ): Array<{ label: string; path: string }> => [
     { label: "double-slash", path: `${victimTenantId}//docs/file.txt` },
     { label: "leading-slash", path: `/${victimTenantId}/docs/file.txt` },
     { label: "trailing-slash", path: `${victimTenantId}/docs/file.txt/` },
@@ -2375,41 +2596,47 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     "url-encoded-slash-plus-dot-dot",
   ]);
 
-  describe.runIf(hasSupabaseConfig)("Anonymous adversarial path normalization", () => {
-    let anon: SupabaseClient;
-    // Use a synthetic tenant id as the "victim" — we don't need a real
-    // tenant for the anon block, since anon writes are denied for ALL
-    // tenants, real or not. This keeps the suite runnable without live
-    // credentials and without ever touching real folders.
-    const fakeTenantId = "11111111-1111-1111-1111-111111111111";
+  describe.runIf(hasSupabaseConfig)(
+    "Anonymous adversarial path normalization",
+    () => {
+      let anon: SupabaseClient;
+      // Use a synthetic tenant id as the "victim" — we don't need a real
+      // tenant for the anon block, since anon writes are denied for ALL
+      // tenants, real or not. This keeps the suite runnable without live
+      // credentials and without ever touching real folders.
+      const fakeTenantId = "11111111-1111-1111-1111-111111111111";
 
-    beforeAll(() => {
-      anon = newAnonClient();
-    });
+      beforeAll(() => {
+        anon = newAnonClient();
+      });
 
-    afterAll(async () => {
-      // Defensive: even though all of these should be denied, a regression
-      // could theoretically write SOMETHING under the fake tenant root.
-      // Sweep the run-id folder under the fake tenant to be sure.
-      await sweepTestArtifacts(PRIVATE_BUCKET, [fakeTenantId]);
-      await sweepTestArtifacts(ASSETS_BUCKET, [fakeTenantId]);
-    });
+      afterAll(async () => {
+        // Defensive: even though all of these should be denied, a regression
+        // could theoretically write SOMETHING under the fake tenant root.
+        // Sweep the run-id folder under the fake tenant to be sure.
+        await sweepTestArtifacts(PRIVATE_BUCKET, [fakeTenantId]);
+        await sweepTestArtifacts(ASSETS_BUCKET, [fakeTenantId]);
+      });
 
-    for (const bucket of [PRIVATE_BUCKET, ASSETS_BUCKET]) {
-      for (const variant of adversarialPaths(fakeTenantId)) {
-        it(
-          `anon cannot upload via '${variant.label}' path to ${bucket}`,
-          async () => {
+      for (const bucket of [PRIVATE_BUCKET, ASSETS_BUCKET]) {
+        for (const variant of adversarialPaths(fakeTenantId)) {
+          it(`anon cannot upload via '${variant.label}' path to ${bucket}`, async () => {
             // We bound this with a hard timeout because some malformed paths
             // make jsdom + the SDK hang waiting on a response that never
             // comes — timeout-as-denial is fine for our threat model.
             const result = await Promise.race([
               anon.storage
                 .from(bucket)
-                .upload(variant.path, fileText(`anon-${variant.label}`), { upsert: true }),
+                .upload(variant.path, fileText(`anon-${variant.label}`), {
+                  upsert: true,
+                }),
               new Promise<{ error: Error; data: null }>((resolve) =>
                 setTimeout(
-                  () => resolve({ error: new Error("network-timeout"), data: null }),
+                  () =>
+                    resolve({
+                      error: new Error("network-timeout"),
+                      data: null,
+                    }),
                   4000,
                 ),
               ),
@@ -2440,12 +2667,11 @@ describe("Cross-Tenant Storage RLS Tests", () => {
               // model and is intentionally too aggressive for assertions.
               expect(serverFirstSegment(variant.path)).not.toBe(fakeTenantId);
             }
-          },
-          15000,
-        );
+          }, 15000);
+        }
       }
-    }
-  });
+    },
+  );
 
   describe.runIf(hasSupabaseConfig && liveModeEnabled)(
     "Live cross-tenant adversarial path normalization",
@@ -2472,13 +2698,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           email: liveCreds.a.email!,
           password: liveCreds.a.password!,
         });
-        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+        if (signInAError)
+          throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
 
         const { error: signInBError } = await clientB.auth.signInWithPassword({
           email: liveCreds.b.email!,
           password: liveCreds.b.password!,
         });
-        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+        if (signInBError)
+          throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
       });
 
       afterAll(async () => {
@@ -2488,8 +2716,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // full rationale). Adversarial paths are exactly the kind of
         // payload where a misconfigured cleanup could do the most damage.
         const preflightClients = {
-          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
-          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+          [liveCreds.a.tenantId!]: {
+            client: clientA,
+            email: liveCreds.a.email,
+          },
+          [liveCreds.b.tenantId!]: {
+            client: clientB,
+            email: liveCreds.b.email,
+          },
         };
         const preflight = await cleanupPreflight({
           tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
@@ -2508,12 +2742,18 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         await sweepTestArtifacts(
           PRIVATE_BUCKET,
           [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
-          { scope: "live-cross-tenant-adversarial:sweep", clients: preflightClients },
+          {
+            scope: "live-cross-tenant-adversarial:sweep",
+            clients: preflightClients,
+          },
         );
         await sweepTestArtifacts(
           ASSETS_BUCKET,
           [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
-          { scope: "live-cross-tenant-adversarial:sweep", clients: preflightClients },
+          {
+            scope: "live-cross-tenant-adversarial:sweep",
+            clients: preflightClients,
+          },
         );
       });
 
@@ -2564,134 +2804,137 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             "url-encoded-dot-dot",
             "url-encoded-slash-plus-dot-dot",
           ]) {
-            it(
-              `user ${dir.attacker.toUpperCase()} cannot UPLOAD via '${labelHint}' to tenant ${dir.owner.toUpperCase()}'s ${bucket}`,
-              async () => {
-                const variant = adversarialPaths(dir.victimTenantId()).find(
-                  (v) => v.label === labelHint,
-                )!;
-                adversarialAttempts.push({
-                  bucket,
-                  path: variant.path,
-                  attacker: dir.attacker,
-                  owner: dir.owner,
-                });
+            it(`user ${dir.attacker.toUpperCase()} cannot UPLOAD via '${labelHint}' to tenant ${dir.owner.toUpperCase()}'s ${bucket}`, async () => {
+              const variant = adversarialPaths(dir.victimTenantId()).find(
+                (v) => v.label === labelHint,
+              )!;
+              adversarialAttempts.push({
+                bucket,
+                path: variant.path,
+                attacker: dir.attacker,
+                owner: dir.owner,
+              });
 
-                const result = await Promise.race([
-                  dir
-                    .attackerClient()
-                    .storage.from(bucket)
-                    .upload(variant.path, fileText(`${dir.attacker}-${variant.label}`), {
-                      upsert: true,
-                    }),
-                  new Promise<{ error: Error; data: null }>((resolve) =>
-                    setTimeout(
-                      () => resolve({ error: new Error("network-timeout"), data: null }),
-                      4000,
-                    ),
-                  ),
-                ]);
-
-                const { httpStatus, errorCode } = extractStorageError(result);
-                recordUpload({
-                  bucket,
-                  path: variant.path,
-                  attacker: dir.attacker,
-                  owner: dir.owner,
-                  expected: "denied",
-                  outcome: result.error ? "denied" : "allowed",
-                  errorMessage: result.error?.message,
-                  httpStatus,
-                  errorCode,
-                  scenario: `adversarial:${variant.label}`,
-                });
-
-                // Pass condition: SDK error OR network-timeout. Either
-                // means no object landed in the victim's folder.
-                expect(result.error).toBeTruthy();
-
-                // Path-shape assertion (defense-in-depth, independent of
-                // RLS) — only meaningful for traversal-style variants.
-                // Direct-probe variants (double-slash, leading-slash,
-                // brace-wrappers, backslashes, NUL) intentionally start
-                // with the victim id, so the normalized first segment
-                // *will* equal the victim id by construction. RLS still
-                // denies them, which is asserted via `result.error` above.
-                //
-                // For TRAVERSAL variants, the canonical first segment
-                // must NEVER equal the victim id no matter how many
-                // decode passes the server applies. If it ever does,
-                // RLS becomes the only line of defence and a single
-                // policy regression turns into a tenant breach.
-                if (TRAVERSAL_LABELS.has(labelHint)) {
-                  const callerTenantId = liveCreds[dir.attacker].tenantId!;
-                  const victimTenantId = dir.victimTenantId();
-                  const firstSegment = serverFirstSegment(variant.path);
-                  expect(firstSegment).not.toBe(victimTenantId);
-                  if (
-                    firstSegment !== null &&
-                    (firstSegment === callerTenantId || firstSegment === victimTenantId)
-                  ) {
-                    expect(firstSegment).toBe(callerTenantId);
-                  }
-                }
-              },
-              15000,
-            );
-
-            it(
-              `user ${dir.attacker.toUpperCase()} cannot DOWNLOAD via '${labelHint}' from tenant ${dir.owner.toUpperCase()}'s ${bucket}`,
-              async () => {
-                const variant = adversarialPaths(dir.victimTenantId()).find(
-                  (v) => v.label === labelHint,
-                )!;
-                const downloadResult = await dir
+              const result = await Promise.race([
+                dir
                   .attackerClient()
                   .storage.from(bucket)
-                  .download(variant.path);
-                const { data, error } = downloadResult;
-                // Denial = error OR no data. We don't care which — both
-                // prove the path normalization didn't leak the file.
-                const denied = Boolean(error) || !data;
-                // Surface DOWNLOAD outcomes in the ledger too. The PDF
-                // currently focuses on uploads, but recording the download
-                // attempt as a "cleanup-style" row keeps every adversarial
-                // probe visible (status code + error code included) so a
-                // 200-with-bytes regression for a path that previously 4xx'd
-                // would jump out in the next CI artifact diff.
-                const { httpStatus, errorCode } = extractStorageError(downloadResult);
-                recordCleanup({
-                  bucket,
-                  path: variant.path,
-                  role: "attacker",
-                  removed: !denied,
-                  httpStatus,
-                  errorCode,
-                  note: denied
-                    ? `download-probe denied (${dir.attacker} -> ${dir.owner}, ${labelHint})`
-                    : `download-probe UNEXPECTEDLY returned bytes — RLS LEAK (${dir.attacker} -> ${dir.owner}, ${labelHint})`,
-                });
-                expect(denied).toBe(true);
+                  .upload(
+                    variant.path,
+                    fileText(`${dir.attacker}-${variant.label}`),
+                    {
+                      upsert: true,
+                    },
+                  ),
+                new Promise<{ error: Error; data: null }>((resolve) =>
+                  setTimeout(
+                    () =>
+                      resolve({
+                        error: new Error("network-timeout"),
+                        data: null,
+                      }),
+                    4000,
+                  ),
+                ),
+              ]);
 
-                // Same path-shape assertion as the upload variant —
-                // gated on TRAVERSAL_LABELS for the same reason: direct-
-                // probe variants legitimately contain the victim id by
-                // construction.
-                if (TRAVERSAL_LABELS.has(labelHint)) {
-                  const callerTenantId = liveCreds[dir.attacker].tenantId!;
-                  const victimTenantId = dir.victimTenantId();
-                  const firstSegment = serverFirstSegment(variant.path);
-                  expect(firstSegment).not.toBe(victimTenantId);
-                  if (
-                    firstSegment !== null &&
-                    (firstSegment === callerTenantId || firstSegment === victimTenantId)
-                  ) {
-                    expect(firstSegment).toBe(callerTenantId);
-                  }
+              const { httpStatus, errorCode } = extractStorageError(result);
+              recordUpload({
+                bucket,
+                path: variant.path,
+                attacker: dir.attacker,
+                owner: dir.owner,
+                expected: "denied",
+                outcome: result.error ? "denied" : "allowed",
+                errorMessage: result.error?.message,
+                httpStatus,
+                errorCode,
+                scenario: `adversarial:${variant.label}`,
+              });
+
+              // Pass condition: SDK error OR network-timeout. Either
+              // means no object landed in the victim's folder.
+              expect(result.error).toBeTruthy();
+
+              // Path-shape assertion (defense-in-depth, independent of
+              // RLS) — only meaningful for traversal-style variants.
+              // Direct-probe variants (double-slash, leading-slash,
+              // brace-wrappers, backslashes, NUL) intentionally start
+              // with the victim id, so the normalized first segment
+              // *will* equal the victim id by construction. RLS still
+              // denies them, which is asserted via `result.error` above.
+              //
+              // For TRAVERSAL variants, the canonical first segment
+              // must NEVER equal the victim id no matter how many
+              // decode passes the server applies. If it ever does,
+              // RLS becomes the only line of defence and a single
+              // policy regression turns into a tenant breach.
+              if (TRAVERSAL_LABELS.has(labelHint)) {
+                const callerTenantId = liveCreds[dir.attacker].tenantId!;
+                const victimTenantId = dir.victimTenantId();
+                const firstSegment = serverFirstSegment(variant.path);
+                expect(firstSegment).not.toBe(victimTenantId);
+                if (
+                  firstSegment !== null &&
+                  (firstSegment === callerTenantId ||
+                    firstSegment === victimTenantId)
+                ) {
+                  expect(firstSegment).toBe(callerTenantId);
                 }
-              },
-              15000,
-            );
+              }
+            }, 15000);
+
+            it(`user ${dir.attacker.toUpperCase()} cannot DOWNLOAD via '${labelHint}' from tenant ${dir.owner.toUpperCase()}'s ${bucket}`, async () => {
+              const variant = adversarialPaths(dir.victimTenantId()).find(
+                (v) => v.label === labelHint,
+              )!;
+              const downloadResult = await dir
+                .attackerClient()
+                .storage.from(bucket)
+                .download(variant.path);
+              const { data, error } = downloadResult;
+              // Denial = error OR no data. We don't care which — both
+              // prove the path normalization didn't leak the file.
+              const denied = Boolean(error) || !data;
+              // Surface DOWNLOAD outcomes in the ledger too. The PDF
+              // currently focuses on uploads, but recording the download
+              // attempt as a "cleanup-style" row keeps every adversarial
+              // probe visible (status code + error code included) so a
+              // 200-with-bytes regression for a path that previously 4xx'd
+              // would jump out in the next CI artifact diff.
+              const { httpStatus, errorCode } =
+                extractStorageError(downloadResult);
+              recordCleanup({
+                bucket,
+                path: variant.path,
+                role: "attacker",
+                removed: !denied,
+                httpStatus,
+                errorCode,
+                note: denied
+                  ? `download-probe denied (${dir.attacker} -> ${dir.owner}, ${labelHint})`
+                  : `download-probe UNEXPECTEDLY returned bytes — RLS LEAK (${dir.attacker} -> ${dir.owner}, ${labelHint})`,
+              });
+              expect(denied).toBe(true);
+
+              // Same path-shape assertion as the upload variant —
+              // gated on TRAVERSAL_LABELS for the same reason: direct-
+              // probe variants legitimately contain the victim id by
+              // construction.
+              if (TRAVERSAL_LABELS.has(labelHint)) {
+                const callerTenantId = liveCreds[dir.attacker].tenantId!;
+                const victimTenantId = dir.victimTenantId();
+                const firstSegment = serverFirstSegment(variant.path);
+                expect(firstSegment).not.toBe(victimTenantId);
+                if (
+                  firstSegment !== null &&
+                  (firstSegment === callerTenantId ||
+                    firstSegment === victimTenantId)
+                ) {
+                  expect(firstSegment).toBe(callerTenantId);
+                }
+              }
+            }, 15000);
           }
 
           // Listing with adversarial folder names follows the same rule:
@@ -2721,35 +2964,29 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             });
           };
 
-          it(
-            `user ${dir.attacker.toUpperCase()} cannot LIST '${dir.owner.toUpperCase()}//' (double-slash) folder in ${bucket}`,
-            async () => {
-              const folder = `${dir.victimTenantId()}//`;
-              const result = await dir
-                .attackerClient()
-                .storage.from(bucket)
-                .list(folder, { limit: 5 });
-              const { data, error } = result;
-              const denied = Boolean(error) || !data || data.length === 0;
-              ledgerListProbe("double-slash", folder, result, denied);
-              expect(denied).toBe(true);
-            },
-          );
+          it(`user ${dir.attacker.toUpperCase()} cannot LIST '${dir.owner.toUpperCase()}//' (double-slash) folder in ${bucket}`, async () => {
+            const folder = `${dir.victimTenantId()}//`;
+            const result = await dir
+              .attackerClient()
+              .storage.from(bucket)
+              .list(folder, { limit: 5 });
+            const { data, error } = result;
+            const denied = Boolean(error) || !data || data.length === 0;
+            ledgerListProbe("double-slash", folder, result, denied);
+            expect(denied).toBe(true);
+          });
 
-          it(
-            `user ${dir.attacker.toUpperCase()} cannot LIST '/${dir.owner.toUpperCase()}/' (leading-slash) folder in ${bucket}`,
-            async () => {
-              const folder = `/${dir.victimTenantId()}/`;
-              const result = await dir
-                .attackerClient()
-                .storage.from(bucket)
-                .list(folder, { limit: 5 });
-              const { data, error } = result;
-              const denied = Boolean(error) || !data || data.length === 0;
-              ledgerListProbe("leading-slash", folder, result, denied);
-              expect(denied).toBe(true);
-            },
-          );
+          it(`user ${dir.attacker.toUpperCase()} cannot LIST '/${dir.owner.toUpperCase()}/' (leading-slash) folder in ${bucket}`, async () => {
+            const folder = `/${dir.victimTenantId()}/`;
+            const result = await dir
+              .attackerClient()
+              .storage.from(bucket)
+              .list(folder, { limit: 5 });
+            const { data, error } = result;
+            const denied = Boolean(error) || !data || data.length === 0;
+            ledgerListProbe("leading-slash", folder, result, denied);
+            expect(denied).toBe(true);
+          });
         }
       }
     },
@@ -2821,47 +3058,50 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       afterAll(async () => {
-        await sweepTestArtifacts(PRIVATE_BUCKET, [attackerRoot, victimTenantId]);
+        await sweepTestArtifacts(PRIVATE_BUCKET, [
+          attackerRoot,
+          victimTenantId,
+        ]);
         await sweepTestArtifacts(ASSETS_BUCKET, [attackerRoot, victimTenantId]);
       });
 
       for (const bucket of [PRIVATE_BUCKET, ASSETS_BUCKET]) {
         for (const variant of lateSegmentPaths(attackerRoot, victimTenantId)) {
-          it(
-            `anon cannot upload with victim id at '${variant.label}' to ${bucket}`,
-            async () => {
-              const result = await Promise.race([
-                anon.storage
-                  .from(bucket)
-                  .upload(variant.path, fileText(`anon-late-${variant.label}`), {
-                    upsert: true,
-                  }),
-                new Promise<{ error: Error; data: null }>((resolve) =>
-                  setTimeout(
-                    () => resolve({ error: new Error("network-timeout"), data: null }),
-                    4000,
-                  ),
+          it(`anon cannot upload with victim id at '${variant.label}' to ${bucket}`, async () => {
+            const result = await Promise.race([
+              anon.storage
+                .from(bucket)
+                .upload(variant.path, fileText(`anon-late-${variant.label}`), {
+                  upsert: true,
+                }),
+              new Promise<{ error: Error; data: null }>((resolve) =>
+                setTimeout(
+                  () =>
+                    resolve({
+                      error: new Error("network-timeout"),
+                      data: null,
+                    }),
+                  4000,
                 ),
-              ]);
+              ),
+            ]);
 
-              const { httpStatus, errorCode } = extractStorageError(result);
-              recordUpload({
-                bucket,
-                path: variant.path,
-                attacker: "anon",
-                owner: "fake-tenant",
-                expected: "denied",
-                outcome: result.error ? "denied" : "allowed",
-                errorMessage: result.error?.message,
-                httpStatus,
-                errorCode,
-                scenario: `late-segment:${variant.label}`,
-              });
+            const { httpStatus, errorCode } = extractStorageError(result);
+            recordUpload({
+              bucket,
+              path: variant.path,
+              attacker: "anon",
+              owner: "fake-tenant",
+              expected: "denied",
+              outcome: result.error ? "denied" : "allowed",
+              errorMessage: result.error?.message,
+              httpStatus,
+              errorCode,
+              scenario: `late-segment:${variant.label}`,
+            });
 
-              expect(result.error).toBeTruthy();
-            },
-            15000,
-          );
+            expect(result.error).toBeTruthy();
+          }, 15000);
         }
       }
     },
@@ -2891,13 +3131,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           email: liveCreds.a.email!,
           password: liveCreds.a.password!,
         });
-        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+        if (signInAError)
+          throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
 
         const { error: signInBError } = await clientB.auth.signInWithPassword({
           email: liveCreds.b.email!,
           password: liveCreds.b.password!,
         });
-        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+        if (signInBError)
+          throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
       });
 
       afterAll(async () => {
@@ -2905,8 +3147,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
         // Last-line preflight (see live-cross-tenant-flat block).
         const preflightClients = {
-          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
-          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+          [liveCreds.a.tenantId!]: {
+            client: clientA,
+            email: liveCreds.a.email,
+          },
+          [liveCreds.b.tenantId!]: {
+            client: clientB,
+            email: liveCreds.b.email,
+          },
         };
         const preflight = await cleanupPreflight({
           tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
@@ -2923,12 +3171,18 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         await sweepTestArtifacts(
           PRIVATE_BUCKET,
           [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
-          { scope: "live-cross-tenant-late-segment:sweep", clients: preflightClients },
+          {
+            scope: "live-cross-tenant-late-segment:sweep",
+            clients: preflightClients,
+          },
         );
         await sweepTestArtifacts(
           ASSETS_BUCKET,
           [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
-          { scope: "live-cross-tenant-late-segment:sweep", clients: preflightClients },
+          {
+            scope: "live-cross-tenant-late-segment:sweep",
+            clients: preflightClients,
+          },
         );
       });
 
@@ -2969,87 +3223,88 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             "victim-embedded-in-filename",
             "victim-mimicking-rls-test-root",
           ]) {
-            it(
-              `user ${dir.attacker.toUpperCase()} writing under OWN root with victim ${dir.owner.toUpperCase()}'s id at '${labelHint}' must not target ${dir.owner.toUpperCase()} (${bucket})`,
-              async () => {
-                // Anchor under the ATTACKER's run-id folder so the
-                // first segment passes the tenant check AND any object
-                // that does land lives under a folder our cleanup
-                // sweep already covers.
-                const attackerRunRoot = `${dir.attackerRoot()}/__rls_test__/${RUN_ID}/late-seg`;
-                const variant = lateSegmentPaths(attackerRunRoot, dir.victimTenantId()).find(
-                  (v) => v.label === labelHint,
-                )!;
+            it(`user ${dir.attacker.toUpperCase()} writing under OWN root with victim ${dir.owner.toUpperCase()}'s id at '${labelHint}' must not target ${dir.owner.toUpperCase()} (${bucket})`, async () => {
+              // Anchor under the ATTACKER's run-id folder so the
+              // first segment passes the tenant check AND any object
+              // that does land lives under a folder our cleanup
+              // sweep already covers.
+              const attackerRunRoot = `${dir.attackerRoot()}/__rls_test__/${RUN_ID}/late-seg`;
+              const variant = lateSegmentPaths(
+                attackerRunRoot,
+                dir.victimTenantId(),
+              ).find((v) => v.label === labelHint)!;
 
-                lateAttempts.push({
-                  bucket,
-                  path: variant.path,
-                  attacker: dir.attacker,
-                  owner: dir.owner,
-                });
+              lateAttempts.push({
+                bucket,
+                path: variant.path,
+                attacker: dir.attacker,
+                owner: dir.owner,
+              });
 
-                // The upload MIGHT succeed under the attacker's own
-                // folder — that's fine, the policy correctly scopes
-                // by segment 1. What matters is that the VICTIM's
-                // folder stays untouched.
-                // Bounded upload — replaces an earlier inline Promise.race
-                // whose losing SDK promise could keep the process alive
-                // long after the test passed, eventually tripping the
-                // step timeout and canceling the whole job.
-                const uploadResult = await storageCall(
-                  () =>
-                    dir
-                      .attackerClient()
-                      .storage.from(bucket)
-                      .upload(
-                        variant.path,
-                        fileText(`${dir.attacker}-late-${variant.label}`),
-                        { upsert: true },
-                      ),
-                  `late-segment upload ${bucket}/${variant.path}`,
-                  6000,
-                );
+              // The upload MIGHT succeed under the attacker's own
+              // folder — that's fine, the policy correctly scopes
+              // by segment 1. What matters is that the VICTIM's
+              // folder stays untouched.
+              // Bounded upload — replaces an earlier inline Promise.race
+              // whose losing SDK promise could keep the process alive
+              // long after the test passed, eventually tripping the
+              // step timeout and canceling the whole job.
+              const uploadResult = await storageCall(
+                () =>
+                  dir
+                    .attackerClient()
+                    .storage.from(bucket)
+                    .upload(
+                      variant.path,
+                      fileText(`${dir.attacker}-late-${variant.label}`),
+                      { upsert: true },
+                    ),
+                `late-segment upload ${bucket}/${variant.path}`,
+                6000,
+              );
 
-                const landedPath =
-                  !uploadResult.error && uploadResult.data
-                    ? // SDK returns either { path } or { Key } depending on version
-                      ((uploadResult.data as { path?: string }).path ??
-                        (uploadResult.data as { Key?: string }).Key ??
-                        variant.path)
-                    : null;
+              const landedPath =
+                !uploadResult.error && uploadResult.data
+                  ? // SDK returns either { path } or { Key } depending on version
+                    ((uploadResult.data as { path?: string }).path ??
+                    (uploadResult.data as { Key?: string }).Key ??
+                    variant.path)
+                  : null;
 
-                const { httpStatus, errorCode } = extractStorageError(uploadResult);
-                recordUpload({
-                  bucket,
-                  path: variant.path,
-                  attacker: dir.attacker,
-                  owner: dir.owner,
-                  expected: "denied",
-                  // "denied" = "did not land in the victim's folder"
-                  // — a successful upload under the attacker's own
-                  // root still counts as denial-of-target.
-                  outcome:
-                    landedPath && landedPath.startsWith(dir.victimTenantId())
-                      ? "allowed"
-                      : "denied",
-                  errorMessage: uploadResult.error?.message,
-                  httpStatus,
-                  errorCode,
-                  scenario: `late-segment:${variant.label}`,
-                });
+              const { httpStatus, errorCode } =
+                extractStorageError(uploadResult);
+              recordUpload({
+                bucket,
+                path: variant.path,
+                attacker: dir.attacker,
+                owner: dir.owner,
+                expected: "denied",
+                // "denied" = "did not land in the victim's folder"
+                // — a successful upload under the attacker's own
+                // root still counts as denial-of-target.
+                outcome:
+                  landedPath && landedPath.startsWith(dir.victimTenantId())
+                    ? "allowed"
+                    : "denied",
+                errorMessage: uploadResult.error?.message,
+                httpStatus,
+                errorCode,
+                scenario: `late-segment:${variant.label}`,
+              });
 
-                // Hard requirement #1: if anything landed, it must
-                // be under the attacker's own tenant prefix.
-                if (landedPath) {
-                  expect(landedPath.startsWith(dir.victimTenantId())).toBe(false);
-                }
+              // Hard requirement #1: if anything landed, it must
+              // be under the attacker's own tenant prefix.
+              if (landedPath) {
+                expect(landedPath.startsWith(dir.victimTenantId())).toBe(false);
+              }
 
-                // Hard requirement #2: the victim's mirror folder
-                // must not contain any artifact from this attempt.
-                // Bounded so a hung list() can't drag the suite past
-                // the job budget.
-                const victimRoot = `${dir.victimTenantId()}/__rls_test__/${RUN_ID}/late-seg`;
-                const { data: victimList, error: victimListError } = await storageCall(
+              // Hard requirement #2: the victim's mirror folder
+              // must not contain any artifact from this attempt.
+              // Bounded so a hung list() can't drag the suite past
+              // the job budget.
+              const victimRoot = `${dir.victimTenantId()}/__rls_test__/${RUN_ID}/late-seg`;
+              const { data: victimList, error: victimListError } =
+                await storageCall(
                   () =>
                     dir
                       .attackerClient()
@@ -3058,12 +3313,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
                   `late-segment list ${bucket}/${victimRoot}`,
                   6000,
                 );
-                const victimFolderClean =
-                  Boolean(victimListError) || !victimList || victimList.length === 0;
-                expect(victimFolderClean).toBe(true);
-              },
-              20000,
-            );
+              const victimFolderClean =
+                Boolean(victimListError) ||
+                !victimList ||
+                victimList.length === 0;
+              expect(victimFolderClean).toBe(true);
+            }, 20000);
           }
         }
       }
@@ -3110,36 +3365,52 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           email: liveCreds.a.email!,
           password: liveCreds.a.password!,
         });
-        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+        if (signInAError)
+          throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
 
         const { error: signInBError } = await clientB.auth.signInWithPassword({
           email: liveCreds.b.email!,
           password: liveCreds.b.password!,
         });
-        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+        if (signInBError)
+          throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
 
         // Seed one asset in each tenant's folder so the cross-tenant
         // list/download attempts have something real to find — otherwise
         // an empty result could mask a leak (we wouldn't be able to tell
         // "nothing to see" from "policy hid it").
-        const aPath = assetsOwnPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
+        const aPath = assetsOwnPath(
+          liveCreds.a.tenantId!,
+          "a-assets-isolation-seed",
+        );
         const { error: aErr } = await allowedStorageCall(
-          () => clientA.storage
-            .from(ASSETS_BUCKET)
-            .upload(aPath, fileText("a-assets-isolation-seed"), { upsert: true }),
+          () =>
+            clientA.storage
+              .from(ASSETS_BUCKET)
+              .upload(aPath, fileText("a-assets-isolation-seed"), {
+                upsert: true,
+              }),
           "A assets isolation seed upload",
         );
-        if (aErr) throw new Error(`Seed upload for tenant A failed: ${aErr.message}`);
+        if (aErr)
+          throw new Error(`Seed upload for tenant A failed: ${aErr.message}`);
         seededAssets.push({ path: aPath, client: "a" });
 
-        const bPath = assetsOwnPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
+        const bPath = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-assets-isolation-seed",
+        );
         const { error: bErr } = await allowedStorageCall(
-          () => clientB.storage
-            .from(ASSETS_BUCKET)
-            .upload(bPath, fileText("b-assets-isolation-seed"), { upsert: true }),
+          () =>
+            clientB.storage
+              .from(ASSETS_BUCKET)
+              .upload(bPath, fileText("b-assets-isolation-seed"), {
+                upsert: true,
+              }),
           "B assets isolation seed upload",
         );
-        if (bErr) throw new Error(`Seed upload for tenant B failed: ${bErr.message}`);
+        if (bErr)
+          throw new Error(`Seed upload for tenant B failed: ${bErr.message}`);
         seededAssets.push({ path: bPath, client: "b" });
       });
 
@@ -3148,8 +3419,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
         // Last-line preflight (see live-cross-tenant-flat block).
         const preflightClients = {
-          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
-          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+          [liveCreds.a.tenantId!]: {
+            client: clientA,
+            email: liveCreds.a.email,
+          },
+          [liveCreds.b.tenantId!]: {
+            client: clientB,
+            email: liveCreds.b.email,
+          },
         };
         const preflight = await cleanupPreflight({
           tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
@@ -3161,13 +3438,20 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // seededAssets has no `bucket` field — it's all ASSETS_BUCKET. Map
         // to the shared shape so we get the same per-call timeout treatment.
         await teardownOwnedPaths(
-          seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
+          seededAssets.map((s) => ({
+            bucket: ASSETS_BUCKET,
+            path: s.path,
+            client: s.client,
+          })),
           clientFor,
         );
         await sweepTestArtifacts(
           ASSETS_BUCKET,
           [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
-          { scope: "live-cross-tenant-assets-isolation:sweep", clients: preflightClients },
+          {
+            scope: "live-cross-tenant-assets-isolation:sweep",
+            clients: preflightClients,
+          },
         );
       });
 
@@ -3180,12 +3464,19 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         expect(data).toBeTruthy();
         // Must include the seed we just uploaded.
         const names = (data ?? []).map((entry) => entry.name);
-        expect(names.some((n) => n.includes("a-assets-isolation-seed"))).toBe(true);
+        expect(names.some((n) => n.includes("a-assets-isolation-seed"))).toBe(
+          true,
+        );
       });
 
       it("user A CAN download their own tenant-assets file via authenticated client", async () => {
-        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
-        const { data, error } = await clientA.storage.from(ASSETS_BUCKET).download(path);
+        const path = assetsOwnPath(
+          liveCreds.a.tenantId!,
+          "a-assets-isolation-seed",
+        );
+        const { data, error } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .download(path);
         expect(error).toBeNull();
         expect(data).toBeTruthy();
       });
@@ -3199,7 +3490,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // critical assertion: B's seed file MUST NOT appear in A's result.
         const leaked =
           Array.isArray(data) &&
-          data.some((entry) => entry.name && entry.name.includes("b-assets-isolation-seed"));
+          data.some(
+            (entry) =>
+              entry.name && entry.name.includes("b-assets-isolation-seed"),
+          );
         expect(leaked).toBe(false);
         const denied = Boolean(error) || !data || data.length === 0;
         expect(denied).toBe(true);
@@ -3211,7 +3505,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           .list(assetsRunRootFor(liveCreds.b.tenantId!), { limit: 50 });
         const leaked =
           Array.isArray(data) &&
-          data.some((entry) => entry.name && entry.name.includes("b-assets-isolation-seed"));
+          data.some(
+            (entry) =>
+              entry.name && entry.name.includes("b-assets-isolation-seed"),
+          );
         expect(leaked).toBe(false);
         const denied = Boolean(error) || !data || data.length === 0;
         expect(denied).toBe(true);
@@ -3223,7 +3520,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           .list(liveCreds.a.tenantId!, { limit: 50 });
         const leaked =
           Array.isArray(data) &&
-          data.some((entry) => entry.name && entry.name.includes("a-assets-isolation-seed"));
+          data.some(
+            (entry) =>
+              entry.name && entry.name.includes("a-assets-isolation-seed"),
+          );
         expect(leaked).toBe(false);
         const denied = Boolean(error) || !data || data.length === 0;
         expect(denied).toBe(true);
@@ -3235,7 +3535,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           .list(assetsRunRootFor(liveCreds.a.tenantId!), { limit: 50 });
         const leaked =
           Array.isArray(data) &&
-          data.some((entry) => entry.name && entry.name.includes("a-assets-isolation-seed"));
+          data.some(
+            (entry) =>
+              entry.name && entry.name.includes("a-assets-isolation-seed"),
+          );
         expect(leaked).toBe(false);
         const denied = Boolean(error) || !data || data.length === 0;
         expect(denied).toBe(true);
@@ -3248,15 +3551,25 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // via that channel — that would imply the SELECT policy is keyed on
       // bucket alone instead of `foldername(name)[1] = tenant_id`.
       it.skip("user A cannot DOWNLOAD tenant B's tenant-assets file via authenticated client", async () => {
-        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
-        const { data, error } = await clientA.storage.from(ASSETS_BUCKET).download(path);
+        const path = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-assets-isolation-seed",
+        );
+        const { data, error } = await clientA.storage
+          .from(ASSETS_BUCKET)
+          .download(path);
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
       });
 
       it.skip("user B cannot DOWNLOAD tenant A's tenant-assets file via authenticated client", async () => {
-        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
-        const { data, error } = await clientB.storage.from(ASSETS_BUCKET).download(path);
+        const path = assetsOwnPath(
+          liveCreds.a.tenantId!,
+          "a-assets-isolation-seed",
+        );
+        const { data, error } = await clientB.storage
+          .from(ASSETS_BUCKET)
+          .download(path);
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
       });
@@ -3276,7 +3589,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           .list(liveCreds.a.tenantId!, { limit: 50 });
         const leaked =
           Array.isArray(data) &&
-          data.some((entry) => entry.name && entry.name.includes("a-assets-isolation-seed"));
+          data.some(
+            (entry) =>
+              entry.name && entry.name.includes("a-assets-isolation-seed"),
+          );
         expect(leaked).toBe(false);
         const denied = Boolean(error) || !data || data.length === 0;
         expect(denied).toBe(true);
@@ -3289,7 +3605,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           .list(assetsRunRootFor(liveCreds.b.tenantId!), { limit: 50 });
         const leaked =
           Array.isArray(data) &&
-          data.some((entry) => entry.name && entry.name.includes("b-assets-isolation-seed"));
+          data.some(
+            (entry) =>
+              entry.name && entry.name.includes("b-assets-isolation-seed"),
+          );
         expect(leaked).toBe(false);
         const denied = Boolean(error) || !data || data.length === 0;
         expect(denied).toBe(true);
@@ -3297,16 +3616,26 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
       it.skip("anon cannot DOWNLOAD tenant A's seeded tenant-assets file via authenticated client", async () => {
         const anonClient = newAnonClient();
-        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-assets-isolation-seed");
-        const { data, error } = await anonClient.storage.from(ASSETS_BUCKET).download(path);
+        const path = assetsOwnPath(
+          liveCreds.a.tenantId!,
+          "a-assets-isolation-seed",
+        );
+        const { data, error } = await anonClient.storage
+          .from(ASSETS_BUCKET)
+          .download(path);
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
       });
 
       it.skip("anon cannot DOWNLOAD tenant B's seeded tenant-assets file via authenticated client", async () => {
         const anonClient = newAnonClient();
-        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-assets-isolation-seed");
-        const { data, error } = await anonClient.storage.from(ASSETS_BUCKET).download(path);
+        const path = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-assets-isolation-seed",
+        );
+        const { data, error } = await anonClient.storage
+          .from(ASSETS_BUCKET)
+          .download(path);
         const denied = Boolean(error) || !data;
         expect(denied).toBe(true);
       });
@@ -3355,43 +3684,65 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           email: liveCreds.a.email!,
           password: liveCreds.a.password!,
         });
-        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+        if (signInAError)
+          throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
 
         const { error: signInBError } = await clientB.auth.signInWithPassword({
           email: liveCreds.b.email!,
           password: liveCreds.b.password!,
         });
-        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+        if (signInBError)
+          throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
 
         // Seed one distinctively-named asset per tenant so prefix/search
         // probes have a real target. Names embed a probe marker so a
         // leak is unambiguous in test output.
-        const aPath = assetsOwnPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const aPath = assetsOwnPath(
+          liveCreds.a.tenantId!,
+          "a-probe-target-asset",
+        );
         const { error: aErr } = await allowedStorageCall(
-          () => clientA.storage
-            .from(ASSETS_BUCKET)
-            .upload(aPath, fileText("a-probe-target-asset"), { upsert: true }),
+          () =>
+            clientA.storage
+              .from(ASSETS_BUCKET)
+              .upload(aPath, fileText("a-probe-target-asset"), {
+                upsert: true,
+              }),
           "A probe seed upload",
         );
-        if (aErr) throw new Error(`Probe seed for tenant A failed: ${aErr.message}`);
+        if (aErr)
+          throw new Error(`Probe seed for tenant A failed: ${aErr.message}`);
         seededAssets.push({ path: aPath, client: "a" });
 
-        const bPath = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const bPath = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-probe-target-asset",
+        );
         const { error: bErr } = await allowedStorageCall(
-          () => clientB.storage
-            .from(ASSETS_BUCKET)
-            .upload(bPath, fileText("b-probe-target-asset"), { upsert: true }),
+          () =>
+            clientB.storage
+              .from(ASSETS_BUCKET)
+              .upload(bPath, fileText("b-probe-target-asset"), {
+                upsert: true,
+              }),
           "B probe seed upload",
         );
-        if (bErr) throw new Error(`Probe seed for tenant B failed: ${bErr.message}`);
+        if (bErr)
+          throw new Error(`Probe seed for tenant B failed: ${bErr.message}`);
         seededAssets.push({ path: bPath, client: "b" });
       });
 
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
         const preflightClients = {
-          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
-          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+          [liveCreds.a.tenantId!]: {
+            client: clientA,
+            email: liveCreds.a.email,
+          },
+          [liveCreds.b.tenantId!]: {
+            client: clientB,
+            email: liveCreds.b.email,
+          },
         };
         const preflight = await cleanupPreflight({
           tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
@@ -3400,13 +3751,20 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         });
         if (!preflight.ok) return;
         await teardownOwnedPaths(
-          seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
+          seededAssets.map((s) => ({
+            bucket: ASSETS_BUCKET,
+            path: s.path,
+            client: s.client,
+          })),
           clientFor,
         );
         await sweepTestArtifacts(
           ASSETS_BUCKET,
           [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
-          { scope: "live-cross-tenant-existence-oracle:sweep", clients: preflightClients },
+          {
+            scope: "live-cross-tenant-existence-oracle:sweep",
+            clients: preflightClients,
+          },
         );
       });
 
@@ -3416,7 +3774,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // granted — i.e. the attacker has just confirmed the file exists
       // AND has been handed a usable download URL. Either is fatal.
       it("user A cannot createSignedUrl for tenant B's seeded tenant-assets file", async () => {
-        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const path = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-probe-target-asset",
+        );
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
           .createSignedUrl(path, 60);
@@ -3425,7 +3786,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it("user B cannot createSignedUrl for tenant A's seeded tenant-assets file", async () => {
-        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const path = assetsOwnPath(
+          liveCreds.a.tenantId!,
+          "a-probe-target-asset",
+        );
         const { data, error } = await clientB.storage
           .from(ASSETS_BUCKET)
           .createSignedUrl(path, 60);
@@ -3438,7 +3802,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // `signedUrl` for the foreign-tenant path is a leak even if other
       // entries error out.
       it("user A cannot batch-sign URLs for tenant B's seeded tenant-assets file", async () => {
-        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const path = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-probe-target-asset",
+        );
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
           .createSignedUrls([path], 60);
@@ -3460,10 +3827,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user A cannot enumerate tenant B's tenant-assets via list({ search })", async () => {
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
-          .list(liveCreds.b.tenantId!, { limit: 50, search: "b-probe-target-asset" });
+          .list(liveCreds.b.tenantId!, {
+            limit: 50,
+            search: "b-probe-target-asset",
+          });
         const leaked =
           Array.isArray(data) &&
-          data.some((entry) => entry.name && entry.name.includes("b-probe-target-asset"));
+          data.some(
+            (entry) =>
+              entry.name && entry.name.includes("b-probe-target-asset"),
+          );
         expect(leaked).toBe(false);
         const denied = Boolean(error) || !data || data.length === 0;
         expect(denied).toBe(true);
@@ -3472,10 +3845,16 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       it("user B cannot enumerate tenant A's tenant-assets via list({ search })", async () => {
         const { data, error } = await clientB.storage
           .from(ASSETS_BUCKET)
-          .list(liveCreds.a.tenantId!, { limit: 50, search: "a-probe-target-asset" });
+          .list(liveCreds.a.tenantId!, {
+            limit: 50,
+            search: "a-probe-target-asset",
+          });
         const leaked =
           Array.isArray(data) &&
-          data.some((entry) => entry.name && entry.name.includes("a-probe-target-asset"));
+          data.some(
+            (entry) =>
+              entry.name && entry.name.includes("a-probe-target-asset"),
+          );
         expect(leaked).toBe(false);
         const denied = Boolean(error) || !data || data.length === 0;
         expect(denied).toBe(true);
@@ -3487,8 +3866,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // exists. We point the destination at the attacker's OWN folder
       // so a hypothetical bypass would actually materialise the leak.
       it("user A cannot copy() tenant B's seeded tenant-assets file", async () => {
-        const sourcePath = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
-        const destPath = assetsOwnPath(liveCreds.a.tenantId!, "a-copy-from-b-probe");
+        const sourcePath = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-probe-target-asset",
+        );
+        const destPath = assetsOwnPath(
+          liveCreds.a.tenantId!,
+          "a-copy-from-b-probe",
+        );
         const { data, error } = await clientA.storage
           .from(ASSETS_BUCKET)
           .copy(sourcePath, destPath);
@@ -3504,7 +3889,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           const { data: remData, error: remErr } = await clientA.storage
             .from(ASSETS_BUCKET)
             .remove([destPath]);
-          const removed = !remErr && Array.isArray(remData) && remData.length > 0;
+          const removed =
+            !remErr && Array.isArray(remData) && remData.length > 0;
           recordCleanup({
             bucket: ASSETS_BUCKET,
             path: destPath,
@@ -3526,8 +3912,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it("user B cannot move() tenant A's seeded tenant-assets file", async () => {
-        const sourcePath = assetsOwnPath(liveCreds.a.tenantId!, "a-probe-target-asset");
-        const destPath = assetsOwnPath(liveCreds.b.tenantId!, "b-move-from-a-probe");
+        const sourcePath = assetsOwnPath(
+          liveCreds.a.tenantId!,
+          "a-probe-target-asset",
+        );
+        const destPath = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-move-from-a-probe",
+        );
         const { data, error } = await clientB.storage
           .from(ASSETS_BUCKET)
           .move(sourcePath, destPath);
@@ -3537,7 +3929,8 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           const { data: remData, error: remErr } = await clientB.storage
             .from(ASSETS_BUCKET)
             .remove([destPath]);
-          const removed = !remErr && Array.isArray(remData) && remData.length > 0;
+          const removed =
+            !remErr && Array.isArray(remData) && remData.length > 0;
           recordCleanup({
             bucket: ASSETS_BUCKET,
             path: destPath,
@@ -3567,7 +3960,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // assertion still holds vacuously (nothing to call → nothing to
       // leak). When present, it MUST refuse the foreign tenant.
       it.skip("user A cannot info()/stat tenant B's seeded tenant-assets file", async () => {
-        const path = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const path = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-probe-target-asset",
+        );
         const bucketApi = clientA.storage.from(ASSETS_BUCKET) as unknown as {
           info?: (p: string) => Promise<{ data: unknown; error: unknown }>;
         };
@@ -3581,7 +3977,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it.skip("user B cannot info()/stat tenant A's seeded tenant-assets file", async () => {
-        const path = assetsOwnPath(liveCreds.a.tenantId!, "a-probe-target-asset");
+        const path = assetsOwnPath(
+          liveCreds.a.tenantId!,
+          "a-probe-target-asset",
+        );
         const bucketApi = clientB.storage.from(ASSETS_BUCKET) as unknown as {
           info?: (p: string) => Promise<{ data: unknown; error: unknown }>;
         };
@@ -3601,7 +4000,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // both technically "fail"). The expectation: both paths produce
       // the same shape of denial and never one-hit/one-miss.
       it.skip("user A's foreign-tenant download() failures are indistinguishable for existing vs. missing paths", async () => {
-        const existingForeign = assetsOwnPath(liveCreds.b.tenantId!, "b-probe-target-asset");
+        const existingForeign = assetsOwnPath(
+          liveCreds.b.tenantId!,
+          "b-probe-target-asset",
+        );
         const missingForeign = ownPath(
           liveCreds.b.tenantId!,
           `definitely-missing-${Math.random().toString(36).slice(2, 10)}`,
@@ -3665,7 +4067,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // RLS on `storage.objects` evaluates the literal `name` value,
       // so any of these that resolves server-side back to victim's
       // file would constitute a bypass.
-      const buildTrickyPaths = (attackerTenant: string, victimTenant: string) => {
+      const buildTrickyPaths = (
+        attackerTenant: string,
+        victimTenant: string,
+      ) => {
         const victimLeaf = `${assetsRunRootFor(victimTenant)}/b-traversal-target.txt`;
         return [
           // Classic `..` traversal out of attacker's folder into victim's.
@@ -3713,13 +4118,15 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           email: liveCreds.a.email!,
           password: liveCreds.a.password!,
         });
-        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+        if (signInAError)
+          throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
 
         const { error: signInBError } = await clientB.auth.signInWithPassword({
           email: liveCreds.b.email!,
           password: liveCreds.b.password!,
         });
-        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+        if (signInBError)
+          throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
 
         // Seed one file per tenant under the run-scoped root so the
         // tricky paths point at REAL victim objects. We deliberately
@@ -3727,30 +4134,44 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // mirror for A) so `buildTrickyPaths` can reconstruct it.
         const aPath = `${assetsRunRootFor(liveCreds.a.tenantId!)}/a-traversal-target.txt`;
         const { error: aErr } = await allowedStorageCall(
-          () => clientA.storage
-            .from(ASSETS_BUCKET)
-            .upload(aPath, fileText("a-traversal-target"), { upsert: true }),
+          () =>
+            clientA.storage
+              .from(ASSETS_BUCKET)
+              .upload(aPath, fileText("a-traversal-target"), { upsert: true }),
           "A traversal seed upload",
         );
-        if (aErr) throw new Error(`Traversal seed for tenant A failed: ${aErr.message}`);
+        if (aErr)
+          throw new Error(
+            `Traversal seed for tenant A failed: ${aErr.message}`,
+          );
         seededAssets.push({ path: aPath, client: "a" });
 
         const bPath = `${assetsRunRootFor(liveCreds.b.tenantId!)}/b-traversal-target.txt`;
         const { error: bErr } = await allowedStorageCall(
-          () => clientB.storage
-            .from(ASSETS_BUCKET)
-            .upload(bPath, fileText("b-traversal-target"), { upsert: true }),
+          () =>
+            clientB.storage
+              .from(ASSETS_BUCKET)
+              .upload(bPath, fileText("b-traversal-target"), { upsert: true }),
           "B traversal seed upload",
         );
-        if (bErr) throw new Error(`Traversal seed for tenant B failed: ${bErr.message}`);
+        if (bErr)
+          throw new Error(
+            `Traversal seed for tenant B failed: ${bErr.message}`,
+          );
         seededAssets.push({ path: bPath, client: "b" });
       });
 
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
         const preflightClients = {
-          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
-          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+          [liveCreds.a.tenantId!]: {
+            client: clientA,
+            email: liveCreds.a.email,
+          },
+          [liveCreds.b.tenantId!]: {
+            client: clientB,
+            email: liveCreds.b.email,
+          },
         };
         const preflight = await cleanupPreflight({
           tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
@@ -3759,13 +4180,20 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         });
         if (!preflight.ok) return;
         await teardownOwnedPaths(
-          seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
+          seededAssets.map((s) => ({
+            bucket: ASSETS_BUCKET,
+            path: s.path,
+            client: s.client,
+          })),
           clientFor,
         );
         await sweepTestArtifacts(
           ASSETS_BUCKET,
           [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
-          { scope: "live-cross-tenant-traversal:sweep", clients: preflightClients },
+          {
+            scope: "live-cross-tenant-traversal:sweep",
+            clients: preflightClients,
+          },
         );
       });
 
@@ -3775,7 +4203,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // attacker isn't authorized to see — i.e. a bypass. We also
       // assert the bytes (when leaked) don't match the victim's seed.
       it.skip("user A cannot download() tenant B's seeded asset via any tricky path", async () => {
-        const trickyPaths = buildTrickyPaths(liveCreds.a.tenantId!, liveCreds.b.tenantId!);
+        const trickyPaths = buildTrickyPaths(
+          liveCreds.a.tenantId!,
+          liveCreds.b.tenantId!,
+        );
         const victimBytes = fileText("b-traversal-target");
 
         for (const tricky of trickyPaths) {
@@ -3799,12 +4230,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       });
 
       it.skip("user B cannot download() tenant A's seeded asset via any tricky path", async () => {
-        const trickyPaths = buildTrickyPaths(liveCreds.b.tenantId!, liveCreds.a.tenantId!).map(
-          (p) =>
-            // Swap the leaf so the probe references A's seed instead
-            // of B's. `buildTrickyPaths` hard-codes `b-traversal-...`;
-            // for the reverse direction we substitute it.
-            p.replace("b-traversal-target.txt", "a-traversal-target.txt"),
+        const trickyPaths = buildTrickyPaths(
+          liveCreds.b.tenantId!,
+          liveCreds.a.tenantId!,
+        ).map((p) =>
+          // Swap the leaf so the probe references A's seed instead
+          // of B's. `buildTrickyPaths` hard-codes `b-traversal-...`;
+          // for the reverse direction we substitute it.
+          p.replace("b-traversal-target.txt", "a-traversal-target.txt"),
         );
         const victimBytes = fileText("a-traversal-target");
 
@@ -3844,12 +4277,19 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             .list(parent, { limit: 50 });
           const leaked =
             Array.isArray(data) &&
-            data.some((entry) => entry.name && entry.name.includes("b-traversal-target"));
-          expect(leaked, `tricky list prefix leaked entries: ${parent}`).toBe(false);
+            data.some(
+              (entry) =>
+                entry.name && entry.name.includes("b-traversal-target"),
+            );
+          expect(leaked, `tricky list prefix leaked entries: ${parent}`).toBe(
+            false,
+          );
           // Either the server errors or returns an empty list — both
           // are acceptable denial shapes.
           const denied = Boolean(error) || !data || data.length === 0;
-          expect(denied, `tricky list prefix returned data: ${parent}`).toBe(true);
+          expect(denied, `tricky list prefix returned data: ${parent}`).toBe(
+            true,
+          );
         }
       });
 
@@ -3859,14 +4299,19 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // attacker can hand the URL to a third party. Any non-null
       // `signedUrl` must be treated as a hard failure.
       it("user A cannot createSignedUrl() for tenant B's seeded asset via any tricky path", async () => {
-        const trickyPaths = buildTrickyPaths(liveCreds.a.tenantId!, liveCreds.b.tenantId!);
+        const trickyPaths = buildTrickyPaths(
+          liveCreds.a.tenantId!,
+          liveCreds.b.tenantId!,
+        );
 
         for (const tricky of trickyPaths) {
           const { data, error } = await clientA.storage
             .from(ASSETS_BUCKET)
             .createSignedUrl(tricky, 60);
           const denied = Boolean(error) || !data?.signedUrl;
-          expect(denied, `tricky path produced signed URL: ${tricky}`).toBe(true);
+          expect(denied, `tricky path produced signed URL: ${tricky}`).toBe(
+            true,
+          );
         }
       });
 
@@ -3877,7 +4322,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       // pinned SDK versions expose `info()`; when absent the test
       // passes vacuously rather than failing on the missing API.
       it.skip("user A cannot info()/stat tenant B's seeded asset via any tricky path", async () => {
-        const trickyPaths = buildTrickyPaths(liveCreds.a.tenantId!, liveCreds.b.tenantId!);
+        const trickyPaths = buildTrickyPaths(
+          liveCreds.a.tenantId!,
+          liveCreds.b.tenantId!,
+        );
         const bucketApi = clientA.storage.from(ASSETS_BUCKET) as unknown as {
           info?: (p: string) => Promise<{ data: unknown; error: unknown }>;
         };
@@ -3930,22 +4378,25 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           email: liveCreds.a.email!,
           password: liveCreds.a.password!,
         });
-        if (signInAError) throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
+        if (signInAError)
+          throw new Error(`Tenant A sign-in failed: ${signInAError.message}`);
 
         const { error: signInBError } = await clientB.auth.signInWithPassword({
           email: liveCreds.b.email!,
           password: liveCreds.b.password!,
         });
-        if (signInBError) throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
+        if (signInBError)
+          throw new Error(`Tenant B sign-in failed: ${signInBError.message}`);
 
         // Seed one publicly addressable asset per tenant. The leaf
         // names are distinctive so leak detection in list() can
         // unambiguously flag them.
         const aPath = `${assetsRunRootFor(liveCreds.a.tenantId!)}/a-public-cdn-seed.txt`;
         const { error: aErr } = await allowedStorageCall(
-          () => clientA.storage
-            .from(ASSETS_BUCKET)
-            .upload(aPath, fileText("a-public-cdn-seed"), { upsert: true }),
+          () =>
+            clientA.storage
+              .from(ASSETS_BUCKET)
+              .upload(aPath, fileText("a-public-cdn-seed"), { upsert: true }),
           "A public CDN seed upload",
         );
         if (aErr) throw new Error(`Seed for tenant A failed: ${aErr.message}`);
@@ -3953,9 +4404,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
 
         const bPath = `${assetsRunRootFor(liveCreds.b.tenantId!)}/b-public-cdn-seed.txt`;
         const { error: bErr } = await allowedStorageCall(
-          () => clientB.storage
-            .from(ASSETS_BUCKET)
-            .upload(bPath, fileText("b-public-cdn-seed"), { upsert: true }),
+          () =>
+            clientB.storage
+              .from(ASSETS_BUCKET)
+              .upload(bPath, fileText("b-public-cdn-seed"), { upsert: true }),
           "B public CDN seed upload",
         );
         if (bErr) throw new Error(`Seed for tenant B failed: ${bErr.message}`);
@@ -3965,8 +4417,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
       afterAll(async () => {
         const clientFor = (key: "a" | "b") => (key === "a" ? clientA : clientB);
         const preflightClients = {
-          [liveCreds.a.tenantId!]: { client: clientA, email: liveCreds.a.email },
-          [liveCreds.b.tenantId!]: { client: clientB, email: liveCreds.b.email },
+          [liveCreds.a.tenantId!]: {
+            client: clientA,
+            email: liveCreds.a.email,
+          },
+          [liveCreds.b.tenantId!]: {
+            client: clientB,
+            email: liveCreds.b.email,
+          },
         };
         const preflight = await cleanupPreflight({
           tenantIds: [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
@@ -3975,13 +4433,20 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         });
         if (!preflight.ok) return;
         await teardownOwnedPaths(
-          seededAssets.map((s) => ({ bucket: ASSETS_BUCKET, path: s.path, client: s.client })),
+          seededAssets.map((s) => ({
+            bucket: ASSETS_BUCKET,
+            path: s.path,
+            client: s.client,
+          })),
           clientFor,
         );
         await sweepTestArtifacts(
           ASSETS_BUCKET,
           [liveCreds.a.tenantId!, liveCreds.b.tenantId!],
-          { scope: "live-cross-tenant-public-cdn:sweep", clients: preflightClients },
+          {
+            scope: "live-cross-tenant-public-cdn:sweep",
+            clients: preflightClients,
+          },
         );
       });
 
@@ -3997,8 +4462,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // getPublicUrl() is a pure URL builder — no network, no auth
         // — so this is equivalent to constructing the CDN path by
         // hand but stays in lockstep with SDK conventions.
-        const urlA = clientA.storage.from(ASSETS_BUCKET).getPublicUrl(aPath).data.publicUrl;
-        const urlB = clientB.storage.from(ASSETS_BUCKET).getPublicUrl(bPath).data.publicUrl;
+        const urlA = clientA.storage.from(ASSETS_BUCKET).getPublicUrl(aPath)
+          .data.publicUrl;
+        const urlB = clientB.storage.from(ASSETS_BUCKET).getPublicUrl(bPath)
+          .data.publicUrl;
 
         // Strip any session cookies/headers by using a fresh global
         // fetch with no Authorization header. Private storage must
@@ -4008,8 +4475,12 @@ describe("Cross-Tenant Storage RLS Tests", () => {
           fetch(urlB, { headers: { "cache-control": "no-cache" } }),
         ]);
 
-        expect(respA.status, `expected 400 from private CDN URL ${urlA}`).toBe(400);
-        expect(respB.status, `expected 400 from private CDN URL ${urlB}`).toBe(400);
+        expect(respA.status, `expected 400 from private CDN URL ${urlA}`).toBe(
+          400,
+        );
+        expect(respB.status, `expected 400 from private CDN URL ${urlB}`).toBe(
+          400,
+        );
       });
 
       // ---------- Anon enumeration: list() must NOT reveal entries ----------
@@ -4030,10 +4501,19 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             .list(folder, { limit: 100 });
           const rootLeaked =
             Array.isArray(rootData) &&
-            rootData.some((entry) => entry.name && entry.name.includes("public-cdn-seed"));
-          expect(rootLeaked, `anon list() leaked tenant ${folder} root entries`).toBe(false);
-          const rootDenied = Boolean(rootError) || !rootData || rootData.length === 0;
-          expect(rootDenied, `anon list() returned data for tenant ${folder} root`).toBe(true);
+            rootData.some(
+              (entry) => entry.name && entry.name.includes("public-cdn-seed"),
+            );
+          expect(
+            rootLeaked,
+            `anon list() leaked tenant ${folder} root entries`,
+          ).toBe(false);
+          const rootDenied =
+            Boolean(rootError) || !rootData || rootData.length === 0;
+          expect(
+            rootDenied,
+            `anon list() returned data for tenant ${folder} root`,
+          ).toBe(true);
 
           // List the run-scoped subfolder where the seed actually lives —
           // a more targeted enumeration attempt.
@@ -4042,10 +4522,19 @@ describe("Cross-Tenant Storage RLS Tests", () => {
             .list(assetsRunRootFor(folder), { limit: 100 });
           const subLeaked =
             Array.isArray(subData) &&
-            subData.some((entry) => entry.name && entry.name.includes("public-cdn-seed"));
-          expect(subLeaked, `anon list() leaked tenant ${folder} subfolder entries`).toBe(false);
-          const subDenied = Boolean(subError) || !subData || subData.length === 0;
-          expect(subDenied, `anon list() returned data for tenant ${folder} subfolder`).toBe(true);
+            subData.some(
+              (entry) => entry.name && entry.name.includes("public-cdn-seed"),
+            );
+          expect(
+            subLeaked,
+            `anon list() leaked tenant ${folder} subfolder entries`,
+          ).toBe(false);
+          const subDenied =
+            Boolean(subError) || !subData || subData.length === 0;
+          expect(
+            subDenied,
+            `anon list() returned data for tenant ${folder} subfolder`,
+          ).toBe(true);
         }
       });
     },
@@ -4083,7 +4572,10 @@ describe("Cross-Tenant Storage RLS Tests", () => {
   // disabled would be a guaranteed failure that masks the RLS-comparison
   // signal the operator is trying to capture by toggling the flag.
   describe.runIf(
-    hasSupabaseConfig && liveModeEnabled && Boolean(adminClient) && MULTIPART_SWEEP_ENABLED,
+    hasSupabaseConfig &&
+      liveModeEnabled &&
+      Boolean(adminClient) &&
+      MULTIPART_SWEEP_ENABLED,
   )(
     "Aborted cross-tenant upload leaves multipart orphan that admin sweep removes",
     () => {
@@ -4109,7 +4601,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         try {
           await adminClient
             .schema("storage")
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             .from("s3_multipart_uploads" as any)
             .delete()
             .eq("id", orphanId);
@@ -4131,7 +4623,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // default.
         const { error: insertErr } = await adminClient
           .schema("storage")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           .from("s3_multipart_uploads" as any)
           .insert({
             id: orphanId,
@@ -4150,7 +4642,6 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         if (insertErr) {
           const msg = insertErr.message ?? "";
           if (isUnsupportedStorageSchemaError(msg)) {
-            // eslint-disable-next-line no-console
             console.warn(
               `[multipart-orphan-test] Skipping: storage.s3_multipart_uploads not available (${msg})`,
             );
@@ -4165,11 +4656,14 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // post-sweep "row is gone" assertion pass for the wrong reason.
         const { data: preSweep, error: preSweepErr } = await adminClient
           .schema("storage")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           .from("s3_multipart_uploads" as any)
           .select("id, key")
           .eq("id", orphanId);
-        expect(preSweepErr, `pre-sweep select failed: ${preSweepErr?.message}`).toBeNull();
+        expect(
+          preSweepErr,
+          `pre-sweep select failed: ${preSweepErr?.message}`,
+        ).toBeNull();
         expect(
           Array.isArray(preSweep) && preSweep.length === 1,
           "synthetic orphan was not visible after insert — test cannot proceed",
@@ -4182,16 +4676,21 @@ describe("Cross-Tenant Storage RLS Tests", () => {
         // here (only for tenant A's id) exercises the same scope filter
         // (`bucket + tenant prefix + RUN_ID substring`) that protects
         // real customer data from being touched.
-        await sweepMultipartIntermediates(PRIVATE_BUCKET, [liveCreds.a.tenantId!]);
+        await sweepMultipartIntermediates(PRIVATE_BUCKET, [
+          liveCreds.a.tenantId!,
+        ]);
 
         // ---------- 4. Verify the orphan is gone ----------
         const { data: postSweep, error: postSweepErr } = await adminClient
           .schema("storage")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           .from("s3_multipart_uploads" as any)
           .select("id, key")
           .eq("id", orphanId);
-        expect(postSweepErr, `post-sweep select failed: ${postSweepErr?.message}`).toBeNull();
+        expect(
+          postSweepErr,
+          `post-sweep select failed: ${postSweepErr?.message}`,
+        ).toBeNull();
         expect(
           Array.isArray(postSweep) && postSweep.length === 0,
           `multipart orphan still present after sweep: ${JSON.stringify(postSweep)}`,
@@ -4203,7 +4702,7 @@ describe("Cross-Tenant Storage RLS Tests", () => {
     },
   );
 
-  describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => { 
+  describe.skipIf(hasSupabaseConfig)("Skipped: missing Supabase config", () => {
     it("test environment is missing VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY", () => {
       expect(true).toBe(true);
     });

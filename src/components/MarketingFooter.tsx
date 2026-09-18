@@ -13,7 +13,12 @@ const MarketingFooter = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-1">
             <div className="mb-4">
-              <Logo variant="negative" size="sm" showText={true} className="text-primary-foreground" />
+              <Logo
+                variant="negative"
+                size="sm"
+                showText={true}
+                className="text-primary-foreground"
+              />
             </div>
             <p className="text-sm text-primary-foreground/70 leading-relaxed">
               {t("footer.tagline")}
@@ -26,12 +31,17 @@ const MarketingFooter = () => {
             </h4>
             <ul className="space-y-2.5">
               <li>
-                <Link to="/pricing" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/pricing"
+                  className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                >
                   {t("nav.pricing")}
                 </Link>
               </li>
               <li>
-                <span className="text-sm text-primary-foreground/40">{t("footer.featuresComingSoon")}</span>
+                <span className="text-sm text-primary-foreground/40">
+                  {t("footer.featuresComingSoon")}
+                </span>
               </li>
             </ul>
           </div>
@@ -42,12 +52,18 @@ const MarketingFooter = () => {
             </h4>
             <ul className="space-y-2.5">
               <li>
-                <Link to="/about" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/about"
+                  className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                >
                   {t("nav.about")}
                 </Link>
               </li>
               <li>
-                <Link to="/support" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/support"
+                  className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                >
                   Support
                 </Link>
               </li>
@@ -60,32 +76,50 @@ const MarketingFooter = () => {
             </h4>
             <ul className="space-y-2.5">
               <li>
-                <Link to="/privacy" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/privacy"
+                  className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                >
                   {t("footer.privacyPolicy")}
                 </Link>
               </li>
               <li>
-                <Link to="/legal/retention" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/legal/retention"
+                  className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                >
                   Data retention
                 </Link>
               </li>
               <li>
-                <Link to="/legal/subprocessors" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/legal/subprocessors"
+                  className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                >
                   Subprocessors
                 </Link>
               </li>
               <li>
-                <Link to="/legal/dpa" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/legal/dpa"
+                  className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                >
                   DPA
                 </Link>
               </li>
               <li>
-                <Link to="/security" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/security"
+                  className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                >
                   Security
                 </Link>
               </li>
               <li>
-                <Link to="/accessibility" className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors">
+                <Link
+                  to="/accessibility"
+                  className="text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                >
                   {t("nav.accessibility")}
                 </Link>
               </li>
@@ -111,10 +145,10 @@ const MarketingFooter = () => {
             loading="lazy"
           />
           <p className="text-xs text-primary-foreground/40">
-            © {new Date().getFullYear()} MimmoBook. {t("footer.allRightsReserved")}
+            © {new Date().getFullYear()} MimmoBook.{" "}
+            {t("footer.allRightsReserved")}
           </p>
         </div>
-
       </div>
     </footer>
   );

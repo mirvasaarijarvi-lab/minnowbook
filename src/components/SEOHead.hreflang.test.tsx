@@ -19,9 +19,15 @@ afterEach(() => {
 
 describe("localizedUrl", () => {
   it("keeps English on the bare path and adds ?lang= for others", () => {
-    expect(localizedUrl("/use-cases", "en")).toBe("https://mimmobook.com/use-cases");
-    expect(localizedUrl("/use-cases", "fi")).toBe("https://mimmobook.com/use-cases?lang=fi");
-    expect(localizedUrl("/use-cases", "sv")).toBe("https://mimmobook.com/use-cases?lang=sv");
+    expect(localizedUrl("/use-cases", "en")).toBe(
+      "https://mimmobook.com/use-cases",
+    );
+    expect(localizedUrl("/use-cases", "fi")).toBe(
+      "https://mimmobook.com/use-cases?lang=fi",
+    );
+    expect(localizedUrl("/use-cases", "sv")).toBe(
+      "https://mimmobook.com/use-cases?lang=sv",
+    );
   });
 });
 
@@ -41,13 +47,15 @@ describe("SEOHead hreflang and canonical", () => {
 
   it("self-references the canonical of the active language", () => {
     renderHead("fi");
-    expect(document.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe(
-      "https://mimmobook.com/use-cases?lang=fi",
-    );
+    expect(
+      document.querySelector('link[rel="canonical"]')?.getAttribute("href"),
+    ).toBe("https://mimmobook.com/use-cases?lang=fi");
     expect(document.documentElement.getAttribute("lang")).toBe("fi");
-    expect(document.querySelector('meta[property="og:locale"]')?.getAttribute("content")).toBe(
-      "fi_FI",
-    );
+    expect(
+      document
+        .querySelector('meta[property="og:locale"]')
+        ?.getAttribute("content"),
+    ).toBe("fi_FI");
   });
 
   it("does not duplicate alternates across renders", () => {
@@ -55,7 +63,8 @@ describe("SEOHead hreflang and canonical", () => {
     cleanup();
     renderHead("sv");
     expect(
-      document.querySelectorAll('link[rel="alternate"][data-seo-hreflang]').length,
+      document.querySelectorAll('link[rel="alternate"][data-seo-hreflang]')
+        .length,
     ).toBe(4);
   });
 });

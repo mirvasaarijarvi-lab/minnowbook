@@ -37,7 +37,9 @@ let doc;
 try {
   doc = JSON.parse(fs.readFileSync(filePath, "utf8"));
 } catch (e) {
-  console.error(`::error file=${filePath}::SARIF file is not valid JSON: ${e.message}`);
+  console.error(
+    `::error file=${filePath}::SARIF file is not valid JSON: ${e.message}`,
+  );
   process.exit(1);
 }
 
@@ -63,10 +65,18 @@ if (Array.isArray(doc.runs)) {
     } else if (!run.tool.driver || typeof run.tool.driver !== "object") {
       fail(`${at}.tool.driver is required.`);
     } else {
-      if (typeof run.tool.driver.name !== "string" || run.tool.driver.name.length === 0) {
-        fail(`${at}.tool.driver.name is required and must be a non-empty string.`);
+      if (
+        typeof run.tool.driver.name !== "string" ||
+        run.tool.driver.name.length === 0
+      ) {
+        fail(
+          `${at}.tool.driver.name is required and must be a non-empty string.`,
+        );
       }
-      if (run.tool.driver.rules !== undefined && !Array.isArray(run.tool.driver.rules)) {
+      if (
+        run.tool.driver.rules !== undefined &&
+        !Array.isArray(run.tool.driver.rules)
+      ) {
         fail(`${at}.tool.driver.rules must be an array when present.`);
       }
     }
@@ -75,8 +85,10 @@ if (Array.isArray(doc.runs)) {
     }
     const ruleIds = new Set(
       Array.isArray(run.tool?.driver?.rules)
-        ? run.tool.driver.rules.map((r) => r && r.id).filter((x) => typeof x === "string")
-        : []
+        ? run.tool.driver.rules
+            .map((r) => r && r.id)
+            .filter((x) => typeof x === "string")
+        : [],
     );
     if (Array.isArray(run.results)) {
       run.results.forEach((res, xi) => {
@@ -88,12 +100,17 @@ if (Array.isArray(doc.runs)) {
         if (typeof res.ruleId !== "string" || res.ruleId.length === 0) {
           fail(`${rat}.ruleId is required and must be a non-empty string.`);
         } else if (ruleIds.size > 0 && !ruleIds.has(res.ruleId)) {
-          fail(`${rat}.ruleId="${res.ruleId}" does not match any rule defined in tool.driver.rules.`);
+          fail(
+            `${rat}.ruleId="${res.ruleId}" does not match any rule defined in tool.driver.rules.`,
+          );
         }
         if (!res.message || typeof res.message.text !== "string") {
           fail(`${rat}.message.text is required.`);
         }
-        if (res.level !== undefined && !["none", "note", "warning", "error"].includes(res.level)) {
+        if (
+          res.level !== undefined &&
+          !["none", "note", "warning", "error"].includes(res.level)
+        ) {
           fail(`${rat}.level "${res.level}" is not a valid SARIF level.`);
         }
       });
@@ -102,11 +119,22 @@ if (Array.isArray(doc.runs)) {
 }
 
 if (errors.length > 0) {
-  console.error(`::error file=${filePath}::SARIF health check failed for ${filePath}:`);
+  console.error(
+    `::error file=${filePath}::SARIF health check failed for ${filePath}:`,
+  );
   for (const e of errors) console.error(` - ${e}`);
   process.exit(1);
 }
 
-const totalResults = doc.runs.reduce((n, r) => n + (Array.isArray(r.results) ? r.results.length : 0), 0);
-const totalRules = doc.runs.reduce((n, r) => n + (Array.isArray(r.tool?.driver?.rules) ? r.tool.driver.rules.length : 0), 0);
-console.log(`SARIF health check OK: ${filePath} (${doc.runs.length} run(s), ${totalRules} rule(s), ${totalResults} result(s)).`);
+const totalResults = doc.runs.reduce(
+  (n, r) => n + (Array.isArray(r.results) ? r.results.length : 0),
+  0,
+);
+const totalRules = doc.runs.reduce(
+  (n, r) =>
+    n + (Array.isArray(r.tool?.driver?.rules) ? r.tool.driver.rules.length : 0),
+  0,
+);
+console.log(
+  `SARIF health check OK: ${filePath} (${doc.runs.length} run(s), ${totalRules} rule(s), ${totalResults} result(s)).`,
+);

@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import { Activity, CheckCircle2, XCircle, ShieldAlert, RefreshCw, Users, Clock } from "lucide-react";
+import {
+  Activity,
+  CheckCircle2,
+  XCircle,
+  ShieldAlert,
+  RefreshCw,
+  Users,
+  Clock,
+} from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -17,7 +25,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
@@ -92,7 +106,9 @@ function StatCard({
         <span>{label}</span>
       </div>
       <div className={`mt-2 text-2xl font-semibold ${toneClass}`}>{value}</div>
-      {hint ? <div className="mt-1 text-xs text-muted-foreground">{hint}</div> : null}
+      {hint ? (
+        <div className="mt-1 text-xs text-muted-foreground">{hint}</div>
+      ) : null}
     </div>
   );
 }
@@ -103,9 +119,12 @@ const RedemptionMetricsPanel = () => {
   const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
     queryKey: ["redemption-metrics", windowKey],
     queryFn: async (): Promise<Metrics> => {
-      const { data, error } = await supabase.rpc("get_redemption_metrics_24h" as never, {
-        p_hours: WINDOW_HOURS[windowKey],
-      } as never);
+      const { data, error } = await supabase.rpc(
+        "get_redemption_metrics_24h" as never,
+        {
+          p_hours: WINDOW_HOURS[windowKey],
+        } as never,
+      );
       if (error) throw error;
       return data as unknown as Metrics;
     },
@@ -143,7 +162,10 @@ const RedemptionMetricsPanel = () => {
             <Activity className="h-5 w-5" /> Access Code Redemption Metrics
           </CardTitle>
           <div className="flex items-center gap-2">
-            <Select value={windowKey} onValueChange={(v) => setWindowKey(v as WindowKey)}>
+            <Select
+              value={windowKey}
+              onValueChange={(v) => setWindowKey(v as WindowKey)}
+            >
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -160,7 +182,9 @@ const RedemptionMetricsPanel = () => {
               disabled={isFetching}
               aria-label="Refresh"
             >
-              <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+              />
             </Button>
           </div>
         </div>
@@ -171,7 +195,8 @@ const RedemptionMetricsPanel = () => {
       <CardContent className="space-y-6">
         {isError ? (
           <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-            Failed to load metrics: {(error as Error)?.message ?? "unknown error"}
+            Failed to load metrics:{" "}
+            {(error as Error)?.message ?? "unknown error"}
           </div>
         ) : null}
 
@@ -184,7 +209,11 @@ const RedemptionMetricsPanel = () => {
         ) : (
           <>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <StatCard label="Attempts" value={totals.attempts} icon={Activity} />
+              <StatCard
+                label="Attempts"
+                value={totals.attempts}
+                icon={Activity}
+              />
               <StatCard
                 label="Successes"
                 value={totals.success}
@@ -231,9 +260,20 @@ const RedemptionMetricsPanel = () => {
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={11} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--border))"
+                    />
+                    <XAxis
+                      dataKey="label"
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={11}
+                    />
+                    <YAxis
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={11}
+                      allowDecimals={false}
+                    />
                     <Tooltip
                       contentStyle={{
                         background: "hsl(var(--popover))",
@@ -243,9 +283,24 @@ const RedemptionMetricsPanel = () => {
                       }}
                     />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar dataKey="success" stackId="a" fill="hsl(142 71% 45%)" name="Success" />
-                    <Bar dataKey="failure" stackId="a" fill="hsl(0 84% 60%)" name="Failure" />
-                    <Bar dataKey="rate_limit" stackId="a" fill="hsl(38 92% 50%)" name="Rate limit" />
+                    <Bar
+                      dataKey="success"
+                      stackId="a"
+                      fill="hsl(142 71% 45%)"
+                      name="Success"
+                    />
+                    <Bar
+                      dataKey="failure"
+                      stackId="a"
+                      fill="hsl(0 84% 60%)"
+                      name="Failure"
+                    />
+                    <Bar
+                      dataKey="rate_limit"
+                      stackId="a"
+                      fill="hsl(38 92% 50%)"
+                      name="Rate limit"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -258,10 +313,16 @@ const RedemptionMetricsPanel = () => {
 
             {topReasons.length > 0 ? (
               <div>
-                <h4 className="mb-2 text-sm font-medium">Top rejection reasons</h4>
+                <h4 className="mb-2 text-sm font-medium">
+                  Top rejection reasons
+                </h4>
                 <div className="flex flex-wrap gap-2">
                   {topReasons.map(([reason, count]) => (
-                    <Badge key={reason} variant="secondary" className="font-mono text-xs">
+                    <Badge
+                      key={reason}
+                      variant="secondary"
+                      className="font-mono text-xs"
+                    >
                       {reason}: {count}
                     </Badge>
                   ))}

@@ -47,7 +47,10 @@ const ProfileSettings = () => {
   }, [profile]);
 
   const updateProfile = useMutation({
-    mutationFn: async (updates: { display_name: string; avatar_url: string | null }) => {
+    mutationFn: async (updates: {
+      display_name: string;
+      avatar_url: string | null;
+    }) => {
       if (!user?.id || !tenantId) throw new Error("Not authenticated");
       const { error } = await supabase
         .from("tenant_users")
@@ -78,12 +81,17 @@ const ProfileSettings = () => {
 
     setUploading(true);
     try {
-      const { sanitizeFileExtension, sanitizePathSegment } = await import("@/lib/sanitize-path");
-      const { assertSafeStorageObjectPath } = await import("@/lib/storage-path");
+      const { sanitizeFileExtension, sanitizePathSegment } =
+        await import("@/lib/sanitize-path");
+      const { assertSafeStorageObjectPath } =
+        await import("@/lib/storage-path");
       const ext = sanitizeFileExtension(file.name.split(".").pop());
       const safeTenant = sanitizePathSegment(tenantId!);
       const safeUser = sanitizePathSegment(user.id);
-      const path = assertSafeStorageObjectPath(`${safeTenant}/avatars/${safeUser}.${ext}`, { callsite: "profile:avatar-upload", tenantId: tenantId ?? undefined });
+      const path = assertSafeStorageObjectPath(
+        `${safeTenant}/avatars/${safeUser}.${ext}`,
+        { callsite: "profile:avatar-upload", tenantId: tenantId ?? undefined },
+      );
 
       const { error: uploadError } = await supabase.storage
         .from("tenant-assets")
@@ -96,7 +104,10 @@ const ProfileSettings = () => {
 
       const newUrl = `${urlData.publicUrl}?t=${Date.now()}`;
       setAvatarUrl(newUrl);
-      await updateProfile.mutateAsync({ display_name: displayName, avatar_url: newUrl });
+      await updateProfile.mutateAsync({
+        display_name: displayName,
+        avatar_url: newUrl,
+      });
     } catch (err) {
       const { isInvalidStoragePathError } = await import("@/lib/storage-path");
       toast.error(
@@ -115,11 +126,19 @@ const ProfileSettings = () => {
   };
 
   const handleSave = () => {
-    updateProfile.mutate({ display_name: displayName.trim(), avatar_url: avatarUrl });
+    updateProfile.mutate({
+      display_name: displayName.trim(),
+      avatar_url: avatarUrl,
+    });
   };
 
   const initials = displayName
-    ? displayName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    ? displayName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
     : user?.email?.[0]?.toUpperCase() || "?";
 
   if (isLoading) {
@@ -144,7 +163,10 @@ const ProfileSettings = () => {
           <div className="flex items-center gap-4">
             <div className="relative group">
               <Avatar className="h-20 w-20 border-2 border-border">
-                <AvatarImage src={avatarUrl || undefined} alt={displayName || "Avatar"} />
+                <AvatarImage
+                  src={avatarUrl || undefined}
+                  alt={displayName || "Avatar"}
+                />
                 <AvatarFallback className="text-lg font-semibold bg-primary/10 text-primary">
                   {initials}
                 </AvatarFallback>
@@ -167,10 +189,16 @@ const ProfileSettings = () => {
                 disabled={uploading}
                 className="gap-1.5"
               >
-                {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                {uploading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Upload className="h-3.5 w-3.5" />
+                )}
                 {uploading ? "Uploading…" : "Upload photo"}
               </Button>
-              <p className="text-xs text-muted-foreground">JPG, PNG or WebP. Max 2MB.</p>
+              <p className="text-xs text-muted-foreground">
+                JPG, PNG or WebP. Max 2MB.
+              </p>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -210,7 +238,9 @@ const ProfileSettings = () => {
             disabled={updateProfile.isPending}
             className="w-full sm:w-auto"
           >
-            {updateProfile.isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            {updateProfile.isPending && (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            )}
             Save Changes
           </Button>
         </CardContent>

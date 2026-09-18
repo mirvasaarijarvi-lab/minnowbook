@@ -64,11 +64,14 @@ const leg = (spec: LegSpec): Row => {
   const breakfast = spec.breakfast ?? true;
   const rate = spec.breakfastRate === undefined ? 11.35 : spec.breakfastRate;
   const gross = roundCents(
-    spec.nightly * spec.nights + (breakfast && rate ? rate * guests * spec.nights : 0),
+    spec.nightly * spec.nights +
+      (breakfast && rate ? rate * guests * spec.nights : 0),
   );
   let charged = gross;
-  if (spec.percent !== undefined) charged = roundCents(gross * (1 - spec.percent / 100));
-  if (spec.coupon !== undefined) charged = roundCents(Math.max(0, charged - spec.coupon));
+  if (spec.percent !== undefined)
+    charged = roundCents(gross * (1 - spec.percent / 100));
+  if (spec.coupon !== undefined)
+    charged = roundCents(Math.max(0, charged - spec.coupon));
   if (spec.override !== undefined) charged = roundCents(spec.override);
   return {
     label: spec.label,
@@ -114,39 +117,58 @@ const checkExports = (rows: Row[]) => {
     // CSV: parse the split cell back the way a spreadsheet reader would.
     const split = parseCsvSplitCell(csv.total);
     if (split) {
-      expect(roundCents(split.room + split.breakfast), `csv split ${r.label}`).toBe(split.total);
+      expect(
+        roundCents(split.room + split.breakfast),
+        `csv split ${r.label}`,
+      ).toBe(split.total);
       expect(split.total, `csv total ${r.label}`).toBe(roundCents(a.charged));
       expect(Number(csv.price), `csv price cell ${r.label}`).toBe(split.room);
       csvTotalCents += Math.round(split.total * 100);
     } else {
-      expect(Number(csv.total), `csv plain total ${r.label}`).toBe(roundCents(a.charged));
+      expect(Number(csv.total), `csv plain total ${r.label}`).toBe(
+        roundCents(a.charged),
+      );
       csvTotalCents += Math.round(Number(csv.total) * 100);
     }
 
     // PDF: three money columns, room + breakfast === total.
     const pdfRoom = Number(pdf.room);
-    const pdfBreakfast = pdf.breakfast === PDF_NO_AMOUNT ? 0 : Number(pdf.breakfast);
+    const pdfBreakfast =
+      pdf.breakfast === PDF_NO_AMOUNT ? 0 : Number(pdf.breakfast);
     const pdfTotal = Number(pdf.total);
-    expect(roundCents(pdfRoom + pdfBreakfast), `pdf split ${r.label}`).toBe(pdfTotal);
+    expect(roundCents(pdfRoom + pdfBreakfast), `pdf split ${r.label}`).toBe(
+      pdfTotal,
+    );
     expect(pdfTotal, `pdf total ${r.label}`).toBe(roundCents(a.charged));
     pdfTotalCents += Math.round(pdfTotal * 100);
 
     // Print view: strip the markup and read the figures back.
-    const printNumbers = print.total.replace(/<[^>]*>/g, " ").match(/-?\d+\.\d{2}/g) ?? [];
+    const printNumbers =
+      print.total.replace(/<[^>]*>/g, " ").match(/-?\d+\.\d{2}/g) ?? [];
     const printTotal = Number(printNumbers[printNumbers.length - 1]);
     expect(printTotal, `print total ${r.label}`).toBe(roundCents(a.charged));
     if (printNumbers.length === 3) {
-      expect(roundCents(Number(printNumbers[0]) + Number(printNumbers[1])), `print split ${r.label}`)
-        .toBe(printTotal);
+      expect(
+        roundCents(Number(printNumbers[0]) + Number(printNumbers[1])),
+        `print split ${r.label}`,
+      ).toBe(printTotal);
     }
     printTotalCents += Math.round(printTotal * 100);
   }
 
   const totals = sumReportAmounts(rows);
-  expect(roundCents(csvTotalCents / 100), "csv period total").toBe(totals.charged);
-  expect(roundCents(pdfTotalCents / 100), "pdf period total").toBe(totals.charged);
-  expect(roundCents(printTotalCents / 100), "print period total").toBe(totals.charged);
-  expect(roundCents(totals.room + totals.breakfast), "period split").toBe(totals.charged);
+  expect(roundCents(csvTotalCents / 100), "csv period total").toBe(
+    totals.charged,
+  );
+  expect(roundCents(pdfTotalCents / 100), "pdf period total").toBe(
+    totals.charged,
+  );
+  expect(roundCents(printTotalCents / 100), "print period total").toBe(
+    totals.charged,
+  );
+  expect(roundCents(totals.room + totals.breakfast), "period split").toBe(
+    totals.charged,
+  );
   return totals;
 };
 
@@ -253,14 +275,27 @@ describe("fractional pricing and discounts across several resources", () => {
         breakfastRate: 8.85,
       }),
     ];
-    for (const r of rows) expect(reportAmounts(r).room).toBeGreaterThanOrEqual(0);
+    for (const r of rows)
+      expect(reportAmounts(r).room).toBeGreaterThanOrEqual(0);
     checkExports(rows);
   });
 
   it("reconciles mixed stored and missing breakfast rates across resources", () => {
     const rows = [
-      leg({ label: "stored rate", nightly: 101.01, nights: 3, guests: 2, breakfastRate: 12.55 }),
-      leg({ label: "no rate saved", nightly: 101.01, nights: 3, guests: 2, breakfastRate: null }),
+      leg({
+        label: "stored rate",
+        nightly: 101.01,
+        nights: 3,
+        guests: 2,
+        breakfastRate: 12.55,
+      }),
+      leg({
+        label: "no rate saved",
+        nightly: 101.01,
+        nights: 3,
+        guests: 2,
+        breakfastRate: null,
+      }),
       leg({
         label: "no breakfast taken",
         nightly: 101.01,
@@ -281,11 +316,21 @@ describe("fractional pricing and discounts across several resources", () => {
       seed = (seed * 1103515245 + 12345) % 2147483648;
       return seed / 2147483648;
     };
-    const pick = <T,>(xs: T[]) => xs[Math.floor(rnd() * xs.length)];
+    const pick = <T>(xs: T[]) => xs[Math.floor(rnd() * xs.length)];
 
     const rows: Row[] = [];
     for (let i = 0; i < 900; i++) {
-      const percent = pick([undefined, 0, 0.01, 5.5, 12.345, 33.333, 66.667, 93.5, 100]);
+      const percent = pick([
+        undefined,
+        0,
+        0.01,
+        5.5,
+        12.345,
+        33.333,
+        66.667,
+        93.5,
+        100,
+      ]);
       const coupon = pick([undefined, undefined, 0.01, 12.34, 50, 333.33]);
       rows.push(
         leg({
@@ -294,7 +339,16 @@ describe("fractional pricing and discounts across several resources", () => {
           nightly: roundCents(37 + rnd() * 320 + rnd()),
           nights: 1 + Math.floor(rnd() * 21),
           guests: 1 + Math.floor(rnd() * 12),
-          breakfastRate: pick([null, 6.67, 8.85, 11.35, 13.33, 16.66, 19.99, 0]),
+          breakfastRate: pick([
+            null,
+            6.67,
+            8.85,
+            11.35,
+            13.33,
+            16.66,
+            19.99,
+            0,
+          ]),
           breakfast: rnd() > 0.2,
           percent: percent as number | undefined,
           coupon: coupon as number | undefined,

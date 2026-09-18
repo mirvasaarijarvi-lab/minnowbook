@@ -91,9 +91,9 @@ const ApprovalQueuePanel = () => {
           table: "resources",
           label: r.name,
           detail: r.resource_type,
-          site_name: r.site_id ? siteMap.get(r.site_id) ?? null : null,
+          site_name: r.site_id ? (siteMap.get(r.site_id) ?? null) : null,
           created_at: r.created_at ?? "",
-        })
+        }),
       );
 
       // Blocked slots
@@ -108,9 +108,9 @@ const ApprovalQueuePanel = () => {
           table: "blocked_slots",
           label: `${b.date} — ${b.resource_type}`,
           detail: b.reason || t("approval.noReason"),
-          site_name: b.site_id ? siteMap.get(b.site_id) ?? null : null,
+          site_name: b.site_id ? (siteMap.get(b.site_id) ?? null) : null,
           created_at: b.created_at ?? "",
-        })
+        }),
       );
 
       // Recurring blocked slots
@@ -125,15 +125,17 @@ const ApprovalQueuePanel = () => {
           table: "recurring_blocked_slots",
           label: `${DAY_NAMES[r.day_of_week]} — ${r.resource_type}`,
           detail: r.reason || t("approval.noReason"),
-          site_name: r.site_id ? siteMap.get(r.site_id) ?? null : null,
+          site_name: r.site_id ? (siteMap.get(r.site_id) ?? null) : null,
           created_at: r.created_at ?? "",
-        })
+        }),
       );
 
       // Opening hours
       const { data: hours } = await supabase
         .from("tenant_opening_hours")
-        .select("id, day_of_week, resource_type, open_time, close_time, is_closed, site_id, created_at")
+        .select(
+          "id, day_of_week, resource_type, open_time, close_time, is_closed, site_id, created_at",
+        )
         .eq("tenant_id", tenantId!)
         .eq("approval_status", "pending");
       (hours ?? []).forEach((h) =>
@@ -141,10 +143,12 @@ const ApprovalQueuePanel = () => {
           id: h.id,
           table: "tenant_opening_hours",
           label: `${DAY_NAMES[h.day_of_week]} — ${h.resource_type}`,
-          detail: h.is_closed ? t("approval.closed") : `${h.open_time ?? "?"} – ${h.close_time ?? "?"}`,
-          site_name: h.site_id ? siteMap.get(h.site_id) ?? null : null,
+          detail: h.is_closed
+            ? t("approval.closed")
+            : `${h.open_time ?? "?"} – ${h.close_time ?? "?"}`,
+          site_name: h.site_id ? (siteMap.get(h.site_id) ?? null) : null,
           created_at: h.created_at ?? "",
-        })
+        }),
       );
 
       // Email templates
@@ -159,9 +163,9 @@ const ApprovalQueuePanel = () => {
           table: "tenant_email_templates",
           label: `${t.template_type} (${t.language ?? "en"})`,
           detail: t.subject,
-          site_name: t.site_id ? siteMap.get(t.site_id) ?? null : null,
+          site_name: t.site_id ? (siteMap.get(t.site_id) ?? null) : null,
           created_at: t.created_at ?? "",
-        })
+        }),
       );
 
       return items;
@@ -186,12 +190,22 @@ const ApprovalQueuePanel = () => {
       toast({ title: t("approval.approved") });
     },
     onError: (err: any) => {
-      toast({ title: t("common.status"), description: err.message, variant: "destructive" });
+      toast({
+        title: t("common.status"),
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
   const rejectMutation = useMutation({
-    mutationFn: async ({ item, reason }: { item: PendingItem; reason: string }) => {
+    mutationFn: async ({
+      item,
+      reason,
+    }: {
+      item: PendingItem;
+      reason: string;
+    }) => {
       const { error } = await supabase
         .from(item.table)
         .update({
@@ -209,13 +223,20 @@ const ApprovalQueuePanel = () => {
       toast({ title: t("approval.rejected") });
     },
     onError: (err: any) => {
-      toast({ title: t("common.status"), description: err.message, variant: "destructive" });
+      toast({
+        title: t("common.status"),
+        description: err.message,
+        variant: "destructive",
+      });
     },
   });
 
   const handleReject = () => {
     if (!rejectDialog || !rejectionReason.trim()) return;
-    rejectMutation.mutate({ item: rejectDialog, reason: rejectionReason.trim() });
+    rejectMutation.mutate({
+      item: rejectDialog,
+      reason: rejectionReason.trim(),
+    });
   };
 
   const count = pendingItems?.length ?? 0;
@@ -258,14 +279,21 @@ const ApprovalQueuePanel = () => {
                 <TableHead>{t("approval.colDetail")}</TableHead>
                 <TableHead>{t("approval.colSite")}</TableHead>
                 <TableHead>{t("approval.colSubmitted")}</TableHead>
-                {canApprove && <TableHead className="text-right">{t("approval.colActions")}</TableHead>}
+                {canApprove && (
+                  <TableHead className="text-right">
+                    {t("approval.colActions")}
+                  </TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {pendingItems!.map((item) => (
                 <TableRow key={`${item.table}-${item.id}`}>
                   <TableCell>
-                    <Badge variant="outline" className="text-xs whitespace-nowrap">
+                    <Badge
+                      variant="outline"
+                      className="text-xs whitespace-nowrap"
+                    >
                       <FileText className="h-3 w-3 mr-1" />
                       {t(TABLE_LABEL_KEYS[item.table])}
                     </Badge>
@@ -275,7 +303,9 @@ const ApprovalQueuePanel = () => {
                     {item.detail}
                   </TableCell>
                   <TableCell className="text-sm">
-                    {item.site_name ?? <span className="text-muted-foreground">—</span>}
+                    {item.site_name ?? (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                     {item.created_at
@@ -318,14 +348,21 @@ const ApprovalQueuePanel = () => {
       </Card>
 
       {/* Rejection reason dialog */}
-      <Dialog open={!!rejectDialog} onOpenChange={(open) => !open && setRejectDialog(null)}>
+      <Dialog
+        open={!!rejectDialog}
+        onOpenChange={(open) => !open && setRejectDialog(null)}
+      >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-serif">{t("approval.rejectChange")}</DialogTitle>
+            <DialogTitle className="font-serif">
+              {t("approval.rejectChange")}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <p className="text-sm text-muted-foreground">
-              {t("approval.rejectingLabel")} <strong>{rejectDialog?.label}</strong> ({t(TABLE_LABEL_KEYS[rejectDialog?.table ?? "resources"])})
+              {t("approval.rejectingLabel")}{" "}
+              <strong>{rejectDialog?.label}</strong> (
+              {t(TABLE_LABEL_KEYS[rejectDialog?.table ?? "resources"])})
             </p>
             <Textarea
               placeholder={t("approval.rejectionReason")}
@@ -339,7 +376,9 @@ const ApprovalQueuePanel = () => {
               onClick={handleReject}
               disabled={!rejectionReason.trim() || rejectMutation.isPending}
             >
-              {rejectMutation.isPending ? t("approval.rejecting") : t("approval.reject")}
+              {rejectMutation.isPending
+                ? t("approval.rejecting")
+                : t("approval.reject")}
             </Button>
           </div>
         </DialogContent>

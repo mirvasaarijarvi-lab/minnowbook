@@ -12,7 +12,10 @@ import { assertSafeStorageObjectPath } from "../src/lib/storage-path";
  */
 
 const MALICIOUS_PATHS: Array<{ label: string; path: string }> = [
-  { label: "parent traversal segment", path: "tenant/../other-tenant/secret.pdf" },
+  {
+    label: "parent traversal segment",
+    path: "tenant/../other-tenant/secret.pdf",
+  },
   { label: "leading parent traversal", path: "../etc/passwd" },
   { label: "current-dir segment", path: "tenant/./logo.png" },
   { label: "absolute unix path", path: "/etc/passwd" },
@@ -33,7 +36,9 @@ const MALICIOUS_PATHS: Array<{ label: string; path: string }> = [
 test.describe("Signed URL path-traversal hardening", () => {
   for (const { label, path } of MALICIOUS_PATHS) {
     test(`rejects ${label}`, () => {
-      expect(() => assertSafeStorageObjectPath(path)).toThrow(/invalid storage path/i);
+      expect(() => assertSafeStorageObjectPath(path)).toThrow(
+        /invalid storage path/i,
+      );
     });
   }
 
@@ -51,8 +56,12 @@ test.describe("Signed URL path-traversal hardening", () => {
 
   test("non-string input is rejected", () => {
     // @ts-expect-error - intentional misuse to verify runtime guard
-    expect(() => assertSafeStorageObjectPath(undefined)).toThrow(/invalid storage path/i);
+    expect(() => assertSafeStorageObjectPath(undefined)).toThrow(
+      /invalid storage path/i,
+    );
     // @ts-expect-error - intentional misuse to verify runtime guard
-    expect(() => assertSafeStorageObjectPath(123)).toThrow(/invalid storage path/i);
+    expect(() => assertSafeStorageObjectPath(123)).toThrow(
+      /invalid storage path/i,
+    );
   });
 });

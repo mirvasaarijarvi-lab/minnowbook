@@ -12,7 +12,13 @@ import { toast } from "sonner";
 import { Loader2, Clock } from "lucide-react";
 
 const DAY_KEYS: TranslationKey[] = [
-  "days.monday", "days.tuesday", "days.wednesday", "days.thursday", "days.friday", "days.saturday", "days.sunday",
+  "days.monday",
+  "days.tuesday",
+  "days.wednesday",
+  "days.thursday",
+  "days.friday",
+  "days.saturday",
+  "days.sunday",
 ];
 const DAY_INDEX_MAP = [1, 2, 3, 4, 5, 6, 0]; // display Mon-Sun, map to DB values
 
@@ -91,13 +97,21 @@ const ResourceOpeningHoursEditor = forwardRef<
               close_time: existing.close_time?.slice(0, 5) ?? "22:00",
               is_closed: existing.is_closed ?? false,
             }
-          : { day_of_week: dow, open_time: "09:00", close_time: "22:00", is_closed: false };
+          : {
+              day_of_week: dow,
+              open_time: "09:00",
+              close_time: "22:00",
+              is_closed: false,
+            };
       });
       setHours(mapped);
       const first = mapped.find((h) => !h.is_closed);
       if (first) {
         const allSame = mapped.every(
-          (h) => h.is_closed || (h.open_time === first.open_time && h.close_time === first.close_time)
+          (h) =>
+            h.is_closed ||
+            (h.open_time === first.open_time &&
+              h.close_time === first.close_time),
         );
         setSameEveryDay(allSame);
       }
@@ -177,7 +191,7 @@ const ResourceOpeningHoursEditor = forwardRef<
       },
       hasPendingChanges: () => isPending && enabled,
     }),
-    [dirty, enabled, hours, tenantId, isPending, sameEveryDay] // eslint-disable-line react-hooks/exhaustive-deps
+    [dirty, enabled, hours, tenantId, isPending, sameEveryDay], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   if (!isPending && isLoading) {
@@ -210,14 +224,20 @@ const ResourceOpeningHoursEditor = forwardRef<
             <Badge
               variant={sameEveryDay ? "default" : "outline"}
               className="cursor-pointer text-xs"
-              onClick={() => { setSameEveryDay(true); setDirty(true); }}
+              onClick={() => {
+                setSameEveryDay(true);
+                setDirty(true);
+              }}
             >
               {t("resourceHours.sameEveryDay")}
             </Badge>
             <Badge
               variant={!sameEveryDay ? "default" : "outline"}
               className="cursor-pointer text-xs"
-              onClick={() => { setSameEveryDay(false); setDirty(true); }}
+              onClick={() => {
+                setSameEveryDay(false);
+                setDirty(true);
+              }}
             >
               {t("resourceHours.perDay")}
             </Badge>
@@ -227,7 +247,9 @@ const ResourceOpeningHoursEditor = forwardRef<
             <div className="space-y-2">
               <div className="grid grid-cols-[1fr_1fr] gap-2">
                 <div>
-                  <Label className="text-xs text-muted-foreground">{t("resourceHours.openTime")}</Label>
+                  <Label className="text-xs text-muted-foreground">
+                    {t("resourceHours.openTime")}
+                  </Label>
                   <Input
                     type="time"
                     value={hours[0]?.open_time ?? "09:00"}
@@ -236,24 +258,35 @@ const ResourceOpeningHoursEditor = forwardRef<
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">{t("resourceHours.closeTime")}</Label>
+                  <Label className="text-xs text-muted-foreground">
+                    {t("resourceHours.closeTime")}
+                  </Label>
                   <Input
                     type="time"
                     value={hours[0]?.close_time ?? "22:00"}
-                    onChange={(e) => updateHour(0, "close_time", e.target.value)}
+                    onChange={(e) =>
+                      updateHour(0, "close_time", e.target.value)
+                    }
                     className="h-8 text-sm"
                   />
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">{t("resourceHours.sameEveryDayDesc")}</p>
+              <p className="text-xs text-muted-foreground">
+                {t("resourceHours.sameEveryDayDesc")}
+              </p>
               <div className="space-y-1 pt-1">
                 {hours.map((row, idx) => (
-                  <div key={row.day_of_week} className="flex items-center justify-between">
+                  <div
+                    key={row.day_of_week}
+                    className="flex items-center justify-between"
+                  >
                     <span className="text-xs">{t(DAY_KEYS[idx])}</span>
                     <div className="flex items-center gap-1.5">
                       <Switch
                         checked={row.is_closed}
-                        onCheckedChange={(checked) => updateHour(idx, "is_closed", checked)}
+                        onCheckedChange={(checked) =>
+                          updateHour(idx, "is_closed", checked)
+                        }
                         className="scale-75"
                       />
                       <span className="text-xs text-muted-foreground w-12">
@@ -277,21 +310,27 @@ const ResourceOpeningHoursEditor = forwardRef<
                   <Input
                     type="time"
                     value={row.open_time}
-                    onChange={(e) => updateHour(idx, "open_time", e.target.value)}
+                    onChange={(e) =>
+                      updateHour(idx, "open_time", e.target.value)
+                    }
                     disabled={row.is_closed}
                     className="h-7 text-xs"
                   />
                   <Input
                     type="time"
                     value={row.close_time}
-                    onChange={(e) => updateHour(idx, "close_time", e.target.value)}
+                    onChange={(e) =>
+                      updateHour(idx, "close_time", e.target.value)
+                    }
                     disabled={row.is_closed}
                     className="h-7 text-xs"
                   />
                   <div className="flex items-center gap-1">
                     <Switch
                       checked={row.is_closed}
-                      onCheckedChange={(checked) => updateHour(idx, "is_closed", checked)}
+                      onCheckedChange={(checked) =>
+                        updateHour(idx, "is_closed", checked)
+                      }
                       className="scale-75"
                     />
                     <span className="text-[10px] text-muted-foreground w-10">
@@ -324,18 +363,22 @@ const ResourceOpeningHoursEditor = forwardRef<
         </>
       )}
 
-      {!enabled && !isPending && existingHours && existingHours.length > 0 && dirty && (
-        <div className="flex justify-end pt-1">
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => saveMutation.mutate()}
-            disabled={saveMutation.isPending}
-          >
-            {t("resourceHours.removeHours")}
-          </Button>
-        </div>
-      )}
+      {!enabled &&
+        !isPending &&
+        existingHours &&
+        existingHours.length > 0 &&
+        dirty && (
+          <div className="flex justify-end pt-1">
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => saveMutation.mutate()}
+              disabled={saveMutation.isPending}
+            >
+              {t("resourceHours.removeHours")}
+            </Button>
+          </div>
+        )}
     </div>
   );
 });

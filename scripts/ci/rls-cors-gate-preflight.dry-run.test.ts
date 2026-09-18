@@ -60,7 +60,10 @@ describe("rls-cors-gate-preflight dry run", () => {
   });
 
   it("prints the same refusal reason as a real run, without annotations", () => {
-    const r = run({ ...liveEnv, VITE_SUPABASE_URL: "https://example.supabase.co/rest/v1" });
+    const r = run({
+      ...liveEnv,
+      VITE_SUPABASE_URL: "https://example.supabase.co/rest/v1",
+    });
     expect(r.out).toContain("VITE_SUPABASE_URL is misconfigured");
     expect(r.out).toContain("bare https origin");
     expect(r.out).not.toContain("::error");
@@ -95,7 +98,10 @@ describe("rls-cors-gate-preflight dry run", () => {
   });
 
   it("still fails a real run (no --dry-run) on the same bad configuration", () => {
-    const r = run({ ...liveEnv, VITE_SUPABASE_PUBLISHABLE_KEY: "not-a-jwt" }, []);
+    const r = run(
+      { ...liveEnv, VITE_SUPABASE_PUBLISHABLE_KEY: "not-a-jwt" },
+      [],
+    );
     expect(r.code).toBe(1);
     expect(r.out).toContain("::error");
     expect(r.outputs).toContain("mode=denied");

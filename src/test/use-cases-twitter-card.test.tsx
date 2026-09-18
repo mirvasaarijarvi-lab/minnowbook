@@ -59,13 +59,16 @@ afterEach(() => {
 });
 
 describe("use cases page Twitter Card", () => {
-  it.each(LANGS)("%s: uses a large image card with the localized image", (lang) => {
-    renderIn(lang);
-    expect(meta("twitter:card")).toBe("summary_large_image");
-    expect(meta("twitter:image")).toBe(
-      `https://mimmobook.com/og/use-cases-${lang}.png`,
-    );
-  });
+  it.each(LANGS)(
+    "%s: uses a large image card with the localized image",
+    (lang) => {
+      renderIn(lang);
+      expect(meta("twitter:card")).toBe("summary_large_image");
+      expect(meta("twitter:image")).toBe(
+        `https://mimmobook.com/og/use-cases-${lang}.png`,
+      );
+    },
+  );
 
   it.each(LANGS)("%s: Twitter copy matches the Open Graph copy", (lang) => {
     renderIn(lang);
@@ -111,7 +114,13 @@ describe("use cases page Twitter Card", () => {
   it("each language names its trades in the share title", () => {
     const expectedWords: Record<Language, string[]> = {
       en: ["barbers", "salons", "massage", "bakeries", "trainers"],
-      fi: ["partureille", "kampaajille", "hierojille", "leipomoille", "valmentajille"],
+      fi: [
+        "partureille",
+        "kampaajille",
+        "hierojille",
+        "leipomoille",
+        "valmentajille",
+      ],
       sv: ["barberare", "salonger", "massörer", "bagerier", "tränare"],
     };
     for (const lang of LANGS) {

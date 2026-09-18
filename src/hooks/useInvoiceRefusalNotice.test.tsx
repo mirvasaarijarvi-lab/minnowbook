@@ -15,13 +15,18 @@ vi.mock("sonner", () => ({
 
 vi.mock("@/hooks/useInvoiceRefusalMessage", () => ({
   useInvoiceRefusalMessage: () => (err: unknown) => ({
-    code: String(err).includes("already invoiced") ? "INVOICED_LOCKED" : "UNKNOWN",
+    code: String(err).includes("already invoiced")
+      ? "INVOICED_LOCKED"
+      : "UNKNOWN",
     message: `refusal: ${String(err)}`,
     serverReason: null,
   }),
 }));
 
-import { useInvoiceRefusalNotice, INVOICE_REFUSAL_TOAST_ID } from "./useInvoiceRefusalNotice";
+import {
+  useInvoiceRefusalNotice,
+  INVOICE_REFUSAL_TOAST_ID,
+} from "./useInvoiceRefusalNotice";
 
 describe("useInvoiceRefusalNotice", () => {
   beforeEach(() => {
@@ -40,9 +45,13 @@ describe("useInvoiceRefusalNotice", () => {
     });
 
     expect(errorMock).toHaveBeenCalledTimes(2);
-    expect(errorMock.mock.calls[0][1]).toEqual({ id: INVOICE_REFUSAL_TOAST_ID });
+    expect(errorMock.mock.calls[0][1]).toEqual({
+      id: INVOICE_REFUSAL_TOAST_ID,
+    });
     expect(errorMock.mock.calls[1][0]).toBe("refusal: already invoiced");
-    expect(errorMock.mock.calls[1][1]).toEqual({ id: INVOICE_REFUSAL_TOAST_ID });
+    expect(errorMock.mock.calls[1][1]).toEqual({
+      id: INVOICE_REFUSAL_TOAST_ID,
+    });
     // Each show dismisses the previous message first.
     expect(dismissMock).toHaveBeenCalledWith(INVOICE_REFUSAL_TOAST_ID);
   });
@@ -60,9 +69,12 @@ describe("useInvoiceRefusalNotice", () => {
   });
 
   it("dismisses a stale refusal when the scope switches to another reservation", () => {
-    const { result, rerender } = renderHook(({ id }) => useInvoiceRefusalNotice(id), {
-      initialProps: { id: "res-1" },
-    });
+    const { result, rerender } = renderHook(
+      ({ id }) => useInvoiceRefusalNotice(id),
+      {
+        initialProps: { id: "res-1" },
+      },
+    );
     act(() => {
       result.current.showRefusal("no price");
     });
@@ -136,14 +148,20 @@ describe("useInvoiceRefusalNotice", () => {
     // The scope stays the same on purpose: the route change alone must clear it.
     await userEvent.click(screen.getByRole("link", { name: "next booking" }));
     expect(dismissMock).toHaveBeenCalledWith(INVOICE_REFUSAL_TOAST_ID);
-    expect(errorMock, "no new refusal is invented for the new booking").toHaveBeenCalledTimes(1);
+    expect(
+      errorMock,
+      "no new refusal is invented for the new booking",
+    ).toHaveBeenCalledTimes(1);
   });
 
   it("supports a custom message while keeping the classified code", () => {
     const { result } = renderHook(() => useInvoiceRefusalNotice("res-1"));
     let code = "";
     act(() => {
-      code = result.current.showRefusal("already invoiced", () => "softer guest wording").code;
+      code = result.current.showRefusal(
+        "already invoiced",
+        () => "softer guest wording",
+      ).code;
     });
     expect(code).toBe("INVOICED_LOCKED");
     expect(errorMock).toHaveBeenCalledWith("softer guest wording", {

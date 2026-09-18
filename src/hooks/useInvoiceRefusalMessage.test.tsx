@@ -23,7 +23,9 @@ const format = (err: unknown, surface?: "staff" | "guest") => {
 
 describe("useInvoiceRefusalMessage — per-surface wording", () => {
   it("gives staff the operational explanation plus the server reason", () => {
-    const refusal = format({ message: "Add a price before marking this reservation as invoiced." });
+    const refusal = format({
+      message: "Add a price before marking this reservation as invoiced.",
+    });
     expect(refusal.code).toBe("NO_PRICE");
     expect(refusal.surface).toBe("staff");
     expect(refusal.message).toContain("Add the price first.");
@@ -36,7 +38,9 @@ describe("useInvoiceRefusalMessage — per-surface wording", () => {
       "guest",
     );
     expect(refusal.surface).toBe("guest");
-    expect(refusal.message).toBe(translations.en["invoiceRefusalGuest.NO_PRICE"]);
+    expect(refusal.message).toBe(
+      translations.en["invoiceRefusalGuest.NO_PRICE"],
+    );
     expect(refusal.message).not.toContain("Reason:");
   });
 
@@ -46,8 +50,14 @@ describe("useInvoiceRefusalMessage — per-surface wording", () => {
       [{ message: "This link has been revoked" }, "invoiceRefusal.NOT_FOUND"],
       [{ message: "JWT expired" }, "invoiceRefusal.SESSION_EXPIRED"],
       [{ message: "Failed to fetch" }, "invoiceRefusal.OFFLINE"],
-      [{ status: 429, message: "Edge Function returned an error" }, "invoiceRefusal.RATE_LIMITED"],
-      [{ message: "Row was modified by another user" }, "invoiceRefusal.CONFLICT"],
+      [
+        { status: 429, message: "Edge Function returned an error" },
+        "invoiceRefusal.RATE_LIMITED",
+      ],
+      [
+        { message: "Row was modified by another user" },
+        "invoiceRefusal.CONFLICT",
+      ],
       [{ message: "Internal server error" }, "invoiceRefusal.SERVER_ERROR"],
     ];
     for (const [err, key] of expectations) {
@@ -60,8 +70,14 @@ describe("useInvoiceRefusalMessage — per-surface wording", () => {
 
   it("maps each new code to its own guest wording", () => {
     const expectations: ReadonlyArray<[unknown, string]> = [
-      [{ message: "Reservation is cancelled" }, "invoiceRefusalGuest.CANCELLED"],
-      [{ message: "This link has been revoked" }, "invoiceRefusalGuest.NOT_FOUND"],
+      [
+        { message: "Reservation is cancelled" },
+        "invoiceRefusalGuest.CANCELLED",
+      ],
+      [
+        { message: "This link has been revoked" },
+        "invoiceRefusalGuest.NOT_FOUND",
+      ],
       [{ message: "Failed to fetch" }, "invoiceRefusalGuest.OFFLINE"],
       [{ status: 503, message: "boom" }, "invoiceRefusalGuest.SERVER_ERROR"],
     ];
@@ -77,7 +93,9 @@ describe("useInvoiceRefusalMessage — per-surface wording", () => {
       language.current = lang;
       const refusal = format({ message: "Failed to fetch" }, "guest");
       expect(refusal.message).toBe(
-        (translations[lang] as Record<string, string>)["invoiceRefusalGuest.OFFLINE"],
+        (translations[lang] as Record<string, string>)[
+          "invoiceRefusalGuest.OFFLINE"
+        ],
       );
     }
     language.current = "en";
@@ -85,9 +103,10 @@ describe("useInvoiceRefusalMessage — per-surface wording", () => {
 
   it("flags retriable refusals so a surface can offer a retry", () => {
     expect(format({ message: "Failed to fetch" }).retriable).toBe(true);
-    expect(format({ message: "Add a price before marking this one as invoiced." }).retriable).toBe(
-      false,
-    );
+    expect(
+      format({ message: "Add a price before marking this one as invoiced." })
+        .retriable,
+    ).toBe(false);
   });
 
   it("falls back to the generic wording for an unrecognised failure", () => {

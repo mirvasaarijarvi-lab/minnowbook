@@ -14,11 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useT } from "@/contexts/I18nContext";
-import {
-  posts,
-  buildBlogPostJsonLd,
-  type BlogAuthor,
-} from "@/lib/blogJsonLd";
+import { posts, buildBlogPostJsonLd, type BlogAuthor } from "@/lib/blogJsonLd";
 import SEOHead from "@/components/SEOHead";
 
 /**
@@ -40,11 +36,18 @@ const BlogJsonLdPreview = () => {
 
   const authorsParse = useMemo(() => {
     const trimmed = authorsText.trim();
-    if (!trimmed) return { authors: undefined as BlogAuthor[] | undefined, error: null as string | null };
+    if (!trimmed)
+      return {
+        authors: undefined as BlogAuthor[] | undefined,
+        error: null as string | null,
+      };
     try {
       const parsed = JSON.parse(trimmed);
       if (!Array.isArray(parsed)) {
-        return { authors: undefined, error: "authors override must be a JSON array" };
+        return {
+          authors: undefined,
+          error: "authors override must be a JSON array",
+        };
       }
       return { authors: parsed as BlogAuthor[], error: null };
     } catch (e) {
@@ -65,9 +68,7 @@ const BlogJsonLdPreview = () => {
     [jsonLd],
   );
 
-  const previewUrl = post
-    ? `https://mimmobook.com/blog/${post.slug}`
-    : "";
+  const previewUrl = post ? `https://mimmobook.com/blog/${post.slug}` : "";
   const richResultsUrl = previewUrl
     ? `https://search.google.com/test/rich-results?url=${encodeURIComponent(previewUrl)}`
     : "";
@@ -104,8 +105,9 @@ const BlogJsonLdPreview = () => {
           Blog JSON-LD Preview
         </h1>
         <p className="text-muted-foreground mb-8">
-          Renders the exact JSON-LD array that /blog/:slug will ship. Optional draft
-          overrides let you dry-run <code>updatedKey</code> or a different authors list.
+          Renders the exact JSON-LD array that /blog/:slug will ship. Optional
+          draft overrides let you dry-run <code>updatedKey</code> or a different
+          authors list.
         </p>
 
         <div className="grid gap-6 md:grid-cols-2 mb-6">
@@ -142,8 +144,8 @@ const BlogJsonLdPreview = () => {
               className="mt-1.5"
             />
             <p className="text-xs text-muted-foreground mt-2">
-              Leave blank to use the post's own <code>updatedKey</code> (falls back
-              to <code>dateKey</code>).
+              Leave blank to use the post's own <code>updatedKey</code> (falls
+              back to <code>dateKey</code>).
             </p>
           </div>
         </div>
@@ -182,13 +184,21 @@ const BlogJsonLdPreview = () => {
                 Google Rich Results Test
               </Button>
             </a>
-            <a href={schemaValidatorUrl} target="_blank" rel="noopener noreferrer">
+            <a
+              href={schemaValidatorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button variant="outline" size="sm">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Schema Markup Validator
               </Button>
             </a>
-            <Link to={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer">
+            <Link
+              to={`/blog/${post.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button variant="outline" size="sm">
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Open live post

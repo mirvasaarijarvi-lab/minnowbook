@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 
-import { translations, type Language, type TranslationKey } from "@/i18n/translations";
+import {
+  translations,
+  type Language,
+  type TranslationKey,
+} from "@/i18n/translations";
 
 const LANGUAGES: Language[] = ["en", "fi", "sv"];
 
