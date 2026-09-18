@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 import MarketingFooter from "@/components/MarketingFooter";
 import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
+import ProtectedEmail from "@/components/ProtectedEmail";
+
 
 const Security = () => {
   useEffect(() => { window.scrollTo(0, 0); }, []);
