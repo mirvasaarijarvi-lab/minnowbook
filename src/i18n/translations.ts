@@ -6050,6 +6050,7 @@ const fi: TranslationKeys = {
   "offers.fillRequired": "Täytä kaikki pakolliset kentät",
   "offers.confirmedSuccess": "Tarjous vahvistettu",
   "offers.confirmedWithoutPrice": "Osa varauksista tallennettiin ilman hintaa. Lisää hinta ennen laskutusta.",
+  "offers.statusRegionLabel": "Tarjouksen viimeisin tulos",
   "offers.kitchenOrdersFailed": "Varaukset tallennettiin, mutta menua ei saatu vietyä keittiölle. Lisää se Keittiö-välilehdellä.",
   "offers.confirmedKitchenSentOne": "Tarjouksesta vietiin 1 ruoka- ja juomarivi Keittiö-välilehdelle.",
   "offers.confirmedKitchenSent": "Tarjouksesta vietiin {count} ruoka- ja juomariviä Keittiö-välilehdelle.",
