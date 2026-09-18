@@ -17,7 +17,6 @@ export const RETRY_WINDOW_MINUTES = 15;
 /** Fields a guest can vary that MUST all match for a repeat to be a retry. */
 export interface DedupFields {
   start_time?: unknown;
-  resource_id?: unknown;
   room_type?: unknown;
   check_out_date?: unknown;
   guests_count?: unknown;
@@ -27,12 +26,20 @@ export interface DedupFields {
 
 /**
  * Columns compared in addition to the coarse keys (tenant, guest email,
- * reservation type, date, status, created_at window). Order is stable so
- * tests can assert against it.
+ * reservation type, date, status, created_at window).
+ *
+ * EVERY entry must be a real column on `public.reservations`. A name that does
+ * not exist makes PostgREST reject the whole lookup, the handler logs a
+ * warning and skips de-duplication entirely, and double-clicks start creating
+ * duplicate reservations. `resource_id` is deliberately absent: it is a
+ * request-only field used to price the booking and is never persisted on the
+ * reservation row, so a resource choice can only be compared through the
+ * columns it actually writes (room_type, dates, guest count).
+ *
+ * Order is stable so tests can assert against it.
  */
 export const DEDUP_MATCH_COLUMNS = [
   "start_time",
-  "resource_id",
   "room_type",
   "check_out_date",
   "guests_count",
@@ -84,7 +91,7 @@ export function applyDedupFilters<Q extends DedupQuery<Q>>(
 
 /**
  * True only when two bookings are identical across every guest-variable
- * field. Used by tests and by any caller that already holds both rows.
+ * field that the reservation row records.
  */
 export function isSameBooking(a: DedupFields, b: DedupFields): boolean {
   return DEDUP_MATCH_COLUMNS.every((column) =>
