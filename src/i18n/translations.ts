@@ -3822,7 +3822,7 @@ const en: TranslationKeys = {
   "pricing.faqQ3": "What reservation types can I choose?",
   "pricing.faqA3": "Restaurant (table bookings), Venue (event space inquiries), Gasthaus/Guesthouse (room reservations), and Wellness Services (appointment bookings for hairdressers, masseurs, makeup artists, and similar providers). Basic lets you pick one. Pro unlocks all types, one per type, on a single site. Business adds unlimited sites.",
   "pricing.faqQ4": "Can I use my own domain?",
-  "pricing.faqA4": "Each business gets a branded subdomain (e.g., yourbusiness.mimmobook.com). Custom domain support is on our roadmap and will be then offered with an enterprise pricing.",
+  "pricing.faqA4": "Each business gets a branded subdomain (e.g., yourbusiness.mimmobook.com), and you can already use your own web address with it. In the dashboard, the \"Share booking page\" card has an \"Your own address\" tab: it shows how to point something like booking.yoursite.com at your booking page with a forward at your domain provider, and it gives you copy-paste code to embed the booking page or add a \"Book now\" button to your site, so your own address stays visible. Fully hosted custom domains are on our roadmap and will then be offered with enterprise pricing.",
   "pricing.faqQ5": "What's the difference between AI chatbot support and 24-hour response support?",
   "pricing.faqA5": "All plans include MimmoAid, our AI chatbot that can answer questions, help troubleshoot issues, and guide you through features instantly. The chatbot is available 24/7 in your dashboard. The Business plan adds 24-hour response support: you can escalate any conversation to our team on the platform via the chatbot and receive a guaranteed response within 24 hours.",
 
@@ -6102,7 +6102,7 @@ const fi: TranslationKeys = {
   "pricing.faqQ3": "Mitä varaustyyppejä voin valita?",
   "pricing.faqA3": "Ravintola (pöytävaraukset), Tila (tilakatsaukset), Majatalo (huonevaraukset) ja Hyvinvointipalvelut (ajanvaraukset kampaajille, hierojille, meikkitaiteilijoille ja vastaaville). Basic antaa valita yhden. Pro avaa kaikki tyypit, yhden kutakin, yhdellä toimipisteellä. Business lisää rajattomat toimipisteet.",
   "pricing.faqQ4": "Voinko käyttää omaa domainia?",
-  "pricing.faqA4": "Jokaiselle yritykselle tulee brändätty alidomain (esim. yrityksesi.mimmobook.com). Oman domainin tuki on tiekartalla ja tarjotaan enterprise-hinnoittelulla.",
+  "pricing.faqA4": "Jokaiselle yritykselle tulee brändätty alidomain (esim. yrityksesi.mimmobook.com), ja voit käyttää sen kanssa jo nyt omaa verkko-osoitettasi. Hallintapaneelin \"Jaa varaussivu\" -kortissa on \"Oma osoite\" -välilehti: se neuvoo, miten ohjaat esimerkiksi varaus.sivustosi.fi varaussivullesi verkkotunnuspalvelusi uudelleenohjauksella, ja antaa valmiin koodin, jolla upotat varaussivun tai lisäät \"Varaa nyt\" -painikkeen sivustollesi, jolloin oma osoitteesi pysyy näkyvissä. Täysin isännöityjen omien verkkotunnusten tuki on tiekartalla ja tarjotaan silloin enterprise-hinnoittelulla.",
   "pricing.faqQ5": "Mikä ero on AI-chatbot-tuella ja 24 tunnin vasteajatuella?",
   "pricing.faqA5": "Kaikki suunnitelmat sisältävät MimmoAid-tekoälychatbotin, joka vastaa kysymyksiin, auttaa vianmäärityksessä ja opastaa ominaisuuksissa. Chatbot on käytettävissä 24/7 hallintapaneelissa. Business-suunnitelma lisää 24 tunnin vasteajatuen: voit eskaloida keskustelun tiimiimme alustan kautta chatbotin avulla ja saada taatun vastauksen 24 tunnin sisällä.",
 
@@ -8382,7 +8382,7 @@ const sv: TranslationKeys = {
   "pricing.faqQ3": "Vilka bokningstyper kan jag välja?",
   "pricing.faqA3": "Restaurang (bordsreservationer), Lokal (lokalförfrågningar), Gästhus (rumsreservationer) och Friskvårdstjänster (tidsbokningar för frisörer, massörer, makeupartister och liknande). Basic låter dig välja en. Pro låser upp alla typer, en av varje, på en plats. Business lägger till obegränsade platser.",
   "pricing.faqQ4": "Kan jag använda min egen domän?",
-  "pricing.faqA4": "Varje företag får en varumärkt subdomän (t.ex. dittforetag.mimmobook.com). Stöd för egna domäner finns på vår roadmap och kommer att erbjudas med enterprise-prissättning.",
+  "pricing.faqA4": "Varje företag får en varumärkt subdomän (t.ex. dittforetag.mimmobook.com), och du kan redan nu använda din egen webbadress tillsammans med den. I kontrollpanelen har kortet \"Dela bokningssida\" en flik \"Egen adress\": den visar hur du pekar till exempel bokning.dinsajt.se mot din bokningssida med en vidarebefordran hos din domänleverantör, och ger dig färdig kod för att bädda in bokningssidan eller lägga till en \"Boka nu\"-knapp på din sajt, så att din egen adress syns hela tiden. Fullt hostade egna domäner finns på vår roadmap och erbjuds då med enterprise-prissättning.",
   "pricing.faqQ5": "Vad är skillnaden mellan AI-chatbot-support och 24-timmarssupport?",
   "pricing.faqA5": "Alla planer inkluderar MimmoAid, vår AI-chatbot som kan svara på frågor, hjälpa till med felsökning och guida dig genom funktioner. Chatboten är tillgänglig 24/7 i din instrumentpanel. Business-planen lägger till 24-timmarssupport: du kan eskalera varje konversation till vårt team på plattformen via chatboten och få ett garanterat svar inom 24 timmar.",
 
