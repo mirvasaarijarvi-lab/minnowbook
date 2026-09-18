@@ -12,6 +12,12 @@ import { Send, MapPin, Mail, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  createAccessibleChallenge,
+  isChallengePassed,
+  type AccessibleChallenge,
+} from "@/lib/accessibleChallenge";
+
 
 /**
  * The support address is never written as a complete string in the markup or
@@ -27,6 +33,9 @@ const MIN_FILL_SECONDS = 3;
 const RATE_WINDOW_MS = 10 * 60 * 1000;
 const RATE_MAX_SUBMITS = 3;
 const RATE_STORAGE_KEY = "mimmobook-support-submits";
+// From this many recent messages onwards, a text challenge is required.
+const CHALLENGE_AFTER_SUBMITS = 2;
+
 
 const contactSchema = z.object({
   name: z.string().trim().max(100, "Name must be under 100 characters."),
@@ -123,6 +132,27 @@ const SupportContactForm = () => {
   const [submitting, setSubmitting] = useState(false);
   const [honeypot, setHoneypot] = useState("");
   const [revealedAddress, setRevealedAddress] = useState<string | null>(null);
+  const [challenge, setChallenge] = useState<AccessibleChallenge | null>(null);
+  const [challengeAnswer, setChallengeAnswer] = useState("");
+  const [challengeError, setChallengeError] = useState<string | null>(null);
+  const challengeInputRef = useRef<HTMLInputElement>(null);
+
+  // Ask the challenge as soon as the browser has already sent a couple of
+  // messages in this window, so a real person sees it before they type.
+  useEffect(() => {
+    if (readSubmitTimes().length >= CHALLENGE_AFTER_SUBMITS) {
+      setChallenge((current) => current ?? createAccessibleChallenge());
+    }
+  }, []);
+
+  /** Shows a fresh challenge and moves focus to it. */
+  const requireChallenge = (reason: string) => {
+    setChallenge(createAccessibleChallenge());
+    setChallengeAnswer("");
+    setChallengeError(reason);
+    requestAnimationFrame(() => challengeInputRef.current?.focus());
+  };
+
 
   // Initial prefill — runs when auth resolves or query params change.
   useEffect(() => {
@@ -171,7 +201,9 @@ const SupportContactForm = () => {
     }
 
     if ((Date.now() - mountedAtRef.current) / 1000 < MIN_FILL_SECONDS) {
-      toast.error("Please take a moment to review your message before sending.");
+      requireChallenge(
+        "That was sent very quickly, so please answer this short question to confirm you are a person.",
+      );
       return;
     }
 
@@ -188,6 +220,23 @@ const SupportContactForm = () => {
       });
       return;
     }
+
+    // Repeated messages from this browser: require the challenge before sending.
+    if (!challenge && recent.length >= CHALLENGE_AFTER_SUBMITS) {
+      requireChallenge("Please answer this short question to confirm you are a person.");
+      return;
+    }
+
+    if (challenge) {
+      if (!isChallengePassed(challenge, challengeAnswer)) {
+        requireChallenge("That answer did not match. Here is a new question.");
+        return;
+      }
+      setChallenge(null);
+      setChallengeAnswer("");
+      setChallengeError(null);
+    }
+
 
     setSubmitting(true);
     try {
@@ -320,6 +369,35 @@ const SupportContactForm = () => {
                 maxLength={4000}
               />
             </div>
+
+            {/* Accessible, text-only challenge. Appears only after suspicious
+                activity or repeated messages from this browser. */}
+            {challenge && (
+              <div className="rounded-md border border-primary/30 bg-muted/40 p-3 space-y-2">
+                <div aria-live="polite" className="text-xs text-muted-foreground">
+                  {challengeError}
+                </div>
+                <Label htmlFor="support-challenge" className="block leading-relaxed">
+                  {challenge.question}
+                </Label>
+                <Input
+                  id="support-challenge"
+                  ref={challengeInputRef}
+                  value={challengeAnswer}
+                  onChange={(e) => setChallengeAnswer(e.target.value)}
+                  aria-describedby="support-challenge-hint"
+                  autoComplete="off"
+                  maxLength={40}
+                  required
+                />
+                <p id="support-challenge-hint" className="text-xs text-muted-foreground">
+                  {challenge.hint} Prefer not to answer? Use "Email instead" below, your message
+                  still reaches us.
+                </p>
+              </div>
+            )}
+
+
 
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
               <Button type="submit" disabled={submitting} className="gap-1.5 flex-1">
