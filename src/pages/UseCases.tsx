@@ -54,6 +54,9 @@ const UseCases = () => {
         description={t("useCases.seoDescription")}
         path="/use-cases"
         keywords={t("useCases.seoKeywords")}
+        ogTitle={t("useCases.ogTitle")}
+        ogDescription={t("useCases.ogDescription")}
+        imageAlt={t("useCases.ogImageAlt")}
         jsonLd={[
           organizationSchema,
           breadcrumbSchema([

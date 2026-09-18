@@ -11,6 +11,10 @@ interface SEOHeadProps {
   type?: string;
   image?: string;
   imageAlt?: string;
+  /** Share specific headline for Open Graph and Twitter. Falls back to title. */
+  ogTitle?: string;
+  /** Share specific summary for Open Graph and Twitter. Falls back to description. */
+  ogDescription?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
@@ -31,7 +35,7 @@ const OG_LOCALES: Record<Language, string> = {
 export const localizedUrl = (path: string, lang: Language) =>
   lang === "en" ? `${BASE_URL}${path}` : `${BASE_URL}${path}?lang=${lang}`;
 
-const SEOHead = ({ title, description, path, keywords, type = "website", image, imageAlt, jsonLd }: SEOHeadProps) => {
+const SEOHead = ({ title, description, path, keywords, type = "website", image, imageAlt, ogTitle, ogDescription, jsonLd }: SEOHeadProps) => {
   const { language } = useI18n();
 
   useEffect(() => {
@@ -84,9 +88,13 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
       ? (image.startsWith("http") ? image : `${BASE_URL}${image}`)
       : `${BASE_URL}/og-image.png`;
 
+    // Share copy: falls back to the search title and description.
+    const shareTitle = ogTitle || title;
+    const shareDescription = ogDescription || description;
+
     // Open Graph
-    setMeta("property", "og:title", title);
-    setMeta("property", "og:description", description);
+    setMeta("property", "og:title", shareTitle);
+    setMeta("property", "og:description", shareDescription);
     setMeta("property", "og:url", url);
     setMeta("property", "og:type", type);
     setMeta("property", "og:image", resolvedImage);
@@ -107,8 +115,8 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
 
     // Twitter
     setMeta("name", "twitter:card", "summary_large_image");
-    setMeta("name", "twitter:title", title);
-    setMeta("name", "twitter:description", description);
+    setMeta("name", "twitter:title", shareTitle);
+    setMeta("name", "twitter:description", shareDescription);
     setMeta("name", "twitter:image", resolvedImage);
     if (imageAlt) setMeta("name", "twitter:image:alt", imageAlt);
 

@@ -1737,6 +1737,9 @@ type TranslationKeys = {
 
 
   "useCases.badge": string;
+  "useCases.ogTitle": string;
+  "useCases.ogDescription": string;
+  "useCases.ogImageAlt": string;
   "useCases.seoTitle": string;
   "useCases.seoDescription": string;
   "useCases.seoKeywords": string;
@@ -3996,6 +3999,9 @@ const en: TranslationKeys = {
 
   // Use Cases
   "useCases.badge": "Use Cases",
+  "useCases.ogTitle": "Booking software for barbers, salons, massage, bakeries and trainers",
+  "useCases.ogDescription": "Service professionals: take bookings around the clock, run a waiting list, price your services, send reminders and collect reviews. Restaurants, venues and hotels too.",
+  "useCases.ogImageAlt": "MimmoBook use cases for service professionals and hospitality",
   "useCases.seoTitle": "Use Cases, Barbers, Salons, Massage, Bakeries and Venues",
   "useCases.seoDescription": "See how MimmoBook works for barbers, hairdressers, massage therapists, bakers, personal trainers, make-up artists, restaurants, venues, hotels, guesthouses, catering and pop-ups.",
   "useCases.seoKeywords": "barber appointment software, hairdresser booking system, salon booking software, massage therapist booking, bakery order booking, personal trainer booking app, make-up artist booking, service business booking software, restaurant reservations, venue booking",
@@ -6249,6 +6255,9 @@ const fi: TranslationKeys = {
 
   // Use Cases
   "useCases.badge": "Käyttökohteet",
+  "useCases.ogTitle": "Ajanvaraus partureille, kampaajille, hierojille, leipomoille ja valmentajille",
+  "useCases.ogDescription": "Palvelualan ammattilaiselle: varaukset vuorokauden ympäri, jonotuslista, palveluiden hinnat, muistutukset ja asiakaspalautteet. Myös ravintoloille, tiloille ja hotelleille.",
+  "useCases.ogImageAlt": "MimmoBookin käyttökohteet palvelualalle ja majoitus- ja ravintola-alalle",
   "useCases.seoTitle": "Käyttökohteet: parturit, kampaajat, hierojat, leipomot",
   "useCases.seoDescription": "Katso miten MimmoBook toimii partureille, kampaajille, hierojille, leipureille, personal trainereille, meikkitaiteilijoille, ravintoloille, tiloille, hotelleille ja cateringille.",
   "useCases.seoKeywords": "parturi ajanvaraus, kampaamo ajanvarausjärjestelmä, hieroja ajanvaraus, leipomo tilausjärjestelmä, personal trainer ajanvaraus, meikkitaiteilija ajanvaraus, palvelualan ajanvaraus, ravintolan pöytävaraus, tilavaraus",
@@ -8502,6 +8511,9 @@ const sv: TranslationKeys = {
 
   // Use Cases
   "useCases.badge": "Användningsfall",
+  "useCases.ogTitle": "Bokningssystem för barberare, salonger, massörer, bagerier och tränare",
+  "useCases.ogDescription": "För serviceyrken: bokningar dygnet runt, väntelista, priser på tjänster, påminnelser och kundomdömen. Även för restauranger, lokaler och hotell.",
+  "useCases.ogImageAlt": "MimmoBooks användningsfall för serviceyrken och besöksnäringen",
   "useCases.seoTitle": "Användningsfall: barberare, frisörer, massörer, bagerier",
   "useCases.seoDescription": "Se hur MimmoBook fungerar för barberare, frisörer, massörer, bagare, personliga tränare, makeupartister, restauranger, lokaler, hotell, gästhus och catering.",
   "useCases.seoKeywords": "barberare bokningssystem, frisör bokning, massör bokning, bageri bokning, personlig tränare bokning, makeupartist bokning, bokningssystem för serviceföretag, restaurangbokning, lokalbokning",
