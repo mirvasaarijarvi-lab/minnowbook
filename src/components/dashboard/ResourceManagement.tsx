@@ -223,7 +223,12 @@ const ResourceManagement = () => {
       // Check per-type resource limit (superadmin bypass handled by useTierGate)
       if (!editingId && !canCreateResourceCheck(form.resource_type, resources ?? [])) {
         const tierLabel = tenant?.tier === "professional" ? "Pro" : "Basic";
-        throw new Error(`Your ${tierLabel} plan allows only 1 resource per type. Upgrade to Business for unlimited resources.`);
+        const { getTierLimits } = await import("@/lib/tier-limits");
+        const tierLimits = getTierLimits(tenant?.tier);
+        if (tierLimits.maxResourcesTotal !== null && (resources ?? []).length >= tierLimits.maxResourcesTotal) {
+          throw new Error(`Your ${tierLabel} plan allows only ${tierLimits.maxResourcesTotal} resource(s) in total. Upgrade to add more.`);
+        }
+        throw new Error(`Your ${tierLabel} plan allows only ${tierLimits.maxResourcesPerType ?? 1} resource(s) per type. Upgrade to Business for unlimited resources.`);
       }
 
       const isAccom = form.resource_type === "hotel" || form.resource_type === "guesthouse";
