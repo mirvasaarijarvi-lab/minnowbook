@@ -195,9 +195,8 @@ describe("special occasions: simultaneous requests need the database seat guard"
       { startTime: "17:00", guests: 4 },
     ]);
     expect(results.every((r) => !r.ok)).toBe(true);
-    for (const result of results) {
-      if (!result.ok) expect(result.reason).toBe("FULL");
-    }
+    const reasons = (results as Array<{ reason?: string }>).map((r) => r.reason);
+    expect(reasons).toEqual(["FULL", "FULL", "FULL"]);
   });
 
   it("shows the sitting availability a booking page would render mid-fill", () => {
