@@ -1,0 +1,66 @@
+name: Offer kitchen mapping
+
+# Guards the contract between the offer form's kitchen preview and the kitchen
+# order lines an accepted offer writes: every cross-booking function's food and
+# drinks field must reach the correct dining or event kitchen order, and empty
+# fields must create nothing.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  offer-kitchen-mapping:
+    name: Cross-booking mapping and preview tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun-with-diagnostics
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Verify bun.lock is in sync with package.json
+        uses: ./.github/actions/verify-bun-lockfile-sync
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bunx tsgo --noEmit
+
+      - name: Run cross-booking mapping and preview tests
+        run: bun run test:offer-kitchen
+
+      - name: Upload test report
+        if: always() && hashFiles('offer-kitchen-report/report.json') != ''
+        uses: actions/upload-artifact@v7
+        with:
+          name: offer-kitchen-report
+          path: offer-kitchen-report/
+          if-no-files-found: ignore
+          retention-days: 14

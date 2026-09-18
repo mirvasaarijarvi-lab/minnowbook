@@ -18,6 +18,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:offer-kitchen": "vitest run --reporter=default --reporter=json --outputFile=offer-kitchen-report/report.json src/lib/offer-kitchen-mapping.test.ts src/lib/offer-kitchen-preview.test.ts src/lib/offer-kitchen-orders.test.ts src/lib/offer-kitchen-consistency.test.ts src/lib/offer-kitchen-message.test.ts src/components/dashboard/OfferCreateDialog.kitchenMapping.test.tsx src/components/dashboard/OffersManager.kitchenOrders.test.tsx",
     "test:security": "vitest run --config vitest.security.config.ts --reporter=verbose",
     "test:security:live": "vitest run --config vitest.security-live.config.ts --reporter=verbose",
     "test:security:billing": "node scripts/run-billing-hardening-tests.mjs",
