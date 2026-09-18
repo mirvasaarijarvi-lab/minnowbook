@@ -205,6 +205,13 @@ async function openOffers(page: Page) {
   await expect(page.getByText("Kitchen E2E Guest").first()).toBeVisible({ timeout: 15_000 });
 }
 
+/** Wait for the confirmation toast and return its full text. */
+async function readToast(page: Page): Promise<string> {
+  const toast = page.locator("[data-sonner-toast]").first();
+  await toast.waitFor({ state: "visible", timeout: 15_000 });
+  return (await toast.innerText()).replace(/\s+/g, " ");
+}
+
 const ref = projectRef();
 
 test.describe("Offer confirmation states the Kitchen tab result", () => {
@@ -224,9 +231,10 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     await page.getByRole("button", { name: "Confirm", exact: true }).first().click();
 
     // Toast: headline plus the kitchen count.
-    const toast = page.locator("[data-sonner-toast]").first();
-    await expect(toast).toContainText("Offer confirmed", { timeout: 15_000 });
-    await expect(toast).toContainText(
+    // Toasts auto-dismiss, so capture the text once and assert on the snapshot.
+    const toastText = await readToast(page);
+    expect(toastText).toContain("Offer confirmed");
+    expect(toastText).toContain(
       "3 food and drink line(s) from the offer were sent to the Kitchen tab.",
     );
 
@@ -258,9 +266,9 @@ test.describe("Offer confirmation states the Kitchen tab result", () => {
     await openOffers(page);
     await page.getByRole("button", { name: "Confirm", exact: true }).first().click();
 
-    const toast = page.locator("[data-sonner-toast]").first();
-    await expect(toast).toContainText("Offer confirmed", { timeout: 15_000 });
-    await expect(toast).toContainText(
+    const toastText = await readToast(page);
+    expect(toastText).toContain("Offer confirmed");
+    expect(toastText).toContain(
       "This offer had no food or drinks, so a regular reservation was created and nothing was sent to the Kitchen tab.",
     );
 
