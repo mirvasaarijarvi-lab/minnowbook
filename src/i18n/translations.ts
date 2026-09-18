@@ -1782,6 +1782,41 @@ type TranslationKeys = {
   "blog.post8C4": string;
   "blog.post8C5": string;
   "blog.post8C6": string;
+  "blog.post9Title": string;
+  "blog.post9Excerpt": string;
+  "blog.post9C1": string;
+  "blog.post9C2": string;
+  "blog.post9C3": string;
+  "blog.post9C4": string;
+  "blog.post9C5": string;
+  "blog.post9C6": string;
+  "blog.spHeroAlt": string;
+  "blog.spHeroCaption": string;
+  "blog.spFlowTitle": string;
+  "blog.spFlowCaption": string;
+  "blog.spFlow1Title": string;
+  "blog.spFlow1Desc": string;
+  "blog.spFlow2Title": string;
+  "blog.spFlow2Desc": string;
+  "blog.spFlow3Title": string;
+  "blog.spFlow3Desc": string;
+  "blog.spFlow4Title": string;
+  "blog.spFlow4Desc": string;
+  "blog.spStat1Label": string;
+  "blog.spStat2Label": string;
+  "blog.spStat3Label": string;
+  "blog.spWhoTitle": string;
+  "blog.spWho1": string;
+  "blog.spWho2": string;
+  "blog.spWho3": string;
+  "blog.spWho4": string;
+  "blog.spBenefitsTitle": string;
+  "blog.spBenefit1": string;
+  "blog.spBenefit2": string;
+  "blog.spBenefit3": string;
+  "blog.spBenefit4": string;
+  "blog.spBenefit5": string;
+  "blog.spBenefit6": string;
 
   // Nav new pages
   "nav.features": string;
@@ -3896,6 +3931,41 @@ const en: TranslationKeys = {
   "blog.post8C4": "Multi-site and multi-service management is where wellness businesses trip up. Mindbody supports multi-location but you often move to a higher tier for it, and each site adds cost. Vagaro and Fresha treat each location as a separate business with its own settings and, in Fresha's case, its own marketplace listing. Acuity's multi-location story is limited and manual. MimmoBook is built around a tenant with multiple sites from day one: one login, one dashboard, per-site overrides for opening hours, branding, staff, email sender and pricing, plus a single flat plan that covers the whole group. For a 2 to 6 site wellness business, the operational overhead drops sharply and the invoice stays predictable as you open location 3, 4 and 5.",
   "blog.post8C5": "Ease of use for small teams is the third practical factor. Mindbody is powerful but assumes a dedicated front-desk manager who lives inside the tool. Vagaro is friendlier but the interface widens quickly once you turn on memberships, forms and payroll. Fresha is smooth on the consumer side but the pro dashboard leans on marketplace behaviours. Acuity is clean but stops short of the hospitality workflows a spa or wellness clinic actually needs, like table or room layouts, deposits per resource or multi-service block bookings. MimmoBook is designed for owner-operators and small staff: booking creation in under 30 seconds, mobile-first dashboard, automatic confirmations and reminders in Finnish, Swedish and English, resource-level availability for rooms and treatment beds, and a staff quick guide you can print as a PDF. Onboarding a new therapist or receptionist is measured in minutes, not shifts.",
   "blog.post8C6": "How to choose in practice: if you are a single-location salon with heavy reliance on new-client discovery, Fresha's marketplace can be a useful acquisition channel. If you are a US enterprise chain with a dedicated ops team, Mindbody's depth still makes sense. If you only need a simple scheduler and never plan to add multi-site or hospitality features, Acuity is fine. For most European spas, salons, yoga studios, wellness clinics and small multi-site wellness groups, MimmoBook is the platform that fits: flat pricing, a branded booking page on your own domain, real multi-site management, GDPR-friendly EU hosting and support in Finnish, Swedish and English. Try MimmoBook on the free sample plan and compare a full month against your current invoice, the numbers usually decide for you.",
+  "blog.post9Title": "Booking Software for Service Professionals: Barbers, Hairdressers, Massage Therapists, Bakers and Personal Trainers",
+  "blog.post9Excerpt": "A practical guide for one person and small team service businesses: how online booking fills your calendar, cuts no-shows and gives you back the hours you now spend on the phone.",
+  "blog.post9C1": "Service professionals sell time, not products. A barber has roughly 40 chair hours in a week, a massage therapist maybe 25 treatment hours, a personal trainer a handful of prime evening slots, a baker a fixed number of pickup windows before the ovens are full. Every hour that goes unbooked, or that a no-show empties, is income you cannot get back. That is why the booking process matters more in a service business than almost anywhere else.",
+  "blog.post9C2": "Most small service businesses still take bookings the same way: a phone call between clients, a direct message in the evening, a paper diary on the counter. It works until it does not. You miss calls while your hands are busy, you double book a Saturday, you forget who asked for the 17:00 slot, and you spend your evenings answering messages instead of resting. Clients notice too. Many people now prefer to book at 22:00 from their phone rather than call during the day, and if they cannot, they book with somebody who lets them.",
+  "blog.post9C3": "An online booking page fixes this without changing how you work. Your services are listed with their real duration and price, so a cut and beard trim reserves 45 minutes and a 90 minute massage reserves 90, and the calendar never offers a slot you cannot deliver. Confirmation emails go out instantly, reminders go out before the appointment, and cancellations free the slot automatically so somebody else can take it. Your opening hours, breaks and days off are yours to set, including the odd Saturday you decide to work.",
+  "blog.post9C4": "The numbers behind this are simple. No-shows in personal service businesses typically run between 10 and 20 percent of appointments, and automated reminders cut that roughly by a third. If you run 60 appointments a week at 50 euros, recovering even five percent of lost slots is about 150 euros a week, far more than a booking subscription costs. Add the admin time: most owners spend three to five hours a week on booking messages, and self-service booking removes most of it.",
+  "blog.post9C5": "Different trades need slightly different things. Barbers and hairdressers need services that stack, so a colour and cut books as one longer visit, plus per chair or per stylist availability. Massage therapists and treatment providers need buffer time between clients, room and bed level scheduling and a calm, branded page that matches the experience they sell. Bakers need pickup windows and order details rather than seats, with a limited number of orders per slot. Personal trainers need recurring sessions, small group slots and evening peaks. MimmoBook handles all of these from the same dashboard, and a multi site business can run several locations under one account.",
+  "blog.post9C6": "If you are a service professional working alone or with a small team, start simple: put your real services and durations online, turn on confirmations and reminders, and publish the page on your own domain so clients book with you and not on a marketplace that owns your client list. MimmoBook has flat monthly pricing with no commission per booking, works in Finnish, Swedish and English, and is hosted in the EU with GDPR in mind. The free sample plan lets you test a full month with real clients before you decide.",
+  "blog.spHeroAlt": "Four service professionals at work: a barber cutting hair, a massage therapist treating a client, a baker arranging pastries and a personal trainer coaching a client.",
+  "blog.spHeroCaption": "Barbers, hairdressers, massage therapists, bakers and personal trainers all sell time in fixed slots, which is exactly what online booking protects.",
+  "blog.spFlowTitle": "How a booking works, from client to repeat visit",
+  "blog.spFlowCaption": "Four steps that run by themselves once your services and hours are set.",
+  "blog.spFlow1Title": "1. Client picks a service",
+  "blog.spFlow1Desc": "They see your services with real duration and price, and only the slots you can actually deliver.",
+  "blog.spFlow2Title": "2. Confirmation is automatic",
+  "blog.spFlow2Desc": "The booking lands in your calendar and the client gets a confirmation email in their own language.",
+  "blog.spFlow3Title": "3. Reminder before the visit",
+  "blog.spFlow3Desc": "A timed reminder reduces no-shows, and a cancellation reopens the slot for somebody else.",
+  "blog.spFlow4Title": "4. Easy rebooking",
+  "blog.spFlow4Desc": "Client details are saved, so the next appointment takes seconds and reports show who returns.",
+  "blog.spStat1Label": "Bookings taken while you work or sleep",
+  "blog.spStat2Label": "Typical drop in no-shows with automatic reminders",
+  "blog.spStat3Label": "Time to add a booking by hand when a client calls",
+  "blog.spWhoTitle": "Built for these trades",
+  "blog.spWho1": "Barbers and hairdressers: services that stack into one visit, per chair or per stylist availability, and colour treatments with the right longer duration.",
+  "blog.spWho2": "Massage therapists, treatment providers and other wellness professionals: buffer time between clients, room and bed level scheduling, and a calm branded page.",
+  "blog.spWho3": "Bakers and food makers: pickup windows instead of seats, a limited number of orders per slot, and order notes for fillings, allergies and sizes.",
+  "blog.spWho4": "Personal trainers and coaches: recurring sessions, small group slots, evening peaks and clear reports on which times sell.",
+  "blog.spBenefitsTitle": "What you get in practice",
+  "blog.spBenefit1": "Your own branded booking page on your own domain, so clients book with you and your client list stays yours.",
+  "blog.spBenefit2": "Services with real durations and prices, so the calendar never offers a slot you cannot deliver.",
+  "blog.spBenefit3": "Automatic confirmations and reminders in Finnish, Swedish and English, which cut no-shows without a single phone call.",
+  "blog.spBenefit4": "Opening hours, breaks, days off and one off working days you control yourself, per person and per room.",
+  "blog.spBenefit5": "Flat monthly pricing with no commission per booking, so a busy month costs the same as a quiet one.",
+  "blog.spBenefit6": "Reports on bookings, repeat clients and the times that sell best, plus several locations under one account when you grow.",
 
   // Nav new pages
   "nav.features": "Features",
@@ -6004,6 +6074,41 @@ const fi: TranslationKeys = {
   "blog.post8C4": "Monitoimipisteiden ja monipalvelujen hallinta on paikka, jossa hyvinvointiyritykset kompastuvat. Mindbody tukee useita toimipisteitä, mutta siirryt yleensä ylempään tasoon sitä varten ja jokainen toimipiste lisää kustannusta. Vagaro ja Fresha käsittelevät jokaista toimipistettä erillisenä yrityksenä omilla asetuksillaan ja Freshan tapauksessa omalla markkinapaikkalistauksella. Acuityn monitoimipistetarina on rajallinen ja manuaalinen. MimmoBook on rakennettu alusta asti tenantin ympärille, jossa on useita toimipisteitä: yksi kirjautuminen, yksi hallintapaneeli, toimipistekohtaiset asetukset aukioloille, brändille, henkilöstölle, sähköpostin lähettäjälle ja hinnoittelulle sekä yksi kiinteä paketti koko ryhmälle. 2 to 6 toimipisteen hyvinvointiyritykselle operatiivinen kuorma putoaa selvästi ja lasku pysyy ennustettavana kun avaat toimipisteen 3, 4 ja 5.",
   "blog.post8C5": "Käytön helppous pienelle tiimille on kolmas käytännön tekijä. Mindbody on tehokas mutta olettaa oman vastaanottopäällikön, joka elää työkalun sisällä. Vagaro on ystävällisempi, mutta käyttöliittymä levenee nopeasti kun otat käyttöön jäsenyydet, lomakkeet ja palkanlaskennan. Fresha on sujuva kuluttajapuolella, mutta ammattilaisten hallintapaneeli nojaa markkinapaikkakäyttäytymiseen. Acuity on siisti, mutta jää hospitality-työnkulkujen ulkopuolelle, joita kylpylä tai hyvinvointiklinikka oikeasti tarvitsee, kuten huone- tai tilapohjakartat, resurssikohtaiset ennakkomaksut tai monipalvelujen lohkovaraukset. MimmoBook on suunniteltu yrittäjä-operaattoreille ja pienelle henkilökunnalle: varaus alle 30 sekunnissa, mobiilioptimoitu hallintapaneeli, automaattiset vahvistukset ja muistutukset suomeksi, ruotsiksi ja englanniksi, resurssitason saatavuus hoitohuoneille ja hoitopedeille sekä tulostettava henkilökunnan pikaohje PDF-muodossa. Uuden hoitajan tai vastaanottovirkailijan perehdytys kestää minuutteja, ei vuoroja.",
   "blog.post8C6": "Käytännön valinta: jos olet yhden toimipisteen kauneushoitola, joka nojaa vahvasti uusien asiakkaiden löydettävyyteen, Freshan markkinapaikka voi olla hyödyllinen hankintakanava. Jos olet yhdysvaltalainen suurketju oman operatiivisen tiimin kanssa, Mindbodyn syvyys on edelleen järkevä. Jos tarvitset vain yksinkertaisen ajanvarauksen etkä koskaan aio lisätä monitoimipistettä tai hospitality-ominaisuuksia, Acuity riittää. Useimmille eurooppalaisille kylpylöille, kauneushoitoloille, joogastudioille, hyvinvointiklinikoille ja pienille monitoimipisteisille hyvinvointiryhmille MimmoBook on alusta, joka sopii: kiinteä hinnoittelu, brändätty varaussivu omalla verkkotunnuksellasi, aito monitoimipistehallinta, GDPR-ystävällinen EU-hostaus sekä tuki suomeksi, ruotsiksi ja englanniksi. Kokeile MimmoBookia ilmaisella näytekaudella ja vertaa kokonaista kuukautta nykyiseen laskuun, luvut yleensä ratkaisevat puolestasi.",
+  "blog.post9Title": "Ajanvarausohjelmisto palvelualan ammattilaisille: parturit, kampaajat, hierojat, leipurit ja personal trainerit",
+  "blog.post9Excerpt": "Käytännön opas yksinyrittäjille ja pienille tiimeille: miten verkkoajanvaraus täyttää kalenterin, vähentää peruuttamatta jääneitä aikoja ja palauttaa tunnit, jotka nyt menevät puhelimessa.",
+  "blog.post9C1": "Palvelualan ammattilainen myy aikaa, ei tuotteita. Parturilla on viikossa noin 40 tuolituntia, hierojalla ehkä 25 hoitotuntia, personal trainerilla kourallinen parhaita ilta-aikoja ja leipurilla rajattu määrä noutoaikoja ennen kuin uunit ovat täynnä. Jokainen tunti, joka jää varaamatta tai jonka saapumatta jäänyt asiakas tyhjentää, on tuloa jota ei saa takaisin. Siksi varausprosessi on palveluyrityksessä tärkeämpi kuin melkein missään muualla.",
+  "blog.post9C2": "Useimmat pienet palveluyritykset ottavat varauksia edelleen samalla tavalla: puhelu asiakkaiden välissä, viesti illalla ja paperikalenteri tiskillä. Se toimii, kunnes ei enää toimi. Puhelut jäävät vastaamatta kun kädet ovat kiinni, lauantai tulee tuplavarattua, kello 17 pyytänyt asiakas unohtuu ja illat menevät viesteihin lepäämisen sijaan. Asiakkaat huomaavat tämän myös. Moni varaa mieluiten kello 22 puhelimella kuin soittaa päivällä, ja jos se ei onnistu, hän varaa jonkun muun luota.",
+  "blog.post9C3": "Verkkoajanvaraus korjaa tämän muuttamatta työtapaasi. Palvelut näkyvät oikeilla kestoilla ja hinnoilla, joten hiustenleikkaus ja partatrimmaus varaa 45 minuuttia ja 90 minuutin hieronta varaa 90 minuuttia, eikä kalenteri tarjoa aikaa jota et voi toteuttaa. Vahvistusviestit lähtevät heti, muistutukset ennen käyntiä ja peruutus vapauttaa ajan automaattisesti seuraavalle. Aukioloajat, tauot ja vapaapäivät asetat itse, myös yksittäisen lauantain jonka päätät tehdä.",
+  "blog.post9C4": "Luvut ovat yksinkertaisia. Saapumatta jääneitä aikoja on henkilökohtaisissa palveluissa tyypillisesti 10 to 20 prosenttia varauksista, ja automaattiset muistutukset leikkaavat siitä noin kolmanneksen. Jos teet 60 varausta viikossa 50 euron hintaan, jo viiden prosentin palautuminen on noin 150 euroa viikossa, selvästi enemmän kuin varausjärjestelmän kuukausimaksu. Lisää tähän hallinnollinen aika: moni yrittäjä käyttää 3 to 5 tuntia viikossa varausviesteihin, ja itsepalveluvaraus poistaa siitä suurimman osan.",
+  "blog.post9C5": "Eri alat tarvitsevat hieman eri asioita. Parturit ja kampaajat tarvitsevat palveluita jotka lasketaan yhteen, niin että väri ja leikkaus varautuu yhtenä pidempänä käyntinä, sekä tuoli- tai tekijäkohtaisen saatavuuden. Hierojat ja hoitojen tarjoajat tarvitsevat puskuriaikaa asiakkaiden väliin, huone- ja pöytätason kalenterin sekä rauhallisen, brändätyn sivun joka vastaa myytyä kokemusta. Leipurit tarvitsevat noutoaikoja ja tilaustietoja istumapaikkojen sijaan, rajatulla määrällä tilauksia aikaa kohti. Personal trainerit tarvitsevat toistuvia kertoja, pienryhmäaikoja ja iltahuippuja. MimmoBook hoitaa nämä kaikki samasta hallintapaneelista, ja monitoimipisteinen yritys voi pyörittää useaa toimipistettä yhdellä tilillä.",
+  "blog.post9C6": "Jos olet palvelualan ammattilainen yksin tai pienessä tiimissä, aloita yksinkertaisesti: vie oikeat palvelut ja kestot verkkoon, ota vahvistukset ja muistutukset käyttöön ja julkaise sivu omalla verkkotunnuksellasi, jotta asiakkaat varaavat sinulta eivätkä markkinapaikasta joka omistaa asiakaslistasi. MimmoBookilla on kiinteä kuukausihinta ilman varauskohtaista provisiota, se toimii suomeksi, ruotsiksi ja englanniksi ja se on hostattu EU:ssa GDPR huomioiden. Ilmainen näytekausi antaa testata kokonaisen kuukauden oikeilla asiakkailla ennen päätöstä.",
+  "blog.spHeroAlt": "Neljä palvelualan ammattilaista työssään: parturi leikkaa hiuksia, hieroja hoitaa asiakasta, leipuri asettelee leivonnaisia ja personal trainer ohjaa asiakasta.",
+  "blog.spHeroCaption": "Parturit, kampaajat, hierojat, leipurit ja personal trainerit myyvät kaikki aikaa kiinteissä paloissa, ja juuri sitä verkkoajanvaraus suojaa.",
+  "blog.spFlowTitle": "Näin varaus kulkee, asiakkaasta seuraavaan käyntiin",
+  "blog.spFlowCaption": "Neljä vaihetta, jotka toimivat itsestään kun palvelut ja ajat on asetettu.",
+  "blog.spFlow1Title": "1. Asiakas valitsee palvelun",
+  "blog.spFlow1Desc": "Hän näkee palvelut oikeilla kestoilla ja hinnoilla sekä vain ne ajat jotka pystyt toteuttamaan.",
+  "blog.spFlow2Title": "2. Vahvistus lähtee itsestään",
+  "blog.spFlow2Desc": "Varaus ilmestyy kalenteriisi ja asiakas saa vahvistusviestin omalla kielellään.",
+  "blog.spFlow3Title": "3. Muistutus ennen käyntiä",
+  "blog.spFlow3Desc": "Ajastettu muistutus vähentää saapumatta jääneitä aikoja, ja peruutus vapauttaa ajan seuraavalle.",
+  "blog.spFlow4Title": "4. Helppo uusi varaus",
+  "blog.spFlow4Desc": "Asiakastiedot säilyvät, joten seuraava aika syntyy sekunneissa ja raportit näyttävät kuka palaa.",
+  "blog.spStat1Label": "Varauksia tulee sisään töiden ja unen aikana",
+  "blog.spStat2Label": "Tyypillinen lasku saapumatta jääneissä ajoissa muistutusten myötä",
+  "blog.spStat3Label": "Aika lisätä varaus käsin, kun asiakas soittaa",
+  "blog.spWhoTitle": "Tehty näille aloille",
+  "blog.spWho1": "Parturit ja kampaajat: palvelut jotka lasketaan yhteen yhdeksi käynniksi, tuoli- tai tekijäkohtainen saatavuus ja värikäsittelyt oikealla pidemmällä kestolla.",
+  "blog.spWho2": "Hierojat, hoitojen tarjoajat ja muut hyvinvointialan ammattilaiset: puskuriaika asiakkaiden väliin, huone- ja pöytätason kalenteri ja rauhallinen brändätty sivu.",
+  "blog.spWho3": "Leipurit ja ruoantekijät: noutoajat istumapaikkojen sijaan, rajattu määrä tilauksia aikaa kohti ja tilausmuistiinpanot täytteille, allergioille ja koolle.",
+  "blog.spWho4": "Personal trainerit ja valmentajat: toistuvat kerrat, pienryhmäajat, iltahuiput ja selkeät raportit siitä mitkä ajat myyvät.",
+  "blog.spBenefitsTitle": "Mitä saat käytännössä",
+  "blog.spBenefit1": "Oma brändätty varaussivu omalla verkkotunnuksellasi, joten asiakkaat varaavat sinulta ja asiakaslista pysyy sinulla.",
+  "blog.spBenefit2": "Palvelut oikeilla kestoilla ja hinnoilla, joten kalenteri ei tarjoa aikaa jota et voi toteuttaa.",
+  "blog.spBenefit3": "Automaattiset vahvistukset ja muistutukset suomeksi, ruotsiksi ja englanniksi, jotka vähentävät saapumatta jääneitä aikoja ilman yhtäkään puhelua.",
+  "blog.spBenefit4": "Aukioloajat, tauot, vapaapäivät ja yksittäiset työpäivät omassa hallinnassasi, tekijä- ja huonekohtaisesti.",
+  "blog.spBenefit5": "Kiinteä kuukausihinta ilman varauskohtaista provisiota, joten kiireinen kuukausi kustantaa saman kuin hiljainen.",
+  "blog.spBenefit6": "Raportit varauksista, palaavista asiakkaista ja parhaiten myyvistä ajoista, sekä useampi toimipiste yhdellä tilillä kun kasvat.",
 
   // Nav new pages
   "nav.features": "Ominaisuudet",
@@ -8112,6 +8217,41 @@ const sv: TranslationKeys = {
   "blog.post8C4": "Flerplats- och flertjänsthantering är där wellnessföretag snubblar. Mindbody stöder flera platser men du hamnar ofta på en högre nivå för det och varje plats lägger till kostnad. Vagaro och Fresha behandlar varje plats som en separat verksamhet med egna inställningar och, i Freshas fall, egen marknadsplatslistning. Acuitys flerplatsberättelse är begränsad och manuell. MimmoBook är byggt kring en tenant med flera platser från dag ett: en inloggning, en instrumentpanel, platsspecifika undantag för öppettider, varumärke, personal, e-postavsändare och pris, samt ett enda fast paket för hela gruppen. För en wellnessverksamhet med 2 to 6 platser sjunker den operativa belastningen tydligt och fakturan förblir förutsägbar när du öppnar plats 3, 4 och 5.",
   "blog.post8C5": "Användarvänlighet för små team är den tredje praktiska faktorn. Mindbody är kraftfullt men förutsätter en dedikerad receptionschef som lever inne i verktyget. Vagaro är vänligare men gränssnittet växer snabbt när du slår på medlemskap, formulär och lönehantering. Fresha är smidigt på konsumentsidan men proffsinstrumentpanelen lutar sig mot marknadsplatsbeteenden. Acuity är rent men stannar innan hospitality-arbetsflödena som ett spa eller en wellnessklinik faktiskt behöver, som rum- eller platslayouter, depositioner per resurs eller flertjänstblockningar. MimmoBook är byggt för ägare och små staber: bokning under 30 sekunder, mobilanpassad instrumentpanel, automatiska bekräftelser och påminnelser på finska, svenska och engelska, resursnivåtillgänglighet för rum och behandlingsbritsar samt en snabbguide för personal att skriva ut som PDF. Att lära upp en ny terapeut eller receptionist mäts i minuter, inte skift.",
   "blog.post8C6": "Så väljer du i praktiken: om du är en salong på en enda plats med tungt beroende av upptäckt av nya kunder kan Freshas marknadsplats vara en användbar förvärvskanal. Om du är en amerikansk företagskedja med ett dedikerat driftteam håller Mindbodys djup fortfarande. Om du bara behöver en enkel schemaläggare och aldrig planerar att lägga till flera platser eller hospitality-funktioner är Acuity okej. För de flesta europeiska spa, salonger, yogastudior, wellnessklinker och små flerplatsföretag inom wellness är MimmoBook plattformen som passar: fast pris, en varumärkt bokningssida på din egen domän, riktig flerplatshantering, GDPR-vänlig EU-drift och stöd på finska, svenska och engelska. Testa MimmoBook på gratisnivån och jämför en hel månad mot din nuvarande faktura, siffrorna brukar besluta åt dig.",
+  "blog.post9Title": "Bokningssystem för serviceyrken: barberare, frisörer, massörer, bagare och personliga tränare",
+  "blog.post9Excerpt": "En praktisk guide för enmansföretag och små team: hur onlinebokning fyller kalendern, minskar uteblivna besök och ger tillbaka timmarna du nu lägger i telefon.",
+  "blog.post9C1": "En yrkesperson inom service säljer tid, inte produkter. En barberare har ungefär 40 stoltimmar i veckan, en massör kanske 25 behandlingstimmar, en personlig tränare ett fåtal attraktiva kvällstider och en bagare ett begränsat antal upphämtningstider innan ugnarna är fulla. Varje timme som står obokad, eller som ett uteblivet besök tömmer, är intäkt du inte får tillbaka. Därför betyder bokningsprocessen mer i ett serviceföretag än nästan någon annanstans.",
+  "blog.post9C2": "De flesta små serviceföretag tar fortfarande bokningar på samma sätt: ett samtal mellan kunder, ett meddelande på kvällen och en papperskalender på disken. Det fungerar tills det inte gör det. Samtal missas när händerna är upptagna, en lördag dubbelbokas, kunden som ville ha 17:00 glöms bort och kvällarna går till meddelanden i stället för vila. Kunderna märker det också. Många bokar hellre klockan 22 i mobilen än ringer under dagen, och kan de inte det bokar de hos någon annan.",
+  "blog.post9C3": "En bokningssida på nätet löser detta utan att ändra hur du arbetar. Dina tjänster visas med verklig längd och pris, så klippning och skäggtrim bokar 45 minuter och en massage på 90 minuter bokar 90, och kalendern erbjuder aldrig en tid du inte kan hålla. Bekräftelser går ut direkt, påminnelser före besöket och en avbokning frigör tiden automatiskt för någon annan. Öppettider, pauser och lediga dagar bestämmer du själv, även den enstaka lördag du väljer att jobba.",
+  "blog.post9C4": "Siffrorna är enkla. Uteblivna besök ligger i personliga tjänster typiskt på 10 to 20 procent av bokningarna, och automatiska påminnelser skär bort ungefär en tredjedel av det. Om du tar 60 bokningar i veckan för 50 euro är redan fem procent återvunna tider ungefär 150 euro i veckan, betydligt mer än vad ett bokningssystem kostar. Lägg till administrationen: många ägare lägger 3 to 5 timmar i veckan på bokningsmeddelanden, och självbetjäning tar bort större delen av det.",
+  "blog.post9C5": "Olika yrken behöver lite olika saker. Barberare och frisörer behöver tjänster som läggs samman, så att färg och klippning bokas som ett längre besök, plus tillgänglighet per stol eller per frisör. Massörer och behandlare behöver buffertid mellan kunder, schema på rum och bänknivå och en lugn varumärkt sida som matchar upplevelsen de säljer. Bagare behöver upphämtningstider och orderuppgifter i stället för platser, med ett begränsat antal ordrar per tid. Personliga tränare behöver återkommande pass, smågruppstider och kvällstoppar. MimmoBook hanterar allt detta från samma panel, och ett företag med flera platser kan driva dem under ett konto.",
+  "blog.post9C6": "Är du yrkesperson inom service, ensam eller med ett litet team, börja enkelt: lägg ut dina verkliga tjänster och längder, slå på bekräftelser och påminnelser och publicera sidan på din egen domän så att kunderna bokar hos dig och inte på en marknadsplats som äger din kundlista. MimmoBook har fast månadspris utan provision per bokning, fungerar på finska, svenska och engelska och driftas i EU med GDPR i fokus. Gratisnivån låter dig testa en hel månad med riktiga kunder innan du bestämmer dig.",
+  "blog.spHeroAlt": "Fyra yrkespersoner inom service i arbete: en barberare som klipper hår, en massör som behandlar en kund, en bagare som lägger upp bakverk och en personlig tränare som coachar en kund.",
+  "blog.spHeroCaption": "Barberare, frisörer, massörer, bagare och personliga tränare säljer alla tid i fasta pass, och det är precis vad onlinebokning skyddar.",
+  "blog.spFlowTitle": "Så går en bokning, från kund till återbesök",
+  "blog.spFlowCaption": "Fyra steg som sköter sig själva när tjänster och tider är satta.",
+  "blog.spFlow1Title": "1. Kunden väljer tjänst",
+  "blog.spFlow1Desc": "Hen ser dina tjänster med verklig längd och pris, och bara de tider du faktiskt kan hålla.",
+  "blog.spFlow2Title": "2. Bekräftelsen är automatisk",
+  "blog.spFlow2Desc": "Bokningen landar i din kalender och kunden får en bekräftelse på sitt eget språk.",
+  "blog.spFlow3Title": "3. Påminnelse före besöket",
+  "blog.spFlow3Desc": "En tidsatt påminnelse minskar uteblivna besök, och en avbokning öppnar tiden för någon annan.",
+  "blog.spFlow4Title": "4. Enkel ombokning",
+  "blog.spFlow4Desc": "Kunduppgifterna sparas, så nästa tid tar sekunder och rapporterna visar vilka som återkommer.",
+  "blog.spStat1Label": "Bokningar kommer in medan du jobbar eller sover",
+  "blog.spStat2Label": "Typisk minskning av uteblivna besök med automatiska påminnelser",
+  "blog.spStat3Label": "Tid att lägga in en bokning för hand när en kund ringer",
+  "blog.spWhoTitle": "Byggt för dessa yrken",
+  "blog.spWho1": "Barberare och frisörer: tjänster som läggs samman till ett besök, tillgänglighet per stol eller per frisör och färgbehandlingar med rätt längre tid.",
+  "blog.spWho2": "Massörer, behandlare och andra yrkespersoner inom wellness: buffertid mellan kunder, schema på rum och bänknivå och en lugn varumärkt sida.",
+  "blog.spWho3": "Bagare och matproducenter: upphämtningstider i stället för platser, ett begränsat antal ordrar per tid och ordernoteringar för fyllningar, allergier och storlek.",
+  "blog.spWho4": "Personliga tränare och coacher: återkommande pass, smågruppstider, kvällstoppar och tydliga rapporter över vilka tider som säljer.",
+  "blog.spBenefitsTitle": "Vad du får i praktiken",
+  "blog.spBenefit1": "En egen varumärkt bokningssida på din egen domän, så att kunderna bokar hos dig och kundlistan förblir din.",
+  "blog.spBenefit2": "Tjänster med verklig längd och pris, så att kalendern aldrig erbjuder en tid du inte kan hålla.",
+  "blog.spBenefit3": "Automatiska bekräftelser och påminnelser på finska, svenska och engelska, som minskar uteblivna besök utan ett enda samtal.",
+  "blog.spBenefit4": "Öppettider, pauser, lediga dagar och enstaka arbetsdagar som du styr själv, per person och per rum.",
+  "blog.spBenefit5": "Fast månadspris utan provision per bokning, så en full månad kostar lika mycket som en lugn.",
+  "blog.spBenefit6": "Rapporter över bokningar, återkommande kunder och de tider som säljer bäst, plus flera platser under ett konto när du växer.",
 
   // Nav new pages
   "nav.features": "Funktioner",
