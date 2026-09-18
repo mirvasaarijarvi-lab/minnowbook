@@ -11,6 +11,7 @@ import {
   Navigate as TSNavigate,
   Outlet as TSOutlet,
   RouterProvider,
+  RouterContextProvider,
   createRootRoute,
   createRoute,
   createRouter,
@@ -253,8 +254,6 @@ export function MemoryRouter({
   }, []);
 
   return (
-    <MemoryChildrenContext.Provider value={children}>
-      <RouterProvider router={router as never} />
-    </MemoryChildrenContext.Provider>
+    <RouterContextProvider router={router as never}>{children}</RouterContextProvider>
   );
 }
