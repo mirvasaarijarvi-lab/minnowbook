@@ -26,7 +26,7 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
     features: [
       "Unlimited sites & locations",
       "All reservation types",
-      "Unlimited staff users & resources per type",
+      "Up to 50 staff users, unlimited resources per type",
       "Multi-site management dashboard",
       "Priority human support with 24h response",
     ],
@@ -35,7 +35,7 @@ const upgradeInfo: Record<string, { targetTier: string; features: string[] }> = 
     targetTier: "business",
     features: [
       "Unlimited sites & locations",
-      "Unlimited staff users & resources per type",
+      "Up to 50 staff users, unlimited resources per type",
       "Multi-site management dashboard",
       "Priority human support with 24h response",
     ],
