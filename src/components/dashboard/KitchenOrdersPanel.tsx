@@ -110,6 +110,7 @@ const KitchenOrdersPanel = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [pendingOrderDelete, setPendingOrderDelete] = useState<string | null>(null);
   const [menuManagerOpen, setMenuManagerOpen] = useState(false);
 
   // Menu templates for quick-insert
