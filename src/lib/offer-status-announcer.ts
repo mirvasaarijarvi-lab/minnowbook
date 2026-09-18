@@ -58,8 +58,9 @@ export function announceOfferStatus(
   message: string,
   politeness: "assertive" | "polite" = "polite",
 ): void {
+  if (!message.trim()) return;
   const region = ensureRegion(politeness);
-  if (!region || !message.trim()) return;
+  if (!region) return;
   if (refillTimer) clearTimeout(refillTimer);
   region.textContent = "";
   alternate = !alternate;
