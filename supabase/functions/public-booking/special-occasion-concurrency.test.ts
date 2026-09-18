@@ -229,11 +229,17 @@ Deno.test({
       assertEquals(await seatsStored(occasionId), 5);
 
       // A cancelled booking gives its seats back.
-      const { res: cancelRes } = await adminFetch(
-        `/reservations?special_occasion_id=eq.${occasionId}&guests_count=eq.2&limit=1`,
+      const { res: pickRes, text: pickText } = await adminFetch(
+        `/reservations?special_occasion_id=eq.${occasionId}&guests_count=eq.2&select=id&limit=1`,
+      );
+      assertEquals(pickRes.status, 200, `could not pick a booking to cancel: ${pickText}`);
+      const cancelId = JSON.parse(pickText)[0]?.id;
+      assert(typeof cancelId === "string", `no booking to cancel: ${pickText}`);
+      const { res: cancelRes, text: cancelText } = await adminFetch(
+        `/reservations?id=eq.${cancelId}`,
         { method: "PATCH", body: JSON.stringify({ status: "cancelled" }) },
       );
-      assert(cancelRes.status < 300, "cancel must succeed");
+      assert(cancelRes.status < 300, `cancel must succeed: ${cancelText}`);
       const afterCancel = await insertBooking(row("23:45", 1));
       assert(afterCancel.ok, `a cancelled booking must free seats: ${afterCancel.text}`);
     } finally {
