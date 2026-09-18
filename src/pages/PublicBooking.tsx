@@ -887,6 +887,15 @@ const PublicBookingInner = () => {
         }
       }
 
+      // Special occasion (staff-defined event day, for example a Christmas dinner)
+      if (selectedOccasion) {
+        if (selectedOccasion.booking_type === "seatings") {
+          if (!occasionSeating) throw new Error(t("booking.occasionSeatingRequired"));
+          payload.start_time = occasionSeating;
+        }
+        payload.special_occasion_id = selectedOccasion.id;
+      }
+
       // Promo code
       if (form.promo_code.trim()) {
         payload.promo_code = form.promo_code.trim().toUpperCase();
