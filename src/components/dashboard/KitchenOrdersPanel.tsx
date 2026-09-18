@@ -500,7 +500,31 @@ const KitchenOrdersPanel = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog
+        open={!!pendingOrderDelete}
+        onOpenChange={(open) => !open && setPendingOrderDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("kitchen.deleteOrderConfirm")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("kitchen.deleteOrderHint")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingOrderDelete) deleteOrderForReservation.mutate(pendingOrderDelete);
+                setPendingOrderDelete(null);
+              }}
+            >
+              {t("kitchen.deleteOrder")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <KitchenMenuManager open={menuManagerOpen} onOpenChange={setMenuManagerOpen} />
+
     </div>
   );
 };
