@@ -197,3 +197,50 @@ export function useOptionalLocationKey(): string | null {
     return null;
   }
 }
+
+// ---------- MemoryRouter (tests / isolated previews) ----------
+// Renders arbitrary children inside a real in-memory TanStack router so
+// components that use Link, useLocation or useNavigate work without the
+// generated app route tree.
+
+const MemoryChildrenContext = createContext<ReactNode>(null);
+
+function MemoryChildrenSlot() {
+  return <>{useContext(MemoryChildrenContext)}</>;
+}
+
+export function MemoryRouter({
+  children,
+  initialEntries,
+}: {
+  children?: ReactNode;
+  initialEntries?: string[];
+}) {
+  const initialRef = useRef(initialEntries);
+  const router = useMemo(() => {
+    const rootRoute = createRootRoute({ component: MemoryChildrenSlot });
+    const indexRoute = createRoute({
+      getParentRoute: () => rootRoute,
+      path: "/",
+      component: () => null,
+    });
+    const splatRoute = createRoute({
+      getParentRoute: () => rootRoute,
+      path: "/$",
+      component: () => null,
+    });
+    rootRoute.addChildren([indexRoute, splatRoute]);
+    return createRouter({
+      routeTree: rootRoute,
+      history: createMemoryHistory({
+        initialEntries: initialRef.current?.length ? initialRef.current : ["/"],
+      }),
+    });
+  }, []);
+
+  return (
+    <MemoryChildrenContext.Provider value={children}>
+      <RouterProvider router={router as never} />
+    </MemoryChildrenContext.Provider>
+  );
+}
