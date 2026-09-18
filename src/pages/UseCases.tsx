@@ -9,7 +9,7 @@ import SupportChatWidget from "@/components/SupportChatWidget";
 import ServiceWorkflowExamples from "@/components/ServiceWorkflowExamples";
 import TradeCallsToAction from "@/components/TradeCallsToAction";
 import SEOHead, { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
-import { useT } from "@/contexts/I18nContext";
+import { useT, useLanguage } from "@/contexts/I18nContext";
 
 const useCases = [
   { icon: UtensilsCrossed, titleKey: "useCases.restaurant" as const, descKey: "useCases.restaurantDesc" as const, challenges: "useCases.restaurantChallenges" as const, solution: "useCases.restaurantSolution" as const },
@@ -23,6 +23,7 @@ const useCases = [
 
 const UseCases = () => {
   const t = useT();
+  const { language } = useLanguage();
 
   const serviceCatalog = {
     "@context": "https://schema.org",
@@ -56,6 +57,7 @@ const UseCases = () => {
         keywords={t("useCases.seoKeywords")}
         ogTitle={t("useCases.ogTitle")}
         ogDescription={t("useCases.ogDescription")}
+        image={`/og/use-cases-${language}.png`}
         imageAlt={t("useCases.ogImageAlt")}
         jsonLd={[
           organizationSchema,
