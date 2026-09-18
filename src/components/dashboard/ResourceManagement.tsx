@@ -26,6 +26,8 @@ import SiteTabs from "./SiteTabs";
 import ResourceImageGallery from "./ResourceImageGallery";
 import BlockedSlotsPanel from "./BlockedSlotsPanel";
 import SpecialOccasionsPanel from "./SpecialOccasionsPanel";
+import BookingRejectionMonitor from "./BookingRejectionMonitor";
+
 import ResourceOpeningHoursEditor from "./ResourceOpeningHoursEditor";
 import ResourceOccasionalSlotsEditor from "./ResourceOccasionalSlotsEditor";
 import { usePermissions } from "@/hooks/usePermissions";
