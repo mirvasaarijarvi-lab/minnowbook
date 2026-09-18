@@ -138,8 +138,9 @@ const Security = () => {
           <ul className="list-disc pl-6 text-muted-foreground space-y-2 leading-relaxed">
             <li>
               <strong>Software Bill of Materials (SBOM):</strong> CycloneDX 1.5 format, regenerated on
-              every dependency change. Available on request at{" "}
-              <a href="mailto:security@mimmobook.com" className="text-accent hover:underline">security@mimmobook.com</a>.
+              every dependency change. Available on request from our security contact:{" "}
+              <ProtectedEmail user="security" subject="SBOM request" className="text-accent hover:underline" />.
+
             </li>
             <li>
               <strong>Penetration testing:</strong> Annual third-party penetration test plus targeted
