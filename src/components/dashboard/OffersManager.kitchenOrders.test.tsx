@@ -401,6 +401,53 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
         { description: translations[language]["offers.confirmedNoKitchen"] },
       );
       expect(toast.warning).not.toHaveBeenCalled();
+  });
+
+    it("announces the kitchen result politely to screen readers", async () => {
+      const { getOfferStatusRegion, resetOfferStatusAnnouncer } = await import(
+        "@/lib/offer-status-announcer"
+      );
+      resetOfferStatusAnnouncer();
+      currentOffers = [
+        baseOffer({
+          id: `offer-kitchen-a11y-${language}`,
+          menu: ["10 x Soup", "10 x Water"].join("\n"),
+        }),
+      ];
+
+      await confirmOffer(language);
+
+      await waitFor(() => {
+        const region = getOfferStatusRegion();
+        expect(region?.textContent?.trim()).toBeTruthy();
+      });
+      const region = getOfferStatusRegion()!;
+      expect(region.getAttribute("aria-live")).toBe("polite");
+      expect(region.getAttribute("role")).toBe("status");
+      expect(region.getAttribute("aria-atomic")).toBe("true");
+      const text = region.textContent ?? "";
+      expect(text).toContain(translations[language]["offers.confirmedSuccess"]);
+      expect(text).toContain(
+        translations[language]["offers.confirmedKitchenSent"].replace("{count}", "2"),
+      );
+      expect(text).not.toContain("{count}");
+    });
+
+    it("announces that nothing was sent to the kitchen", async () => {
+      const { getOfferStatusRegion, resetOfferStatusAnnouncer } = await import(
+        "@/lib/offer-status-announcer"
+      );
+      resetOfferStatusAnnouncer();
+      currentOffers = [baseOffer({ id: `offer-kitchen-a11y-none-${language}`, menu: null })];
+
+      await confirmOffer(language);
+
+      await waitFor(() => {
+        expect(getOfferStatusRegion()?.textContent?.trim()).toBeTruthy();
+      });
+      expect(getOfferStatusRegion()?.textContent).toContain(
+        translations[language]["offers.confirmedNoKitchen"],
+      );
     });
   });
 
