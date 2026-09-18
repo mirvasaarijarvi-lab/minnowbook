@@ -4,6 +4,8 @@ interface SEOHeadProps {
   title: string;
   description: string;
   path: string;
+  /** Optional comma separated keyword list for this route. */
+  keywords?: string;
   type?: string;
   image?: string;
   imageAlt?: string;
@@ -12,7 +14,7 @@ interface SEOHeadProps {
 
 const BASE_URL = "https://mimmobook.com";
 
-const SEOHead = ({ title, description, path, type = "website", image, imageAlt, jsonLd }: SEOHeadProps) => {
+const SEOHead = ({ title, description, path, keywords, type = "website", image, imageAlt, jsonLd }: SEOHeadProps) => {
 
   useEffect(() => {
     document.title = title;
@@ -40,6 +42,7 @@ const SEOHead = ({ title, description, path, type = "website", image, imageAlt, 
     const url = `${BASE_URL}${path}`;
 
     setMeta("name", "description", description);
+    if (keywords) setMeta("name", "keywords", keywords);
     setLink("canonical", url);
 
     const resolvedImage = image
@@ -81,7 +84,7 @@ const SEOHead = ({ title, description, path, type = "website", image, imageAlt, 
     return () => {
       document.querySelectorAll('script[data-seo-jsonld]').forEach((s) => s.remove());
     };
-  }, [title, description, path, type, image, imageAlt, jsonLd]);
+  }, [title, description, path, keywords, type, image, imageAlt, jsonLd]);
 
   return null;
 };

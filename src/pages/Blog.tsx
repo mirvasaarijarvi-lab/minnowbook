@@ -88,9 +88,10 @@ const Blog = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="Blog – MimmoBook Hospitality Insights & Guides"
-        description="Guides and best practices for hospitality reservation management: streamline bookings, reduce no-shows and grow your restaurant, venue or hotel."
+        title="Blog, Booking Guides for Service Pros and Hospitality"
+        description="Booking guides for barbers, hairdressers, massage therapists, bakers, personal trainers, restaurants, venues and hotels: fill your calendar and cut no-shows."
         path="/blog"
+        keywords="booking guides, barber booking software, hairdresser appointment system, massage therapist booking, bakery orders, personal trainer scheduling, restaurant reservations, no-show reduction"
         jsonLd={[
           organizationSchema,
           breadcrumbSchema([

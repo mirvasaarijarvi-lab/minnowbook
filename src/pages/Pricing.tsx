@@ -86,6 +86,7 @@ const Pricing = () => {
         title="MimmoBook Pricing, Plans from €19/month (VAT included)"
         description="Compare MimmoBook plans: Basic €19, Professional €59, Business €179/mo (VAT included). 30-day free trial, branded booking pages and automated emails."
         path="/pricing"
+        keywords="booking software pricing, barber booking software price, hairdresser booking system cost, massage therapist booking app, personal trainer scheduling price, bakery order system, no commission booking"
         jsonLd={[
           faqSchema([
             { question: "How much does MimmoBook cost?", answer: "MimmoBook offers three plans: Basic at €19/month, Professional at €59/month, and Business at €179/month. All prices include VAT." },

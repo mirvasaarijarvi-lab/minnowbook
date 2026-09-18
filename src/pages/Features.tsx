@@ -58,9 +58,10 @@ const Features = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="Features – MimmoBook Reservation Management Platform"
-        description="Explore MimmoBook features: smart reservations, branded booking pages, team management, automated emails, reports and multi-site support."
+        title="Features, Online Booking for Service Pros and Hospitality"
+        description="Branded booking pages, automated reminders, team management, reports and multi-site support for barbers, hairdressers, massage therapists, bakers, personal trainers and venues."
         path="/features"
+        keywords="online booking features, barber booking software, hairdresser appointment system, massage therapist booking, bakery order booking, personal trainer scheduling, automated reminders, no-show reduction"
         jsonLd={[
           organizationSchema,
           softwareSchema,
