@@ -75,11 +75,22 @@ async function fetchTenantEntries(): Promise<SitemapEntry[]> {
     }));
 }
 
+const LANGUAGES = ["en", "fi", "sv"] as const;
+
+/** English is served on the bare path; other languages add ?lang=. */
+const localizedUrl = (path: string, lang: (typeof LANGUAGES)[number]) =>
+  lang === "en" ? `${BASE_URL}${path}` : `${BASE_URL}${path}?lang=${lang}`;
+
 function renderSitemap(entries: SitemapEntry[]): string {
   const urls = entries.map((e) =>
     [
       `  <url>`,
       `    <loc>${BASE_URL}${e.path}</loc>`,
+      ...LANGUAGES.map(
+        (lang) =>
+          `    <xhtml:link rel="alternate" hreflang="${lang}" href="${localizedUrl(e.path, lang)}" />`,
+      ),
+      `    <xhtml:link rel="alternate" hreflang="x-default" href="${localizedUrl(e.path, "en")}" />`,
       e.lastmod ? `    <lastmod>${e.lastmod}</lastmod>` : null,
       e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
       e.priority ? `    <priority>${e.priority}</priority>` : null,
@@ -91,7 +102,7 @@ function renderSitemap(entries: SitemapEntry[]): string {
 
   return [
     `<?xml version="1.0" encoding="UTF-8"?>`,
-    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">`,
     ...urls,
     `</urlset>`,
     "",

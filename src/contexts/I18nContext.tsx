@@ -33,6 +33,17 @@ export const useLanguage = () => {
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguageState] = useState<Language>(() => {
+    // A ?lang= query parameter wins, so hreflang alternate URLs open in the
+    // language they advertise.
+    try {
+      const param = new URLSearchParams(window.location.search).get("lang");
+      if (param === "fi" || param === "sv" || param === "en") {
+        localStorage.setItem("mimmobook-lang", param);
+        return param;
+      }
+    } catch {
+      /* ignore unparsable URLs */
+    }
     const saved = localStorage.getItem("mimmobook-lang");
     if (saved === "fi" || saved === "sv" || saved === "en") return saved;
     const browserLang = navigator.language.slice(0, 2);

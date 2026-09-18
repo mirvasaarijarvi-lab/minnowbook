@@ -1,4 +1,6 @@
 import { useEffect } from "react";
+import { useI18n } from "@/contexts/I18nContext";
+import type { Language } from "@/i18n/translations";
 
 interface SEOHeadProps {
   title: string;
@@ -14,7 +16,23 @@ interface SEOHeadProps {
 
 const BASE_URL = "https://mimmobook.com";
 
+/** Languages the marketing pages are published in. English is the default. */
+const LANGUAGES: Language[] = ["en", "fi", "sv"];
+const OG_LOCALES: Record<Language, string> = {
+  en: "en_GB",
+  fi: "fi_FI",
+  sv: "sv_SE",
+};
+
+/**
+ * Absolute URL of a page in a given language. English is served on the bare
+ * path; Finnish and Swedish add ?lang=, which I18nProvider honours.
+ */
+export const localizedUrl = (path: string, lang: Language) =>
+  lang === "en" ? `${BASE_URL}${path}` : `${BASE_URL}${path}?lang=${lang}`;
+
 const SEOHead = ({ title, description, path, keywords, type = "website", image, imageAlt, jsonLd }: SEOHeadProps) => {
+  const { language } = useI18n();
 
   useEffect(() => {
     document.title = title;
@@ -39,7 +57,24 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
       el.setAttribute("href", href);
     };
 
-    const url = `${BASE_URL}${path}`;
+    const url = localizedUrl(path, language);
+
+    // hreflang alternates: one per published language plus x-default.
+    document
+      .querySelectorAll('link[rel="alternate"][data-seo-hreflang]')
+      .forEach((el) => el.remove());
+    const addAlternate = (hrefLang: string, href: string) => {
+      const el = document.createElement("link");
+      el.setAttribute("rel", "alternate");
+      el.setAttribute("hreflang", hrefLang);
+      el.setAttribute("href", href);
+      el.setAttribute("data-seo-hreflang", "true");
+      document.head.appendChild(el);
+    };
+    LANGUAGES.forEach((lang) => addAlternate(lang, localizedUrl(path, lang)));
+    addAlternate("x-default", localizedUrl(path, "en"));
+
+    document.documentElement.setAttribute("lang", language);
 
     setMeta("name", "description", description);
     if (keywords) setMeta("name", "keywords", keywords);
@@ -59,6 +94,16 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
     setMeta("property", "og:image:height", "630");
     if (imageAlt) setMeta("property", "og:image:alt", imageAlt);
     setMeta("property", "og:site_name", "MimmoBook");
+    setMeta("property", "og:locale", OG_LOCALES[language]);
+    document
+      .querySelectorAll('meta[property="og:locale:alternate"]')
+      .forEach((el) => el.remove());
+    LANGUAGES.filter((lang) => lang !== language).forEach((lang) => {
+      const el = document.createElement("meta");
+      el.setAttribute("property", "og:locale:alternate");
+      el.setAttribute("content", OG_LOCALES[lang]);
+      document.head.appendChild(el);
+    });
 
     // Twitter
     setMeta("name", "twitter:card", "summary_large_image");
@@ -83,8 +128,11 @@ const SEOHead = ({ title, description, path, keywords, type = "website", image, 
 
     return () => {
       document.querySelectorAll('script[data-seo-jsonld]').forEach((s) => s.remove());
+      document
+        .querySelectorAll('link[rel="alternate"][data-seo-hreflang]')
+        .forEach((el) => el.remove());
     };
-  }, [title, description, path, keywords, type, image, imageAlt, jsonLd]);
+  }, [title, description, path, keywords, type, image, imageAlt, jsonLd, language]);
 
   return null;
 };
