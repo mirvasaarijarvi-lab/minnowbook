@@ -19,6 +19,8 @@ import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { I18nProvider } from "@/contexts/I18nContext";
+import { translations, type Language } from "@/i18n/translations";
 import type { Offer } from "@/hooks/useOffers";
 
 const TENANT_ID = "tenant-offer-kitchen-1";
@@ -171,22 +173,26 @@ const showsInKitchenTab = (row: any) =>
   (KITCHEN_RESERVATION_TYPES as readonly string[]).includes(row.reservation_type) &&
   row.status !== "cancelled";
 
-const renderOffers = () => {
+const renderOffers = (language: Language = "en") => {
+  localStorage.setItem("mimmobook-lang", language);
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
   return render(
     <QueryClientProvider client={client}>
-      <TooltipProvider>
-        <OffersManager />
-      </TooltipProvider>
+      <I18nProvider>
+        <TooltipProvider>
+          <OffersManager />
+        </TooltipProvider>
+      </I18nProvider>
     </QueryClientProvider>,
   );
 };
 
-const confirmOffer = async () => {
-  renderOffers();
-  await userEvent.click(await screen.findByRole("button", { name: /confirm/i }));
+const confirmOffer = async (language: Language = "en") => {
+  renderOffers(language);
+  const label = translations[language]["offers.confirm"];
+  await userEvent.click(await screen.findByRole("button", { name: label }));
   await waitFor(() => expect(updateOfferMutate).toHaveBeenCalled());
 };
 
@@ -354,6 +360,47 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
       );
       expect(toast.warning).not.toHaveBeenCalled();
       expect(toast.error).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * The confirmation message must tell staff, in their own language, whether
+   * anything went to the Kitchen tab and how many lines it was.
+   */
+  describe.each(["en", "fi", "sv"] as Language[])("confirmation message in %s", (language) => {
+    it("names the number of food and drink lines sent to the kitchen", async () => {
+      currentOffers = [
+        baseOffer({
+          id: `offer-kitchen-msg-${language}`,
+          menu: ["20 x Roast beef", "4 x Vegan plate", "20 x Red wine"].join("\n"),
+        }),
+      ];
+
+      await confirmOffer(language);
+
+      expect(insertedKitchenOrders).toHaveLength(3);
+      const expected = translations[language]["offers.confirmedKitchenSent"].replace(
+        "{count}",
+        "3",
+      );
+      expect(expected).not.toContain("{count}");
+      expect(toast.success).toHaveBeenCalledWith(
+        translations[language]["offers.confirmedSuccess"],
+        { description: expected },
+      );
+    });
+
+    it("states that nothing was sent to the kitchen when there is no food or drink", async () => {
+      currentOffers = [baseOffer({ id: `offer-kitchen-msg-none-${language}`, menu: "   " })];
+
+      await confirmOffer(language);
+
+      expect(insertedKitchenOrders).toHaveLength(0);
+      expect(toast.success).toHaveBeenCalledWith(
+        translations[language]["offers.confirmedSuccess"],
+        { description: translations[language]["offers.confirmedNoKitchen"] },
+      );
+      expect(toast.warning).not.toHaveBeenCalled();
     });
   });
 
