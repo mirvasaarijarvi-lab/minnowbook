@@ -35,7 +35,7 @@ const OG_LOCALES: Record<Language, string> = {
 export const localizedUrl = (path: string, lang: Language) =>
   lang === "en" ? `${BASE_URL}${path}` : `${BASE_URL}${path}?lang=${lang}`;
 
-const SEOHead = ({ title, description, path, keywords, type = "website", image, imageAlt, jsonLd }: SEOHeadProps) => {
+const SEOHead = ({ title, description, path, keywords, type = "website", image, imageAlt, ogTitle, ogDescription, jsonLd }: SEOHeadProps) => {
   const { language } = useI18n();
 
   useEffect(() => {
