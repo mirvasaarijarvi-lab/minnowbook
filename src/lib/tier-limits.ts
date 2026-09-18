@@ -7,7 +7,7 @@
  * and the `enforce_*_limit` triggers):
  *
  *   basic         → 1 site, 2 reservation types, 2 resources TOTAL (any types), 5 staff users
- *   professional  → 1 site, up to 5 reservation types (any combo), unlimited resources (any mix of types), 25 staff users
+ *   professional  → 1 site, up to 5 reservation types (any combo), up to 5 resources per type, 25 staff users
  *   business      → unlimited sites, all types, unlimited resources, 50 staff users
  *   enterprise    → unlimited everything (staff users included), sold by offer only
  */
