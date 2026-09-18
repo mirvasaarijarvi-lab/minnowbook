@@ -4,7 +4,9 @@
       "/nix/store/31sh8fzcbg4sjahp3zj002j0ca8sfvvr-nodejs-22.22.0/bin/node",
       "/dev-server/node_modules/.bin/playwright",
       "test",
-      "e2e/offer-confirm-kitchen-confirmation.spec.ts"
+      "e2e/offer-confirm-kitchen-confirmation.spec.ts",
+      "-g",
+      "Kitchen tab"
     ],
     "configFile": "/dev-server/playwright.config.ts",
     "rootDir": "/dev-server/e2e",
@@ -92,7 +94,7 @@
         {
           "title": "Offer confirmation states the Kitchen tab result",
           "file": "offer-confirm-kitchen-confirmation.spec.ts",
-          "line": 260,
+          "line": 261,
           "column": 6,
           "specs": [
             {
@@ -111,12 +113,109 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1819,
+                      "duration": 2491,
                       "errors": [],
-                      "stdout": [],
+                      "stdout": [
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d\n"
+                        },
+                        {
+                          "text": "[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/rpc/is_system_admin\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&resource_type=in.%28restaurant%2Cvenue%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reschedule_requests?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/notifications?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&limit=50\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cguest_name%2Cguest_email%2Cdate%2Cstart_time%2Creservation_type%2Creminder_email_sent_at%2Csite_id&tenant_id=eq.11111111-1111-1111-1111-111111111111&reminder_email_sent_at=not.is.null&reminder_email_sent_at=gte.2026-09-11T06%3A33%3A12.714Z&order=reminder_email_sent_at.desc&limit=10\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_opening_hours?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=business_name%2Clogo_url%2Cbusiness_email&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=guests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&is_checked_in=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=eq.confirmed\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests%2Cdate&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-14&date=lte.2026-09-20&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&check_out_date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-07&date=lte.2026-09-13&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Ccapacity&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=reservation_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_invoiced=eq.false&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=name%2Cresource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&order=name.asc\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=resource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Cname%2Cresource_type%2Cprice_per_night%2Cbreakfast_price_per_person%2Csub_services&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=*\n"
+                        },
+                        {
+                          "text": "[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/kitchen_orders?columns=%22item_name%22%2C%22quantity%22%2C%22category%22%2C%22notes%22%2C%22sort_order%22%2C%22tenant_id%22%2C%22reservation_id%22%2C%22status%22%2C%22unit_price_eur%22\n"
+                        },
+                        {
+                          "text": "[rest] PATCH https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?id=eq.offer-e2e-1&select=*\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null\n"
+                        }
+                      ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:32:19.587Z",
+                      "startTime": "2026-09-18T06:33:11.256Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -142,7 +241,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-3a868a4a8d30e3640ec3",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 263,
+              "line": 264,
               "column": 3
             },
             {
@@ -161,12 +260,106 @@
                       "workerIndex": 1,
                       "parallelIndex": 1,
                       "status": "passed",
-                      "duration": 1928,
+                      "duration": 2337,
                       "errors": [],
-                      "stdout": [],
+                      "stdout": [
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d\n"
+                        },
+                        {
+                          "text": "[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/rpc/is_system_admin\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&resource_type=in.%28restaurant%2Cvenue%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reschedule_requests?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/notifications?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&limit=50\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cguest_name%2Cguest_email%2Cdate%2Cstart_time%2Creservation_type%2Creminder_email_sent_at%2Csite_id&tenant_id=eq.11111111-1111-1111-1111-111111111111&reminder_email_sent_at=not.is.null&reminder_email_sent_at=gte.2026-09-11T06%3A33%3A12.813Z&order=reminder_email_sent_at.desc&limit=10\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_opening_hours?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=business_name%2Clogo_url%2Cbusiness_email&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&is_checked_in=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=eq.confirmed\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=guests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests%2Cdate&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-14&date=lte.2026-09-20&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-07&date=lte.2026-09-13&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&check_out_date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_invoiced=eq.false&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Ccapacity&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=reservation_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=name%2Cresource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&order=name.asc\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=resource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Cname%2Cresource_type%2Cprice_per_night%2Cbreakfast_price_per_person%2Csub_services&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=*\n"
+                        },
+                        {
+                          "text": "[rest] PATCH https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?id=eq.offer-e2e-2&select=*\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null\n"
+                        }
+                      ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:32:19.553Z",
+                      "startTime": "2026-09-18T06:33:11.291Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -192,7 +385,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-d50f7b15dc36c63d3853",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 304,
+              "line": 305,
               "column": 3
             },
             {
@@ -211,7 +404,7 @@
                       "workerIndex": 2,
                       "parallelIndex": 2,
                       "status": "timedOut",
-                      "duration": 30382,
+                      "duration": 30651,
                       "error": {
                         "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
                         "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
@@ -224,15 +417,112 @@
                           "location": {
                             "file": "/dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts",
                             "column": 78,
-                            "line": 348
+                            "line": 349
                           },
-                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Kitchen', exact: true }).first()\u001b[22m\n\n\n  346 |\n  347 |     // Now open the Kitchen tab and check the guest and the lines are listed.\n> 348 |     await page.getByRole(\"button\", { name: \"Kitchen\", exact: true }).first().click();\n      |                                                                              ^\n  349 |     await expect(page.getByText(\"Kitchen E2E Guest\").first()).toBeVisible({ timeout: 15_000 });\n  350 |\n  351 |     const itemNames = page.getByRole(\"textbox\", { name: \"Item\" });\n    at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:348:78"
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Kitchen', exact: true }).first()\u001b[22m\n\n\n  347 |\n  348 |     // Now open the Kitchen tab and check the guest and the lines are listed.\n> 349 |     await page.getByRole(\"button\", { name: \"Kitchen\", exact: true }).first().click();\n      |                                                                              ^\n  350 |     await expect(page.getByText(\"Kitchen E2E Guest\").first()).toBeVisible({ timeout: 15_000 });\n  351 |\n  352 |     const itemNames = page.getByRole(\"textbox\", { name: \"Item\" });\n    at /dev-server/e2e/offer-confirm-kitchen-confirmation.spec.ts:349:78"
                         }
                       ],
-                      "stdout": [],
+                      "stdout": [
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d\n"
+                        },
+                        {
+                          "text": "[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/rpc/is_system_admin\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&resource_type=in.%28restaurant%2Cvenue%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reschedule_requests?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/notifications?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&limit=50\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cguest_name%2Cguest_email%2Cdate%2Cstart_time%2Creservation_type%2Creminder_email_sent_at%2Csite_id&tenant_id=eq.11111111-1111-1111-1111-111111111111&reminder_email_sent_at=not.is.null&reminder_email_sent_at=gte.2026-09-11T06%3A33%3A12.742Z&order=reminder_email_sent_at.desc&limit=10\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_opening_hours?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=business_name%2Clogo_url%2Cbusiness_email&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&status=eq.pending\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&is_checked_in=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=guests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=eq.confirmed\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests%2Cdate&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-14&date=lte.2026-09-20&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id%2Cprice_eur%2Cguests_count%2Cestimated_guests&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=gte.2026-09-07&date=lte.2026-09-13&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Ccapacity&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&check_out_date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] HEAD https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=id&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_invoiced=eq.false&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=reservation_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&date=eq.2026-09-18&status=in.%28pending%2Cconfirmed%29\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_users?select=*%2Ctenants_safe%28*%29&user_id=eq.00000000-0000-0000-0000-00000000f00d\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/tenant_settings?select=resource_type_names&tenant_id=eq.11111111-1111-1111-1111-111111111111\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=name%2Cresource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true&order=name.asc\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=resource_type&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/resources?select=id%2Cname%2Cresource_type%2Cprice_per_night%2Cbreakfast_price_per_person%2Csub_services&tenant_id=eq.11111111-1111-1111-1111-111111111111&is_active=eq.true\n"
+                        },
+                        {
+                          "text": "[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/reservations?select=*\n"
+                        },
+                        {
+                          "text": "[rest] POST https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/kitchen_orders?columns=%22item_name%22%2C%22quantity%22%2C%22category%22%2C%22notes%22%2C%22sort_order%22%2C%22tenant_id%22%2C%22reservation_id%22%2C%22status%22%2C%22unit_price_eur%22\n"
+                        },
+                        {
+                          "text": "[rest] PATCH https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?id=eq.offer-e2e-3&select=*\n"
+                        },
+                        {
+                          "text": "[rest] GET https://lsgznskkxadplwnxplhd.supabase.co/rest/v1/offers?select=*&tenant_id=eq.11111111-1111-1111-1111-111111111111&order=created_at.desc&archived_at=is.null\n"
+                        }
+                      ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:32:19.586Z",
+                      "startTime": "2026-09-18T06:33:11.282Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -263,7 +553,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-23374397598126874fb4",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 326,
+              "line": 327,
               "column": 3
             }
           ]
@@ -273,8 +563,8 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-18T06:32:18.384Z",
-    "duration": 32260.952000000005,
+    "startTime": "2026-09-18T06:33:09.918Z",
+    "duration": 33077.127,
     "expected": 2,
     "skipped": 0,
     "unexpected": 1,
