@@ -19,6 +19,7 @@ import {
   pickOfferResource,
 } from "@/lib/offer-reservation-pricing";
 import { buildKitchenOrderRows, type OfferMenuLeg } from "@/lib/offer-kitchen-orders";
+import { announceOfferStatus, composeOfferStatusMessage } from "@/lib/offer-status-announcer";
 
 import OfferCreateDialog from "./OfferCreateDialog";
 import OfferEmailDialog from "./OfferEmailDialog";
