@@ -1,9 +1,405 @@
-<testsuites id="" name="" tests="9" failures="0" skipped="0" errors="0" time="16.72581">
-<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-18T06:41:40.247Z" hostname="chromium" tests="9" failures="0" skipped="0" time="21.66" errors="0">
-<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="3.708">
+<testsuites id="" name="" tests="110" failures="0" skipped="14" errors="0" time="237.06176399999998">
+<testsuite name="cross-booking-same-guest.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="2" failures="0" skipped="0" time="6.851" errors="0">
+<testcase name="Cross-booking: same guest, multiple resources/services › public booking page for the test tenant loads" classname="cross-booking-same-guest.spec.ts" time="1.196">
+<properties>
+<property name="checkpoint" value="smoke: before goto (00-smoke-before-goto)">
+</property>
+<property name="checkpoint" value="smoke: after booking form ready (01-smoke-after-booking-form-ready)">
+</property>
+</properties>
 <system-out>
 <![CDATA[
+[[ATTACHMENT|../../test-results/cross-booking-same-guest-C-53650-e-for-the-test-tenant-loads-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/cross-booking-same-guest-C-53650-e-for-the-test-tenant-loads-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Cross-booking: same guest, multiple resources/services › creates restaurant + guesthouse + venue reservations for the same guest" classname="cross-booking-same-guest.spec.ts" time="5.655">
+<properties>
+<property name="correlation_id" value="cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2">
+</property>
+<property name="warmup" value="{&quot;outcome&quot;:&quot;ok&quot;,&quot;status&quot;:200,&quot;duration_ms&quot;:137,&quot;correlation_id&quot;:&quot;cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2&quot;}">
+</property>
+<property name="checkpoint" value="post-warmup (02-post-warmup)">
+</property>
+<property name="checkpoint" value="restaurant: before SPA reload (03-restaurant-before-spa-reload)">
+</property>
+<property name="checkpoint" value="restaurant: after booking form ready (04-restaurant-after-booking-form-ready)">
+</property>
+<property name="checkpoint" value="guesthouse: before SPA reload (05-guesthouse-before-spa-reload)">
+</property>
+<property name="checkpoint" value="guesthouse: after booking form ready (06-guesthouse-after-booking-form-ready)">
+</property>
+<property name="checkpoint" value="venue: before SPA reload (07-venue-before-spa-reload)">
+</property>
+<property name="checkpoint" value="venue: after booking form ready (08-venue-after-booking-form-ready)">
+</property>
+</properties>
+<system-out>
+<![CDATA[[cross-booking] HAR will be written to /dev-server/test-results/cross-booking-same-guest-C-af4ac-rvations-for-the-same-guest-chromium/har/public-booking-attempt-1.har
+[cross-booking] flow correlation_id=cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2
+[cross-booking] warmup OK (HTTP 200, 133ms) trace: correlation_id=cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/warmup/c35bf6c5-808d-4e51-8b5f-48763990d000/attempt-1 echoed=cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/warmup/c35bf6c5-808d-4e51-8b5f-48763990d000/attempt-1 sb-request-id=01a0b343-b7fb-7dc3-9a65-ffeffbbd2b15 cf-ray=a3ce63f98edfdd09-CDG deno-execution-id=c0d5beee-d938-407a-bf21-3653b62300c6
+[cross-booking] warmup result {"outcome":"ok","status":200,"duration_ms":137,"correlation_id":"cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2"}
+[cross-booking] restaurant OK (HTTP 200, 742ms) trace: correlation_id=cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/restaurant/3e3b4e48-0e7c-4db5-92fd-6d464dd82863/attempt-1 echoed=<none> sb-request-id=01a0b343-b86a-7a1f-9c44-24b96c6b7dc6 cf-ray=a3ce63fa3949dd09-CDG deno-execution-id=4e6aa856-2c1c-4156-8639-d38bc86702ee
+[cross-booking] restaurant: verified in public booking UI (current_load=54, capacity_total=80)
+[cross-booking] guesthouse OK (HTTP 200, 637ms) trace: correlation_id=cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/guesthouse/9e6c76c2-15d3-4427-ad34-a9e52460e728/attempt-1 echoed=<none> sb-request-id=01a0b343-be33-7738-bd7d-64934d8442c6 cf-ray=a3ce64037c25dd09-CDG deno-execution-id=9295db49-37c7-41f2-915b-5b0648d196da
+[cross-booking] guesthouse: verified in public booking UI (current_load=54, capacity_total=4)
+[cross-booking] venue OK (HTTP 200, 668ms) trace: correlation_id=cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/venue/5c8dcd8b-6ac8-453e-96a4-5b9f32bedb77/attempt-1 echoed=<none> sb-request-id=01a0b343-c3f6-7f3e-a82c-24cda78c8d7e cf-ray=a3ce640cbf7edd09-CDG deno-execution-id=08695bb7-afff-4f41-8bb6-eeb31dadbe26
+[cross-booking] venue: verified in public booking UI (current_load=810, capacity_total=0)
+[cross-booking] created reservations for guest "TEST Lovable Cross 1789713952224" (test-cross-1789713952224@example.com)
+[cross-booking] exported 5 entries (31990 bytes) at /dev-server/test-results/cross-booking-same-guest-C-af4ac-rvations-for-the-same-guest-chromium/har/public-booking-attempt-1.har
+
+[[ATTACHMENT|../../test-results/cross-booking-same-guest-C-af4ac-rvations-for-the-same-guest-chromium/attachments/public-booking-attempt-1-har-b376b94e7d65031594852134affe36746403c66a.har]]
+
+[[ATTACHMENT|../../test-results/cross-booking-same-guest-C-af4ac-rvations-for-the-same-guest-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/cross-booking-same-guest-C-af4ac-rvations-for-the-same-guest-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/cross-booking-same-guest-C-af4ac-rvations-for-the-same-guest-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[
+[cross-booking] foreign-tenant-negative FAILED (HTTP 400, 110ms)
+[cross-booking] foreign-tenant-negative edge-function trace: correlation_id=cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/foreign-tenant-negative/f6367af4-5a3f-447b-81db-6b7ab472f07c/attempt-1 echoed=<none> sb-request-id=01a0b343-c9d1-74af-9a11-c704a59c897e cf-ray=a3ce64161b38dd09-CDG deno-execution-id=d0a77e4e-f0f0-4189-b859-4e1bee9c7656
+[cross-booking] grep edge logs with: supabase functions logs public-booking | grep -E 'cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/foreign-tenant-negative/f6367af4-5a3f-447b-81db-6b7ab472f07c/attempt-1|01a0b343-c9d1-74af-9a11-c704a59c897e'
+{
+  "label": "foreign-tenant-negative",
+  "correlationId": "cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/foreign-tenant-negative/f6367af4-5a3f-447b-81db-6b7ab472f07c",
+  "attemptCorrelationId": "cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/foreign-tenant-negative/f6367af4-5a3f-447b-81db-6b7ab472f07c/attempt-1",
+  "echoedCorrelationId": null,
+  "traceIds": {
+    "sb_request_id": "01a0b343-c9d1-74af-9a11-c704a59c897e",
+    "cf_ray": "a3ce64161b38dd09-CDG",
+    "deno_execution_id": "d0a77e4e-f0f0-4189-b859-4e1bee9c7656",
+    "deployment_id": null
+  },
+  "errorShapeProblems": [],
+  "request": {
+    "method": "POST",
+    "url": "https://lsgznskkxadplwnxplhd.supabase.co/functions/v1/public-booking",
+    "headers": {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer <redacted>",
+      "apikey": "<redacted>",
+      "x-correlation-id": "cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/foreign-tenant-negative/f6367af4-5a3f-447b-81db-6b7ab472f07c/attempt-1",
+      "x-request-id": "cross-booking/chromium/retry-0/29aacaa4-ce64-4bce-8304-de96060836a2/foreign-tenant-negative/f6367af4-5a3f-447b-81db-6b7ab472f07c/attempt-1",
+      "traceparent": "00-677d5222dac36194bdbe33b64240b3b6-dac36194677d5222-01"
+    },
+    "body": {
+      "tenant_id": "00000000-0000-0000-0000-000000000000",
+      "guest_name": "TEST Lovable Cross 1789713952224",
+      "guest_email": "test-cross-1789713952224@example.com",
+      "guest_phone": "+358 40 0000000",
+      "guests_count": 2,
+      "reservation_type": "restaurant",
+      "resource_id": "63137f6d-4da6-4128-b43b-0901771f2137",
+      "date": "2026-11-17",
+      "start_time": "19:30",
+      "special_requests": "TEST: cross-booking foreign-tenant negative"
+    }
+  },
+  "response": {
+    "status": 400,
+    "durationMs": 110,
+    "headers": {
+      "date": "Fri, 18 Sep 2026 06:45:59 GMT",
+      "content-type": "application/json",
+      "content-length": "48",
+      "connection": "keep-alive",
+      "cf-ray": "a3ce64161b38dd09-CDG",
+      "cf-cache-status": "DYNAMIC",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store, no-cache, must-revalidate, private",
+      "content-encoding": "gzip",
+      "server": "cloudflare",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "vary": "Accept-Encoding, Origin",
+      "pragma": "no-cache",
+      "access-control-allow-headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+      "endpoint-load-metrics": "application_utilization:5,named_metrics.queue_depth:5",
+      "referrer-policy": "strict-origin-when-cross-origin",
+      "sb-gateway-version": "1",
+      "sb-project-ref": "lsgznskkxadplwnxplhd",
+      "sb-request-id": "01a0b343-c9d1-74af-9a11-c704a59c897e",
+      "x-content-type-options": "nosniff",
+      "x-deno-execution-id": "d0a77e4e-f0f0-4189-b859-4e1bee9c7656",
+      "x-frame-options": "DENY",
+      "x-sb-edge-region": "eu-west-3",
+      "x-served-by": "supabase-edge-runtime",
+      "x-xss-protection": "1; mode=block",
+      "alt-svc": "h3=\":443\"; ma=86400"
+    },
+    "body": {
+      "error": "Tenant not found"
+    }
+  }
+}
+
+[cross-booking] E2E_SUPABASE_SERVICE_ROLE_KEY not set; skipping RLS / tenant-isolation DB verification.
+]]>
+</system-err>
+</testcase>
+</testsuite>
+<testsuite name="dashboard-reservations.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="2" failures="0" skipped="0" time="2.248" errors="0">
+<testcase name="Dashboard reservations route › redirects unauthenticated users away from /dashboard" classname="dashboard-reservations.spec.ts" time="1.159">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/dashboard-reservations-Das-ca565-d-users-away-from-dashboard-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/dashboard-reservations-Das-ca565-d-users-away-from-dashboard-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/dashboard-reservations-Das-ca565-d-users-away-from-dashboard-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/dashboard-reservations-Das-ca565-d-users-away-from-dashboard-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/dashboard-reservations-Das-ca565-d-users-away-from-dashboard-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Dashboard reservations route › login page exposes the email/password fields used to reach dashboard" classname="dashboard-reservations.spec.ts" time="1.089">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/dashboard-reservations-Das-0ae16-lds-used-to-reach-dashboard-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/dashboard-reservations-Das-0ae16-lds-used-to-reach-dashboard-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/dashboard-reservations-Das-0ae16-lds-used-to-reach-dashboard-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/dashboard-reservations-Das-0ae16-lds-used-to-reach-dashboard-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/dashboard-reservations-Das-0ae16-lds-used-to-reach-dashboard-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="guest-portal-flow.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="6.387" errors="0">
+<testcase name="guest self-service flow › find booking, reschedule, staff approval, and guest cancellation" classname="guest-portal-flow.spec.ts" time="6.387">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/guest-portal-flow-guest-se-87dd2-oval-and-guest-cancellation-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/guest-portal-flow-guest-se-87dd2-oval-and-guest-cancellation-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/guest-portal-flow-guest-se-87dd2-oval-and-guest-cancellation-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/guest-portal-flow-guest-se-87dd2-oval-and-guest-cancellation-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/guest-portal-flow-guest-se-87dd2-oval-and-guest-cancellation-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="guest-portal-invoice-refusal-lifecycle.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="2" failures="0" skipped="0" time="6.405" errors="0">
+<testcase name="Invoice refusal notice lifecycle › replaces, announces and clears refusals across retries and bookings" classname="guest-portal-invoice-refusal-lifecycle.spec.ts" time="3.811">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Invoice refusal notice lifecycle › clears a refusal on back and forward navigation between bookings" classname="guest-portal-invoice-refusal-lifecycle.spec.ts" time="2.594">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="multi-resource-invoice-line-items.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="1.113" errors="0">
+<testcase name="Multi-resource invoice line items › line items sum to the charged total for every leg and the group" classname="multi-resource-invoice-line-items.spec.ts" time="1.113">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/multi-resource-invoice-lin-0dcbb-for-every-leg-and-the-group-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/multi-resource-invoice-lin-0dcbb-for-every-leg-and-the-group-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/multi-resource-invoice-lin-0dcbb-for-every-leg-and-the-group-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="no-tenant-navigation.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="9" failures="0" skipped="5" time="4.456" errors="0">
+<testcase name="Anonymous users hitting protected routes › GET /dashboard as anon redirects to /login" classname="no-tenant-navigation.spec.ts" time="1.209">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-694eb--as-anon-redirects-to-login-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-694eb--as-anon-redirects-to-login-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-694eb--as-anon-redirects-to-login-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-694eb--as-anon-redirects-to-login-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-694eb--as-anon-redirects-to-login-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Anonymous users hitting protected routes › GET /onboarding as anon redirects to /login" classname="no-tenant-navigation.spec.ts" time="1.121">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-e501a--as-anon-redirects-to-login-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-e501a--as-anon-redirects-to-login-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-e501a--as-anon-redirects-to-login-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-e501a--as-anon-redirects-to-login-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-e501a--as-anon-redirects-to-login-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Anonymous users hitting protected routes › GET /guide as anon redirects to /login" classname="no-tenant-navigation.spec.ts" time="1.07">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-d9f72--as-anon-redirects-to-login-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-d9f72--as-anon-redirects-to-login-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-d9f72--as-anon-redirects-to-login-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-d9f72--as-anon-redirects-to-login-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-d9f72--as-anon-redirects-to-login-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Anonymous users hitting protected routes › GET /superadmin as anon redirects to /login" classname="no-tenant-navigation.spec.ts" time="1.056">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-df823--as-anon-redirects-to-login-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-df823--as-anon-redirects-to-login-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-df823--as-anon-redirects-to-login-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-df823--as-anon-redirects-to-login-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/no-tenant-navigation-Anony-df823--as-anon-redirects-to-login-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authenticated user without tenant membership › /dashboard redirects to /onboarding" classname="no-tenant-navigation.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Authenticated user without tenant membership › /onboarding renders the wizard (no redirect loop)" classname="no-tenant-navigation.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Authenticated user without tenant membership › /guide renders without requiring a tenant" classname="no-tenant-navigation.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Authenticated user without tenant membership › /superadmin denies non-admin and bounces to onboarding" classname="no-tenant-navigation.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Authenticated user without tenant membership › full navigation loop: dashboard -&gt; onboarding -&gt; guide -&gt; superadmin" classname="no-tenant-navigation.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="no-tenant-state.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="5" failures="0" skipped="5" time="0" errors="0">
+<testcase name="NoTenantState for logged-in users without a tenant › /dashboard guard redirects no-tenant user to /onboarding" classname="no-tenant-state.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="NoTenantState for logged-in users without a tenant › /guide guard redirects no-tenant user to /onboarding" classname="no-tenant-state.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="NoTenantState for logged-in users without a tenant › /superadmin renders NoTenantState › shows the user&apos;s email and both CTAs" classname="no-tenant-state.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="NoTenantState for logged-in users without a tenant › /superadmin renders NoTenantState › &apos;Complete setup&apos; CTA navigates to /onboarding" classname="no-tenant-state.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="NoTenantState for logged-in users without a tenant › /superadmin renders NoTenantState › &apos;Contact support&apos; CTA opens /support with prefilled area + email" classname="no-tenant-state.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="offer-confirm-creates-reservations.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Offer confirm creates main + linked cross reservations › confirms offer and produces main + 2 linked reservations" classname="offer-confirm-creates-reservations.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="9" failures="0" skipped="0" time="17.444" errors="0">
+<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.162">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/test-finished-2.png]]
+
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/test-finished-3.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/video.webm]]
 
@@ -11,10 +407,14 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Offer confirmation states the Kitchen tab result › offer without food or drinks: confirmation says nothing was sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.098">
+<testcase name="Offer confirmation states the Kitchen tab result › offer without food or drinks: confirmation says nothing was sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.589">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/test-finished-3.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/video.webm]]
 
@@ -22,10 +422,14 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Offer confirmation states the Kitchen tab result › accepted offer&apos;s food and drink lines show up in the Kitchen tab" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.625">
+<testcase name="Offer confirmation states the Kitchen tab result › accepted offer&apos;s food and drink lines show up in the Kitchen tab" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.092">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-finished-3.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/video.webm]]
 
@@ -33,10 +437,14 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Kitchen tab announcement wording per language › en: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts" time="3.715">
+<testcase name="Kitchen tab announcement wording per language › en: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.088">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/test-finished-3.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/video.webm]]
 
@@ -44,10 +452,14 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Kitchen tab announcement wording per language › en: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.114">
+<testcase name="Kitchen tab announcement wording per language › en: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.907">
 <system-out>
 <![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/test-finished-2.png]]
+
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/test-finished-3.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/video.webm]]
 
@@ -55,10 +467,14 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Kitchen tab announcement wording per language › fi: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.221">
+<testcase name="Kitchen tab announcement wording per language › fi: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.839">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/test-finished-3.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/video.webm]]
 
@@ -66,10 +482,14 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Kitchen tab announcement wording per language › fi: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.646">
+<testcase name="Kitchen tab announcement wording per language › fi: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.873">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/test-finished-3.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/video.webm]]
 
@@ -77,10 +497,14 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Kitchen tab announcement wording per language › sv: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.645">
+<testcase name="Kitchen tab announcement wording per language › sv: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.847">
 <system-out>
 <![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/test-finished-2.png]]
+
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/test-finished-3.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/video.webm]]
 
@@ -88,16 +512,1285 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Kitchen tab announcement wording per language › sv: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.888">
+<testcase name="Kitchen tab announcement wording per language › sv: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.047">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/test-finished-3.png]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/video.webm]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/trace.zip]]
 ]]>
 </system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-concurrent-invoice-identity.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="7.168" errors="0">
+<testcase name="Concurrent invoicing identity › returns one consistent invoice identifier and a single history entry" classname="public-booking-concurrent-invoice-identity.spec.ts" time="7.168">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-concurrent--9aceb--and-a-single-history-entry-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-concurrent--9aceb--and-a-single-history-entry-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-concurrent--9aceb--and-a-single-history-entry-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-concurrent-invoicing.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="7.317" errors="0">
+<testcase name="Concurrent invoicing › invoices only once and refuses while totals are inconsistent" classname="public-booking-concurrent-invoicing.spec.ts" time="7.317">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-concurrent--422c9-ile-totals-are-inconsistent-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-concurrent--422c9-ile-totals-are-inconsistent-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-concurrent--422c9-ile-totals-are-inconsistent-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-conflicting-discount-codes.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="15.272" errors="0">
+<testcase name="Conflicting discount code combinations › are selected or refused by one policy, whatever the order or duplication" classname="public-booking-conflicting-discount-codes.spec.ts" time="15.272">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-conflicting-c2c52-er-the-order-or-duplication-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-conflicting-c2c52-er-the-order-or-duplication-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-conflicting-c2c52-er-the-order-or-duplication-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-discount-code-normalization.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="13.049" errors="0">
+<testcase name="Discount code normalization › casing, whitespace and URL-encoded input are cleaned before policy runs" classname="public-booking-discount-code-normalization.spec.ts" time="13.049">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-discount-co-63c10--cleaned-before-policy-runs-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-co-63c10--cleaned-before-policy-runs-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-co-63c10--cleaned-before-policy-runs-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-discount-dashboard.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="3.61" errors="0">
+<testcase name="Public booking with a discount code › stores the discounted price and shows it with invoice fields in the dashboard" classname="public-booking-discount-dashboard.spec.ts" time="3.61">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-discount-da-23480-ice-fields-in-the-dashboard-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-da-23480-ice-fields-in-the-dashboard-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-da-23480-ice-fields-in-the-dashboard-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-da-23480-ice-fields-in-the-dashboard-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-da-23480-ice-fields-in-the-dashboard-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-discount-partial-night.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="5.116" errors="0">
+<testcase name="Discounted partial-night stays › prices partial nights correctly and reflects them in the dashboard" classname="public-booking-discount-partial-night.spec.ts" time="5.116">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-discount-pa-a55e7-lects-them-in-the-dashboard-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-pa-a55e7-lects-them-in-the-dashboard-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-pa-a55e7-lects-them-in-the-dashboard-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-pa-a55e7-lects-them-in-the-dashboard-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-pa-a55e7-lects-them-in-the-dashboard-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-discount-reuse.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="1.916" errors="0">
+<testcase name="Reusing a single-use discount code › counts the code as used once and leaves the first booking&apos;s price unchanged" classname="public-booking-discount-reuse.spec.ts" time="1.916">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-discount-re-f58b1-t-booking-s-price-unchanged-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-re-f58b1-t-booking-s-price-unchanged-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-re-f58b1-t-booking-s-price-unchanged-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-discount-rounding-edge-cases.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="8.578" errors="0">
+<testcase name="Discount rounding edge cases › always round to the same cent in every persisted report" classname="public-booking-discount-rounding-edge-cases.spec.ts" time="8.578">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-discount-ro-e4c6d-t-in-every-persisted-report-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-ro-e4c6d-t-in-every-persisted-report-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-discount-ro-e4c6d-t-in-every-persisted-report-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-idempotency-key.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="13.132" errors="0">
+<testcase name="Booking create idempotency key › repeated creates with the same key never double-apply a promotion" classname="public-booking-idempotency-key.spec.ts" time="13.132">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-idempotency-fd119-er-double-apply-a-promotion-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-idempotency-fd119-er-double-apply-a-promotion-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-idempotency-fd119-er-double-apply-a-promotion-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-invalid-discount.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="7.245" errors="0">
+<testcase name="Public booking with an invalid or expired discount code › rejects the booking, shows an error, and writes no price or invoice data" classname="public-booking-invalid-discount.spec.ts" time="7.245">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-invalid-dis-56f63-es-no-price-or-invoice-data-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-invalid-dis-56f63-es-no-price-or-invoice-data-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-invalid-dis-56f63-es-no-price-or-invoice-data-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-invalid-dis-56f63-es-no-price-or-invoice-data-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/public-booking-invalid-dis-56f63-es-no-price-or-invoice-data-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-invoice-amount-consistency.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="2.768" errors="0">
+<testcase name="Invoice amounts must reconcile with the report split › rejects invoice amounts that do not match room + breakfast" classname="public-booking-invoice-amount-consistency.spec.ts" time="2.768">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-invoice-amo-314a4-do-not-match-room-breakfast-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-invoice-amo-314a4-do-not-match-room-breakfast-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-invoice-amo-314a4-do-not-match-room-breakfast-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-invoicing-refusal.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="2.167" errors="0">
+<testcase name="Invoicing refused for tampered pricing › returns a clear message and records nothing as invoiced" classname="public-booking-invoicing-refusal.spec.ts" time="2.167">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-invoicing-r-2b4c3-records-nothing-as-invoiced-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-invoicing-r-2b4c3-records-nothing-as-invoiced-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-invoicing-r-2b4c3-records-nothing-as-invoiced-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-mixed-concurrent-invoicing.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="5.95" errors="0">
+<testcase name="Mixed concurrent invoicing › rejects the mismatched request while the good one invoices exactly once" classname="public-booking-mixed-concurrent-invoicing.spec.ts" time="5.95">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-mixed-concu-e8c80-d-one-invoices-exactly-once-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-mixed-concu-e8c80-d-one-invoices-exactly-once-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-mixed-concu-e8c80-d-one-invoices-exactly-once-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-multi-code-error-quality.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="7.109" errors="0">
+<testcase name="Multiple promo codes: refusal message quality › every multi-code shape returns the same clean explanation" classname="public-booking-multi-code-error-quality.spec.ts" time="7.109">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-multi-code--85260--the-same-clean-explanation-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-multi-code--85260--the-same-clean-explanation-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-multi-code--85260--the-same-clean-explanation-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-multiple-discount-codes.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="7.309" errors="0">
+<testcase name="Requests carrying multiple discount codes › are refused, and a single code is applied at its own value" classname="public-booking-multiple-discount-codes.spec.ts" time="7.309">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-multiple-di-5f63c-is-applied-at-its-own-value-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-multiple-di-5f63c-is-applied-at-its-own-value-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-multiple-di-5f63c-is-applied-at-its-own-value-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-period-aggregates-invoicing.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="4.61" errors="0">
+<testcase name="Period aggregates and invoicing › move only when invoicing succeeds, never on a refused or tampered attempt" classname="public-booking-period-aggregates-invoicing.spec.ts" time="4.61">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-period-aggr-1e647-refused-or-tampered-attempt-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-period-aggr-1e647-refused-or-tampered-attempt-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-period-aggr-1e647-refused-or-tampered-attempt-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-repeat-invoicing.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="4.976" errors="0">
+<testcase name="Repeat invoicing of the same booking › creates the invoice once and keeps the totals correct" classname="public-booking-repeat-invoicing.spec.ts" time="4.976">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-repeat-invo-b3e6e-nd-keeps-the-totals-correct-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-repeat-invo-b3e6e-nd-keeps-the-totals-correct-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-repeat-invo-b3e6e-nd-keeps-the-totals-correct-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-repeat-submission-totals.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="3.175" errors="0">
+<testcase name="Repeated identical booking submissions › produce identical totals and report figures without double-charging" classname="public-booking-repeat-submission-totals.spec.ts" time="3.175">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-repeat-subm-57f2c-res-without-double-charging-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-repeat-subm-57f2c-res-without-double-charging-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-repeat-subm-57f2c-res-without-double-charging-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-retry-discount-usage.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="6.223" errors="0">
+<testcase name="Retried booking requests and coupon usage › count a coupon once no matter how often the client retries" classname="public-booking-retry-discount-usage.spec.ts" time="6.223">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-retry-disco-319ad-ow-often-the-client-retries-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-retry-disco-319ad-ow-often-the-client-retries-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-retry-disco-319ad-ow-often-the-client-retries-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-server-owned-fields.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="3.344" errors="0">
+<testcase name="Server-owned invoicing flag and pricing notes › client-sent invoiced flags and pricing notes are discarded" classname="public-booking-server-owned-fields.spec.ts" time="3.344">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-server-owne-40973-pricing-notes-are-discarded-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-server-owne-40973-pricing-notes-are-discarded-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-server-owne-40973-pricing-notes-are-discarded-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-service-role-missing.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="2.018" errors="0">
+<testcase name="public-booking: SUPABASE_SERVICE_ROLE_KEY missing › UI shows a safe error and writes no reservation row" classname="public-booking-service-role-missing.spec.ts" time="2.018">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-service-rol-db0d7-d-writes-no-reservation-row-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-service-rol-db0d7-d-writes-no-reservation-row-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-service-rol-db0d7-d-writes-no-reservation-row-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-service-rol-db0d7-d-writes-no-reservation-row-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/public-booking-service-rol-db0d7-d-writes-no-reservation-row-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-staff-branding.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="3.293" errors="0">
+<testcase name="Public booking page branding for authenticated staff › shows site name, colours and logo to a staff user" classname="public-booking-staff-branding.spec.ts" time="3.293">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-staff-brand-8017c-rs-and-logo-to-a-staff-user-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-staff-brand-8017c-rs-and-logo-to-a-staff-user-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-staff-brand-8017c-rs-and-logo-to-a-staff-user-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-staff-brand-8017c-rs-and-logo-to-a-staff-user-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/public-booking-staff-brand-8017c-rs-and-logo-to-a-staff-user-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-staff-pricing-edit-invoicing.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="2.545" errors="0">
+<testcase name="Staff pricing edits and invoicing › blocks invoicing until the edited totals reconcile again" classname="public-booking-staff-pricing-edit-invoicing.spec.ts" time="2.545">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-staff-prici-96d3a-ited-totals-reconcile-again-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-staff-prici-96d3a-ited-totals-reconcile-again-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-staff-prici-96d3a-ited-totals-reconcile-again-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-tampered-breakfast-rate.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="8.468" errors="0">
+<testcase name="Server recalculates breakfast from resource rules, ignoring the client › uses the resource breakfast rate whatever the browser claims" classname="public-booking-tampered-breakfast-rate.spec.ts" time="8.468">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-tampered-br-2593d-whatever-the-browser-claims-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-br-2593d-whatever-the-browser-claims-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-br-2593d-whatever-the-browser-claims-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-tampered-discount.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="4.337" errors="0">
+<testcase name="Server recalculates discounts, ignoring the client › applies only tenant-configured promo codes to resource-level prices" classname="public-booking-tampered-discount.spec.ts" time="4.337">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-tampered-di-0236c-es-to-resource-level-prices-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-di-0236c-es-to-resource-level-prices-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-di-0236c-es-to-resource-level-prices-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-tampered-invoicing.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="5.647" errors="0">
+<testcase name="Tampered bookings cannot be invoiced until totals are consistent › blocks invoicing until the recalculated total is present and consistent" classname="public-booking-tampered-invoicing.spec.ts" time="5.647">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-tampered-in-1f22b-l-is-present-and-consistent-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-in-1f22b-l-is-present-and-consistent-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-in-1f22b-l-is-present-and-consistent-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-in-1f22b-l-is-present-and-consistent-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-in-1f22b-l-is-present-and-consistent-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-tampered-pricing.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="3.786" errors="0">
+<testcase name="Tampered client pricing is recomputed server-side › ignores client-supplied prices and reports the resource-level amounts" classname="public-booking-tampered-pricing.spec.ts" time="3.786">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-tampered-pr-7d3e9--the-resource-level-amounts-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-pr-7d3e9--the-resource-level-amounts-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-pr-7d3e9--the-resource-level-amounts-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-pr-7d3e9--the-resource-level-amounts-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/public-booking-tampered-pr-7d3e9--the-resource-level-amounts-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="public-booking-warmup.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="2" failures="0" skipped="0" time="0.356" errors="0">
+<testcase name="public-booking warmup › returns 200 with { ok: true, warmup: true }" classname="public-booking-warmup.spec.ts" time="0.171">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-warmup-publ-0ed7a-0-with-ok-true-warmup-true--chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-warmup-publ-0ed7a-0-with-ok-true-warmup-true--chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-warmup-publ-0ed7a-0-with-ok-true-warmup-true--chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="public-booking warmup › rejects malformed warmup payload with 400" classname="public-booking-warmup.spec.ts" time="0.185">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/public-booking-warmup-publ-dd048-med-warmup-payload-with-400-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-warmup-publ-dd048-med-warmup-payload-with-400-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/public-booking-warmup-publ-dd048-med-warmup-payload-with-400-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="reservation-and-email-preview.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="0" time="2.178" errors="0">
+<testcase name="Smoke: reservation submit + confirmation email preview › submits a reservation and renders the confirmation email preview" classname="reservation-and-email-preview.spec.ts" time="2.178">
+<system-out>
+<![CDATA[[smoke:reservation+email-preview] smoke-reservation OK (HTTP 200, 775ms) trace: correlation_id=smoke-reservation/ee26096a-f232-4cbb-924a-906fd23861e5/attempt-1 echoed=<none> sb-request-id=01a0b346-f6ed-7cb8-81b7-d2e562606f9a cf-ray=a3ce692b0c8a4e73-CDG deno-execution-id=717ac694-a35c-44e5-a6cf-4218448cefbb
+
+[[ATTACHMENT|../../test-results/reservation-and-email-prev-1c34c--confirmation-email-preview-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/reservation-and-email-prev-1c34c--confirmation-email-preview-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/reservation-and-email-prev-1c34c--confirmation-email-preview-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/reservation-and-email-prev-1c34c--confirmation-email-preview-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/reservation-and-email-prev-1c34c--confirmation-email-preview-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="signed-url-malicious-paths.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="19" failures="0" skipped="0" time="3.496" errors="0">
+<testcase name="mint-tenant-private-url HTTP contract › rejects parent traversal segment with 400 + invalid_storage_path/traversal_or_empty_segment" classname="signed-url-malicious-paths.spec.ts" time="0.171">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-2d246--traversal-or-empty-segment-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-2d246--traversal-or-empty-segment-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-2d246--traversal-or-empty-segment-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects leading parent traversal with 400 + invalid_storage_path/traversal_or_empty_segment" classname="signed-url-malicious-paths.spec.ts" time="0.22">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-55e3e--traversal-or-empty-segment-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-55e3e--traversal-or-empty-segment-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-55e3e--traversal-or-empty-segment-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects current-dir segment with 400 + invalid_storage_path/traversal_or_empty_segment" classname="signed-url-malicious-paths.spec.ts" time="0.204">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-e28ec--traversal-or-empty-segment-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-e28ec--traversal-or-empty-segment-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-e28ec--traversal-or-empty-segment-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects absolute unix path with 400 + invalid_storage_path/absolute" classname="signed-url-malicious-paths.spec.ts" time="0.163">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-7174f-valid-storage-path-absolute-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-7174f-valid-storage-path-absolute-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-7174f-valid-storage-path-absolute-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects double slash empty segment with 400 + invalid_storage_path/traversal_or_empty_segment" classname="signed-url-malicious-paths.spec.ts" time="0.156">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-5e484--traversal-or-empty-segment-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-5e484--traversal-or-empty-segment-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-5e484--traversal-or-empty-segment-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects trailing slash empty segment with 400 + invalid_storage_path/traversal_or_empty_segment" classname="signed-url-malicious-paths.spec.ts" time="0.198">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-3e79d--traversal-or-empty-segment-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-3e79d--traversal-or-empty-segment-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-3e79d--traversal-or-empty-segment-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects windows backslash traversal with 400 + invalid_storage_path/backslash" classname="signed-url-malicious-paths.spec.ts" time="0.16">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-43f53-alid-storage-path-backslash-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-43f53-alid-storage-path-backslash-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-43f53-alid-storage-path-backslash-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects embedded NUL byte with 400 + invalid_storage_path/control_char" classname="signed-url-malicious-paths.spec.ts" time="0.169">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-aef26-d-storage-path-control-char-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-aef26-d-storage-path-control-char-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-aef26-d-storage-path-control-char-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects ASCII control character with 400 + invalid_storage_path/control_char" classname="signed-url-malicious-paths.spec.ts" time="0.283">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-7c9c7-d-storage-path-control-char-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-7c9c7-d-storage-path-control-char-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-7c9c7-d-storage-path-control-char-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects DEL control character with 400 + invalid_storage_path/control_char" classname="signed-url-malicious-paths.spec.ts" time="0.205">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-29705-d-storage-path-control-char-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-29705-d-storage-path-control-char-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-29705-d-storage-path-control-char-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects http scheme with 400 + invalid_storage_path/scheme" classname="signed-url-malicious-paths.spec.ts" time="0.182">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-a8c0c-invalid-storage-path-scheme-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-a8c0c-invalid-storage-path-scheme-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-a8c0c-invalid-storage-path-scheme-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects https scheme with 400 + invalid_storage_path/scheme" classname="signed-url-malicious-paths.spec.ts" time="0.18">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-96275-invalid-storage-path-scheme-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-96275-invalid-storage-path-scheme-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-96275-invalid-storage-path-scheme-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects file scheme with 400 + invalid_storage_path/scheme" classname="signed-url-malicious-paths.spec.ts" time="0.178">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-ffc8c-invalid-storage-path-scheme-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-ffc8c-invalid-storage-path-scheme-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-ffc8c-invalid-storage-path-scheme-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects whitespace only with 400 + invalid_storage_path/empty" classname="signed-url-malicious-paths.spec.ts" time="0.152">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-cf4f1--invalid-storage-path-empty-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-cf4f1--invalid-storage-path-empty-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-cf4f1--invalid-storage-path-empty-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects overly long path with 400 + invalid_storage_path/too_long" classname="signed-url-malicious-paths.spec.ts" time="0.192">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-0b65e-valid-storage-path-too-long-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-0b65e-valid-storage-path-too-long-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-0b65e-valid-storage-path-too-long-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects non-string path with not_a_string" classname="signed-url-malicious-paths.spec.ts" time="0.153">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-cb44d-ring-path-with-not-a-string-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-cb44d-ring-path-with-not-a-string-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-cb44d-ring-path-with-not-a-string-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects non-JSON body with invalid_request" classname="signed-url-malicious-paths.spec.ts" time="0.168">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-7116d-N-body-with-invalid-request-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-7116d-N-body-with-invalid-request-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-7116d-N-body-with-invalid-request-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › rejects GET with 405 method_not_allowed" classname="signed-url-malicious-paths.spec.ts" time="0.185">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-16e1f-with-405-method-not-allowed-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-16e1f-with-405-method-not-allowed-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-16e1f-with-405-method-not-allowed-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="mint-tenant-private-url HTTP contract › well-formed path without auth returns 401 unauthenticated" classname="signed-url-malicious-paths.spec.ts" time="0.177">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-c5b86-returns-401-unauthenticated-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-c5b86-returns-401-unauthenticated-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/signed-url-malicious-paths-c5b86-returns-401-unauthenticated-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="smoke.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="3" failures="0" skipped="0" time="3.389" errors="0">
+<testcase name="Smoke tests › homepage loads and shows heading" classname="smoke.spec.ts" time="1.524">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-homepage-loads-and-shows-heading-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-homepage-loads-and-shows-heading-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-homepage-loads-and-shows-heading-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-homepage-loads-and-shows-heading-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-homepage-loads-and-shows-heading-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Smoke tests › login page is accessible" classname="smoke.spec.ts" time="0.995">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-login-page-is-accessible-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-login-page-is-accessible-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-login-page-is-accessible-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-login-page-is-accessible-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-login-page-is-accessible-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Smoke tests › 404 page renders for unknown routes" classname="smoke.spec.ts" time="0.87">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-404-page-renders-for-unknown-routes-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-404-page-renders-for-unknown-routes-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-404-page-renders-for-unknown-routes-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-404-page-renders-for-unknown-routes-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/smoke-Smoke-tests-404-page-renders-for-unknown-routes-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="storage-path-traversal.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="18" failures="0" skipped="0" time="1.009" errors="0">
+<testcase name="Signed URL path-traversal hardening › rejects parent traversal segment" classname="storage-path-traversal.spec.ts" time="0.075">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-49c3c-ts-parent-traversal-segment-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-49c3c-ts-parent-traversal-segment-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-49c3c-ts-parent-traversal-segment-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'traversal_or_empty_segment'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m33[39m,
+  segmentCount: [33m4[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:39.246Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects leading parent traversal" classname="storage-path-traversal.spec.ts" time="0.065">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-ea508-ts-leading-parent-traversal-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-ea508-ts-leading-parent-traversal-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-ea508-ts-leading-parent-traversal-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'traversal_or_empty_segment'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m13[39m,
+  segmentCount: [33m3[39m,
+  leadingCharClass: [32m'dot'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:39.451Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects current-dir segment" classname="storage-path-traversal.spec.ts" time="0.057">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-f8469-rejects-current-dir-segment-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-f8469-rejects-current-dir-segment-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-f8469-rejects-current-dir-segment-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'traversal_or_empty_segment'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m17[39m,
+  segmentCount: [33m3[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:39.636Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects absolute unix path" classname="storage-path-traversal.spec.ts" time="0.057">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-022ad--rejects-absolute-unix-path-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-022ad--rejects-absolute-unix-path-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-022ad--rejects-absolute-unix-path-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'absolute'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m11[39m,
+  segmentCount: [33m3[39m,
+  leadingCharClass: [32m'slash'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:39.812Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects double slash empty segment" classname="storage-path-traversal.spec.ts" time="0.052">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-f6928--double-slash-empty-segment-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-f6928--double-slash-empty-segment-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-f6928--double-slash-empty-segment-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'traversal_or_empty_segment'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m16[39m,
+  segmentCount: [33m3[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:39.966Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects trailing slash empty segment" classname="storage-path-traversal.spec.ts" time="0.055">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-6ff94-railing-slash-empty-segment-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-6ff94-railing-slash-empty-segment-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-6ff94-railing-slash-empty-segment-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'traversal_or_empty_segment'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m16[39m,
+  segmentCount: [33m3[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:40.117Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects windows backslash traversal" classname="storage-path-traversal.spec.ts" time="0.056">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-9bc3c-windows-backslash-traversal-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-9bc3c-windows-backslash-traversal-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-9bc3c-windows-backslash-traversal-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'backslash'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m20[39m,
+  segmentCount: [33m1[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mtrue[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:40.256Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects embedded NUL byte" classname="storage-path-traversal.spec.ts" time="0.063">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-1d03f-g-rejects-embedded-NUL-byte-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-1d03f-g-rejects-embedded-NUL-byte-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-1d03f-g-rejects-embedded-NUL-byte-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'control_char'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m20[39m,
+  segmentCount: [33m2[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mtrue[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:40.454Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects ASCII control character" classname="storage-path-traversal.spec.ts" time="0.059">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-73445-cts-ASCII-control-character-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-73445-cts-ASCII-control-character-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-73445-cts-ASCII-control-character-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'control_char'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m16[39m,
+  segmentCount: [33m2[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mtrue[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:40.618Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects DEL control character" classname="storage-path-traversal.spec.ts" time="0.049">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-eb017-jects-DEL-control-character-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-eb017-jects-DEL-control-character-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-eb017-jects-DEL-control-character-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'control_char'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m15[39m,
+  segmentCount: [33m2[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mtrue[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:40.763Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects http scheme" classname="storage-path-traversal.spec.ts" time="0.045">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-5dbcd-rdening-rejects-http-scheme-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-5dbcd-rdening-rejects-http-scheme-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-5dbcd-rdening-rejects-http-scheme-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'scheme'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m29[39m,
+  segmentCount: [33m4[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mtrue[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:40.909Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects https scheme" classname="storage-path-traversal.spec.ts" time="0.058">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-e485e-dening-rejects-https-scheme-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-e485e-dening-rejects-https-scheme-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-e485e-dening-rejects-https-scheme-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'scheme'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m30[39m,
+  segmentCount: [33m4[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mtrue[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:41.046Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects file scheme" classname="storage-path-traversal.spec.ts" time="0.049">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-1bd75-rdening-rejects-file-scheme-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-1bd75-rdening-rejects-file-scheme-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-1bd75-rdening-rejects-file-scheme-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'scheme'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m18[39m,
+  segmentCount: [33m5[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mtrue[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:41.207Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects empty string" classname="storage-path-traversal.spec.ts" time="0.052">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-b493c-dening-rejects-empty-string-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-b493c-dening-rejects-empty-string-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-b493c-dening-rejects-empty-string-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'empty'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m0[39m,
+  segmentCount: [1mnull[22m,
+  leadingCharClass: [32m'none'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:41.346Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects whitespace only" classname="storage-path-traversal.spec.ts" time="0.053">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-5e679-ing-rejects-whitespace-only-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-5e679-ing-rejects-whitespace-only-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-5e679-ing-rejects-whitespace-only-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'empty'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m3[39m,
+  segmentCount: [33m1[39m,
+  leadingCharClass: [32m'none'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:41.487Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › rejects overly long path" classname="storage-path-traversal.spec.ts" time="0.059">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-72db1-ng-rejects-overly-long-path-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-72db1-ng-rejects-overly-long-path-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-72db1-ng-rejects-overly-long-path-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'too_long'[39m,
+  inputType: [32m'string'[39m,
+  inputLength: [33m1208[39m,
+  segmentCount: [33m601[39m,
+  leadingCharClass: [32m'alnum'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:41.628Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › accepts well-formed tenant-scoped keys" classname="storage-path-traversal.spec.ts" time="0.048">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-d0a9a-l-formed-tenant-scoped-keys-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-d0a9a-l-formed-tenant-scoped-keys-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-d0a9a-l-formed-tenant-scoped-keys-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Signed URL path-traversal hardening › non-string input is rejected" classname="storage-path-traversal.spec.ts" time="0.057">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-98264-on-string-input-is-rejected-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-98264-on-string-input-is-rejected-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/storage-path-traversal-Sig-98264-on-string-input-is-rejected-chromium/trace.zip]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[[security] storage-path rejected {
+  reason: [32m'not_a_string'[39m,
+  inputType: [32m'undefined'[39m,
+  inputLength: [33m0[39m,
+  segmentCount: [1mnull[22m,
+  leadingCharClass: [32m'none'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:41.903Z'[39m
+}
+[security] storage-path rejected {
+  reason: [32m'not_a_string'[39m,
+  inputType: [32m'number'[39m,
+  inputLength: [33m0[39m,
+  segmentCount: [1mnull[22m,
+  leadingCharClass: [32m'none'[39m,
+  hasSchemeShape: [33mfalse[39m,
+  hasBackslash: [33mfalse[39m,
+  hasControlChar: [33mfalse[39m,
+  callsite: [90mundefined[39m,
+  tenantId: [90mundefined[39m,
+  rejectedAt: [32m'2026-09-18T06:49:41.904Z'[39m
+}
+]]>
+</system-err>
+</testcase>
+</testsuite>
+<testsuite name="superadmin-forbidden.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="4" failures="0" skipped="2" time="1.136" errors="0">
+<testcase name="forbidden-status edge function (always-403 contract) › direct request to forbidden-status returns HTTP 403" classname="superadmin-forbidden.spec.ts" time="0.16">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/superadmin-forbidden-forbi-f4f4c-den-status-returns-HTTP-403-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-forbidden-forbi-f4f4c-den-status-returns-HTTP-403-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-forbidden-forbi-f4f4c-den-status-returns-HTTP-403-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Anonymous /superadmin visit › redirects to /login (auth-gate happens before role-gate)" classname="superadmin-forbidden.spec.ts" time="0.976">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/superadmin-forbidden-Anony-b61c9-e-happens-before-role-gate--chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-forbidden-Anony-b61c9-e-happens-before-role-gate--chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-forbidden-Anony-b61c9-e-happens-before-role-gate--chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-forbidden-Anony-b61c9-e-happens-before-role-gate--chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/superadmin-forbidden-Anony-b61c9-e-happens-before-role-gate--chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Authenticated non-admin /superadmin denial flow › non-admin sees Forbidden page with data-http-status=403" classname="superadmin-forbidden.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NON_ADMIN_EMAIL + E2E_NON_ADMIN_PASSWORD to run the authenticated denial flow">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Authenticated non-admin /superadmin denial flow › Forbidden page beacon to forbidden-status produces a real HTTP 403 in the network log" classname="superadmin-forbidden.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_NON_ADMIN_EMAIL + E2E_NON_ADMIN_PASSWORD to run the authenticated denial flow">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+</testsuite>
+<testsuite name="superadmin-mocked-auth.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="3" failures="0" skipped="0" time="3.399" errors="0">
+<testcase name="/superadmin — mocked auth states (lightweight E2E) › anonymous: redirects to /login, no Forbidden UI, no beacons" classname="superadmin-mocked-auth.spec.ts" time="1.023">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-818f9--no-Forbidden-UI-no-beacons-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-818f9--no-Forbidden-UI-no-beacons-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-818f9--no-Forbidden-UI-no-beacons-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-818f9--no-Forbidden-UI-no-beacons-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-818f9--no-Forbidden-UI-no-beacons-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="/superadmin — mocked auth states (lightweight E2E) › authenticated states (require VITE_SUPABASE_URL) › non-admin: Forbidden renders in-place with data-http-status=403 and a real 403 in the network log" classname="superadmin-mocked-auth.spec.ts" time="0.924">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-6312c-real-403-in-the-network-log-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-6312c-real-403-in-the-network-log-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-6312c-real-403-in-the-network-log-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-6312c-real-403-in-the-network-log-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-6312c-real-403-in-the-network-log-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="/superadmin — mocked auth states (lightweight E2E) › authenticated states (require VITE_SUPABASE_URL) › system admin: reaches Superadmin page, no Forbidden UI" classname="superadmin-mocked-auth.spec.ts" time="1.452">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-18740-radmin-page-no-Forbidden-UI-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-18740-radmin-page-no-Forbidden-UI-chromium/test-finished-2.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-18740-radmin-page-no-Forbidden-UI-chromium/test-finished-3.png]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-18740-radmin-page-no-Forbidden-UI-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/superadmin-mocked-auth--su-18740-radmin-page-no-Forbidden-UI-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+</testsuite>
+<testsuite name="tenant-membership-removed.spec.ts" timestamp="2026-09-18T06:45:51.502Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Tenant membership revoked mid-session › removes membership while on /dashboard, shows toast, and lands on /onboarding" classname="tenant-membership-removed.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_SUPABASE_URL, E2E_SUPABASE_SERVICE_ROLE_KEY, E2E_MEMBERSHIP_TEST_EMAIL, E2E_MEMBERSHIP_TEST_PASSWORD, and E2E_MEMBERSHIP_TEST_TENANT_ID to run this test.">
+</property>
+</properties>
+<skipped>
+</skipped>
 </testcase>
 </testsuite>
 </testsuites>
