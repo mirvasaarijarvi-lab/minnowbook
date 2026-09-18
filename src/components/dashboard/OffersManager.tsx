@@ -317,7 +317,7 @@ const OffersManager = () => {
       toast.success(t("offers.confirmedSuccess"), {
         description:
           kitchenRows.length > 0
-            ? t("offers.confirmedKitchenSent")
+            ? t("offers.confirmedKitchenSent").replace("{count}", String(kitchenRows.length))
             : t("offers.confirmedNoKitchen"),
       });
       if (missingPrice.length > 0) {
