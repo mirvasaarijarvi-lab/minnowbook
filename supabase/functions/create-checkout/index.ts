@@ -6,6 +6,15 @@ import { getCorsHeaders, isOriginAllowed } from "../_shared/http-headers.ts";
 const SAFE_ORIGIN_FALLBACK = "https://mimmobook.com";
 const GENERIC_ERROR = "Payment service temporarily unavailable.";
 
+// Self-serve subscriptions exist only for the three monthly plans. Enterprise is
+// sold by offer and has no Stripe price, so any other price id is rejected here
+// (keep in sync with src/lib/stripe-tiers.ts).
+const ALLOWED_PRICE_IDS = new Set([
+  "price_1TM3VZAi9C4ePV8hzIKzpZHb", // basic
+  "price_1TM3VxAi9C4ePV8hP4Olb3GN", // professional
+  "price_1TM3bOAi9C4ePV8hv5EQysmt", // business
+]);
+
 const logStep = (step: string, details?: any) => {
   const d = details ? ` - ${JSON.stringify(details)}` : "";
   console.log(`[CREATE-CHECKOUT] ${step}${d}`);
@@ -57,6 +66,12 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
     if (!priceId || typeof priceId !== "string") throw new Error("priceId is required");
     // Validate priceId format (Stripe price IDs start with "price_")
     if (!/^price_[a-zA-Z0-9]+$/.test(priceId)) throw new Error("Invalid priceId format");
+    if (!ALLOWED_PRICE_IDS.has(priceId)) {
+      return new Response(
+        JSON.stringify({ error: "This plan is not available for self-serve checkout. Request an offer instead." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     logStep("Price ID received", { priceId });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
