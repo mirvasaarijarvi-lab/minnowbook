@@ -42,6 +42,7 @@ import { trackBookingError } from "@/lib/booking-telemetry";
 import { useAuth } from "@/contexts/AuthContext";
 import { FadeInImage } from "@/components/branding/FadeInImage";
 import SEOHead from "@/components/SEOHead";
+import { buildLocalBusinessSchema } from "@/lib/localBusinessSchema";
 
 // Types for public views (not in auto-generated types)
 interface PublicTenant {
@@ -1193,6 +1194,56 @@ const PublicBookingInner = () => {
   const displayPhone = settings?.business_phone ?? null;
   const displayAddress = settings?.business_address ?? null;
 
+  // LocalBusiness structured data for this booking page. The tenant/site is a
+  // real local business (salon, barber shop, massage practice, bakery, gym,
+  // restaurant, venue, hotel), so this is what makes the page eligible for
+  // local rich results. Only data the page itself displays is included.
+  const bookingUrl = `https://mimmobook.com/book/${slug ?? ""}`;
+  const localBusinessJsonLd = useMemo(() => {
+    const serviceLabels: string[] = [];
+    const services: { name: string; priceEur?: number | null }[] = [];
+    for (const tile of typeTiles) {
+      if (tile.kind === "builtin") continue;
+      serviceLabels.push(tile.label);
+      for (const sub of tile.subServices ?? []) {
+        if (sub?.name) {
+          serviceLabels.push(sub.name);
+          services.push({ name: sub.name, priceEur: sub.price_eur ?? null });
+        }
+      }
+    }
+    // Signed (temporary) URLs are useless to crawlers, so only a plain public
+    // image URL is published.
+    const publicImage =
+      logoSignedUrl && !logoSignedUrl.includes("token=") ? logoSignedUrl : null;
+
+    return buildLocalBusinessSchema({
+      name: displayName ?? "",
+      bookingUrl,
+      description: displayDescription,
+      telephone: displayPhone,
+      email: displayEmail,
+      address: displayAddress,
+      image: publicImage,
+      reservationTypes: allowedTypes,
+      serviceLabels,
+      openingHours: openingHours as any,
+      services,
+      languages: ["en", "fi", "sv"],
+    });
+  }, [
+    displayName,
+    bookingUrl,
+    displayDescription,
+    displayPhone,
+    displayEmail,
+    displayAddress,
+    logoSignedUrl,
+    allowedTypes,
+    typeTiles,
+    openingHours,
+  ]);
+
   if (loadingTenant) {
     return (
       <main className="min-h-screen flex items-center justify-center" style={{ backgroundColor: secondaryColor }}>
@@ -1525,6 +1576,7 @@ const PublicBookingInner = () => {
         title={`Book at ${displayName} – MimmoBook`}
         description={(displayDescription ?? `Reserve online at ${displayName}. Quick, mobile-friendly booking powered by MimmoBook.`).slice(0, 155)}
         path={`/book/${slug ?? ""}`}
+        jsonLd={localBusinessJsonLd ?? undefined}
       />
       <main className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Show title below only when no hero (or when the hero failed and we degraded) */}
