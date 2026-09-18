@@ -51,9 +51,9 @@ describe("support chat — system prompt content", () => {
 describe("support chat — guidebook article keys", () => {
   // Mirrors articleDefs in DashboardSupportPanel — the panel reads these keys
   // dynamically, so a missing key would surface as a raw key in the UI.
-  const ARTICLE_COUNT = 10;
+  const ARTICLE_COUNT = 12;
   const CONTENT_PER_ARTICLE = 4;
-  const GUIDE_COUNT = 6;
+  const GUIDE_COUNT = 8;
   const LANGUAGES = ["en", "fi", "sv"] as const;
 
   for (const lang of LANGUAGES) {
