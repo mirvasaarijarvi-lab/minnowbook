@@ -1,6 +1,6 @@
-<testsuites id="" name="" tests="1" failures="0" skipped="0" errors="0" time="3.691314">
-<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-18T06:40:56.610Z" hostname="chromium" tests="1" failures="0" skipped="0" time="2.071" errors="0">
-<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.071">
+<testsuites id="" name="" tests="9" failures="0" skipped="0" errors="0" time="19.681129">
+<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-18T06:41:08.463Z" hostname="chromium" tests="9" failures="0" skipped="0" time="16.944" errors="0">
+<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.885">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/test-finished-1.png]]
@@ -8,6 +8,94 @@
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/video.webm]]
 
 [[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-917c1-e-lines-sent-to-the-kitchen-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Offer confirmation states the Kitchen tab result › offer without food or drinks: confirmation says nothing was sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.874">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4b200-ing-was-sent-to-the-kitchen-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Offer confirmation states the Kitchen tab result › accepted offer&apos;s food and drink lines show up in the Kitchen tab" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.367">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2433--show-up-in-the-Kitchen-tab-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Kitchen tab announcement wording per language › en: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.903">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Kitchen tab announcement wording per language › en: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts" time="2.009">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Kitchen tab announcement wording per language › fi: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.596">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Kitchen tab announcement wording per language › fi: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.798">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Kitchen tab announcement wording per language › sv: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.659">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/trace.zip]]
+]]>
+</system-out>
+</testcase>
+<testcase name="Kitchen tab announcement wording per language › sv: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts" time="1.853">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/test-finished-1.png]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/video.webm]]
+
+[[ATTACHMENT|../../test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/trace.zip]]
 ]]>
 </system-out>
 </testcase>
