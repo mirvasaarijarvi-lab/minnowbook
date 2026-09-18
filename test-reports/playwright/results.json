@@ -18,7 +18,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 3
+      "actualWorkers": 2
     },
     "preserveOutput": "always",
     "projects": [
@@ -27,7 +27,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 3
+          "actualWorkers": 2
         },
         "id": "chromium",
         "name": "chromium",
@@ -92,7 +92,7 @@
         {
           "title": "Offer confirmation states the Kitchen tab result",
           "file": "offer-confirm-kitchen-confirmation.spec.ts",
-          "line": 269,
+          "line": 302,
           "column": 6,
           "specs": [
             {
@@ -111,12 +111,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3883,
+                      "duration": 3708,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:34:14.530Z",
+                      "startTime": "2026-09-18T06:41:41.098Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -142,7 +142,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-3a868a4a8d30e3640ec3",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 272,
+              "line": 309,
               "column": 3
             },
             {
@@ -158,15 +158,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3882,
+                      "duration": 2098,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:34:14.541Z",
+                      "startTime": "2026-09-18T06:41:45.487Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -192,7 +192,7 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-d50f7b15dc36c63d3853",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 313,
+              "line": 350,
               "column": 3
             },
             {
@@ -208,15 +208,15 @@
                   "projectName": "chromium",
                   "results": [
                     {
-                      "workerIndex": 2,
-                      "parallelIndex": 2,
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4242,
+                      "duration": 2625,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-18T06:34:14.631Z",
+                      "startTime": "2026-09-18T06:41:47.766Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -242,8 +242,316 @@
               ],
               "id": "e8756ec45a7a1cfe12f3-23374397598126874fb4",
               "file": "offer-confirm-kitchen-confirmation.spec.ts",
-              "line": 335,
+              "line": 372,
               "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Kitchen tab announcement wording per language",
+          "file": "offer-confirm-kitchen-confirmation.spec.ts",
+          "line": 418,
+          "column": 6,
+          "specs": [
+            {
+              "title": "en: one food or drink line is announced in the singular",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 3715,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:41:41.151Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-f2ec3-s-announced-in-the-singular-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-21d216eda85a99768031",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 428,
+              "column": 5
+            },
+            {
+              "title": "en: several food and drink lines are announced in the plural",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2114,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:41:45.554Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-4c5cb-are-announced-in-the-plural-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-6cdeb23ccd774397ace6",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 449,
+              "column": 5
+            },
+            {
+              "title": "fi: one food or drink line is announced in the singular",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 2221,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:41:47.820Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-13d64-s-announced-in-the-singular-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-3236a26c3408b01710e4",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 428,
+              "column": 5
+            },
+            {
+              "title": "fi: several food and drink lines are announced in the plural",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 1646,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:41:50.199Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-de999-are-announced-in-the-plural-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-0ac00ee4b34621775170",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 449,
+              "column": 5
+            },
+            {
+              "title": "sv: one food or drink line is announced in the singular",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 1645,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:41:51.956Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-af630-s-announced-in-the-singular-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-edfa4f5454070e495d30",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 428,
+              "column": 5
+            },
+            {
+              "title": "sv: several food and drink lines are announced in the plural",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "passed",
+                      "duration": 1888,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-18T06:41:53.711Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/test-finished-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/video.webm"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/dev-server/test-results/offer-confirm-kitchen-conf-924dc-are-announced-in-the-plural-chromium/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "e8756ec45a7a1cfe12f3-c333de7cdd8f1cbfa12d",
+              "file": "offer-confirm-kitchen-confirmation.spec.ts",
+              "line": 449,
+              "column": 5
             }
           ]
         }
@@ -252,9 +560,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-18T06:34:12.496Z",
-    "duration": 7453.996999999999,
-    "expected": 3,
+    "startTime": "2026-09-18T06:41:39.098Z",
+    "duration": 16725.809999999998,
+    "expected": 9,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
