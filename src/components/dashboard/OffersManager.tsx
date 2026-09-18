@@ -247,6 +247,15 @@ const OffersManager = () => {
       if (mainErr) throw mainErr;
       const resIds = [mainRes.id];
 
+      // Legs whose menu text becomes kitchen order lines.
+      const menuLegs: OfferMenuLeg[] = [
+        {
+          reservationId: mainRes.id,
+          reservationType: plan.mainType,
+          menu: offer.menu,
+        },
+      ];
+
       // Create linked reservations
       const linked = offer.linked_reservations || {};
       for (const [key, lr] of Object.entries(linked)) {
