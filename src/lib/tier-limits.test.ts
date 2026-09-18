@@ -4,6 +4,11 @@ import {
   canSelectMoreTypes,
   canCreateResourceOfType,
   isResourceTypeAllowed,
+  getMaxStaffUsers,
+  canAddStaffUser,
+  canCreateSite,
+  isMultiSiteTier,
+  getTierLabel,
 } from "./tier-limits";
 
 describe("tier-limits: Professional tier", () => {
