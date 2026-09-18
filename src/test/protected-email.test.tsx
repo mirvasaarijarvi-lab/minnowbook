@@ -65,14 +65,19 @@ describe("ProtectedEmail: mailto subjects", () => {
 });
 
 describe("ProtectedEmail: no-script fallback", () => {
+  // React only serialises <noscript> children in server-rendered markup, so the
+  // fallback is asserted against renderToStaticMarkup (the form a crawler or a
+  // script-less reader would see).
   it("keeps a readable obfuscated form in the noscript block", () => {
+    const markup = renderToStaticMarkup(<ProtectedEmail user="privacy" />)
+      .replace(/\s+/g, " ");
+    expect(markup).toMatch(/<noscript>.*privacy \[at\] mimmobook \[dot\] com/);
+    expect(markup).not.toContain("privacy@mimmobook.com");
+  });
+
+  it("renders a noscript element on the client too", () => {
     const { container } = render(<ProtectedEmail user="privacy" />);
-    const noscript = container.querySelector("noscript");
-    expect(noscript).not.toBeNull();
-    // jsdom keeps <noscript> content as unparsed markup, so read innerHTML.
-    const text = (noscript?.innerHTML ?? "").replace(/\s+/g, " ");
-    expect(text).toContain("privacy [at] mimmobook [dot] com");
-    expect(text).not.toContain("privacy@mimmobook.com");
+    expect(container.querySelector("noscript")).not.toBeNull();
   });
 
   it("drops the fallback once the address is revealed", () => {
