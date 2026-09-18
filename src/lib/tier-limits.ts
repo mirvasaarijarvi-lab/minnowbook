@@ -7,7 +7,7 @@
  * and the `enforce_*_limit` triggers):
  *
  *   basic         → 1 site, 2 reservation types, 2 resources TOTAL (any types), 5 staff users
- *   professional  → 1 site, up to 5 reservation types (any combo), unlimited resources (any mix of types), 25 staff users
+ *   professional  → 1 site, up to 5 reservation types (any combo), up to 5 resources per type, 25 staff users
  *   business      → unlimited sites, all types, unlimited resources, 50 staff users
  *   enterprise    → unlimited everything (staff users included), sold by offer only
  */
@@ -22,7 +22,7 @@ interface TierLimits {
 
 const TIER_LIMITS: Record<string, TierLimits> = {
   basic:        { maxSites: 1,    maxReservationTypes: 2,    maxResourcesPerType: null, maxResourcesTotal: 2,    maxStaffUsers: 5 },
-  professional: { maxSites: 1,    maxReservationTypes: 5,    maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: 25 },
+  professional: { maxSites: 1,    maxReservationTypes: 5,    maxResourcesPerType: 5,    maxResourcesTotal: null, maxStaffUsers: 25 },
   business:     { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: 50 },
   enterprise:   { maxSites: null, maxReservationTypes: null, maxResourcesPerType: null, maxResourcesTotal: null, maxStaffUsers: null },
 };

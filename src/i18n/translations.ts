@@ -1000,6 +1000,7 @@ type TranslationKeys = {
   "pricing.basicTypes": string;
   "pricing.basicStaff": string;
   "pricing.basicResourcesTotal": string;
+  "pricing.proResourcesPerType": string;
   "pricing.proName": string;
   "pricing.proDesc": string;
   "pricing.proTypes": string;
@@ -3759,6 +3760,7 @@ const en: TranslationKeys = {
   "pricing.basicTypes": "2 types",
   "pricing.basicStaff": "1 to 5",
   "pricing.basicResourcesTotal": "2 total",
+  "pricing.proResourcesPerType": "Up to 5",
   "pricing.proName": "Pro",
   "pricing.proDesc": "For businesses offering hotel, restaurant and event venue services in one place.",
   "pricing.proTypes": "Up to 5 reservation types in any combination (e.g. two restaurants and one hotel)",
@@ -4438,7 +4440,7 @@ const en: TranslationKeys = {
   "tierError.STAFF_USER_LIMIT_REACHED": "Your plan allows up to {limit} staff users. Upgrade to add more team members.",
   "tierError.SITE_LIMIT_REACHED": "Your plan allows up to {limit} site. Upgrade to Business to manage multiple locations.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Your plan allows up to {limit} reservation type. Upgrade to unlock additional booking categories.",
-  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Your plan allows only {limit} resource per type. Upgrade to Business for unlimited resources.",
+  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Your plan allows only {limit} resource(s) per type. Upgrade to Business for unlimited resources.",
 
   // Privacy & account deletion
   "privacy.panel.title": "Privacy and your data",
@@ -6038,6 +6040,7 @@ const fi: TranslationKeys = {
   "pricing.basicTypes": "2 tyyppiä",
   "pricing.basicStaff": "1 to 5",
   "pricing.basicResourcesTotal": "2 yhteensä",
+  "pricing.proResourcesPerType": "Enintään 5",
   "pricing.proName": "Protaso",
   "pricing.proDesc": "Yrityksille, jotka tarjoavat hotelli-, ravintola- ja tapahtumatilapalvelun yhdessä paikassa.",
   "pricing.proTypes": "Jopa 5 varaustyyppiä missä tahansa yhdistelmässä (esim. kaksi ravintolaa ja yksi hotelli)",
@@ -6717,7 +6720,7 @@ const fi: TranslationKeys = {
   "tierError.STAFF_USER_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} käyttäjää. Päivitä lisätäksesi tiimiläisiä.",
   "tierError.SITE_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} toimipisteen. Päivitä Business-tasoon hallitaksesi useita.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Tilauksesi sallii enintään {limit} varaustyypin. Päivitä lisätäksesi varauskategorioita.",
-  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Tilauksesi sallii vain {limit} resurssin per tyyppi. Päivitä Business-tasoon saadaksesi rajattomat resurssit.",
+  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Tilauksesi sallii vain {limit} resurssia per tyyppi. Päivitä Business-tasoon saadaksesi rajattomat resurssit.",
 
   // Yksityisyys & tilin poisto
   "privacy.panel.title": "Yksityisyys ja tietosi",
@@ -8317,6 +8320,7 @@ const sv: TranslationKeys = {
   "pricing.basicTypes": "2 typer",
   "pricing.basicStaff": "1 till 5",
   "pricing.basicResourcesTotal": "2 totalt",
+  "pricing.proResourcesPerType": "Upp till 5",
   "pricing.proName": "Pro",
   "pricing.proDesc": "För företag som erbjuder hotell-, restaurang- och evenemangstjänster på ett ställe.",
   "pricing.proTypes": "Upp till 5 bokningstyper i valfri kombination (t.ex. två restauranger och ett hotell)",
@@ -8996,7 +9000,7 @@ const sv: TranslationKeys = {
   "tierError.STAFF_USER_LIMIT_REACHED": "Din plan tillåter upp till {limit} användare. Uppgradera för att lägga till fler teammedlemmar.",
   "tierError.SITE_LIMIT_REACHED": "Din plan tillåter upp till {limit} plats. Uppgradera till Business för att hantera flera platser.",
   "tierError.RESERVATION_TYPE_LIMIT_REACHED": "Din plan tillåter upp till {limit} bokningstyp. Uppgradera för fler bokningskategorier.",
-  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Din plan tillåter endast {limit} resurs per typ. Uppgradera till Business för obegränsade resurser.",
+  "tierError.RESOURCE_PER_TYPE_LIMIT_REACHED": "Din plan tillåter endast {limit} resurs(er) per typ. Uppgradera till Business för obegränsade resurser.",
 
   // Integritet & kontoradering
   "privacy.panel.title": "Integritet och dina uppgifter",
