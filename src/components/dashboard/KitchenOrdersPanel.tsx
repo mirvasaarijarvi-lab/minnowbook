@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, addDays, parseISO, isToday } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -30,6 +30,7 @@ import {
   Calendar as CalendarIcon,
   Plus,
   Trash2,
+  RotateCcw,
   Users,
   Clock,
   UtensilsCrossed,
@@ -100,6 +101,14 @@ const STATUS_BADGE: Record<Status, string> = {
   served: "bg-primary/15 text-primary border-primary/30",
 };
 
+import {
+  addHiddenCard,
+  loadHiddenCards,
+  removeHiddenCard,
+  saveHiddenCards,
+  splitHiddenCards,
+} from "@/lib/kitchen-hidden-cards";
+
 const KitchenOrdersPanel = () => {
   const t = useT();
   const { tenantId } = useTenant();
@@ -112,6 +121,33 @@ const KitchenOrdersPanel = () => {
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const [pendingOrderDelete, setPendingOrderDelete] = useState<string | null>(null);
   const [menuManagerOpen, setMenuManagerOpen] = useState(false);
+  const [hiddenCards, setHiddenCards] = useState<string[]>([]);
+
+  // Hidden cards are stored per tenant so a reload keeps the kitchen list clean.
+  useEffect(() => {
+    setHiddenCards(loadHiddenCards(tenantId));
+  }, [tenantId]);
+
+  const hideCard = (reservationId: string) => {
+    setHiddenCards((prev) => {
+      const next = addHiddenCard(prev, reservationId);
+      saveHiddenCards(tenantId, next);
+      return next;
+    });
+  };
+
+  const restoreCard = (reservationId: string) => {
+    setHiddenCards((prev) => {
+      const next = removeHiddenCard(prev, reservationId);
+      saveHiddenCards(tenantId, next);
+      return next;
+    });
+  };
+
+  const restoreAllCards = () => {
+    setHiddenCards([]);
+    saveHiddenCards(tenantId, []);
+  };
 
   // Menu templates for quick-insert
   const { data: menuItems = [] } = useQuery({
@@ -261,9 +297,11 @@ const KitchenOrdersPanel = () => {
         .eq("tenant_id", tenantId!)
         .eq("reservation_id", reservationId);
       if (error) throw error;
+      return reservationId;
     },
-    onSuccess: () => {
+    onSuccess: (reservationId) => {
       invalidate();
+      hideCard(reservationId);
       toast.success(t("kitchen.orderDeleted"));
     },
     onError: () => toast.error(t("kitchen.error")),
@@ -290,6 +328,11 @@ const KitchenOrdersPanel = () => {
     },
     onError: () => toast.error(t("kitchen.error")),
   });
+
+  const { visible: visibleReservations, hidden: hiddenReservations } = useMemo(
+    () => splitHiddenCards(reservations, hiddenCards),
+    [reservations, hiddenCards],
+  );
 
   const guestsLabel = (r: Reservation) => r.guests_count ?? r.estimated_guests ?? "—";
 
@@ -372,6 +415,15 @@ const KitchenOrdersPanel = () => {
             <Printer className="h-4 w-4" />
             {t("kitchen.print")}
           </Button>
+          {hiddenReservations.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={restoreAllCards} className="gap-1.5">
+              <RotateCcw className="h-4 w-4" />
+              {t("kitchen.restoreHidden").replace(
+                "{count}",
+                String(hiddenReservations.length),
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -380,13 +432,13 @@ const KitchenOrdersPanel = () => {
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-32 w-full" />
         </div>
-      ) : reservations.length === 0 ? (
+      ) : visibleReservations.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-12 text-center text-muted-foreground">
           {t("kitchen.noReservations")}
         </div>
       ) : (
         <ul className="space-y-4 list-none p-0 m-0">
-          {reservations.map((r) => {
+          {visibleReservations.map((r) => {
             const items = ordersByReservation.get(r.id) ?? [];
             const total = items.reduce(
               (sum, it) => sum + (it.unit_price_eur != null ? Number(it.unit_price_eur) * it.quantity : 0),
@@ -428,8 +480,7 @@ const KitchenOrdersPanel = () => {
                           <p className="text-base font-semibold">{total.toFixed(2)} €</p>
                         </div>
                       )}
-                      {items.length > 0 && (
-                        <Button
+                      <Button
                           variant="ghost"
                           size="icon"
                           className="h-9 w-9 text-destructive hover:text-destructive print:hidden"
@@ -441,7 +492,6 @@ const KitchenOrdersPanel = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      )}
                     </div>
                   </div>
                 </CardHeader>
