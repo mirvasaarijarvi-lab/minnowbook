@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { KITCHEN_RESERVATION_TYPES } from "@/lib/offer-kitchen-orders";
+import { buildKitchenPreview } from "@/lib/offer-kitchen-preview";
 
 const allTimes: string[] = [];
 for (let h = 6; h <= 23; h++) {
