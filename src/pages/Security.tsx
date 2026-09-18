@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 import MarketingFooter from "@/components/MarketingFooter";
 import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
+import ProtectedEmail from "@/components/ProtectedEmail";
+
 
 const Security = () => {
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -45,11 +47,17 @@ const Security = () => {
             <Bug className="h-5 w-5 text-accent" /> Reporting a vulnerability
           </h2>
           <p className="text-muted-foreground leading-relaxed mb-3">
-            If you believe you have found a security issue in MimmoBook, please report it privately to{" "}
-            <a href="mailto:security@mimmobook.com" className="text-accent hover:underline font-medium">
-              security@mimmobook.com
-            </a>. We will acknowledge your report within 2 business days and aim to give a substantive
-            update within 5 business days.
+            If you believe you have found a security issue in MimmoBook, please report it privately to our
+            security contact:{" "}
+            <ProtectedEmail user="security" subject="Vulnerability report" />. The address is hidden from
+            automated crawlers and revealed on click, so bots cannot scrape it from this page.
+          </p>
+          <p className="text-muted-foreground leading-relaxed mb-3">
+            What to expect: we acknowledge your report within 2 business days and aim to give a
+            substantive update within 5 business days. Please include the affected URL, the steps to
+            reproduce, the impact you believe it has, and your preferred credit name. Reports without
+            reproduction steps, automated scanner output with no verified impact, and sales or marketing
+            messages sent to this address are not answered.
           </p>
           <p className="text-muted-foreground leading-relaxed mb-3">
             Please give us reasonable time to investigate and fix the issue before any public
@@ -60,6 +68,7 @@ const Security = () => {
             <a href="/.well-known/security.txt" className="text-accent hover:underline">/.well-known/security.txt</a>.
           </p>
         </section>
+
 
         <section>
           <h2 className="text-xl font-serif font-bold mb-3">Safe harbor</h2>
@@ -129,8 +138,9 @@ const Security = () => {
           <ul className="list-disc pl-6 text-muted-foreground space-y-2 leading-relaxed">
             <li>
               <strong>Software Bill of Materials (SBOM):</strong> CycloneDX 1.5 format, regenerated on
-              every dependency change. Available on request at{" "}
-              <a href="mailto:security@mimmobook.com" className="text-accent hover:underline">security@mimmobook.com</a>.
+              every dependency change. Available on request from our security contact:{" "}
+              <ProtectedEmail user="security" subject="SBOM request" className="text-accent hover:underline" />.
+
             </li>
             <li>
               <strong>Penetration testing:</strong> Annual third-party penetration test plus targeted

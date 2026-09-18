@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 import MarketingFooter from "@/components/MarketingFooter";
 import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
+import ProtectedEmail from "@/components/ProtectedEmail";
+
 
 const subprocessors = [
   { name: "Supabase (via Lovable Cloud)", purpose: "Database, authentication, file storage, edge functions", data: "All application data, account credentials, uploaded files", region: "European Union (Frankfurt)" },
@@ -74,10 +76,12 @@ const Subprocessors = () => {
         <h2 className="text-xl font-serif font-bold mt-10 mb-2">Notifications of changes</h2>
         <p className="text-muted-foreground leading-relaxed">
           We notify customers by email at least 30 days before adding or replacing a subprocessor that
-          handles personal data. If you want to receive these notifications, email{" "}
-          <a href="mailto:privacy@mimmobook.com" className="text-accent hover:underline">privacy@mimmobook.com</a>{" "}
-          and ask to be added to the subprocessor change list.
+          handles personal data. If you want to receive these notifications, email our privacy contact{" "}
+          <ProtectedEmail user="privacy" subject="Subprocessor change list" className="text-accent hover:underline font-medium" />{" "}
+          and ask to be added to the subprocessor change list. The address is hidden from automated
+          crawlers and revealed on click, so please use the button rather than guessing it.
         </p>
+
       </main>
       <MarketingFooter />
     </div>

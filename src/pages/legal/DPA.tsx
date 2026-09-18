@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 import MarketingFooter from "@/components/MarketingFooter";
 import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
+import ProtectedEmail from "@/components/ProtectedEmail";
+
 
 const DPA = () => {
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -160,10 +162,12 @@ const DPA = () => {
             <h2 className="text-xl font-serif font-bold text-foreground mb-2">13. Signing</h2>
             <p>
               By using the MimmoBook Service, the Controller accepts this DPA. If the Controller requires
-              a counter-signed copy, email{" "}
-              <a href="mailto:privacy@mimmobook.com" className="text-accent hover:underline">privacy@mimmobook.com</a>{" "}
-              and we will return one within 5 business days.
+              a counter-signed copy, email our privacy contact{" "}
+              <ProtectedEmail user="privacy" subject="Counter-signed DPA request" className="text-accent hover:underline font-medium" />{" "}
+              and we will return one within 5 business days. The address is hidden from automated crawlers
+              and revealed on click; please include the legal entity name and business ID in your request.
             </p>
+
           </section>
         </div>
       </main>
