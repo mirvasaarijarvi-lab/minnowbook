@@ -20,6 +20,10 @@ import {
 } from "@/lib/offer-reservation-pricing";
 import { offerKitchenMessage } from "@/lib/offer-kitchen-message";
 import { buildKitchenOrderRows, type OfferMenuLeg } from "@/lib/offer-kitchen-orders";
+import {
+  checkKitchenPreviewMatchesOutput,
+  formatKitchenMismatches,
+} from "@/lib/offer-kitchen-consistency";
 import { announceOfferStatus, composeOfferStatusMessage } from "@/lib/offer-status-announcer";
 import { focusOfferStatusPanel } from "@/lib/offer-status-focus";
 
