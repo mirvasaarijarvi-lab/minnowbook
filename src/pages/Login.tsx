@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import Logo from "@/components/Logo";
+import type { TranslationKey } from "@/i18n/translations";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
@@ -18,7 +19,7 @@ import SEOHead from "@/components/SEOHead";
 
 const PENDING_CODE_KEY = "mimmobook_pending_code";
 
-const redeemPendingCode = async (t: (key: string) => string) => {
+const redeemPendingCode = async (t: (key: TranslationKey) => string) => {
   const code = localStorage.getItem(PENDING_CODE_KEY);
   if (!code) return;
   localStorage.removeItem(PENDING_CODE_KEY);

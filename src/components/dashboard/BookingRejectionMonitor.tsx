@@ -34,7 +34,7 @@ const BookingRejectionMonitor = () => {
       const { data, error } = await supabase
         .from("booking_validation_log")
         .select("reasons, created_at")
-        .eq("tenant_id", tenantId)
+        .eq("tenant_id", tenantId!)
         .eq("outcome", "rejected")
         .gte("created_at", since)
         .order("created_at", { ascending: false })

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Link2, Copy, ExternalLink, Building2, Home, UtensilsCrossed, HeartPulse, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import DashboardTooltip from "./DashboardTooltip";
+import { siteOrigin } from "@/lib/site-origin";
 
 const TYPE_ICONS: Record<string, React.ElementType> = {
   venue: Building2,
@@ -68,7 +69,7 @@ const BookingLinksCard = () => {
 
   if (!tenant?.slug) return null;
 
-  const baseUrl = `${window.location.origin}/book/${tenant.slug}`;
+  const baseUrl = `${siteOrigin()}/book/${tenant.slug}`;
   const allowedTypes: string[] = tenant.allowed_reservation_types ?? [];
   const shareableTypes = allowedTypes;
 

@@ -156,10 +156,10 @@ const Onboarding = () => {
         p_display_name: user?.user_metadata?.display_name ?? null,
         p_primary_color: branding.primaryColor, p_secondary_color: branding.secondaryColor,
         p_accent_color: branding.accentColor,
-        p_business_description: branding.businessDescription || null,
-        p_business_email: branding.businessEmail || null,
-        p_business_phone: branding.businessPhone || null,
-        p_business_address: branding.businessAddress || null,
+        p_business_description: branding.businessDescription || undefined,
+        p_business_email: branding.businessEmail || undefined,
+        p_business_phone: branding.businessPhone || undefined,
+        p_business_address: branding.businessAddress || undefined,
       });
       if (error) throw error;
       await queryClient.invalidateQueries({ queryKey: ["tenant-user"] });

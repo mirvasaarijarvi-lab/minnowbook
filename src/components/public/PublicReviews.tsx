@@ -19,7 +19,7 @@ const PublicReviews = ({ tenantId, siteId, primaryColor, accentColor }: PublicRe
     queryFn: async () => {
       const { data, error } = await supabase.rpc("get_published_reviews", {
         p_tenant_id: tenantId,
-        p_site_id: siteId,
+        p_site_id: siteId ?? undefined,
       });
       if (error) throw error;
       return (data ?? []).slice(0, 6);

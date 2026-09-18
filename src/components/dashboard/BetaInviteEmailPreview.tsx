@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { Copy, Mail, Eye, EyeOff } from "lucide-react";
 import DOMPurify from "dompurify";
+import { siteOrigin } from "@/lib/site-origin";
 
 interface BetaInviteEmailPreviewProps {
   code?: string;
@@ -28,7 +29,7 @@ const BetaInviteEmailPreview = ({
     return div.innerHTML;
   }, [recipientName]);
 
-  const guideUrl = `${window.location.origin}/beta-guide`;
+  const guideUrl = `${siteOrigin()}/beta-guide`;
 
   const emailSubject = "You are invited to test MimmoBook";
 
@@ -42,7 +43,7 @@ This code grants you full ${tierLabel} tier access for ${durationDays} days, com
 
 Here is how to get started:
 
-1. Create your account at ${window.location.origin}/signup
+1. Create your account at ${siteOrigin()}/signup
 2. Complete the quick onboarding to set up your workspace
 3. Go to Settings in your dashboard
 4. Enter your access code in the "Have an access code?" section
@@ -86,7 +87,7 @@ The MimmoBook Team`;
       How to get started
     </h2>
     <ol style="color: #555; font-size: 15px; line-height: 1.8; padding-left: 20px; margin: 0 0 24px;">
-      <li>Create your account at <a href="${window.location.origin}/signup" style="color: #4a1d7a;">mimmobook.com/signup</a></li>
+      <li>Create your account at <a href="${siteOrigin()}/signup" style="color: #4a1d7a;">mimmobook.com/signup</a></li>
       <li>Complete the quick onboarding to set up your workspace</li>
       <li>Go to <strong>Settings</strong> in your dashboard</li>
       <li>Enter your access code and click <strong>Redeem</strong></li>

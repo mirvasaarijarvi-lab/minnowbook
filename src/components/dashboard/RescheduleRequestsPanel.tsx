@@ -44,7 +44,7 @@ const RescheduleRequestsPanel = () => {
       const { data: requests, error } = await supabase
         .from("reschedule_requests")
         .select("*")
-        .eq("tenant_id", tenantId)
+        .eq("tenant_id", tenantId!)
         .eq("status", "pending")
         .order("created_at", { ascending: true });
       if (error) throw error;

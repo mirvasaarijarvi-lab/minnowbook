@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Copy } from "lucide-react";
 import { toast } from "sonner";
+import { siteOrigin } from "@/lib/site-origin";
 
 const SiteTabs = () => {
   const { tenantId, tenant, isOwner, isAdmin } = useTenant();
@@ -43,7 +44,7 @@ const SiteTabs = () => {
 
   const selectedSite = selectedSiteId ? sites?.find((s) => s.id === selectedSiteId) : null;
   const bookingUrl = selectedSite && tenant?.slug
-    ? `${window.location.origin}/book/${tenant.slug}?site=${selectedSite.slug}`
+    ? `${siteOrigin()}/book/${tenant.slug}?site=${selectedSite.slug}`
     : null;
 
   const copyLink = () => {

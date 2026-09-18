@@ -1,5 +1,5 @@
-import { useCallback, useContext, useEffect, useRef } from "react";
-import { UNSAFE_LocationContext } from "@/lib/router-compat";
+import { useCallback, useEffect, useRef } from "react";
+import { useOptionalLocationKey } from "@/lib/router-compat";
 import { toast } from "sonner";
 import { useInvoiceRefusalMessage, type FormattedInvoiceRefusal } from "@/hooks/useInvoiceRefusalMessage";
 import type { InvoiceRefusalSurface } from "@/lib/invoice-refusal";
@@ -70,12 +70,7 @@ export function useInvoiceRefusalNotice(
   // Read the router location through context instead of `useLocation()`, which
   // throws outside a router. Surfaces rendered in isolation (tests, previews)
   // then simply have no route to watch.
-  const routerContext = useContext(UNSAFE_LocationContext) as
-    | { location?: { pathname?: string; search?: string } }
-    | null;
-  const routeKey = routerContext?.location
-    ? `${routerContext.location.pathname ?? ""}${routerContext.location.search ?? ""}`
-    : null;
+  const routeKey = useOptionalLocationKey();
   // Scope and route are watched as one key: whichever changes first (staff
   // selecting another booking, a link to another reservation, or the browser's
   // back and forward buttons) clears the message exactly once.

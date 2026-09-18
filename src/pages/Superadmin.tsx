@@ -108,6 +108,7 @@ const Superadmin = () => {
           ]);
           return {
             ...t,
+            is_active: t.is_active ?? true,
             userCount: usersRes.count ?? 0,
             reservationCount: reservationsRes.count ?? 0,
             resourceCount: resourcesRes.count ?? 0,

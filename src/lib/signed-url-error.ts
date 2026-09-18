@@ -31,7 +31,7 @@ export class SignedUrlError extends Error {
   readonly httpStatus?: number;
   // Native `Error.cause` is supported in modern runtimes; we mirror it
   // here for older targets and for explicit typing.
-  readonly cause?: unknown;
+  override readonly cause?: unknown;
 
   constructor(code: SignedUrlErrorCode, message: string, init: SignedUrlErrorInit = {}) {
     super(message);

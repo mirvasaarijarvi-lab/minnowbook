@@ -40,11 +40,12 @@ const RedeemAccessCode = () => {
       }
 
       setRedeemed(true);
+      const grant = data as { tier?: string; granted_until?: string } | null;
       queryClient.invalidateQueries({ queryKey: ["tenant-user"] });
       queryClient.invalidateQueries({ queryKey: ["superadmin-tenants"] });
       toast({
         title: "Access code redeemed!",
-        description: `You now have ${data.tier} access until ${data.granted_until}`,
+        description: `You now have ${grant?.tier} access until ${grant?.granted_until}`,
       });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });

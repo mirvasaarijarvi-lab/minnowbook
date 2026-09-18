@@ -84,7 +84,7 @@ type Period = "week" | "month" | "quarter" | "half" | "year" | "custom";
 const ReservationChart = ({ reservations, period, start, end, dateLocale, types, t, typeLabel }: {
   reservations: ReservationRow[];
   period: Period; start: Date; end: Date; dateLocale: Locale;
-  types: string[]; t: (k: string) => string; typeLabel: (tp: string) => string;
+  types: string[]; t: (k: TranslationKey) => string; typeLabel: (tp: string) => string;
 }) => {
   const chartData = useMemo(() => {
     const bucket = (items: ReservationRow[]) => {
