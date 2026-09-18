@@ -46,6 +46,8 @@ export default tseslint.config(
     files: ["src/integrations/supabase/**/*.ts"],
     rules: {
       "prefer-const": "off",
+      // Generated clients/types are emitted by tooling, not formatted by us.
+      "prettier/prettier": "off",
     },
   },
   {
