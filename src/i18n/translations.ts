@@ -881,6 +881,23 @@ type TranslationKeys = {
   "booking.occasionErrFullWithSeats": string;
   "booking.occasionNoneOnDate": string;
   "booking.occasionNextDates": string;
+  "monitor.title": string;
+  "monitor.subtitle": string;
+  "monitor.days": string;
+  "monitor.refresh": string;
+  "monitor.loading": string;
+  "monitor.empty": string;
+  "monitor.total": string;
+  "monitor.lastSeen": string;
+  "monitor.code.OCCASION_FULL": string;
+  "monitor.code.OCCASION_SEATING_UNAVAILABLE": string;
+  "monitor.code.OCCASION_SEATING_REQUIRED": string;
+  "monitor.code.OCCASION_WRONG_DATE": string;
+  "monitor.code.OCCASION_WRONG_TYPE": string;
+  "monitor.code.OCCASION_UNAVAILABLE": string;
+  "monitor.code.DB_INSERT_FAILED": string;
+  "monitor.code.UNTAGGED": string;
+
   "blocking.blocksRemoved": string;
   "blocking.removeBlock": string;
   "blocking.removeBlockDesc": string;
@@ -2949,6 +2966,23 @@ const en: TranslationKeys = {
   "booking.occasionErrFullWithSeats": "Only {seats} seat(s) are left for this occasion, so we could not fit your party. Please try a smaller party, another sitting time or another date.",
   "booking.occasionNoneOnDate": "There is no special occasion on this day, so you can book a normal time below.",
   "booking.occasionNextDates": "Next occasions: {dates}",
+  "monitor.title": "Refused bookings",
+  "monitor.subtitle": "Why bookings were refused on your booking page",
+  "monitor.days": "{days} days",
+  "monitor.refresh": "Refresh",
+  "monitor.loading": "Loading...",
+  "monitor.empty": "No refused bookings in this period.",
+  "monitor.total": "{count} refused bookings in total",
+  "monitor.lastSeen": "Last seen: {when}",
+  "monitor.code.OCCASION_FULL": "Occasion was fully booked",
+  "monitor.code.OCCASION_SEATING_UNAVAILABLE": "Sitting was no longer available",
+  "monitor.code.OCCASION_SEATING_REQUIRED": "No sitting was chosen",
+  "monitor.code.OCCASION_WRONG_DATE": "Occasion was on a different date",
+  "monitor.code.OCCASION_WRONG_TYPE": "Occasion was for another service",
+  "monitor.code.OCCASION_UNAVAILABLE": "Occasion was no longer available",
+  "monitor.code.DB_INSERT_FAILED": "Booking could not be saved",
+  "monitor.code.UNTAGGED": "Other reason",
+
   "blocking.blocksRemoved": "Blocks removed",
   "blocking.removeBlock": "Remove Block",
   "blocking.removeBlockDesc": "This will remove the block for {date}. Bookings will be allowed again.",
@@ -4997,6 +5031,23 @@ const fi: TranslationKeys = {
   "booking.occasionErrFullWithSeats": "Tilaisuuteen on jäljellä vain {seats} paikkaa, joten seurueesi ei mahdu. Kokeile pienempää seuruetta, toista kattausaikaa tai toista päivää.",
   "booking.occasionNoneOnDate": "Tälle päivälle ei ole erityistilaisuutta, joten voit varata tavallisen ajan alta.",
   "booking.occasionNextDates": "Seuraavat tilaisuudet: {dates}",
+  "monitor.title": "Hylätyt varaukset",
+  "monitor.subtitle": "Miksi varauksia hylättiin varaussivullasi",
+  "monitor.days": "{days} päivää",
+  "monitor.refresh": "Päivitä",
+  "monitor.loading": "Haetaan...",
+  "monitor.empty": "Ei hylättyjä varauksia tällä ajanjaksolla.",
+  "monitor.total": "{count} hylättyä varausta yhteensä",
+  "monitor.lastSeen": "Viimeksi: {when}",
+  "monitor.code.OCCASION_FULL": "Tilaisuus oli täynnä",
+  "monitor.code.OCCASION_SEATING_UNAVAILABLE": "Kattaus ei ollut enää saatavilla",
+  "monitor.code.OCCASION_SEATING_REQUIRED": "Kattausta ei valittu",
+  "monitor.code.OCCASION_WRONG_DATE": "Tilaisuus oli eri päivänä",
+  "monitor.code.OCCASION_WRONG_TYPE": "Tilaisuus koski toista palvelua",
+  "monitor.code.OCCASION_UNAVAILABLE": "Tilaisuus ei ollut enää saatavilla",
+  "monitor.code.DB_INSERT_FAILED": "Varausta ei voitu tallentaa",
+  "monitor.code.UNTAGGED": "Muu syy",
+
   "blocking.blocksRemoved": "Estot poistettu",
   "blocking.removeBlock": "Poista esto",
   "blocking.removeBlockDesc": "Tämä poistaa eston päivälle {date}. Varaukset ovat jälleen mahdollisia.",
@@ -7044,6 +7095,23 @@ const sv: TranslationKeys = {
   "booking.occasionErrFullWithSeats": "Det finns bara {seats} platser kvar för tillfället, så ditt sällskap får inte plats. Prova ett mindre sällskap, en annan sittningstid eller en annan dag.",
   "booking.occasionNoneOnDate": "Det finns inget särskilt tillfälle den här dagen, så du kan boka en vanlig tid nedan.",
   "booking.occasionNextDates": "Kommande tillfällen: {dates}",
+  "monitor.title": "Nekade bokningar",
+  "monitor.subtitle": "Varför bokningar nekades på din bokningssida",
+  "monitor.days": "{days} dagar",
+  "monitor.refresh": "Uppdatera",
+  "monitor.loading": "Hämtar...",
+  "monitor.empty": "Inga nekade bokningar under perioden.",
+  "monitor.total": "{count} nekade bokningar totalt",
+  "monitor.lastSeen": "Senast: {when}",
+  "monitor.code.OCCASION_FULL": "Tillfället var fullbokat",
+  "monitor.code.OCCASION_SEATING_UNAVAILABLE": "Sittningen var inte längre tillgänglig",
+  "monitor.code.OCCASION_SEATING_REQUIRED": "Ingen sittning valdes",
+  "monitor.code.OCCASION_WRONG_DATE": "Tillfället gällde ett annat datum",
+  "monitor.code.OCCASION_WRONG_TYPE": "Tillfället gällde en annan tjänst",
+  "monitor.code.OCCASION_UNAVAILABLE": "Tillfället var inte längre tillgängligt",
+  "monitor.code.DB_INSERT_FAILED": "Bokningen kunde inte sparas",
+  "monitor.code.UNTAGGED": "Annan orsak",
+
   "blocking.blocksRemoved": "Blockeringar borttagna",
   "blocking.removeBlock": "Ta bort blockering",
   "blocking.removeBlockDesc": "Detta tar bort blockeringen för {date}. Bokningar kommer att tillåtas igen.",
