@@ -21,8 +21,8 @@ export const BOOKING_ERROR_CODES = {
 } as const;
 
 export type BookingErrorCode =
-  | OccasionErrorCode
-  typeof BOOKING_ERROR_CODES[keyof typeof BOOKING_ERROR_CODES];
+  | typeof BOOKING_ERROR_CODES[keyof typeof BOOKING_ERROR_CODES]
+  | OccasionErrorCode;
 
 /**
  * Structured codes for special-occasion refusals. The edge function
