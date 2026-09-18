@@ -246,8 +246,14 @@ const Support = () => {
       </section>
 
       {/* Articles grid */}
-      <section className="py-16">
+      <section className="py-16" aria-labelledby="support-articles-heading">
         <div className="container mx-auto px-4">
+          <h2
+            id="support-articles-heading"
+            className="text-3xl font-serif font-bold text-foreground mb-10 text-center"
+          >
+            {t("support.articlesHeading")}
+          </h2>
           {filtered.length === 0 ? (
             <p className="text-center text-muted-foreground text-lg">
               {t("support.noResults")}
