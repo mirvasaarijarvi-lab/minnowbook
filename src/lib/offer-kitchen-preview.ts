@@ -35,6 +35,15 @@ export interface PreviewLeg {
   targetName: string | null;
   /** True when the lines stay on this function. */
   staysHere: boolean;
+  /**
+   * Where this field's lines would go regardless of whether it has content,
+   * so the mapping can be shown before anything is typed. Null means no
+   * booking in this offer appears on the Kitchen tab.
+   */
+  routeKey: string | null;
+  routeName: string | null;
+  /** True when this function appears on the Kitchen tab itself. */
+  ownKitchenOrder: boolean;
 }
 
 export interface KitchenPreview {
@@ -55,7 +64,11 @@ export function buildKitchenPreview(inputs: PreviewLegInput[]): KitchenPreview {
 
   const previewLegs: PreviewLeg[] = inputs.map((input, index) => {
     const lines = buildKitchenOrderDrafts(input.menu);
-    const targetKey = lines.length > 0 ? pickKitchenReservationId(legs, legs[index]) : null;
+    // Routing is a property of the functions in the offer, not of the text,
+    // so it is resolved with a placeholder line when the field is still empty.
+    const routeKey =
+      pickKitchenReservationId(legs, { ...legs[index], menu: "placeholder" }) ?? null;
+    const targetKey = lines.length > 0 ? routeKey : null;
     return {
       key: input.key,
       name: input.name,
@@ -63,6 +76,9 @@ export function buildKitchenPreview(inputs: PreviewLegInput[]): KitchenPreview {
       targetKey,
       targetName: targetKey ? nameByKey.get(targetKey) ?? null : null,
       staysHere: targetKey === input.key,
+      routeKey,
+      routeName: routeKey ? nameByKey.get(routeKey) ?? null : null,
+      ownKitchenOrder: routeKey === input.key,
     };
   });
 
