@@ -129,6 +129,7 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
           <div className="col-span-12 sm:col-span-6">
             <Input
               value={draftName}
+              aria-label={t("kitchen.menu.namePlaceholder")}
               placeholder={t("kitchen.menu.namePlaceholder")}
               onChange={(e) => setDraftName(e.target.value)}
               onKeyDown={(e) => {
@@ -139,7 +140,7 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
           </div>
           <div className="col-span-6 sm:col-span-3">
             <Select value={draftCategory} onValueChange={(v) => setDraftCategory(v as Category)}>
-              <SelectTrigger className="h-9">
+              <SelectTrigger className="h-9" aria-label={t("kitchen.category")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -154,6 +155,7 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
               type="number"
               step="0.01"
               min={0}
+              aria-label={t("kitchen.menu.priceLabel")}
               value={draftPrice}
               placeholder="€"
               onChange={(e) => setDraftPrice(e.target.value)}
@@ -191,6 +193,7 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
                     <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
                     <Input
                       defaultValue={item.name}
+                      aria-label={t("kitchen.itemName")}
                       onBlur={(e) => {
                         const next = e.target.value.trim();
                         if (next && next !== item.name) {
@@ -210,7 +213,7 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
                         })
                       }
                     >
-                      <SelectTrigger className="h-8">
+                      <SelectTrigger className="h-8" aria-label={t("kitchen.category")}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -225,6 +228,7 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
                       type="number"
                       step="0.01"
                       min={0}
+                      aria-label={t("kitchen.menu.priceLabel")}
                       defaultValue={item.unit_price_eur ?? ""}
                       placeholder="€"
                       onBlur={(e) => {
@@ -242,6 +246,7 @@ const KitchenMenuManager = ({ open, onOpenChange }: Props) => {
                       size="icon"
                       className="h-8 w-8 text-destructive"
                       onClick={() => deleteItem.mutate(item.id)}
+                      aria-label={t("kitchen.deleteItemNamed").replace("{name}", item.name)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

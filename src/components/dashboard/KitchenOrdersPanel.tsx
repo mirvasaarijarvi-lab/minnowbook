@@ -289,7 +289,7 @@ const KitchenOrdersPanel = () => {
               size="icon"
               className="h-9 w-9"
               onClick={() => shiftDay(-1)}
-              aria-label="Previous day"
+              aria-label={t("kitchen.prevDay")}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -302,6 +302,7 @@ const KitchenOrdersPanel = () => {
                     "h-9 px-3 gap-2 font-normal min-w-[180px] justify-start",
                     !selectedDate && "text-muted-foreground",
                   )}
+                  aria-label={t("kitchen.pickDate")}
                 >
                   <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                   {format(selectedDateObj, "PPP", { locale: dateLocale })}
@@ -328,7 +329,7 @@ const KitchenOrdersPanel = () => {
               size="icon"
               className="h-9 w-9"
               onClick={() => shiftDay(1)}
-              aria-label="Next day"
+              aria-label={t("kitchen.nextDay")}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -366,7 +367,7 @@ const KitchenOrdersPanel = () => {
           {t("kitchen.noReservations")}
         </div>
       ) : (
-        <div className="space-y-4">
+        <ul className="space-y-4 list-none p-0 m-0">
           {reservations.map((r) => {
             const items = ordersByReservation.get(r.id) ?? [];
             const total = items.reduce(
@@ -374,7 +375,8 @@ const KitchenOrdersPanel = () => {
               0,
             );
             return (
-              <Card key={r.id}>
+              <li key={r.id}>
+              <Card aria-label={t("kitchen.ordersFor").replace("{name}", r.guest_name ?? "")}>
                 <CardHeader className="pb-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
@@ -456,9 +458,10 @@ const KitchenOrdersPanel = () => {
                   </div>
                 </CardContent>
               </Card>
+              </li>
             );
           })}
-        </div>
+        </ul>
       )}
 
       <AlertDialog open={!!pendingDelete} onOpenChange={(open) => !open && setPendingDelete(null)}>
@@ -641,6 +644,7 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
       <div className="md:col-span-4">
         <Input
           value={local.item_name}
+          aria-label={t("kitchen.itemName")}
           placeholder={t("kitchen.itemNamePlaceholder")}
           onChange={(e) => setLocal({ ...local, item_name: e.target.value })}
           onBlur={() => {
@@ -655,6 +659,7 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
         <Input
           type="number"
           min={1}
+          aria-label={t("kitchen.quantity")}
           value={local.quantity}
           onChange={(e) => setLocal({ ...local, quantity: parseInt(e.target.value) || 1 })}
           onBlur={() => {
@@ -670,7 +675,7 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
           value={local.category}
           onValueChange={(v) => commit({ category: v as Category })}
         >
-          <SelectTrigger className="h-9">
+          <SelectTrigger className="h-9" aria-label={t("kitchen.category")}>
             <SelectValue>
               <span className="flex items-center gap-1.5">
                 <CategoryIcon className="h-3.5 w-3.5" />
@@ -692,7 +697,10 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
           value={local.status}
           onValueChange={(v) => commit({ status: v as Status })}
         >
-          <SelectTrigger className={cn("h-9 border", STATUS_BADGE[local.status])}>
+          <SelectTrigger
+            className={cn("h-9 border", STATUS_BADGE[local.status])}
+            aria-label={t("kitchen.status")}
+          >
             <SelectValue>
               <span className="flex items-center gap-1.5">
                 <StatusIcon className="h-3.5 w-3.5" />
@@ -715,6 +723,7 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
           type="number"
           step="0.01"
           min={0}
+          aria-label={t("kitchen.unitPrice")}
           value={local.unit_price_eur ?? ""}
           placeholder="€"
           onChange={(e) =>
@@ -734,7 +743,16 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
 
       {/* Delete */}
       <div className="md:col-span-1 flex md:justify-end print:hidden">
-        <Button variant="ghost" size="icon" className="h-9 w-9 text-destructive" onClick={onDelete}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 text-destructive"
+          onClick={onDelete}
+          aria-label={t("kitchen.deleteItemNamed").replace(
+            "{name}",
+            local.item_name?.trim() || t("kitchen.itemName"),
+          )}
+        >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -743,6 +761,7 @@ const KitchenOrderRow = ({ item, onChange, onDelete, t }: RowProps) => {
       <div className="md:col-span-12">
         <Textarea
           value={local.notes ?? ""}
+          aria-label={t("kitchen.notes")}
           placeholder={t("kitchen.notesPlaceholder")}
           rows={1}
           onChange={(e) => setLocal({ ...local, notes: e.target.value })}
