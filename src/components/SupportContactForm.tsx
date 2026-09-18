@@ -201,7 +201,9 @@ const SupportContactForm = () => {
     }
 
     if ((Date.now() - mountedAtRef.current) / 1000 < MIN_FILL_SECONDS) {
-      toast.error("Please take a moment to review your message before sending.");
+      requireChallenge(
+        "That was sent very quickly, so please answer this short question to confirm you are a person.",
+      );
       return;
     }
 
@@ -218,6 +220,23 @@ const SupportContactForm = () => {
       });
       return;
     }
+
+    // Repeated messages from this browser: require the challenge before sending.
+    if (!challenge && recent.length >= CHALLENGE_AFTER_SUBMITS) {
+      requireChallenge("Please answer this short question to confirm you are a person.");
+      return;
+    }
+
+    if (challenge) {
+      if (!isChallengePassed(challenge, challengeAnswer)) {
+        requireChallenge("That answer did not match. Here is a new question.");
+        return;
+      }
+      setChallenge(null);
+      setChallengeAnswer("");
+      setChallengeError(null);
+    }
+
 
     setSubmitting(true);
     try {
