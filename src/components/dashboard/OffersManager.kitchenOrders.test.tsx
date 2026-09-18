@@ -309,6 +309,86 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
   });
 
   /**
+   * Cross-booking: every function in the offer has its own food and drinks
+   * field. Each field must land on its own function's kitchen order, and a
+   * function the Kitchen tab never shows (a room) must hand its lines to the
+   * dining leg instead of dropping them.
+   */
+  it("keeps each function's menu field on its own kitchen order", async () => {
+    currentOffers = [
+      baseOffer({
+        id: "offer-kitchen-cross",
+        // Main venue leg field.
+        menu: "20 x Welcome bites\n20 x Sparkling wine",
+        linked_reservations: {
+          restaurant: {
+            enabled: true,
+            resource_type: "restaurant",
+            space: "Set menu",
+            guests_count: 20,
+            start_time: "19:00",
+            end_time: "21:00",
+            // Dining leg field.
+            menu: "20 x Roast beef\n20 x Coffee",
+          },
+          guesthouse: {
+            enabled: true,
+            resource_type: "guesthouse",
+            space: "Room 1",
+            guests_count: 2,
+            // Room leg field: rooms never show in the Kitchen tab.
+            menu: "2 x Breakfast basket",
+          },
+        } as any,
+      }),
+    ];
+
+    await confirmOffer();
+
+    // Three separate reservations, in offer order.
+    expect(insertedReservations.map((r) => r.reservation_type)).toEqual([
+      "venue",
+      "restaurant",
+      "guesthouse",
+    ]);
+    const venueId = "r-1";
+    const restaurantId = "r-2";
+    const roomId = "r-3";
+
+    const linesFor = (id: string) =>
+      insertedKitchenOrders
+        .filter((o) => o.reservation_id === id)
+        .map((o) => [o.item_name, o.quantity, o.category, o.sort_order]);
+
+    // The venue field stays on the venue booking.
+    expect(linesFor(venueId)).toEqual([
+      ["Welcome bites", 20, "food", 0],
+      ["Sparkling wine", 20, "drink", 1],
+    ]);
+    // The dining field stays on the dining booking; the room field follows it,
+    // after the dining lines, with a continuing order.
+    expect(linesFor(restaurantId)).toEqual([
+      ["Roast beef", 20, "food", 0],
+      ["Coffee", 20, "drink", 1],
+      ["Breakfast basket", 2, "food", 2],
+    ]);
+    // Nothing is written on the room booking.
+    expect(linesFor(roomId)).toEqual([]);
+
+    // The two kitchen orders are separate: no line appears on both.
+    expect(insertedKitchenOrders).toHaveLength(5);
+    for (const order of insertedKitchenOrders) {
+      expect(order.tenant_id).toBe(TENANT_ID);
+      expect(order.status).toBe("received");
+      expect(showsInKitchenTab(
+        insertedReservations[Number(order.reservation_id.slice(2)) - 1],
+      )).toBe(true);
+    }
+    expect(toast.warning).not.toHaveBeenCalled();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  /**
    * Regression: an offer with nothing to cook must behave like a plain offer.
    * Accepting it creates exactly one reservation, unchanged, and the Kitchen
    * tab is never touched (not even an empty insert).
