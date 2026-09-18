@@ -1790,8 +1790,12 @@ type TranslationKeys = {
   "blog.post9C4": string;
   "blog.post9C5": string;
   "blog.post9C6": string;
-  "blog.spHeroAlt": string;
   "blog.spHeroCaption": string;
+  "blog.spSlotsTitle": string;
+  "blog.spSlotsCaption": string;
+  "blog.spSlotsBooked": string;
+  "blog.spSlotsOpen": string;
+  "blog.spSlotsLost": string;
   "blog.spFlowTitle": string;
   "blog.spFlowCaption": string;
   "blog.spFlow1Title": string;
@@ -3939,8 +3943,12 @@ const en: TranslationKeys = {
   "blog.post9C4": "The numbers behind this are simple. No-shows in personal service businesses typically run between 10 and 20 percent of appointments, and automated reminders cut that roughly by a third. If you run 60 appointments a week at 50 euros, recovering even five percent of lost slots is about 150 euros a week, far more than a booking subscription costs. Add the admin time: most owners spend three to five hours a week on booking messages, and self-service booking removes most of it.",
   "blog.post9C5": "Different trades need slightly different things. Barbers and hairdressers need services that stack, so a colour and cut books as one longer visit, plus per chair or per stylist availability. Massage therapists and treatment providers need buffer time between clients, room and bed level scheduling and a calm, branded page that matches the experience they sell. Bakers need pickup windows and order details rather than seats, with a limited number of orders per slot. Personal trainers need recurring sessions, small group slots and evening peaks. MimmoBook handles all of these from the same dashboard, and a multi site business can run several locations under one account.",
   "blog.post9C6": "If you are a service professional working alone or with a small team, start simple: put your real services and durations online, turn on confirmations and reminders, and publish the page on your own domain so clients book with you and not on a marketplace that owns your client list. MimmoBook has flat monthly pricing with no commission per booking, works in Finnish, Swedish and English, and is hosted in the EU with GDPR in mind. The free sample plan lets you test a full month with real clients before you decide.",
-  "blog.spHeroAlt": "Four service professionals at work: a barber cutting hair, a massage therapist treating a client, a baker arranging pastries and a personal trainer coaching a client.",
   "blog.spHeroCaption": "Barbers, hairdressers, massage therapists, bakers and personal trainers all sell time in fixed slots, which is exactly what online booking protects.",
+  "blog.spSlotsTitle": "Your week is a grid of slots",
+  "blog.spSlotsCaption": "Six working slots per day for one person. Every open slot and every no-show is income that cannot be recovered later.",
+  "blog.spSlotsBooked": "Booked and paid",
+  "blog.spSlotsOpen": "Open, nobody could book it outside your phone hours",
+  "blog.spSlotsLost": "Lost to a no-show or a late cancellation",
   "blog.spFlowTitle": "How a booking works, from client to repeat visit",
   "blog.spFlowCaption": "Four steps that run by themselves once your services and hours are set.",
   "blog.spFlow1Title": "1. Client picks a service",
@@ -6082,8 +6090,12 @@ const fi: TranslationKeys = {
   "blog.post9C4": "Luvut ovat yksinkertaisia. Saapumatta jääneitä aikoja on henkilökohtaisissa palveluissa tyypillisesti 10 ja 20 prosentin välillä varauksista, ja automaattiset muistutukset leikkaavat siitä noin kolmanneksen. Jos teet 60 varausta viikossa 50 euron hintaan, jo viiden prosentin palautuminen on noin 150 euroa viikossa, selvästi enemmän kuin varausjärjestelmän kuukausimaksu. Lisää tähän hallinnollinen aika: moni yrittäjä käyttää 3 ja 5 tunnin välillä viikossa varausviesteihin, ja itsepalveluvaraus poistaa siitä suurimman osan.",
   "blog.post9C5": "Eri alat tarvitsevat hieman eri asioita. Parturit ja kampaajat tarvitsevat palveluita jotka lasketaan yhteen, niin että väri ja leikkaus varautuu yhtenä pidempänä käyntinä, sekä tuoli- tai tekijäkohtaisen saatavuuden. Hierojat ja hoitojen tarjoajat tarvitsevat puskuriaikaa asiakkaiden väliin, huone- ja pöytätason kalenterin sekä rauhallisen, brändätyn sivun joka vastaa myytyä kokemusta. Leipurit tarvitsevat noutoaikoja ja tilaustietoja istumapaikkojen sijaan, rajatulla määrällä tilauksia aikaa kohti. Personal trainerit tarvitsevat toistuvia kertoja, pienryhmäaikoja ja iltahuippuja. MimmoBook hoitaa nämä kaikki samasta hallintapaneelista, ja monitoimipisteinen yritys voi pyörittää useaa toimipistettä yhdellä tilillä.",
   "blog.post9C6": "Jos olet palvelualan ammattilainen yksin tai pienessä tiimissä, aloita yksinkertaisesti: vie oikeat palvelut ja kestot verkkoon, ota vahvistukset ja muistutukset käyttöön ja julkaise sivu omalla verkkotunnuksellasi, jotta asiakkaat varaavat sinulta eivätkä markkinapaikasta joka omistaa asiakaslistasi. MimmoBookilla on kiinteä kuukausihinta ilman varauskohtaista provisiota, se toimii suomeksi, ruotsiksi ja englanniksi ja se on hostattu EU:ssa GDPR huomioiden. Ilmainen näytekausi antaa testata kokonaisen kuukauden oikeilla asiakkailla ennen päätöstä.",
-  "blog.spHeroAlt": "Neljä palvelualan ammattilaista työssään: parturi leikkaa hiuksia, hieroja hoitaa asiakasta, leipuri asettelee leivonnaisia ja personal trainer ohjaa asiakasta.",
   "blog.spHeroCaption": "Parturit, kampaajat, hierojat, leipurit ja personal trainerit myyvät kaikki aikaa kiinteissä paloissa, ja juuri sitä verkkoajanvaraus suojaa.",
+  "blog.spSlotsTitle": "Viikkosi on ruudukko varattavia aikoja",
+  "blog.spSlotsCaption": "Kuusi työaikaa päivässä yhdelle tekijälle. Jokainen vapaaksi jäänyt aika ja jokainen saapumatta jäänyt asiakas on tuloa, jota ei saa jälkikäteen takaisin.",
+  "blog.spSlotsBooked": "Varattu ja maksettu",
+  "blog.spSlotsOpen": "Vapaa, kukaan ei voinut varata puhelinaikojesi ulkopuolella",
+  "blog.spSlotsLost": "Menetetty saapumatta jääneeseen asiakkaaseen tai myöhäiseen peruutukseen",
   "blog.spFlowTitle": "Näin varaus kulkee, asiakkaasta seuraavaan käyntiin",
   "blog.spFlowCaption": "Neljä vaihetta, jotka toimivat itsestään kun palvelut ja ajat on asetettu.",
   "blog.spFlow1Title": "1. Asiakas valitsee palvelun",
@@ -8225,8 +8237,12 @@ const sv: TranslationKeys = {
   "blog.post9C4": "Siffrorna är enkla. Uteblivna besök ligger i personliga tjänster typiskt mellan 10 och 20 procent av bokningarna, och automatiska påminnelser skär bort ungefär en tredjedel av det. Om du tar 60 bokningar i veckan för 50 euro är redan fem procent återvunna tider ungefär 150 euro i veckan, betydligt mer än vad ett bokningssystem kostar. Lägg till administrationen: många ägare lägger mellan 3 och 5 timmar i veckan på bokningsmeddelanden, och självbetjäning tar bort större delen av det.",
   "blog.post9C5": "Olika yrken behöver lite olika saker. Barberare och frisörer behöver tjänster som läggs samman, så att färg och klippning bokas som ett längre besök, plus tillgänglighet per stol eller per frisör. Massörer och behandlare behöver buffertid mellan kunder, schema på rum och bänknivå och en lugn varumärkt sida som matchar upplevelsen de säljer. Bagare behöver upphämtningstider och orderuppgifter i stället för platser, med ett begränsat antal ordrar per tid. Personliga tränare behöver återkommande pass, smågruppstider och kvällstoppar. MimmoBook hanterar allt detta från samma panel, och ett företag med flera platser kan driva dem under ett konto.",
   "blog.post9C6": "Är du yrkesperson inom service, ensam eller med ett litet team, börja enkelt: lägg ut dina verkliga tjänster och längder, slå på bekräftelser och påminnelser och publicera sidan på din egen domän så att kunderna bokar hos dig och inte på en marknadsplats som äger din kundlista. MimmoBook har fast månadspris utan provision per bokning, fungerar på finska, svenska och engelska och driftas i EU med GDPR i fokus. Gratisnivån låter dig testa en hel månad med riktiga kunder innan du bestämmer dig.",
-  "blog.spHeroAlt": "Fyra yrkespersoner inom service i arbete: en barberare som klipper hår, en massör som behandlar en kund, en bagare som lägger upp bakverk och en personlig tränare som coachar en kund.",
   "blog.spHeroCaption": "Barberare, frisörer, massörer, bagare och personliga tränare säljer alla tid i fasta pass, och det är precis vad onlinebokning skyddar.",
+  "blog.spSlotsTitle": "Din vecka är ett rutnät av tider",
+  "blog.spSlotsCaption": "Sex arbetspass per dag för en person. Varje ledigt pass och varje uteblivet besök är intäkt som inte kan hämtas tillbaka senare.",
+  "blog.spSlotsBooked": "Bokat och betalt",
+  "blog.spSlotsOpen": "Ledigt, ingen kunde boka utanför dina telefontider",
+  "blog.spSlotsLost": "Förlorat till ett uteblivet besök eller en sen avbokning",
   "blog.spFlowTitle": "Så går en bokning, från kund till återbesök",
   "blog.spFlowCaption": "Fyra steg som sköter sig själva när tjänster och tider är satta.",
   "blog.spFlow1Title": "1. Kunden väljer tjänst",
