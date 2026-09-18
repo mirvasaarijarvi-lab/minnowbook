@@ -180,6 +180,32 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
     resourceTypes.map((tp) => [tp, typeLabel(tp)])
   );
 
+  // Type of the main booking: taken from the chosen space, venue by default.
+  const mainType =
+    resourceRows.find((r) => r.name === form.event_space)?.resource_type || "venue";
+
+  // Live preview of the kitchen order lines each menu field will create.
+  const kitchenPreview = useMemo(
+    () =>
+      buildKitchenPreview([
+        {
+          key: "main",
+          name: typeLabels[mainType] || typeLabel(mainType),
+          reservationType: mainType,
+          menu: form.menu,
+        },
+        ...enabledLinked.map((key) => ({
+          key,
+          name: typeLabels[key] || key,
+          reservationType: linked[key]?.resource_type || key,
+          menu: linked[key]?.menu ?? null,
+        })),
+      ]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [form.menu, mainType, enabledLinked.join("|"), JSON.stringify(linked)],
+  );
+
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
