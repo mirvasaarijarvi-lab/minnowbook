@@ -404,7 +404,72 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
               {t("offers.menuKitchenHint")} {t("offers.menuFormatHint")}
             </p>
           </div>
+
+          {/* Kitchen order preview: what each menu field will create, and where */}
+          <div
+            className="border rounded-lg p-4 space-y-3"
+            aria-labelledby="offer-kitchen-preview-title"
+          >
+            <div className="flex items-baseline justify-between gap-2">
+              <h4 id="offer-kitchen-preview-title" className="font-medium text-sm">
+                {t("offers.kitchenPreviewTitle")}
+              </h4>
+              <span className="text-xs text-muted-foreground">
+                {t("offers.kitchenPreviewTotal").replace(
+                  "{count}",
+                  String(kitchenPreview.totalLines),
+                )}
+              </span>
+            </div>
+            {!kitchenPreview.hasLines ? (
+              <p className="text-xs text-muted-foreground">{t("offers.kitchenPreviewEmpty")}</p>
+            ) : (
+              <div className="space-y-3">
+                {kitchenPreview.legs.map((leg) => (
+                  <div key={leg.key} className="space-y-1">
+                    <p className="text-sm font-medium">{leg.name}</p>
+                    {leg.lines.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        {t("offers.kitchenPreviewNone")}
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-xs text-muted-foreground">
+                          {leg.targetName == null
+                            ? t("offers.kitchenPreviewLost")
+                            : leg.staysHere
+                              ? t("offers.kitchenPreviewStays")
+                              : t("offers.kitchenPreviewMoved").replace(
+                                  "{name}",
+                                  leg.targetName,
+                                )}
+                        </p>
+                        <ul className="text-xs space-y-0.5">
+                          {leg.lines.map((line, i) => (
+                            <li key={`${leg.key}-${i}`} className="flex flex-wrap gap-x-2">
+                              <span className="font-medium">
+                                {line.quantity} x {line.item_name}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {line.category === "drink"
+                                  ? t("kitchen.categoryDrink")
+                                  : t("kitchen.categoryFood")}
+                              </span>
+                              {line.notes && (
+                                <span className="text-muted-foreground">({line.notes})</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+
 
         <DialogFooter className="mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
