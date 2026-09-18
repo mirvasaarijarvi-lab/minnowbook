@@ -521,13 +521,9 @@ const OperationsSheetPanel = () => {
                   </table>
                 </div>
               )}
-            </div>
+            </CollapsibleSection>
 
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-sm font-medium">Lodging</h3>
-                <Badge variant="secondary">{lodging.length}</Badge>
-              </div>
+            <CollapsibleSection title="Lodging" count={lodging.length}>
               {lodging.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No arrivals or departures for this day.</p>
               ) : (
