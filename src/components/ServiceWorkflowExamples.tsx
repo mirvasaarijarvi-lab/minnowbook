@@ -1,5 +1,6 @@
 import { Scissors, Sparkles, CroissantIcon, Dumbbell, CalendarCheck, Users, Receipt, Star } from "lucide-react";
-import { useT, type TranslationKey } from "@/contexts/I18nContext";
+import { useT } from "@/contexts/I18nContext";
+import type { TranslationKey } from "@/i18n/translations";
 
 /**
  * Step-by-step workflow examples for service industry professionals.
