@@ -317,10 +317,21 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
               <div className="space-y-1.5">
                 <Label htmlFor={`offer-linked-requests-${key}`}>{t("offers.specialRequests")}</Label>
                 <Textarea id={`offer-linked-requests-${key}`} value={linked[key]?.special_requests || ""} onChange={(e) => updateLinkedField(key, "special_requests", e.target.value)} rows={2} />
+                <p className="text-xs text-muted-foreground">{t("offers.menuNoKitchenHint")}</p>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor={`offer-linked-menu-${key}`}>Menu</Label>
-                <Textarea id={`offer-linked-menu-${key}`} value={linked[key]?.menu || ""} onChange={(e) => updateLinkedField(key, "menu", e.target.value)} rows={3} />
+                <Label htmlFor={`offer-linked-menu-${key}`}>{t("offers.menuKitchenLabel")}</Label>
+                <Textarea
+                  id={`offer-linked-menu-${key}`}
+                  value={linked[key]?.menu || ""}
+                  onChange={(e) => updateLinkedField(key, "menu", e.target.value)}
+                  rows={3}
+                  placeholder={t("offers.menuPlaceholder")}
+                  aria-describedby={`offer-linked-menu-hint-${key}`}
+                />
+                <p id={`offer-linked-menu-hint-${key}`} className="text-xs text-muted-foreground">
+                  {t("offers.menuKitchenHintLeg")} {t("offers.menuFormatHint")}
+                </p>
               </div>
             </div>
           ))}
@@ -329,12 +340,23 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
           <div className="space-y-1.5">
             <Label htmlFor="offer-special-requests">{t("offers.specialRequests")}</Label>
             <Textarea id="offer-special-requests" value={form.special_requests} onChange={(e) => updateField("special_requests", e.target.value)} rows={3} />
+            <p className="text-xs text-muted-foreground">{t("offers.menuNoKitchenHint")}</p>
           </div>
 
           {/* Menu */}
           <div className="space-y-1.5">
-            <Label htmlFor="offer-menu">Menu</Label>
-            <Textarea id="offer-menu" value={form.menu} onChange={(e) => updateField("menu", e.target.value)} rows={6} placeholder={t("offers.menuPlaceholder")} />
+            <Label htmlFor="offer-menu">{t("offers.menuKitchenLabel")}</Label>
+            <Textarea
+              id="offer-menu"
+              value={form.menu}
+              onChange={(e) => updateField("menu", e.target.value)}
+              rows={6}
+              placeholder={t("offers.menuPlaceholder")}
+              aria-describedby="offer-menu-hint"
+            />
+            <p id="offer-menu-hint" className="text-xs text-muted-foreground">
+              {t("offers.menuKitchenHint")} {t("offers.menuFormatHint")}
+            </p>
           </div>
         </div>
 
