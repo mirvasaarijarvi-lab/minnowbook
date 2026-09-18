@@ -1156,9 +1156,18 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       .select("id")
       .single();
     if (insertErr) {
+      const seatGuardFull = Boolean(
+        special_occasion_id && /fully booked/i.test(insertErr.message ?? ""),
+      );
+      reasons.push(
+        rejectionTag(
+          seatGuardFull ? OCCASION_ERROR_CODES.OCCASION_FULL : "DB_INSERT_FAILED",
+        ),
+      );
       reasons.push(
         `[DB_INSERT_FAILED] Reservation row could not be created: ${insertErr.message}. (${idCtx})`,
       );
+
       await logValidation(adminClient, {
         tenant_id,
         site_id,
