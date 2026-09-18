@@ -248,3 +248,128 @@ describe("empty menu fields create no kitchen order", () => {
     ]);
   });
 });
+
+/** Convenience: the rows the confirmation writes for a set of preview inputs. */
+function rowsFor(legs: PreviewLegInput[]) {
+  return buildKitchenOrderRows(
+    "t-1",
+    legs.map((l) => ({ reservationId: l.key, reservationType: l.reservationType, menu: l.menu })),
+  );
+}
+
+describe("cross-booking preview with no dining booking", () => {
+  it("routes every field to the event booking and says so per function", () => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: "20 x Bites" },
+      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "2 x Breakfast" },
+      { key: "sauna", name: "Sauna", reservationType: "sauna", menu: "6 x Beer" },
+    );
+    const preview = buildKitchenPreview(legs);
+    expect(preview.legs.map((l) => [l.name, l.routeName, l.ownKitchenOrder])).toEqual([
+      ["Event space", "Event space", true],
+      ["Rooms", "Event space", false],
+      ["Sauna", "Event space", false],
+    ]);
+    expect(preview.totalLines).toBe(3);
+    expect(rowsFor(legs).every((r) => r.reservation_id === "venue")).toBe(true);
+  });
+
+  it("warns that lines have nowhere to go when the offer has neither dining nor event", () => {
+    const legs = inputs(
+      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "2 x Breakfast" },
+      { key: "sauna", name: "Sauna", reservationType: "sauna", menu: "6 x Beer" },
+    );
+    const preview = buildKitchenPreview(legs);
+    for (const leg of preview.legs) {
+      expect(leg.lines.length).toBeGreaterThan(0);
+      expect(leg.routeKey).toBeNull();
+      expect(leg.routeName).toBeNull();
+      expect(leg.targetKey).toBeNull();
+      expect(leg.staysHere).toBe(false);
+    }
+    expect(preview.hasLines).toBe(false);
+    expect(rowsFor(legs)).toEqual([]);
+  });
+});
+
+describe("event-only cross-booking preview", () => {
+  it("keeps the event field on the event booking and merges the other fields after it", () => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: "Bites\nSparkling wine" },
+      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "Breakfast" },
+    );
+    const preview = buildKitchenPreview(legs);
+    expect(preview.legs[0].staysHere).toBe(true);
+    expect(preview.legs[1].targetName).toBe("Event space");
+    expect(rowsFor(legs).map((r) => [r.item_name, r.sort_order, r.category])).toEqual([
+      ["Bites", 0, "food"],
+      ["Sparkling wine", 1, "drink"],
+      ["Breakfast", 2, "food"],
+    ]);
+  });
+
+  it("creates one kitchen order for an event-only offer where only the event field is filled", () => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: "40 x Buffet" },
+      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "" },
+    );
+    const preview = buildKitchenPreview(legs);
+    expect(preview.totalLines).toBe(1);
+    expect(preview.legs[1].lines).toEqual([]);
+    expect(rowsFor(legs)).toEqual([
+      expect.objectContaining({ reservation_id: "venue", item_name: "Buffet", quantity: 40 }),
+    ]);
+  });
+});
+
+describe("mixed empty and filled menu fields across a cross-booking", () => {
+  it("delivers only the filled fields, each to its own kitchen order", () => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: "   " },
+      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "Beef" },
+      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "\n-\n" },
+      { key: "sauna", name: "Sauna", reservationType: "sauna", menu: "6 x Beer" },
+    );
+    const preview = buildKitchenPreview(legs);
+    expect(preview.legs.map((l) => [l.name, l.lines.length, l.targetKey])).toEqual([
+      ["Event space", 0, null],
+      ["Restaurant", 1, "rest"],
+      ["Rooms", 0, null],
+      ["Sauna", 1, "rest"],
+    ]);
+    expect(preview.totalLines).toBe(2);
+    expect(rowsFor(legs).map((r) => [r.reservation_id, r.item_name, r.sort_order])).toEqual([
+      ["rest", "Beef", 0],
+      ["rest", "Beer", 1],
+    ]);
+  });
+
+  it("still shows the full mapping for the empty fields so staff know where they would go", () => {
+    const preview = buildKitchenPreview(
+      inputs(
+        { key: "venue", name: "Event space", reservationType: "venue" },
+        { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "Beef" },
+        { key: "rooms", name: "Rooms", reservationType: "guesthouse" },
+      ),
+    );
+    expect(preview.legs.map((l) => l.routeName)).toEqual([
+      "Event space",
+      "Restaurant",
+      "Restaurant",
+    ]);
+  });
+
+  it("keeps each kitchen order numbered from zero when only some fields are filled", () => {
+    const legs = inputs(
+      { key: "venue", name: "Event space", reservationType: "venue", menu: "Bites" },
+      { key: "rest", name: "Restaurant", reservationType: "restaurant", menu: "" },
+      { key: "rooms", name: "Rooms", reservationType: "guesthouse", menu: "Breakfast\nJuice" },
+    );
+    expect(rowsFor(legs).map((r) => [r.reservation_id, r.item_name, r.sort_order])).toEqual([
+      ["venue", "Bites", 0],
+      // The dining field is empty, so the room's lines start its kitchen order.
+      ["rest", "Breakfast", 0],
+      ["rest", "Juice", 1],
+    ]);
+  });
+});
