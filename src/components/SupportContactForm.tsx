@@ -12,6 +12,12 @@ import { Send, MapPin, Mail, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenant } from "@/hooks/useTenant";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  createAccessibleChallenge,
+  isChallengePassed,
+  type AccessibleChallenge,
+} from "@/lib/accessibleChallenge";
+
 
 /**
  * The support address is never written as a complete string in the markup or
