@@ -390,6 +390,26 @@ describe("OffersManager: offer confirmation forwards kitchen details", () => {
       );
     });
 
+    it("uses singular wording for a single food or drink line", async () => {
+      currentOffers = [
+        baseOffer({
+          id: `offer-kitchen-msg-one-${language}`,
+          menu: "1 x Roast beef",
+        }),
+      ];
+
+      await confirmOffer(language);
+
+      expect(insertedKitchenOrders).toHaveLength(1);
+      const expected = translations[language]["offers.confirmedKitchenSentOne"];
+      expect(expected).not.toContain("{count}");
+      expect(expected).not.toBe(translations[language]["offers.confirmedKitchenSent"]);
+      expect(toast.success).toHaveBeenCalledWith(
+        translations[language]["offers.confirmedSuccess"],
+        { description: expected },
+      );
+    });
+
     it("states that nothing was sent to the kitchen when there is no food or drink", async () => {
       currentOffers = [baseOffer({ id: `offer-kitchen-msg-none-${language}`, menu: "   " })];
 
