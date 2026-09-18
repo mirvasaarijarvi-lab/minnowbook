@@ -11,7 +11,7 @@ import type { Language } from "@/i18n/translations";
  * Playwright spec can verify the email markup mounts without runtime errors,
  * without needing to authenticate, impersonate a tenant, or seed real data.
  *
- * Gated on `?e2e=1` so casual visitors hitting `/__e2e/email-preview` see
+ * Gated on `?e2e=1` so casual visitors hitting `/e2e/email-preview` see
  * nothing (the route is not linked from the marketing UI, but we keep it
  * gated as a belt-and-suspenders measure).
  *
