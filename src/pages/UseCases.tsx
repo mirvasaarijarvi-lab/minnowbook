@@ -22,19 +22,43 @@ const useCases = [
 const UseCases = () => {
   const t = useT();
 
+  const serviceCatalog = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: t("useCases.seoTitle"),
+    description: t("useCases.seoDescription"),
+    provider: { "@type": "Organization", name: "MimmoBook", url: "https://mimmobook.com/" },
+    serviceType: "Online booking software",
+    areaServed: { "@type": "Country", name: "Finland" },
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: t("useCases.heroTitle"),
+      itemListElement: useCases.map((useCase, index) => ({
+        "@type": "Offer",
+        position: index + 1,
+        itemOffered: {
+          "@type": "Service",
+          name: t(useCase.titleKey),
+          description: t(useCase.descKey),
+        },
+      })),
+    },
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="Use Cases, Barbers, Salons, Massage, Bakeries and Venues"
-        description="See how MimmoBook works for barbers, hairdressers, massage therapists, bakers, personal trainers, restaurants, venues, hotels, guesthouses, catering and pop-ups."
+        title={t("useCases.seoTitle")}
+        description={t("useCases.seoDescription")}
         path="/use-cases"
-        keywords="barber appointment software, hairdresser booking system, salon booking, massage therapist booking, bakery order booking, personal trainer booking app, restaurant reservations, venue booking, ajanvaraus palvelualalle"
+        keywords={t("useCases.seoKeywords")}
         jsonLd={[
           organizationSchema,
           breadcrumbSchema([
-            { name: "Home", url: "https://mimmobook.com/" },
-            { name: "Use Cases", url: "https://mimmobook.com/use-cases" },
+            { name: t("nav.home"), url: "https://mimmobook.com/" },
+            { name: t("nav.useCases"), url: "https://mimmobook.com/use-cases" },
           ]),
+          serviceCatalog,
         ]}
       />
       <MarketingHeader />
