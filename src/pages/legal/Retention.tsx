@@ -76,11 +76,19 @@ const Retention = () => {
 
         <h2 className="text-xl font-serif font-bold mt-10 mb-2">Deletion on request</h2>
         <p className="text-muted-foreground leading-relaxed">
-          You can request deletion of your personal data at any time by contacting{" "}
-          <a href="mailto:privacy@mimmobook.com" className="text-accent hover:underline">privacy@mimmobook.com</a>{" "}
-          or by using the self-service account deletion in your profile. Some data may be retained for a
-          limited period to meet legal obligations (for example, invoicing records under Finnish accounting law).
+          You can request deletion of your personal data at any time by using the self-service account
+          deletion in your profile, or by emailing our privacy contact{" "}
+          <ProtectedEmail user="privacy" subject="Data deletion request" className="text-accent hover:underline font-medium" />.
+          The address is hidden from automated crawlers and revealed on click. Some data may be retained
+          for a limited period to meet legal obligations (for example, invoicing records under Finnish
+          accounting law).
         </p>
+        <p className="text-muted-foreground leading-relaxed mt-3">
+          What to expect: we confirm your request within 2 business days and complete it within 30 days,
+          as required by the GDPR. Please write from the email address on your account and name the
+          business, so we can verify the request without asking for extra personal data.
+        </p>
+
       </main>
       <MarketingFooter />
     </div>
