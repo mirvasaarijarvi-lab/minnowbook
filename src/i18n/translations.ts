@@ -6827,7 +6827,7 @@ const sv: TranslationKeys = {
   "features.teamManagement": "Användarhantering",
   "features.teamManagementDesc": "Lägg enkelt till personal, tilldela roller och hantera behörigheter.",
   "features.brandedPages": "Bokningstyper",
-  "features.brandedPagesDesc": "Hotell/pensionat, restaurang och evenemangslokaler.",
+  "features.brandedPagesDesc": "Hotell/pensionat, restaurang, evenemangslokaler och yrkesverksamma inom service, som massörer, barberare, frisörer, bagare, makeupartister, behandlare och personliga tränare.",
   "features.reportsInsights": "Rapportering",
   "features.reportsInsightsDesc": "Spåra bokningar, beläggning och intäkter med en snabb blick.",
   "features.automatedEmails": "Automatiserade e-postmeddelanden",
