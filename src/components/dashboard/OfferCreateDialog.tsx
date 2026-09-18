@@ -310,17 +310,26 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
             </div>
           )}
 
+          {canCrossReserve && enabledLinked.length > 0 && (
+            <p className="text-xs text-muted-foreground">{t("offers.menuKitchenSummary")}</p>
+          )}
+
           {/* Linked reservation details */}
-          {canCrossReserve && enabledLinked.map((key) => (
+          {canCrossReserve && enabledLinked.map((key) => {
+            const legName = typeLabels[key] || key;
+            const ownKitchen = (KITCHEN_RESERVATION_TYPES as readonly string[]).includes(key);
+            return (
             <div key={key} className="border rounded-lg p-4 space-y-3 bg-muted/30">
-              <h4 className="font-medium text-sm">{typeLabels[key] || key}</h4>
+              <h4 className="font-medium text-sm">{legName}</h4>
               <div className="space-y-1.5">
                 <Label htmlFor={`offer-linked-requests-${key}`}>{t("offers.specialRequests")}</Label>
                 <Textarea id={`offer-linked-requests-${key}`} value={linked[key]?.special_requests || ""} onChange={(e) => updateLinkedField(key, "special_requests", e.target.value)} rows={2} />
                 <p className="text-xs text-muted-foreground">{t("offers.menuNoKitchenHint")}</p>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor={`offer-linked-menu-${key}`}>{t("offers.menuKitchenLabel")}</Label>
+                <Label htmlFor={`offer-linked-menu-${key}`}>
+                  {t("offers.menuKitchenLabelFor").replace("{name}", legName)}
+                </Label>
                 <Textarea
                   id={`offer-linked-menu-${key}`}
                   value={linked[key]?.menu || ""}
@@ -330,11 +339,17 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
                   aria-describedby={`offer-linked-menu-hint-${key}`}
                 />
                 <p id={`offer-linked-menu-hint-${key}`} className="text-xs text-muted-foreground">
-                  {t("offers.menuKitchenHintLeg")} {t("offers.menuFormatHint")}
+                  {(ownKitchen
+                    ? t("offers.menuKitchenHintLegOwn")
+                    : t("offers.menuKitchenHintLegMoved")
+                  ).replace("{name}", legName)}{" "}
+                  {t("offers.menuFormatHint")}
                 </p>
               </div>
             </div>
-          ))}
+            );
+          })}
+
 
           {/* Special requests */}
           <div className="space-y-1.5">
