@@ -254,3 +254,93 @@ Deno.test({
     }
   },
 });
+
+Deno.test({
+  name: "special occasions: over-capacity parties, wrong dates and unknown occasions are refused",
+  ignore: SERVICE_KEY.length === 0,
+  sanitizeOps: true,
+  sanitizeResources: true,
+  sanitizeExit: true,
+  fn: async () => {
+    // Fresh window for the per-minute limiter.
+    await wait(RATE_WINDOW_MS);
+
+    const stamp = Date.now();
+    const guestEmail = `occasion-edge+${stamp}@mimmobook.test`;
+    const date = isoFutureDate(47);
+    const otherDate = isoFutureDate(48);
+    const occasionId = await createOccasion({
+      reservation_type: "restaurant",
+      name: `Edge case dinner ${stamp}`,
+      occasion_date: date,
+      capacity: 2,
+      booking_type: "seatings",
+      seating_times: ["19:00"],
+    });
+    const { cleanup, assertEmpty } = makeReservationCleanup({
+      adminFetch,
+      tenantId: TEST_TENANT_ID,
+      guestEmail,
+      hasServiceKey: true,
+    });
+
+    const base = {
+      tenant_id: TEST_TENANT_ID,
+      guest_name: `Occasion Edge ${stamp}`,
+      guest_email: guestEmail,
+      reservation_type: "restaurant",
+    };
+
+    try {
+      // 1. A single party larger than the whole occasion.
+      const tooBig = await callFn({
+        ...base,
+        date,
+        special_occasion_id: occasionId,
+        start_time: "19:00",
+        guests_count: 6,
+      });
+      assert(tooBig.res.status >= 400, `an over-capacity party must be refused: ${tooBig.text}`);
+      assert(/fully booked/i.test(tooBig.text), `refusal must say it is full: ${tooBig.text}`);
+
+      // 2. The occasion attached to a date it does not belong to.
+      const wrongDate = await callFn({
+        ...base,
+        date: otherDate,
+        special_occasion_id: occasionId,
+        start_time: "19:00",
+        guests_count: 2,
+      });
+      assert(wrongDate.res.status >= 400, `a wrong date must be refused: ${wrongDate.text}`);
+      assert(
+        /different date/i.test(wrongDate.text),
+        `refusal must name the date problem: ${wrongDate.text}`,
+      );
+
+      // 3. An occasion id that does not exist.
+      const unknown = await callFn({
+        ...base,
+        date,
+        special_occasion_id: "00000000-0000-0000-0000-000000000000",
+        start_time: "19:00",
+        guests_count: 2,
+      });
+      assert(unknown.res.status >= 400, `an unknown occasion must be refused: ${unknown.text}`);
+      assert(
+        /no longer available/i.test(unknown.text),
+        `refusal must say it is unavailable: ${unknown.text}`,
+      );
+
+      // 4. A date with no occasion at all still books normally.
+      const plain = await callFn({ ...base, date: otherDate, start_time: "12:15", guests_count: 2 });
+      assertEquals(plain.res.status, 200, `a normal booking must still work: ${plain.text}`);
+      const plainRow = await readReservation(plain.json.reservation.id);
+      assertEquals(plainRow.special_occasion_id, null);
+      assertEquals(plainRow.start_time, "12:15:00");
+    } finally {
+      await cleanup();
+      await assertEmpty();
+      await deleteOccasion(occasionId);
+    }
+  },
+});
