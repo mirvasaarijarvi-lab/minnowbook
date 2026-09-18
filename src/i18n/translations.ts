@@ -5898,7 +5898,7 @@ const fi: TranslationKeys = {
   "features.f18Title": "Ristiinvaraukset",
   "features.f18Desc": "Yhdistä varauksia eri tilojen ja palvelujen välillä. Merkitse yhdistetyt varaukset käytetyiksi tai laskutetuiksi yhdessä.",
   "features.offersAndCross": "Tarjoukset ja ristiinvaraukset",
-  "features.offersAndCrossDesc": "Luo tarjouksia, generoi brändätyt PDF:t ja yhdistä varauksia tilojen välillä — hallitse kaikkea yhdessä.",
+  "features.offersAndCrossDesc": "Luo tarjouksia, generoi brändätyt PDF:t ja yhdistä varauksia tilojen välillä ja hallitse kaikkea yhdessä.",
 
   // Use Cases
   "useCases.badge": "Käyttökohteet",
