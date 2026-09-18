@@ -123,8 +123,16 @@ runs:
       run: |
         # setup-bun normally appends ~/.bun/bin to PATH for us; on a
         # cache hit it never runs, so we mirror that behaviour here.
-        echo "$HOME/.bun/bin" >> "$GITHUB_PATH"
-        echo "✅ Bun cache hit — skipped re-download."
+        # On Windows the bash-style "/c/Users/..." path is invisible to
+        # PowerShell (the default shell for `run:` steps there), which
+        # made every Windows matrix job fail with "The term 'bun' is not
+        # recognized". Write the native path so both shells resolve it.
+        BUN_BIN="$HOME/.bun/bin"
+        if [ "${RUNNER_OS:-}" = "Windows" ] && command -v cygpath >/dev/null 2>&1; then
+          BUN_BIN="$(cygpath -w "$BUN_BIN")"
+        fi
+        echo "$BUN_BIN" >> "$GITHUB_PATH"
+        echo "✅ Bun cache hit — skipped re-download (PATH += $BUN_BIN)."
 
     - name: Validate cached Bun version
       id: cached-bun-validation
@@ -329,3 +337,18 @@ runs:
         INPUT_BUN_VERSION: ${{ inputs.bun-version }}
       run: |
         echo "::warning::bun-version='${INPUT_BUN_VERSION}' does not match the pin in bun-pin.env; checksum verification skipped. Update bun-pin.env to make this install verifiable."
+
+    - name: Verify Bun resolves in PowerShell (Windows)
+      # PowerShell is the default shell for `run:` steps on Windows
+      # runners. Fail here, with the PATH printed, rather than letting a
+      # later `bun install` fail with a bare "not recognized" error.
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        if (-not (Get-Command bun -ErrorAction SilentlyContinue)) {
+          Write-Host "PATH: $env:PATH"
+          Write-Error "bun is not on PATH in PowerShell after setup."
+          exit 1
+        }
+        bun --version

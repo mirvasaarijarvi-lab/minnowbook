@@ -102,6 +102,7 @@ jobs:
           verify-checksum: ${{ runner.os == 'Linux' }}
 
       - name: Install dependencies
+        shell: bash
         run: bun install --frozen-lockfile
 
       - name: Report environment
@@ -114,6 +115,7 @@ jobs:
       # Run through npm so the tests execute on the matrix Node.js version
       # rather than on Bun's runtime.
       - name: Run cross-booking mapping and preview tests on Node
+        shell: bash
         run: npm run test:offer-kitchen
 
       - name: Upload test report
