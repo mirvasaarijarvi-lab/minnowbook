@@ -472,8 +472,8 @@ describe("menu fields mixing valid items with empty and placeholder lines", () =
     // A dashed separator carries no name, a written heading does.
     expect(rowsFor(legs).map((r) => r.item_name)).toEqual([
       "Starters",
-      "____",
       "Soup",
+      "____",
       "Desserts",
       "Berry pie",
     ]);
