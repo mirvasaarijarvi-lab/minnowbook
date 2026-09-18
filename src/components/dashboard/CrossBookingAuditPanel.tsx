@@ -231,6 +231,7 @@ const CrossBookingAuditPanel = () => {
         ) : visible.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">{t("an.cross.none")}</p>
         ) : (
+          <CollapsibleSection title={t("an.cross.title")} count={visible.length}>
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
