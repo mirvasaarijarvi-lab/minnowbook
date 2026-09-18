@@ -110,6 +110,7 @@ const KitchenOrdersPanel = () => {
   const [selectedDate, setSelectedDate] = useState(today);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [pendingOrderDelete, setPendingOrderDelete] = useState<string | null>(null);
   const [menuManagerOpen, setMenuManagerOpen] = useState(false);
 
   // Menu templates for quick-insert
@@ -251,6 +252,23 @@ const KitchenOrdersPanel = () => {
     },
     onError: () => toast.error(t("kitchen.error")),
   });
+
+  const deleteOrderForReservation = useMutation({
+    mutationFn: async (reservationId: string) => {
+      const { error } = await supabase
+        .from("kitchen_orders")
+        .delete()
+        .eq("tenant_id", tenantId!)
+        .eq("reservation_id", reservationId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidate();
+      toast.success(t("kitchen.orderDeleted"));
+    },
+    onError: () => toast.error(t("kitchen.error")),
+  });
+
 
   const bulkUpdateStatus = useMutation({
     mutationFn: async ({ ids, status }: { ids: string[]; status: Status }) => {
@@ -403,12 +421,28 @@ const KitchenOrdersPanel = () => {
                         </p>
                       )}
                     </div>
-                    {total > 0 && (
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">{t("kitchen.total")}</p>
-                        <p className="text-base font-semibold">{total.toFixed(2)} €</p>
-                      </div>
-                    )}
+                    <div className="flex items-start gap-3">
+                      {total > 0 && (
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">{t("kitchen.total")}</p>
+                          <p className="text-base font-semibold">{total.toFixed(2)} €</p>
+                        </div>
+                      )}
+                      {items.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 text-destructive hover:text-destructive print:hidden"
+                          aria-label={t("kitchen.deleteOrderNamed").replace(
+                            "{name}",
+                            r.guest_name ?? "",
+                          )}
+                          onClick={() => setPendingOrderDelete(r.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -484,7 +518,31 @@ const KitchenOrdersPanel = () => {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog
+        open={!!pendingOrderDelete}
+        onOpenChange={(open) => !open && setPendingOrderDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("kitchen.deleteOrderConfirm")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("kitchen.deleteOrderHint")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pendingOrderDelete) deleteOrderForReservation.mutate(pendingOrderDelete);
+                setPendingOrderDelete(null);
+              }}
+            >
+              {t("kitchen.deleteOrder")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <KitchenMenuManager open={menuManagerOpen} onOpenChange={setMenuManagerOpen} />
+
     </div>
   );
 };

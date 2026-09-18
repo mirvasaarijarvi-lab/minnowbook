@@ -1818,6 +1818,11 @@ type TranslationKeys = {
   "kitchen.pickDate": string;
   "kitchen.ordersFor": string;
   "kitchen.deleteItemNamed": string;
+  "kitchen.deleteOrder": string;
+  "kitchen.deleteOrderNamed": string;
+  "kitchen.deleteOrderConfirm": string;
+  "kitchen.deleteOrderHint": string;
+  "kitchen.orderDeleted": string;
   "kitchen.menu.priceLabel": string;
   "kitchen.today": string;
   "kitchen.noReservations": string;
@@ -3901,6 +3906,11 @@ const en: TranslationKeys = {
   "kitchen.pickDate": "Choose a date",
   "kitchen.ordersFor": "Kitchen orders for {name}",
   "kitchen.deleteItemNamed": "Delete {name}",
+  "kitchen.deleteOrder": "Delete order",
+  "kitchen.deleteOrderNamed": "Delete the whole kitchen order for {name}",
+  "kitchen.deleteOrderConfirm": "Delete the whole kitchen order?",
+  "kitchen.deleteOrderHint": "All food and drink lines for this booking are removed. The booking itself stays.",
+  "kitchen.orderDeleted": "Kitchen order deleted",
   "kitchen.menu.priceLabel": "Unit price in euros",
   "kitchen.today": "Today",
   "kitchen.noReservations": "No restaurant or venue reservations on this date.",
@@ -5981,6 +5991,11 @@ const fi: TranslationKeys = {
   "kitchen.pickDate": "Valitse päivä",
   "kitchen.ordersFor": "Keittiötilaukset: {name}",
   "kitchen.deleteItemNamed": "Poista {name}",
+  "kitchen.deleteOrder": "Poista tilaus",
+  "kitchen.deleteOrderNamed": "Poista koko keittiötilaus asiakkaalta {name}",
+  "kitchen.deleteOrderConfirm": "Poistetaanko koko keittiötilaus?",
+  "kitchen.deleteOrderHint": "Kaikki tämän varauksen ruoka- ja juomarivit poistetaan. Varaus itse säilyy.",
+  "kitchen.orderDeleted": "Keittiötilaus poistettu",
   "kitchen.menu.priceLabel": "Yksikköhinta euroina",
   "kitchen.today": "Tänään",
   "kitchen.noReservations": "Ei ravintola- tai juhlatilavarauksia tälle päivälle.",
@@ -8061,6 +8076,11 @@ const sv: TranslationKeys = {
   "kitchen.pickDate": "Välj ett datum",
   "kitchen.ordersFor": "Köksbeställningar: {name}",
   "kitchen.deleteItemNamed": "Ta bort {name}",
+  "kitchen.deleteOrder": "Ta bort order",
+  "kitchen.deleteOrderNamed": "Ta bort hela köksordern för {name}",
+  "kitchen.deleteOrderConfirm": "Ta bort hela köksordern?",
+  "kitchen.deleteOrderHint": "Alla mat- och dryckesrader för denna bokning tas bort. Bokningen finns kvar.",
+  "kitchen.orderDeleted": "Köksordern borttagen",
   "kitchen.menu.priceLabel": "Enhetspris i euro",
   "kitchen.today": "Idag",
   "kitchen.noReservations": "Inga restaurang- eller festlokalbokningar detta datum.",
