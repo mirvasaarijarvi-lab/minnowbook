@@ -1886,6 +1886,7 @@ type TranslationKeys = {
   "offers.confirmedSuccess": string;
   "offers.confirmedWithoutPrice": string;
   "offers.kitchenOrdersFailed": string;
+  "offers.confirmedKitchenSentOne": string;
   "offers.confirmedKitchenSent": string;
   "offers.confirmedNoKitchen": string;
   "offers.priceReviewTitle": string;
@@ -3956,7 +3957,8 @@ const en: TranslationKeys = {
   "offers.confirmedSuccess": "Offer confirmed",
   "offers.confirmedWithoutPrice": "Some bookings were saved without a price. Add the price before invoicing them.",
   "offers.kitchenOrdersFailed": "The bookings were saved, but the menu could not be sent to the kitchen. Please add it in the Kitchen tab.",
-  "offers.confirmedKitchenSent": "{count} food and drink line(s) from the offer were sent to the Kitchen tab.",
+  "offers.confirmedKitchenSentOne": "1 food and drink line from the offer was sent to the Kitchen tab.",
+  "offers.confirmedKitchenSent": "{count} food and drink lines from the offer were sent to the Kitchen tab.",
   "offers.confirmedNoKitchen": "This offer had no food or drinks, so a regular reservation was created and nothing was sent to the Kitchen tab.",
   "offers.priceReviewTitle": "Check the prices",
   "offers.priceReviewDesc": "These bookings will be created from the offer. Prices come from your resource settings.",
@@ -6023,6 +6025,7 @@ const fi: TranslationKeys = {
   "offers.confirmedSuccess": "Tarjous vahvistettu",
   "offers.confirmedWithoutPrice": "Osa varauksista tallennettiin ilman hintaa. Lisää hinta ennen laskutusta.",
   "offers.kitchenOrdersFailed": "Varaukset tallennettiin, mutta menua ei saatu vietyä keittiölle. Lisää se Keittiö-välilehdellä.",
+  "offers.confirmedKitchenSentOne": "Tarjouksesta vietiin 1 ruoka- ja juomarivi Keittiö-välilehdelle.",
   "offers.confirmedKitchenSent": "Tarjouksesta vietiin {count} ruoka- ja juomariviä Keittiö-välilehdelle.",
   "offers.confirmedNoKitchen": "Tarjouksessa ei ollut ruokia eikä juomia, joten tehtiin tavallinen varaus eikä Keittiö-välilehdelle viety mitään.",
   "offers.priceReviewTitle": "Tarkista hinnat",
@@ -8090,6 +8093,7 @@ const sv: TranslationKeys = {
   "offers.confirmedSuccess": "Erbjudande bekräftat",
   "offers.confirmedWithoutPrice": "Vissa bokningar sparades utan pris. Lägg till priset innan du fakturerar dem.",
   "offers.kitchenOrdersFailed": "Bokningarna sparades, men menyn kunde inte skickas till köket. Lägg till den i Kök-fliken.",
+  "offers.confirmedKitchenSentOne": "1 mat- och dryckesrad från erbjudandet skickades till Kök-fliken.",
   "offers.confirmedKitchenSent": "{count} mat- och dryckesrader från erbjudandet skickades till Kök-fliken.",
   "offers.confirmedNoKitchen": "Erbjudandet hade ingen mat eller dryck, så en vanlig bokning skapades och inget skickades till Kök-fliken.",
   "offers.priceReviewTitle": "Kontrollera priserna",
