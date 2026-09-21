@@ -127,7 +127,7 @@ describe("CORS Origin Validation - Security Regression Tests", () => {
     it("no idle timeout is enforced (users stay signed in until they sign out)", async () => {
       const fs = await import("fs");
       const src = await fs.promises.readFile(
-        "src/contexts/AuthContext.tsx",
+        "src/contexts/AuthContext/AuthProvider.tsx",
         "utf8",
       );
       expect(src).not.toMatch(/IDLE_TIMEOUT_MS/);

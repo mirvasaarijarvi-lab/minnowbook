@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useI18n } from "@/contexts/I18nContext";
 import type { Language } from "@/i18n/translations";
+import { BASE_URL, LANGUAGES, OG_LOCALES, localizedUrl } from "@/lib/seo-urls";
 
 interface SEOHeadProps {
   title: string;
@@ -17,23 +18,6 @@ interface SEOHeadProps {
   ogDescription?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
-
-const BASE_URL = "https://mimmobook.com";
-
-/** Languages the marketing pages are published in. English is the default. */
-const LANGUAGES: Language[] = ["en", "fi", "sv"];
-const OG_LOCALES: Record<Language, string> = {
-  en: "en_GB",
-  fi: "fi_FI",
-  sv: "sv_SE",
-};
-
-/**
- * Absolute URL of a page in a given language. English is served on the bare
- * path; Finnish and Swedish add ?lang=, which I18nProvider honours.
- */
-export const localizedUrl = (path: string, lang: Language) =>
-  lang === "en" ? `${BASE_URL}${path}` : `${BASE_URL}${path}?lang=${lang}`;
 
 const SEOHead = ({
   title,
@@ -181,79 +165,3 @@ const SEOHead = ({
 };
 
 export default SEOHead;
-
-// Reusable JSON-LD helpers
-export const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "MimmoBook",
-  url: "https://mimmobook.com",
-  logo: "https://mimmobook.com/logos/logo-color-large.png",
-  description:
-    "MimmoBook is a SaaS reservation management platform for restaurants, venues, hotels, and guesthouses.",
-  sameAs: [],
-  address: {
-    "@type": "PostalAddress",
-    addressCountry: "FI",
-  },
-  contactPoint: [
-    {
-      "@type": "ContactPoint",
-      contactType: "customer support",
-      url: "https://mimmobook.com/support",
-      email: "support@mimmobook.com",
-      availableLanguage: ["English", "Finnish", "Swedish"],
-    },
-    {
-      "@type": "ContactPoint",
-      contactType: "sales",
-      url: "https://mimmobook.com/pricing",
-      email: "sales@mimmobook.com",
-      availableLanguage: ["English", "Finnish", "Swedish"],
-    },
-  ],
-};
-
-export const softwareSchema = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "MimmoBook",
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web",
-  url: "https://mimmobook.com",
-  description:
-    "Cloud-based reservation management for restaurants, venues, hotels and guesthouses. Multi-site support, branded booking pages, automated emails, team management and real-time reporting.",
-  offers: {
-    "@type": "AggregateOffer",
-    priceCurrency: "EUR",
-    lowPrice: "29",
-    highPrice: "149",
-    offerCount: "3",
-  },
-  featureList:
-    "Online reservations, Multi-site management, Branded booking pages, Automated emails, Team roles & permissions, Reports & analytics, Discount codes, Catering & popup support",
-};
-
-export const faqSchema = (items: { question: string; answer: string }[]) => ({
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: items.map((item) => ({
-    "@type": "Question",
-    name: item.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: item.answer,
-    },
-  })),
-});
-
-export const breadcrumbSchema = (items: { name: string; url: string }[]) => ({
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: items.map((item, i) => ({
-    "@type": "ListItem",
-    position: i + 1,
-    name: item.name,
-    item: item.url,
-  })),
-});

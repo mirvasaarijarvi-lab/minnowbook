@@ -1,9 +1,10 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, cleanup } from "@testing-library/react";
-import ConfirmationEmailPreview, {
+import ConfirmationEmailPreview from "@/components/ConfirmationEmailPreview";
+import {
   isPersistedPublicBrandingUrl,
   SIGNED_URL_MARKERS,
-} from "@/components/ConfirmationEmailPreview";
+} from "@/lib/persisted-branding-url";
 
 /**
  * Contract test: ConfirmationEmailPreview MUST embed branding via a persisted

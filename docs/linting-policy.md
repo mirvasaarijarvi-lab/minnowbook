@@ -7,12 +7,12 @@ narrow, justified and written down here.
 
 ## Always enforced
 
-| Rule | Level | Why |
-| --- | --- | --- |
-| `react-hooks/rules-of-hooks` | error | Conditional hook calls corrupt React state. |
-| `react-hooks/exhaustive-deps` | error | Missing dependencies produce stale reservations, prices and availability data. |
-| `no-restricted-imports` (`server-only`) | error | TanStack Start uses `*.server.ts`, not the Next.js package. |
-| `prettier/prettier` | error | Formatting stays mechanical, not reviewed by hand. |
+| Rule                                    | Level | Why                                                                            |
+| --------------------------------------- | ----- | ------------------------------------------------------------------------------ |
+| `react-hooks/rules-of-hooks`            | error | Conditional hook calls corrupt React state.                                    |
+| `react-hooks/exhaustive-deps`           | error | Missing dependencies produce stale reservations, prices and availability data. |
+| `no-restricted-imports` (`server-only`) | error | TanStack Start uses `*.server.ts`, not the Next.js package.                    |
+| `prettier/prettier`                     | error | Formatting stays mechanical, not reviewed by hand.                             |
 
 These are never disabled by a file-scoped block. When a dependency genuinely
 must be excluded, use a single inline exception at the call site with a comment
@@ -32,35 +32,37 @@ Current inline hook exceptions:
 - `src/components/dashboard/OpeningHoursSettings.tsx` - depends on a derived
   `reservationTypesKey` string instead of the array identity.
 
-## Targeted exception: `react-refresh/only-export-components`
+## `react-refresh/only-export-components`
 
-This rule is advisory. It warns when a module exports something besides a
-component, because React Fast Refresh then falls back to a full page reload for
-that module during development. It says nothing about runtime correctness.
+This rule warns when a module exports something besides a component, because
+React Fast Refresh then falls back to a full page reload for that module during
+development.
 
-Some modules intentionally co-locate non-component exports. Splitting them would
-add indirection without improving the product, so the rule is turned off for
-exactly these paths in `eslint.config.js`:
+There is no longer any file-scoped exception block for it. Non-component
+exports live in their own modules instead:
 
-| Path | Intentional co-located export |
-| --- | --- |
-| `src/components/ui/**/*.tsx` | shadcn variant maps (`buttonVariants`) and small helpers shipped with each primitive. |
-| `src/contexts/**/*.tsx` | the context object and its `use*` hook next to the provider. |
-| `src/routes/**/*.tsx` | TanStack `Route` objects, `loader`s and `head()` metadata required to live in the route file. |
-| `src/lib/router-compat.tsx` | router compatibility helpers plus the wrapper component. |
-| `src/components/SEOHead.tsx` | shared metadata builders used by routes and tests. |
-| `src/components/CookieConsent.tsx` | consent read/write helpers used outside React. |
-| `src/components/ConfirmationEmailPreview.tsx` | email template helpers reused by the mail pipeline. |
+| Module                                                                           | Non-component exports moved out of it                                                                                                                              |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/components/ui/button.tsx`, `badge.tsx`, `toggle.tsx`, `navigation-menu.tsx` | variant maps in sibling `*-variants.ts` modules.                                                                                                                   |
+| `src/components/ui/form.tsx`, `sidebar.tsx`                                      | context objects, constants and `useFormField` / `useSidebar` in sibling `*-context.ts` modules.                                                                    |
+| `src/components/ui/sonner.tsx`                                                   | `toast` is imported from the `sonner` package directly.                                                                                                            |
+| `src/contexts/AuthContext/`, `I18nContext/`, `ImpersonationContext/`             | directories with `context.ts` (context object, types, hooks), a provider component file and an `index.ts` barrel, so `@/contexts/...` import paths stay unchanged. |
+| `src/lib/router-compat/`                                                         | `hooks.ts`, `components.tsx`, `internal.ts` plus an `index.ts` barrel.                                                                                             |
+| `src/components/SEOHead.tsx`                                                     | metadata builders in `src/lib/seo-urls.ts` and `src/lib/seo-schemas.ts`.                                                                                           |
+| `src/components/CookieConsent.tsx`                                               | `openCookieSettings` in `src/lib/cookie-consent.ts`.                                                                                                               |
+| `src/components/ConfirmationEmailPreview.tsx`                                    | branding-URL helpers in `src/lib/persisted-branding-url.ts`.                                                                                                       |
 
-Rules for changing that list:
+The only remaining exception is an inline, justified file-level disable in
+`src/routes/__root.tsx`: TanStack Start requires the root `Route` object to sit
+in the same file as the shell, root, not-found and error components.
 
-1. Disable only `react-refresh/only-export-components`. Never add a
-   `react-hooks` entry to that block.
-2. Add a path only for a genuinely intentional co-located export, never to
-   silence a fixable warning.
-3. Add the path to the table above in the same change.
-4. Prefer moving the helper into a plain `.ts` module when it has no reason to
-   sit next to the component.
+Rules for new exceptions:
+
+1. Move the non-component export into a plain `.ts` module, or use a barrel
+   directory when many call sites import the existing path.
+2. Reach for an inline `eslint-disable` only when the framework requires the
+   co-located export, and state the reason in the comment.
+3. Never add a file-scoped block that relaxes a `react-hooks` rule.
 
 ## Ignored paths
 

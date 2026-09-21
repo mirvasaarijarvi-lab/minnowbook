@@ -15,10 +15,8 @@ import MarketingFooter from "@/components/MarketingFooter";
 import SupportChatWidget from "@/components/SupportChatWidget";
 import ServiceWorkflowExamples from "@/components/ServiceWorkflowExamples";
 import TradeCallsToAction from "@/components/TradeCallsToAction";
-import SEOHead, {
-  organizationSchema,
-  breadcrumbSchema,
-} from "@/components/SEOHead";
+import SEOHead from "@/components/SEOHead";
+import { organizationSchema, breadcrumbSchema } from "@/lib/seo-schemas";
 import { useT, useLanguage } from "@/contexts/I18nContext";
 
 const useCases = [

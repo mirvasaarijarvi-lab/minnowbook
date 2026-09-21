@@ -18,11 +18,12 @@ import heroBg from "@/assets/hero-bg.png";
 import ctaBg from "@/assets/cta-bg.png";
 import { useT } from "@/contexts/I18nContext";
 import { TranslationKey } from "@/i18n/translations";
-import SEOHead, {
+import SEOHead from "@/components/SEOHead";
+import {
   organizationSchema,
   softwareSchema,
   faqSchema,
-} from "@/components/SEOHead";
+} from "@/lib/seo-schemas";
 import { siteOrigin } from "@/lib/site-origin";
 
 const featureKeys: {

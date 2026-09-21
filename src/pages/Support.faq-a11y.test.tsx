@@ -19,6 +19,8 @@ import Support from "./Support";
 // FAQ accordion semantics.
 vi.mock("@/components/SEOHead", () => ({
   default: () => null,
+}));
+vi.mock("@/lib/seo-schemas", () => ({
   breadcrumbSchema: () => ({}),
 }));
 vi.mock("@/components/MarketingHeader", () => ({ default: () => null }));

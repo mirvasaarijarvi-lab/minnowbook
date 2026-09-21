@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { render, cleanup } from "@testing-library/react";
-import SEOHead, { localizedUrl } from "./SEOHead";
+import SEOHead from "./SEOHead";
+import { localizedUrl } from "@/lib/seo-urls";
 import { I18nProvider } from "@/contexts/I18nContext";
 
 const renderHead = (lang: "en" | "fi" | "sv") => {

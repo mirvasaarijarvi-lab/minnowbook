@@ -1,65 +1,15 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-  ReactNode,
-} from "react";
+import { useEffect, useState, useRef, useCallback, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 import { gtm } from "@/lib/gtm";
-
-interface SubscriptionInfo {
-  subscribed: boolean;
-  tier: string | null;
-  subscriptionEnd: string | null;
-  subscriptionStatus: string | null;
-}
-
-/**
- * Reasons why the app may intentionally call `signOut`. Every caller MUST pass
- * one of these so we can distinguish a *user-initiated* logout from a
- * *background* `SIGNED_OUT` event emitted by the Supabase SDK (e.g. a failed
- * silent token refresh, a tab waking up after a long sleep, etc.).
- *
- * Sessions must persist until the user explicitly logs out, so background
- * `SIGNED_OUT` events that arrive without one of these reasons are logged as
- * unexpected and surface in monitoring.
- */
-export type SignOutReason =
-  "user_logout" | "mfa_cancel" | "no_tenant" | "corrupted_session";
-
-interface AuthContextType {
-  session: Session | null;
-  user: User | null;
-  loading: boolean;
-  subscription: SubscriptionInfo;
-  refreshSubscription: () => Promise<void>;
-  /** Sign the user out. A reason is REQUIRED so we can audit the call site. */
-  signOut: (reason: SignOutReason) => Promise<void>;
-}
-
-const defaultSubscription: SubscriptionInfo = {
-  subscribed: false,
-  tier: null,
-  subscriptionEnd: null,
-  subscriptionStatus: null,
-};
-
-const AuthContext = createContext<AuthContextType>({
-  session: null,
-  user: null,
-  loading: true,
-  subscription: defaultSubscription,
-  refreshSubscription: async () => {},
-  signOut: async () => {},
-});
-
-export const useAuth = () => useContext(AuthContext);
+import {
+  AuthContext,
+  defaultSubscription,
+  type SignOutReason,
+  type SubscriptionInfo,
+} from "./context";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);

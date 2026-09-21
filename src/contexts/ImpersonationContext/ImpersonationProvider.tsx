@@ -1,49 +1,11 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useEffect,
-  ReactNode,
-} from "react";
+import { useState, useCallback, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-
-interface ImpersonationState {
-  tenantId: string | null;
-  tenantName: string | null;
-}
-
-interface ImpersonationContextType {
-  impersonating: ImpersonationState;
-  startImpersonation: (tenantId: string, tenantName: string) => void;
-  stopImpersonation: () => void;
-  isImpersonating: boolean;
-}
-
-const ImpersonationContext = createContext<ImpersonationContextType | null>(
-  null,
-);
-
-const STORAGE_KEY = "mimmobook-impersonation";
-
-function readStored(): ImpersonationState {
-  if (typeof window === "undefined")
-    return { tenantId: null, tenantName: null };
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { tenantId: null, tenantName: null };
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.tenantId === "string") {
-      return {
-        tenantId: parsed.tenantId,
-        tenantName: parsed.tenantName ?? null,
-      };
-    }
-  } catch {
-    /* ignore */
-  }
-  return { tenantId: null, tenantName: null };
-}
+import {
+  ImpersonationContext,
+  STORAGE_KEY,
+  readStored,
+  type ImpersonationState,
+} from "./context";
 
 /** Fire-and-forget audit log entry for impersonation events */
 async function logImpersonationEvent(
@@ -138,21 +100,4 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
       {children}
     </ImpersonationContext.Provider>
   );
-}
-
-export function useImpersonation() {
-  const ctx = useContext(ImpersonationContext);
-  if (!ctx) {
-    // Outside the provider (e.g. isolated component tests, email-preview
-    // rendering): fall back to a no-op state so leaf components that only
-    // need labels don't crash. Real app code is always wrapped by
-    // <ImpersonationProvider> at the root, so this branch is test-only.
-    return {
-      impersonating: { tenantId: null, tenantName: null } as ImpersonationState,
-      startImpersonation: () => {},
-      stopImpersonation: () => {},
-      isImpersonating: false,
-    } satisfies ImpersonationContextType;
-  }
-  return ctx;
 }

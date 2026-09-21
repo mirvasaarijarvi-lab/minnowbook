@@ -5,7 +5,7 @@
  * render the exact same output that ships to production.
  */
 
-import { organizationSchema, breadcrumbSchema } from "@/components/SEOHead";
+import { organizationSchema, breadcrumbSchema } from "@/lib/seo-schemas";
 import ogComparisonAsset from "@/assets/og-comparison-resy-tock-mimmobook.jpg.asset.json";
 
 export interface BlogAuthor {

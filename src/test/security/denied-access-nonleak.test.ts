@@ -288,7 +288,7 @@ describe("audit events for refused access", () => {
    */
   const ALLOWED_AUDIT_WRITERS = [
     "supabase/functions/log-forbidden-access/index.ts",
-    "src/contexts/ImpersonationContext.tsx",
+    "src/contexts/ImpersonationContext/ImpersonationProvider.tsx",
   ];
 
   it("only the reviewed writers insert audit rows directly", () => {
@@ -342,7 +342,10 @@ describe("audit events for refused access", () => {
 
   it("the impersonation audit write is tenant-scoped and RLS-bound", () => {
     const src = readFileSync(
-      resolve(process.cwd(), "src/contexts/ImpersonationContext.tsx"),
+      resolve(
+        process.cwd(),
+        "src/contexts/ImpersonationContext/ImpersonationProvider.tsx",
+      ),
       "utf-8",
     );
     // Uses the user-scoped client (RLS applies), never a service role.

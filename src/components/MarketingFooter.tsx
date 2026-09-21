@@ -1,7 +1,7 @@
 import { Link } from "@/lib/router-compat";
 import Logo from "@/components/Logo";
 import { useT } from "@/contexts/I18nContext";
-import { openCookieSettings } from "@/components/CookieConsent";
+import { openCookieSettings } from "@/lib/cookie-consent";
 import aiBadge from "@/assets/ai-by-cmimmio.png.asset.json";
 
 const MarketingFooter = () => {

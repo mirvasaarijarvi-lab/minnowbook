@@ -4,7 +4,8 @@ import { ArrowLeft, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/Logo";
 import MarketingFooter from "@/components/MarketingFooter";
-import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
+import SEOHead from "@/components/SEOHead";
+import { breadcrumbSchema } from "@/lib/seo-schemas";
 import ProtectedEmail from "@/components/ProtectedEmail";
 
 const DPA = () => {
