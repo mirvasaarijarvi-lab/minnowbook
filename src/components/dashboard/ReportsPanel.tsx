@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
+import { logReservationAccess } from "@/lib/reservationAccessLog";
 import { useUserSites } from "@/hooks/useUserSites";
 import { useTierGate } from "@/hooks/useTierGate";
 import { useT, useLanguage } from "@/contexts/I18nContext";
@@ -432,6 +433,13 @@ const ReportsPanel = () => {
       query = applySiteFilter(query, effectiveSiteId);
       const { data, error } = await query;
       if (error) throw error;
+      // Security telemetry: how much reservation data this account read.
+      logReservationAccess({
+        tenantId,
+        action: "view",
+        recordCount: data?.length ?? 0,
+        siteId: effectiveSiteId ?? null,
+      });
       return (data ?? []) as (ReservationRow & { site_id?: string | null })[];
     },
     enabled: !!tenantId,
