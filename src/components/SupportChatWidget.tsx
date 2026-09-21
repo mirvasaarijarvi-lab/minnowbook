@@ -126,7 +126,7 @@ const SupportChatWidget = ({
       viewMode === "requests",
   });
 
-  const markResponsesRead = async () => {
+  const markResponsesRead = useCallback(async () => {
     if (!tenantId || !session?.user?.id || unreadCount === 0) return;
     await supabase
       .from("support_requests")
@@ -136,7 +136,7 @@ const SupportChatWidget = ({
       .eq("status", "fixed")
       .eq("is_read_by_user", false);
     queryClient.invalidateQueries({ queryKey: ["unread-support-responses"] });
-  };
+  }, [tenantId, session?.user?.id, unreadCount, queryClient]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -149,7 +149,7 @@ const SupportChatWidget = ({
     if (open && unreadCount > 0) {
       markResponsesRead();
     }
-  }, [open]);
+  }, [open, unreadCount, markResponsesRead]);
 
   const quickGuides = GUIDE_KEYS.map((n) => ({
     q: t(`aid.guideQ${n}` as TranslationKey),
