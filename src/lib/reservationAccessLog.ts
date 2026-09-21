@@ -27,15 +27,18 @@ export const logReservationAccess = ({
 }: LogArgs): void => {
   if (!tenantId) return;
 
-  void supabase
-    .rpc("log_reservation_access", {
-      p_tenant_id: tenantId,
-      p_action: action,
-      p_record_count: Math.max(0, Math.round(recordCount)),
-      p_site_id: siteId,
-    })
-    .then(() => undefined)
-    .catch(() => undefined);
+  void (async () => {
+    try {
+      await supabase.rpc("log_reservation_access", {
+        p_tenant_id: tenantId,
+        p_action: action,
+        p_record_count: Math.max(0, Math.round(recordCount)),
+        p_site_id: siteId ?? undefined,
+      });
+    } catch {
+      // Telemetry is best effort and never surfaced to staff.
+    }
+  })();
 };
 
 /**
@@ -48,14 +51,17 @@ export const recordAuthFailure = (
   reason: string,
   tenantSlug?: string | null,
 ): void => {
-  void supabase
-    .rpc("record_auth_failure", {
-      p_email: email,
-      p_reason: reason.slice(0, 200),
-      p_tenant_slug: tenantSlug ?? null,
-      p_user_agent:
-        typeof navigator === "undefined" ? null : navigator.userAgent,
-    })
-    .then(() => undefined)
-    .catch(() => undefined);
+  void (async () => {
+    try {
+      await supabase.rpc("record_auth_failure", {
+        p_email: email,
+        p_reason: reason.slice(0, 200),
+        p_tenant_slug: tenantSlug ?? undefined,
+        p_user_agent:
+          typeof navigator === "undefined" ? undefined : navigator.userAgent,
+      });
+    } catch {
+      // Never block or reveal anything on the sign-in screen.
+    }
+  })();
 };
