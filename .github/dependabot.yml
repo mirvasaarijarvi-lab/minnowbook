@@ -9,8 +9,19 @@ updates:
     # NOTE: no `labels:` here on purpose. Dependabot errors on every PR when a
     # label does not exist in the repo, and this repo has no dependency labels.
 
-    # Group routine updates so security PRs stand out on their own
+    # Group routine updates so security PRs stand out on their own.
+    # Every group lands as ONE pull request, which is what the
+    # dependency-audit checks in .github/workflows/security-scan.yml grade:
+    # the gate job (high/critical) plus the "Dependency audit report" job,
+    # which diffs the PR against the base branch and annotates only the
+    # advisories the update itself introduces. Neither job needs repository
+    # secrets, so they run normally on Dependabot pull requests.
     groups:
+      # @tanstack router/start packages must always move together; a
+      # partial update breaks the build.
+      tanstack:
+        patterns:
+          - "@tanstack/*"
       yaml-parsers:
         patterns:
           - "js-yaml"
@@ -18,21 +29,41 @@ updates:
           - "@types/js-yaml"
           - "@stoplight/yaml*"
           - "yaml-ast-parser"
+      # Build/test toolchain moves as one PR so a Vite bump and its plugins
+      # are audited and built together rather than in sequence.
+      build-toolchain:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "vitest"
+          - "@vitest/*"
+          - "typescript"
+          - "jsdom"
+      linting:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "eslint-plugin-*"
+          - "prettier"
+          - "globals"
+      types:
+        patterns:
+          - "@types/*"
+        exclude-patterns:
+          - "@types/js-yaml"
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
         exclude-patterns:
-          - "react-router"
-          - "react-router-dom"
           - "js-yaml"
           - "yaml"
-    # Honor the strict pin on react-router / react-router-dom (6.28.0)
     ignore:
+      # react-router / react-router-dom are no longer dependencies: the app
+      # routes entirely through @tanstack/react-router. Blocked here so a
+      # transitive reintroduction never opens an update PR for them.
       - dependency-name: "react-router"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "react-router-dom"
-        update-types: ["version-update:semver-major", "version-update:semver-minor"]
       - dependency-name: "react"
         update-types: ["version-update:semver-major"]
       - dependency-name: "react-dom"
