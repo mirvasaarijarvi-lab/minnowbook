@@ -8,7 +8,10 @@ vi.mock("@/integrations/supabase/client", () => ({
   },
 }));
 
-import { logReservationAccess, recordAuthFailure } from "./reservationAccessLog";
+import {
+  logReservationAccess,
+  recordAuthFailure,
+} from "./reservationAccessLog";
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 

@@ -1,6 +1,9 @@
 import { ShieldAlert, KeyRound, Eye, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSecurityAlerts, type SecurityAlert } from "@/hooks/useSecurityAlerts";
+import {
+  useSecurityAlerts,
+  type SecurityAlert,
+} from "@/hooks/useSecurityAlerts";
 
 const severityStyles: Record<SecurityAlert["severity"], string> = {
   high: "border-destructive/50 bg-destructive/5 text-destructive",
