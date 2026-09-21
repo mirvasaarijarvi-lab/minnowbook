@@ -6,14 +6,15 @@ name: Test CI (test:ci)
 # fast on the first failing suite.
 
 concurrency:
-  # Only cancel an in-progress run when a NEW commit lands on the SAME PR
-  # (github.head_ref is set on pull_request events). For pushes to main and
-  # for workflow_dispatch we use github.run_id, which is unique per run, so
-  # nothing ever cancels them mid-flight. This preserves trustworthy CI
-  # history on protected branches while still avoiding wasted minutes when
-  # a contributor force-pushes to their PR.
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Supersede in-progress runs for the SAME branch (PR head or pushed ref).
+  # Rapid successive commits on main used to each start a ~30-45 min run that
+  # nothing could cancel, so dozens of runs queued behind a single hosted
+  # runner and the workflow looked permanently stuck. Only the newest commit
+  # on a branch is meaningful, so older runs for that branch are cancelled.
+  # Manual (workflow_dispatch) runs keep a unique group so they never get
+  # cancelled by an unrelated push.
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 on:
   push:
