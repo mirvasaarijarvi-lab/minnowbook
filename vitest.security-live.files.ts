@@ -93,6 +93,7 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/resource-images-member-policy-role-scope.test.ts",
   "src/test/security/role-definition-hierarchy-guard.test.ts",
 
+  "src/test/security/security-monitoring-tables-isolation.test.ts",
   "src/test/security/session-persistence.test.tsx",
   "src/test/security/storage-offer-pdf-isolation.test.ts",
   "src/test/security/tenant-assets-private.test.ts",
