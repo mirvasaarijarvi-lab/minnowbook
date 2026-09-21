@@ -7,12 +7,12 @@ narrow, justified and written down here.
 
 ## Always enforced
 
-| Rule | Level | Why |
-| --- | --- | --- |
-| `react-hooks/rules-of-hooks` | error | Conditional hook calls corrupt React state. |
-| `react-hooks/exhaustive-deps` | error | Missing dependencies produce stale reservations, prices and availability data. |
-| `no-restricted-imports` (`server-only`) | error | TanStack Start uses `*.server.ts`, not the Next.js package. |
-| `prettier/prettier` | error | Formatting stays mechanical, not reviewed by hand. |
+| Rule                                    | Level | Why                                                                            |
+| --------------------------------------- | ----- | ------------------------------------------------------------------------------ |
+| `react-hooks/rules-of-hooks`            | error | Conditional hook calls corrupt React state.                                    |
+| `react-hooks/exhaustive-deps`           | error | Missing dependencies produce stale reservations, prices and availability data. |
+| `no-restricted-imports` (`server-only`) | error | TanStack Start uses `*.server.ts`, not the Next.js package.                    |
+| `prettier/prettier`                     | error | Formatting stays mechanical, not reviewed by hand.                             |
 
 These are never disabled by a file-scoped block. When a dependency genuinely
 must be excluded, use a single inline exception at the call site with a comment
@@ -41,16 +41,16 @@ development.
 There is no longer any file-scoped exception block for it. Non-component
 exports live in their own modules instead:
 
-| Module | Non-component exports moved out of it |
-| --- | --- |
-| `src/components/ui/button.tsx`, `badge.tsx`, `toggle.tsx`, `navigation-menu.tsx` | variant maps in sibling `*-variants.ts` modules. |
-| `src/components/ui/form.tsx`, `sidebar.tsx` | context objects, constants and `useFormField` / `useSidebar` in sibling `*-context.ts` modules. |
-| `src/components/ui/sonner.tsx` | `toast` is imported from the `sonner` package directly. |
-| `src/contexts/AuthContext/`, `I18nContext/`, `ImpersonationContext/` | directories with `context.ts` (context object, types, hooks), a provider component file and an `index.ts` barrel, so `@/contexts/...` import paths stay unchanged. |
-| `src/lib/router-compat/` | `hooks.ts`, `components.tsx`, `internal.ts` plus an `index.ts` barrel. |
-| `src/components/SEOHead.tsx` | metadata builders in `src/lib/seo-urls.ts` and `src/lib/seo-schemas.ts`. |
-| `src/components/CookieConsent.tsx` | `openCookieSettings` in `src/lib/cookie-consent.ts`. |
-| `src/components/ConfirmationEmailPreview.tsx` | branding-URL helpers in `src/lib/persisted-branding-url.ts`. |
+| Module                                                                           | Non-component exports moved out of it                                                                                                                              |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/components/ui/button.tsx`, `badge.tsx`, `toggle.tsx`, `navigation-menu.tsx` | variant maps in sibling `*-variants.ts` modules.                                                                                                                   |
+| `src/components/ui/form.tsx`, `sidebar.tsx`                                      | context objects, constants and `useFormField` / `useSidebar` in sibling `*-context.ts` modules.                                                                    |
+| `src/components/ui/sonner.tsx`                                                   | `toast` is imported from the `sonner` package directly.                                                                                                            |
+| `src/contexts/AuthContext/`, `I18nContext/`, `ImpersonationContext/`             | directories with `context.ts` (context object, types, hooks), a provider component file and an `index.ts` barrel, so `@/contexts/...` import paths stay unchanged. |
+| `src/lib/router-compat/`                                                         | `hooks.ts`, `components.tsx`, `internal.ts` plus an `index.ts` barrel.                                                                                             |
+| `src/components/SEOHead.tsx`                                                     | metadata builders in `src/lib/seo-urls.ts` and `src/lib/seo-schemas.ts`.                                                                                           |
+| `src/components/CookieConsent.tsx`                                               | `openCookieSettings` in `src/lib/cookie-consent.ts`.                                                                                                               |
+| `src/components/ConfirmationEmailPreview.tsx`                                    | branding-URL helpers in `src/lib/persisted-branding-url.ts`.                                                                                                       |
 
 The only remaining exception is an inline, justified file-level disable in
 `src/routes/__root.tsx`: TanStack Start requires the root `Route` object to sit
