@@ -51,11 +51,58 @@ describe("pull requests that cannot read repository secrets", () => {
       RLS_GATE_SECRETS_UNAVAILABLE: "1",
     });
     expect(r.code).toBe(0);
-    expect(r.out).toContain(
-      "::warning title=RLS/CORS gate secrets unavailable",
-    );
+    expect(r.out).toContain("::warning title=RLS/CORS credential checks");
+    expect(r.out).toContain("RLS/CORS credential checks were skipped");
     expect(r.out).not.toContain("::error");
     expect(r.outputs).toContain("mode=skip");
+  });
+
+  it("names the pull request, branch, event and actor in the warning", () => {
+    const r = run({
+      GITHUB_EVENT_NAME: "pull_request",
+      GITHUB_ACTOR: "dependabot[bot]",
+      GITHUB_REPOSITORY: "acme/minnowbook",
+      GITHUB_REF_NAME: "91/merge",
+      GITHUB_HEAD_REF: "dependabot/npm_and_yarn/zod-4.6.5",
+      GITHUB_RUN_ID: "1234567890",
+      RLS_GATE_SECRETS_UNAVAILABLE: "1",
+    });
+    expect(r.code).toBe(0);
+    expect(r.out).toContain("pull request acme/minnowbook#91");
+    expect(r.out).toContain("branch dependabot/npm_and_yarn/zod-4.6.5");
+    expect(r.out).toContain("event pull_request");
+    expect(r.out).toContain("actor dependabot[bot]");
+    expect(r.out).toContain("run 1234567890");
+  });
+
+  it("explains the Dependabot cause and that nothing is misconfigured", () => {
+    const r = run({
+      GITHUB_EVENT_NAME: "pull_request",
+      GITHUB_ACTOR: "dependabot[bot]",
+      RLS_GATE_SECRETS_UNAVAILABLE: "1",
+    });
+    expect(r.out).toContain(
+      "Dependabot pull requests run without access to repository secrets",
+    );
+    expect(r.out).toContain("not a credential failure");
+    expect(r.out).toContain("only the offline CORS checks gate this run");
+  });
+
+  it("explains the empty-input cause when no flag and no bot actor are present", () => {
+    const r = run({
+      GITHUB_EVENT_NAME: "pull_request",
+      GITHUB_ACTOR: "some-maintainer",
+    });
+    expect(r.out).toContain("Every credential input arrived empty");
+    expect(r.out).toContain("actor some-maintainer");
+  });
+
+  it("omits context it was not given instead of printing empty values", () => {
+    const r = run({ GITHUB_EVENT_NAME: "pull_request" });
+    expect(r.code).toBe(0);
+    expect(r.out).toContain("Context: event pull_request.");
+    expect(r.out).not.toContain("branch ,");
+    expect(r.out).not.toContain("actor .");
   });
 
   it("skips a re-run of such a pull request, where the actor is a human", () => {
