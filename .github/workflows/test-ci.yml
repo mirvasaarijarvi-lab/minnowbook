@@ -216,7 +216,11 @@ jobs:
         run: bunx vite build
 
       - name: Lint (ESLint)
-        run: bun run lint
+        # Hard-bounded: ESLint on this repo takes well under a minute. If it
+        # ever exceeds 10 minutes something is walking files it should not
+        # (e.g. the restored .deno-cache), and we want a fast, readable
+        # failure instead of a step that looks stuck.
+        run: timeout 600 bun run lint
 
       - name: Typecheck (tsc --noEmit)
         run: bunx tsc --noEmit
