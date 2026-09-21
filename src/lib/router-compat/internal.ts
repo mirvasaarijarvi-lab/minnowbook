@@ -7,7 +7,7 @@ import { createContext, type ReactNode } from "react";
 
 // ---------- shared URL parsing ----------
 
-function parseTo(to: string): {
+export function parseTo(to: string): {
   pathname: string;
   search?: Record<string, string>;
   hash?: string;
@@ -36,20 +36,6 @@ export type ShimRouteProps = {
   children?: ReactNode;
 };
 
-// instead of the generated app route tree.
-
-const ShimParamsContext = createContext<Record<string, string> | null>(null);
-
-type ShimRouteProps = {
-  path?: string;
-  element?: ReactNode;
-  index?: boolean;
-  children?: ReactNode;
-};
-
-export function Route(_props: ShimRouteProps): null {
-  return null;
-}
 
 export function matchPath(
   pattern: string,
