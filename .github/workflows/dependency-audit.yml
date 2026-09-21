@@ -101,8 +101,8 @@ jobs:
       checks: write
     steps:
       - name: Checkout
-        # actions/checkout@v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
           # Need history so we can fetch the branch tip and compare it
@@ -692,8 +692,8 @@ jobs:
       - name: Upload npm SARIF to GitHub code scanning
         if: always() && (steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm') && hashFiles('npm-audit.sarif') != '' && steps.validate_npm_sarif.outcome == 'success'
         continue-on-error: true
-        # github/codeql-action/upload-sarif@v3.27.5
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63
+        # github/codeql-action/upload-sarif@v4.38.1
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd
         with:
           sarif_file: npm-audit.sarif
           category: npm-audit
@@ -710,8 +710,8 @@ jobs:
       - name: Upload pnpm SARIF to GitHub code scanning
         if: always() && steps.detect.outputs.manager == 'pnpm' && hashFiles('pnpm-audit.sarif') != '' && steps.validate_pnpm_sarif.outcome == 'success'
         continue-on-error: true
-        # github/codeql-action/upload-sarif@v3.27.5
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63
+        # github/codeql-action/upload-sarif@v4.38.1
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd
         with:
           sarif_file: pnpm-audit.sarif
           category: pnpm-audit
@@ -738,8 +738,8 @@ jobs:
       - name: Upload yarn SARIF to GitHub code scanning
         if: always() && steps.detect.outputs.manager == 'yarn' && hashFiles('yarn-audit.sarif') != '' && steps.validate_yarn_sarif.outcome == 'success'
         continue-on-error: true
-        # github/codeql-action/upload-sarif@v3.27.5
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63
+        # github/codeql-action/upload-sarif@v4.38.1
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd
         with:
           sarif_file: yarn-audit.sarif
           category: yarn-audit
