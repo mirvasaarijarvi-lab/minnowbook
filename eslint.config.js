@@ -87,12 +87,21 @@ export default tseslint.config(
     },
   },
   {
+    // Targeted exception, documented in docs/linting-policy.md.
+    //
     // These modules intentionally export helpers, hooks, variant maps or
     // route/loader objects next to their component. Splitting them would only
     // trade a working structure for extra indirection: Fast Refresh simply
     // does a full reload for these files during development, which is
     // acceptable, so the advisory rule is disabled here instead of left as
     // permanent noise in every lint run.
+    //
+    // Scope rules:
+    //   1. Only `react-refresh/only-export-components` is disabled here.
+    //   2. Hook rules (rules-of-hooks, exhaustive-deps) stay errors in these
+    //      files and in CI; this block must never add a react-hooks entry.
+    //   3. New paths are added only for an intentional co-located export, with
+    //      a matching entry in docs/linting-policy.md.
     files: [
       "src/components/ui/**/*.tsx",
       "src/contexts/**/*.tsx",
