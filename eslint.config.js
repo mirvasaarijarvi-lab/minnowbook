@@ -41,6 +41,13 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // Hook correctness is a CI gate, never an advisory warning. Stale or
+      // missing dependencies cause real data bugs, so these stay at "error"
+      // everywhere and are never relaxed by the per-file blocks below.
+      // Individual, justified exceptions use an inline eslint-disable comment
+      // that states why the dependency is excluded. See docs/linting-policy.md.
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "error",
       "no-restricted-imports": [
         "error",
         {
