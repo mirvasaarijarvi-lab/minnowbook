@@ -9,8 +9,9 @@ const TENANT = "11111111-2222-3333-4444-555555555555";
 
 describe("buildResourceImageObjectKey", () => {
   it("builds a key from the tenant, a literal extension and a timestamp", () => {
-    expect(buildResourceImageObjectKey(TENANT, "image/jpeg", 1700000000000))
-      .toBe(`${TENANT}/resources/resource-1700000000000.jpg`);
+    expect(
+      buildResourceImageObjectKey(TENANT, "image/jpeg", 1700000000000),
+    ).toBe(`${TENANT}/resources/resource-1700000000000.jpg`);
   });
 
   it("maps every allowed type to a safe literal extension", () => {
