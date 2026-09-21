@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:cce12e87-ffa2-5823-9714-f97c72c7c1f6",
+  "serialNumber": "urn:uuid:24d2b6c5-4c86-5683-bebb-7dbfc46a6461",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-21T05:50:20Z",
+    "timestamp": "2026-09-21T05:56:03Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "97f240e81738ff21d762323e27fe222d718c2b11"
+          "value": "0c3cee549836a5b41f6d8ceb3ce2507115308a48"
         }
       ]
     }
@@ -332,27 +332,27 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.18",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.36",
       "type": "library",
       "name": "@tanstack/react-router",
-      "version": "1.170.18",
-      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.18",
+      "version": "1.170.36",
+      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.36",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.168.32",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.168.54",
       "type": "library",
       "name": "@tanstack/react-start",
-      "version": "1.168.32",
-      "purl": "pkg:npm/@tanstack%2Freact-start@1.168.32",
+      "version": "1.168.54",
+      "purl": "pkg:npm/@tanstack%2Freact-start@1.168.54",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.23",
+      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.38",
       "type": "library",
       "name": "@tanstack/router-plugin",
-      "version": "1.168.23",
-      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.23",
+      "version": "1.168.38",
+      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.38",
       "scope": "required"
     },
     {
