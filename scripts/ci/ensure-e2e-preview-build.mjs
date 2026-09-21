@@ -32,16 +32,43 @@ function installedVersion(pkg) {
   }
 }
 
-const reactVersion = installedVersion("react");
-const reactDomVersion = installedVersion("react-dom");
+function reactVersions() {
+  return [installedVersion("react"), installedVersion("react-dom")];
+}
+
+let [reactVersion, reactDomVersion] = reactVersions();
 
 if (reactVersion && reactDomVersion && reactVersion !== reactDomVersion) {
-  console.error(
+  // A stale or partially restored node_modules is a machine-state problem, not
+  // an app-code problem, so repair it once instead of failing the whole run.
+  console.warn(
     `[e2e] Incompatible React versions installed: react ${reactVersion} vs react-dom ${reactDomVersion}.\n` +
-      "[e2e] node_modules is out of step with the lockfile. Reinstall before running e2e:\n" +
-      "[e2e]   rm -rf node_modules && bun install --frozen-lockfile",
+      "[e2e] Repairing node_modules with a frozen install ...",
   );
-  process.exit(1);
+
+  const reinstall = spawnSync(
+    "bun",
+    ["install", "--frozen-lockfile", "--force"],
+    { stdio: "inherit", env: process.env },
+  );
+
+  [reactVersion, reactDomVersion] = reactVersions();
+
+  if (
+    reinstall.status !== 0 ||
+    !reactVersion ||
+    !reactDomVersion ||
+    reactVersion !== reactDomVersion
+  ) {
+    console.error(
+      `[e2e] Still incompatible after reinstall: react ${reactVersion} vs react-dom ${reactDomVersion}.\n` +
+        "[e2e] Run locally and commit the result:\n" +
+        "[e2e]   rm -rf node_modules bun.lock && bun install",
+    );
+    process.exit(1);
+  }
+
+  console.log(`[e2e] node_modules repaired, react ${reactVersion} matches react-dom.`);
 }
 
 const serverEntry = resolve(process.cwd(), "dist/server/server.js");
