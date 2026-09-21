@@ -142,7 +142,10 @@ export function buildPlan(name, options = {}) {
 /**
  * Presence-only environment report. Values are never read into the output.
  */
-export function checkEnvironment(env = process.env, inventory = loadInventory()) {
+export function checkEnvironment(
+  env = process.env,
+  inventory = loadInventory(),
+) {
   return inventory.secrets
     .filter((s) => s.kind !== "shared")
     .map((s) => {
