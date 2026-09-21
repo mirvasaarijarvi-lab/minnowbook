@@ -342,7 +342,10 @@ describe("audit events for refused access", () => {
 
   it("the impersonation audit write is tenant-scoped and RLS-bound", () => {
     const src = readFileSync(
-      resolve(process.cwd(), "src/contexts/ImpersonationContext/ImpersonationProvider.tsx"),
+      resolve(
+        process.cwd(),
+        "src/contexts/ImpersonationContext/ImpersonationProvider.tsx",
+      ),
       "utf-8",
     );
     // Uses the user-scoped client (RLS applies), never a service role.
