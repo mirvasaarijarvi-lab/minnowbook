@@ -239,6 +239,13 @@ const OperationsSheetPanel = () => {
       if (error) throw error;
 
       const reservations = (rows ?? []) as OpsReservation[];
+      // Security telemetry for unusual-access detection.
+      logReservationAccess({
+        tenantId,
+        action: "view",
+        recordCount: reservations.length,
+        siteId: selectedSiteId ?? null,
+      });
 
       const { data: orders } = await supabase
         .from("kitchen_orders")
