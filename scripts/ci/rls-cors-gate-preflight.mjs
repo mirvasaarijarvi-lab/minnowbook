@@ -162,8 +162,7 @@ const NOTHING_CONFIGURED =
 // empty set on any pull request as the structural skip it is. A push or a
 // protected-branch run that requires live coverage still fails loudly.
 const PR_EVENT = String(env.GITHUB_EVENT_NAME || "").startsWith("pull_request");
-const SECRETS_UNAVAILABLE =
-  !REQUIRE_LIVE && (FLAGGED_UNAVAILABLE || PR_EVENT);
+const SECRETS_UNAVAILABLE = !REQUIRE_LIVE && (FLAGGED_UNAVAILABLE || PR_EVENT);
 
 if (SECRETS_UNAVAILABLE && NOTHING_CONFIGURED) {
   log("");
@@ -177,7 +176,6 @@ if (SECRETS_UNAVAILABLE && NOTHING_CONFIGURED) {
   finish(0, "skip");
 }
 
-
 if (!URL_ || !ANON) {
   problem(
     "RLS/CORS gate cannot reach the project",
@@ -185,7 +183,6 @@ if (!URL_ || !ANON) {
   );
   finish(1, "denied");
 }
-
 
 // Shape checks: catch a misconfigured value before spending a network round
 // trip that would fail with an opaque 401 or DNS error deep in the logs.

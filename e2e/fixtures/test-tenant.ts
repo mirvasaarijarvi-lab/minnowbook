@@ -92,10 +92,7 @@ type Fixtures = {
  * Use `import { test, expect } from "../fixtures/test-tenant"` in specs to
  * get a `tenant` fixture wired to the same shared tenant_id everywhere.
  */
-/* eslint-disable react-hooks/rules-of-hooks
-   -- The `use`/`useFixture` parameter below is Playwright's fixture
-   callback, not React's `use` hook. Disabled file-wide as a belt-and-
-   suspenders alongside the e2e/** override in eslint.config.js. */
+
 export const test = base.extend<Fixtures>({
   // eslint-disable-next-line no-empty-pattern
   tenant: async ({}, use) => {
