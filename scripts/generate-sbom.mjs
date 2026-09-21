@@ -13,32 +13,22 @@
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { execSync } from "node:child_process";
 
 const ROOT = process.cwd();
 const pkg = JSON.parse(readFileSync(`${ROOT}/package.json`, "utf8"));
 
-function gitMeta() {
-  const safe = (cmd, fallback = "") => {
+// Lockfile contents, when present, so the digest changes whenever resolved
+// versions change. No git commands: CI's shallow clone reports different
+// commit metadata than a full checkout.
+function readLockfile() {
+  for (const name of ["bun.lock", "package-lock.json"]) {
     try {
-      return execSync(cmd, { stdio: ["ignore", "pipe", "ignore"] })
-        .toString()
-        .trim();
+      return readFileSync(`${ROOT}/${name}`, "utf8");
     } catch {
-      return fallback;
+      /* not present */
     }
-  };
-  // Use the commit that last touched dependency manifests so the SBOM
-  // is deterministic across re-runs that don't actually change deps.
-  const sha = safe(
-    "git log -n 1 --pretty=format:%H -- package.json bun.lock bun.lockb",
-    "unknown",
-  );
-  const isoTs = safe(
-    "git log -n 1 --pretty=format:%cI -- package.json bun.lock bun.lockb",
-    "1970-01-01T00:00:00Z",
-  );
-  return { sha, isoTs };
+  }
+  return "";
 }
 
 // Deterministic UUID v5-ish derivation from a stable string. Avoids
@@ -82,7 +72,12 @@ const components = Object.entries(allDeps)
     };
   });
 
-const meta = gitMeta();
+// Deterministic content digest of the dependency set. Replaces the old
+// git-derived timestamp/sha, which differed between a local checkout and
+// CI's shallow clone and made the committed SBOM look permanently stale.
+const depsDigest = createHash("sha256")
+  .update(JSON.stringify({ allDeps, lock: readLockfile() }))
+  .digest("hex");
 const stableSeed = JSON.stringify({
   name: pkg.name,
   version: pkg.version,
@@ -94,7 +89,6 @@ const sbom = {
   serialNumber: `urn:uuid:${deterministicUuid(stableSeed)}`,
   version: 1,
   metadata: {
-    timestamp: meta.isoTs,
     tools: [{ vendor: "MimmoBook", name: "generate-sbom", version: "1.0.0" }],
     component: {
       "bom-ref": `pkg:app/${pkg.name}@${pkg.version ?? "0.0.0"}`,
@@ -102,9 +96,10 @@ const sbom = {
       name: pkg.name,
       version: pkg.version ?? "0.0.0",
       description: pkg.description ?? "MimmoBook reservation management SaaS",
-      properties: [{ name: "git:sha", value: meta.sha }],
+      properties: [{ name: "dependencies:sha256", value: depsDigest }],
     },
   },
+
   components,
 };
 
