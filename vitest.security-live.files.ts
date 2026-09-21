@@ -34,6 +34,7 @@ export const LIVE_SECURITY_TESTS: string[] = [
   "src/test/security/billing-and-discount-role-matrix.test.ts",
   "src/test/security/reservations-anon-discount-malformed.test.ts",
   "src/test/security/reservations-anon-staff-only-fields.test.ts",
+  "src/test/security/reservations-anon-submission-scrub.test.ts",
   "src/test/security/reservations-malformed-discount-payloads.test.ts",
   "src/test/security/reservations-service-role-pricing-allowlist.test.ts",
   "src/test/security/reservations-trigger-failure-atomicity.test.ts",
