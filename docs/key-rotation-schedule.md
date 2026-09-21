@@ -5,6 +5,10 @@ anon / publishable key, and the key is baked into the Vite bundle at build
 time. Rotation therefore has to be initiated manually and followed by a
 republish. Use this file as the source of truth for when to do that.
 
+For the step-by-step procedure, including third-party and shared secrets and the
+emergency path for a suspected exposure, see `docs/secret-rotation-runbook.md`
+and run `bun run secrets:rotate -- --plan <NAME>`.
+
 ## How to rotate
 
 1. Ask the Lovable agent: **"Rotate the Supabase anon key."**

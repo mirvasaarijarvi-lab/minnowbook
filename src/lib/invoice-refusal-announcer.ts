@@ -71,7 +71,6 @@ export function announceInvoiceRefusal(
     const current = document.getElementById(REGION_ID);
     if (current) current.textContent = text;
   }, 60);
-
 }
 
 /** Clear the announcement, for example after a successful retry. */

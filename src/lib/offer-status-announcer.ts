@@ -74,7 +74,6 @@ export function announceOfferStatus(
     const current = document.getElementById(REGION_ID);
     if (current) current.textContent = text;
   }, 60);
-
 }
 
 /** The live region element, or null when nothing has been announced yet. */
