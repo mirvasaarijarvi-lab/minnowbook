@@ -404,6 +404,39 @@ export type Database = {
           },
         ]
       }
+      auth_failure_log: {
+        Row: {
+          created_at: string
+          email_hash: string
+          email_masked: string
+          id: string
+          ip_address: string | null
+          reason: string
+          tenant_slug: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_hash: string
+          email_masked: string
+          id?: string
+          ip_address?: string | null
+          reason: string
+          tenant_slug?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_hash?: string
+          email_masked?: string
+          id?: string
+          ip_address?: string | null
+          reason?: string
+          tenant_slug?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       beta_feedback: {
         Row: {
           comment: string | null
@@ -1493,6 +1526,51 @@ export type Database = {
           },
         ]
       }
+      reservation_access_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          record_count: number
+          site_id: string | null
+          tenant_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          record_count?: number
+          site_id?: string | null
+          tenant_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          record_count?: number
+          site_id?: string | null
+          tenant_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reservation_access_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservation_access_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reservations: {
         Row: {
           accommodation_needed: boolean | null
@@ -2072,6 +2150,72 @@ export type Database = {
           },
           {
             foreignKeyName: "role_permissions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      security_events: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          dedupe_key: string
+          detected_at: string
+          event_type: string
+          id: string
+          score: number
+          severity: string
+          signals: Json
+          subject: string | null
+          tenant_id: string | null
+          user_id: string | null
+          window_end: string | null
+          window_start: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          dedupe_key: string
+          detected_at?: string
+          event_type: string
+          id?: string
+          score?: number
+          severity: string
+          signals?: Json
+          subject?: string | null
+          tenant_id?: string | null
+          user_id?: string | null
+          window_end?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          dedupe_key?: string
+          detected_at?: string
+          event_type?: string
+          id?: string
+          score?: number
+          severity?: string
+          signals?: Json
+          subject?: string | null
+          tenant_id?: string | null
+          user_id?: string | null
+          window_end?: string | null
+          window_start?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "security_events_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants_safe"
@@ -3261,6 +3405,10 @@ export type Database = {
       }
     }
     Functions: {
+      acknowledge_security_event: {
+        Args: { p_event_id: string }
+        Returns: undefined
+      }
       analyze_reservations_dashboard: {
         Args: { p_limit?: number; p_tenant_id: string }
         Returns: Json
@@ -3354,6 +3502,31 @@ export type Database = {
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
+      }
+      detect_security_alerts: {
+        Args: { p_sensitivity?: number }
+        Returns: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          dedupe_key: string
+          detected_at: string
+          event_type: string
+          id: string
+          score: number
+          severity: string
+          signals: Json
+          subject: string | null
+          tenant_id: string | null
+          user_id: string | null
+          window_end: string | null
+          window_start: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "security_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       diagnostics_caller_is_trusted: { Args: never; Returns: boolean }
       email_queue_dispatch: { Args: never; Returns: undefined }
@@ -3493,6 +3666,15 @@ export type Database = {
           table_name: string
         }[]
       }
+      log_reservation_access: {
+        Args: {
+          p_action: string
+          p_record_count?: number
+          p_site_id?: string
+          p_tenant_id: string
+        }
+        Returns: undefined
+      }
       log_reservation_pricing_decision: {
         Args: {
           p_db_user: string
@@ -3563,6 +3745,15 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      record_auth_failure: {
+        Args: {
+          p_email: string
+          p_reason: string
+          p_tenant_slug?: string
+          p_user_agent?: string
+        }
+        Returns: undefined
       }
       run_test_reservation_cleanup: {
         Args: {
