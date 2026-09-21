@@ -73,7 +73,7 @@ jobs:
         # `playwright.config.ts` boots `vite preview` as a `webServer`
         # for E2E specs. We build once up front so the preview server
         # has something to serve when Playwright launches it.
-        run: bunx vite build
+        run: E2E_PREVIEW_BUILD=1 bunx vite build
 
       - name: Run signed-URL malicious-paths spec
         env:
