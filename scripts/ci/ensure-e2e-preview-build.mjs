@@ -68,7 +68,9 @@ if (reactVersion && reactDomVersion && reactVersion !== reactDomVersion) {
     process.exit(1);
   }
 
-  console.log(`[e2e] node_modules repaired, react ${reactVersion} matches react-dom.`);
+  console.log(
+    `[e2e] node_modules repaired, react ${reactVersion} matches react-dom.`,
+  );
 }
 
 const serverEntry = resolve(process.cwd(), "dist/server/server.js");
