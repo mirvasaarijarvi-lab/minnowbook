@@ -292,7 +292,6 @@ jobs:
             exit 1
           fi
 
-
   summary:
     name: Security scan summary
     needs: [npm-audit, supabase-advisors]

@@ -67,7 +67,9 @@ export function diffAudits(headAdvisories, baseAdvisories, allowlist = []) {
     : [];
 
   const bySeverity = (list) =>
-    [...list].sort((a, b) => severityRank(b.severity) - severityRank(a.severity));
+    [...list].sort(
+      (a, b) => severityRank(b.severity) - severityRank(a.severity),
+    );
 
   return {
     hasBaseline,
@@ -159,7 +161,9 @@ export function annotations(diff, failOn = "high") {
         `::error title=New ${a.severity} advisory introduced::${detail}. Upgrade the dependency or add a documented allowlist entry.`,
       );
     } else {
-      out.push(`::warning title=New ${a.severity} advisory introduced::${detail}`);
+      out.push(
+        `::warning title=New ${a.severity} advisory introduced::${detail}`,
+      );
     }
   }
   return out;

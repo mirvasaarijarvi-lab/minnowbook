@@ -39,7 +39,11 @@ describe("audit-report diffing", () => {
     const base = [adv()];
     const head = [
       adv(),
-      adv({ ghsaId: "GHSA-dddd-eeee-ffff", ruleId: "GHSA-dddd-eeee-ffff", pkg: "tar" }),
+      adv({
+        ghsaId: "GHSA-dddd-eeee-ffff",
+        ruleId: "GHSA-dddd-eeee-ffff",
+        pkg: "tar",
+      }),
     ];
     const diff = diffAudits(head, base);
     expect(diff.introduced.map((a: Advisory) => a.pkg)).toEqual(["tar"]);
@@ -69,8 +73,18 @@ describe("audit-report diffing", () => {
     const diff = diffAudits(
       [
         adv({ severity: "low", pkg: "a", ghsaId: "GHSA-1", ruleId: "GHSA-1" }),
-        adv({ severity: "critical", pkg: "b", ghsaId: "GHSA-2", ruleId: "GHSA-2" }),
-        adv({ severity: "moderate", pkg: "c", ghsaId: "GHSA-3", ruleId: "GHSA-3" }),
+        adv({
+          severity: "critical",
+          pkg: "b",
+          ghsaId: "GHSA-2",
+          ruleId: "GHSA-2",
+        }),
+        adv({
+          severity: "moderate",
+          pkg: "c",
+          ghsaId: "GHSA-3",
+          ruleId: "GHSA-3",
+        }),
       ],
       [],
     );
@@ -103,9 +117,10 @@ describe("audit-report gating", () => {
     expect(isAllowlisted(adv(), list)).toBe(true);
     expect(isAllowlisted(adv({ ghsaId: null, ruleId: "x" }), list)).toBe(true);
     expect(
-      isAllowlisted(adv({ ghsaId: null, ruleId: "x", url: "", cves: ["CVE-2026-1"] }), [
-        "CVE-2026-1",
-      ]),
+      isAllowlisted(
+        adv({ ghsaId: null, ruleId: "x", url: "", cves: ["CVE-2026-1"] }),
+        ["CVE-2026-1"],
+      ),
     ).toBe(true);
     expect(isAllowlisted(adv(), ["GHSA-zzzz"])).toBe(false);
   });
@@ -127,9 +142,9 @@ describe("audit-report annotations", () => {
   });
 
   it("emits a warning below the failure threshold and a notice when allowlisted", () => {
-    expect(annotations(diffAudits([adv({ severity: "low" })], []), "high")[0]).toContain(
-      "::warning title=New low advisory introduced::",
-    );
+    expect(
+      annotations(diffAudits([adv({ severity: "low" })], []), "high")[0],
+    ).toContain("::warning title=New low advisory introduced::");
     expect(
       annotations(diffAudits([adv()], [], ["GHSA-aaaa-bbbb-cccc"]), "high")[0],
     ).toContain("::notice title=New allowlisted advisory::");
