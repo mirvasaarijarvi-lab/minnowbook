@@ -35,6 +35,7 @@
     "check:rls-cors-gate": "node scripts/ci/check-rls-cors-gate-config.mjs",
     "check:rls-cors-gate:dry-run": "node scripts/ci/rls-cors-gate-preflight.mjs --dry-run",
     "check:lockfile": "node scripts/ci/preflight-manifest-drift.mjs",
+    "check:lockfile:npm": "node scripts/ci/check-npm-lockfile-hygiene.mjs",
     "lock:heal": "node scripts/ci/heal-bun-lockfile.mjs",
     "lock:heal:check": "node scripts/ci/heal-bun-lockfile.mjs --check",
     "prepare": "node scripts/setup-git-hooks.mjs",
