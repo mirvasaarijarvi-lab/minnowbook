@@ -1,4 +1,11 @@
 /// <reference types="vite/client" />
+/* eslint-disable react-refresh/only-export-components --
+ * TanStack Start requires the root route object (`export const Route`) to live
+ * in this file alongside its shell, root, not-found and error components, so a
+ * non-component export next to components is unavoidable here. Fast Refresh
+ * falls back to a full reload for the root file only. See
+ * docs/linting-policy.md.
+ */
 import {
   createRootRouteWithContext,
   HeadContent,
