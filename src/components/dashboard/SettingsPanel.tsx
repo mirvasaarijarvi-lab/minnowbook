@@ -890,12 +890,6 @@ const SettingsPanel = () => {
     hero_image_url: "",
   });
 
-  const DEFAULT_THRESHOLDS: Record<string, number> = {
-    restaurant: 5,
-    venue: 5,
-    guesthouse: 5,
-    hotel: 5,
-  };
   const [thresholds, setThresholds] =
     useState<Record<string, number>>(DEFAULT_THRESHOLDS);
   const [resourceTypeNames, setResourceTypeNames] = useState<

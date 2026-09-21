@@ -173,6 +173,8 @@ const SEOHead = ({
     imageAlt,
     jsonLd,
     language,
+    ogTitle,
+    ogDescription,
   ]);
 
   return null;
