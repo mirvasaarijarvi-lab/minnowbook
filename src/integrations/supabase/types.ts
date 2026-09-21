@@ -3690,6 +3690,19 @@ export type Database = {
           table_name: string
         }[]
       }
+      log_booking_submission: {
+        Args: {
+          p_db_user: string
+          p_jwt_role: string
+          p_reservation_id: string
+          p_scrubbed: string[]
+          p_submitted: Json
+          p_system_assigned: Json
+          p_tenant_id: string
+          p_trusted: boolean
+        }
+        Returns: undefined
+      }
       log_reservation_access: {
         Args: {
           p_action: string

@@ -204,6 +204,13 @@
       "when": 1789978351560,
       "tag": "0028_public_availability_counts",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1789992653963,
+      "tag": "0029_booking_submission_audit_log",
+      "breakpoints": true
     }
   ]
 }
