@@ -5618,6 +5618,7 @@ const fi: TranslationKeys = {
   "admin.created": "Luotu",
   "admin.updated": "Päivitetty",
   "admin.deleted": "Poistettu",
+  "admin.bookingSubmission": "Varaus lähetetty",
   "admin.fieldsChanged": "kenttää muutettu",
   "admin.revert": "Palauta",
   "admin.revertConfirm": "Palautetaanko tämä muutos?",
