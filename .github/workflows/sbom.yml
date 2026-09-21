@@ -62,8 +62,10 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           set -euo pipefail
-          if ! git diff --quiet -- docs/sbom.cdx.json docs/sbom.cdx.json.sha256; then
-            echo "::error::docs/sbom.cdx.json is out of date. Run 'node scripts/generate-sbom.mjs' and commit."
+          if ! git diff --quiet -- docs/sbom.cdx.json docs/sbom.cdx.json.sha256 \
+            public/security-docs/sbom.cdx.json public/security-docs/sbom.cdx.json.sha256; then
+            echo "::error::SBOM is out of date. Run 'node scripts/generate-sbom.mjs' and commit."
+            git diff --stat -- docs/sbom.cdx.json public/security-docs/sbom.cdx.json
             git diff -- docs/sbom.cdx.json | head -50
             exit 1
           fi

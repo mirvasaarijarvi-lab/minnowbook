@@ -109,12 +109,18 @@ const sbom = {
 };
 
 const json = JSON.stringify(sbom, null, 2);
-mkdirSync(`${ROOT}/docs`, { recursive: true });
-writeFileSync(`${ROOT}/docs/sbom.cdx.json`, json);
-
 const hash = createHash("sha256").update(json).digest("hex");
-writeFileSync(`${ROOT}/docs/sbom.cdx.json.sha256`, `${hash}  sbom.cdx.json\n`);
+const checksum = `${hash}  sbom.cdx.json\n`;
+
+// docs/ is the auditable copy; public/security-docs/ is what the /security
+// page serves. Both are written here so they can never drift apart.
+for (const dir of ["docs", "public/security-docs"]) {
+  mkdirSync(`${ROOT}/${dir}`, { recursive: true });
+  writeFileSync(`${ROOT}/${dir}/sbom.cdx.json`, json);
+  writeFileSync(`${ROOT}/${dir}/sbom.cdx.json.sha256`, checksum);
+}
 
 console.log(`SBOM written: docs/sbom.cdx.json`);
+console.log(`SBOM written: public/security-docs/sbom.cdx.json`);
 console.log(`Components:   ${components.length}`);
 console.log(`SHA-256:      ${hash}`);
