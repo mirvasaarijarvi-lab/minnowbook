@@ -69,6 +69,7 @@ This document is the formal SDLC for MimmoBook. It describes how features are de
 1. Triage in the `#security` internal channel within 30 minutes of detection.
 2. Contain (revoke keys, disable accounts, freeze writes if needed).
 3. Investigate using the audit log, edge function logs, and storage rejection events.
+   For a suspected credential exposure, run `bun run secrets:rotate -- --plan <NAME> --compromised`.
 4. Notify affected customers within 72 hours per the DPA.
 5. Post-incident review with documented corrective actions and owners.
 
