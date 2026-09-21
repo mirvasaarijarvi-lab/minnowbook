@@ -69,9 +69,10 @@ function expectNoRowsLeaked(
   expect(Array.isArray(data), `${ctx}: result must be an array or error`).toBe(
     true,
   );
-  expect((data ?? []) as unknown[], `${ctx}: anon must not see any rows`).toEqual(
-    [],
-  );
+  expect(
+    (data ?? []) as unknown[],
+    `${ctx}: anon must not see any rows`,
+  ).toEqual([]);
 }
 
 describe.each(MONITORING_TABLES)(
@@ -158,43 +159,40 @@ describe.each(MONITORING_TABLES)(
   },
 );
 
-describe.each(MONITORING_TABLES)(
-  "$table — anon write denial",
-  ({ table }) => {
-    liveIt("anon INSERT is rejected", async () => {
-      const { error } = await anon
-        .from(table)
-        .insert({ tenant_id: FAKE_TENANT_ID } as never);
-      expect(error, `${table}: anon INSERT must be denied`).toBeTruthy();
-    });
+describe.each(MONITORING_TABLES)("$table — anon write denial", ({ table }) => {
+  liveIt("anon INSERT is rejected", async () => {
+    const { error } = await anon
+      .from(table)
+      .insert({ tenant_id: FAKE_TENANT_ID } as never);
+    expect(error, `${table}: anon INSERT must be denied`).toBeTruthy();
+  });
 
-    liveIt("anon UPDATE affects nothing", async () => {
-      const { data, error } = await anon
-        .from(table)
-        .update({ tenant_id: FAKE_TENANT_ID } as never)
-        .eq("tenant_id", LIVE_TENANT_ID)
-        .select("id");
-      if (error) {
-        expect(error).toBeTruthy();
-        return;
-      }
-      expect((data ?? []) as unknown[], `${table} anon UPDATE`).toEqual([]);
-    });
+  liveIt("anon UPDATE affects nothing", async () => {
+    const { data, error } = await anon
+      .from(table)
+      .update({ tenant_id: FAKE_TENANT_ID } as never)
+      .eq("tenant_id", LIVE_TENANT_ID)
+      .select("id");
+    if (error) {
+      expect(error).toBeTruthy();
+      return;
+    }
+    expect((data ?? []) as unknown[], `${table} anon UPDATE`).toEqual([]);
+  });
 
-    liveIt("anon DELETE affects nothing", async () => {
-      const { data, error } = await anon
-        .from(table)
-        .delete()
-        .eq("tenant_id", LIVE_TENANT_ID)
-        .select("id");
-      if (error) {
-        expect(error).toBeTruthy();
-        return;
-      }
-      expect((data ?? []) as unknown[], `${table} anon DELETE`).toEqual([]);
-    });
-  },
-);
+  liveIt("anon DELETE affects nothing", async () => {
+    const { data, error } = await anon
+      .from(table)
+      .delete()
+      .eq("tenant_id", LIVE_TENANT_ID)
+      .select("id");
+    if (error) {
+      expect(error).toBeTruthy();
+      return;
+    }
+    expect((data ?? []) as unknown[], `${table} anon DELETE`).toEqual([]);
+  });
+});
 
 describe("security monitoring RPC surface", () => {
   liveIt("anon cannot run detect_security_alerts()", async () => {
