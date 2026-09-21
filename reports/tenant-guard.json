@@ -12,7 +12,7 @@
     },
     {
       "suite": "discount-redemption-fuzz",
-      "recordedAt": "2026-09-21T17:46:44.999Z",
+      "recordedAt": "2026-09-21T17:50:40.900Z",
       "tenantA": "341849d8-0c52-428d-9efd-3000af4d13a7",
       "tenantB": "d76a4af7-0ea1-4c5b-9f7c-d8db856e8427",
       "membershipA": true,
