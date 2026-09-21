@@ -15,7 +15,6 @@ export const Route = createFileRoute("/use-cases")({
       ogDescription:
         "Service professionals: take bookings around the clock, run a waiting list, price your services, send reminders and collect reviews. Restaurants, venues and hotels too.",
       image: "https://mimmobook.com/og/use-cases-en.png",
-      imageAlt:
-        "MimmoBook use cases for service professionals and hospitality",
+      imageAlt: "MimmoBook use cases for service professionals and hospitality",
     }),
 });
