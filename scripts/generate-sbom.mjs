@@ -13,33 +13,24 @@
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { execSync } from "node:child_process";
 
 const ROOT = process.cwd();
 const pkg = JSON.parse(readFileSync(`${ROOT}/package.json`, "utf8"));
 
-function gitMeta() {
-  const safe = (cmd, fallback = "") => {
+// Lockfile contents, when present, so the digest changes whenever resolved
+// versions change. No git commands: CI's shallow clone reports different
+// commit metadata than a full checkout.
+function readLockfile() {
+  for (const name of ["bun.lock", "package-lock.json"]) {
     try {
-      return execSync(cmd, { stdio: ["ignore", "pipe", "ignore"] })
-        .toString()
-        .trim();
+      return readFileSync(`${ROOT}/${name}`, "utf8");
     } catch {
-      return fallback;
+      /* not present */
     }
-  };
-  // Use the commit that last touched dependency manifests so the SBOM
-  // is deterministic across re-runs that don't actually change deps.
-  const sha = safe(
-    "git log -n 1 --pretty=format:%H -- package.json bun.lock bun.lockb",
-    "unknown",
-  );
-  const isoTs = safe(
-    "git log -n 1 --pretty=format:%cI -- package.json bun.lock bun.lockb",
-    "1970-01-01T00:00:00Z",
-  );
-  return { sha, isoTs };
+  }
+  return "";
 }
+
 
 // Deterministic UUID v5-ish derivation from a stable string. Avoids
 // pulling in a UUID library; format matches RFC 4122 v5 layout.
