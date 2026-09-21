@@ -111,7 +111,7 @@ function table(list) {
   ].join("\n");
 }
 
-export function renderMarkdown(diff, { manager, failOn }) {
+export function renderMarkdown(diff, { manager, failOn, label }) {
   const counts = (list) =>
     BLOCKING_SEVERITIES.concat(["moderate", "low", "info"])
       .map((sev) => [sev, list.filter((a) => a.severity === sev).length])
@@ -122,7 +122,7 @@ export function renderMarkdown(diff, { manager, failOn }) {
   const lines = [
     "## Dependency audit report",
     "",
-    `- Source: \`${manager} audit\``,
+    `- Source: \`${label || manager} audit\``,
     `- Failure threshold for newly introduced advisories: **${failOn} and above**`,
     `- Newly introduced: **${counts(diff.introduced)}**`,
     `- Pre-existing: ${counts(diff.preExisting)}`,
@@ -182,6 +182,7 @@ function main() {
   const baseFile = arg("base");
   const outDir = arg("out-dir", "audit-report");
   const failOn = arg("fail-on", "high").toLowerCase();
+  const label = arg("label");
   const allowlist = arg("allowlist")
     .split(",")
     .map((s) => s.trim())
@@ -192,7 +193,7 @@ function main() {
   const diff = diffAudits(head, base, allowlist);
 
   fs.mkdirSync(outDir, { recursive: true });
-  const markdown = renderMarkdown(diff, { manager, failOn });
+  const markdown = renderMarkdown(diff, { manager, failOn, label });
   fs.writeFileSync(path.join(outDir, "audit-report.md"), `${markdown}\n`);
   fs.writeFileSync(
     path.join(outDir, "audit-report.json"),

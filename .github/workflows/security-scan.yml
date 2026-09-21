@@ -161,6 +161,7 @@ jobs:
           # can emit ({ advisories } and { vulnerabilities }).
           node .github/workflows/scripts/audit-report.mjs \
             --manager=pnpm \
+            --label=bun \
             --head=audit-report/head.json \
             --base=audit-report/base.json \
             --out-dir=audit-report \
