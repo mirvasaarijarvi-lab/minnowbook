@@ -47,6 +47,7 @@ import {
   Undo2,
   ChevronDown,
   ChevronRight,
+  ShieldCheck,
 } from "lucide-react";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -84,6 +85,13 @@ const actionBadgeConfig: Record<
     icon: Trash2,
     labelKey: "admin.deleted",
     color: "border-destructive/30 text-destructive bg-destructive/10",
+  },
+  // Written by the database when a booking arrives through the public form
+  // or the server booking function: records which fields the system assigned.
+  booking_submission: {
+    icon: ShieldCheck,
+    labelKey: "admin.bookingSubmission",
+    color: "border-muted-foreground/30 text-muted-foreground bg-muted",
   },
 };
 
@@ -358,6 +366,9 @@ const AuditLogPanel = () => {
                   <SelectItem value="INSERT">{t("admin.created")}</SelectItem>
                   <SelectItem value="UPDATE">{t("admin.updated")}</SelectItem>
                   <SelectItem value="DELETE">{t("admin.deleted")}</SelectItem>
+                  <SelectItem value="booking_submission">
+                    {t("admin.bookingSubmission")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
 

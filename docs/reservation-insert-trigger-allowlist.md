@@ -108,4 +108,51 @@ the `v_supplied` snapshot block so it shows up in `kept_fields` /
 `scrubbed_fields`. Retention follows `cleanup_old_audit_logs()` (90 days).
 Coverage: `src/test/security/reservations-pricing-trust-audit.test.ts`.
 
+## 5. Booking submission audit trail
+
+`validate_public_reservation_insert()` also calls `log_booking_submission()`
+(SECURITY DEFINER) for **every** non-authenticated insert, trusted or not, writing one
+`public.audit_log` row with `table_name='reservations'`,
+`action='booking_submission'`, `record_id = NEW.id` and `new_data`:
+
+```json
+{
+  "source": "public_form",
+  "trusted": false,
+  "jwt_role": "anon",
+  "db_user": "authenticator",
+  "system_assigned": {
+    "status": "pending",
+    "is_invoiced": false,
+    "is_checked_in": false,
+    "is_used": false,
+    "staff_needed": false,
+    "price_eur": null,
+    "discount_type": null,
+    "staff_notes": null,
+    "created_by": null
+  },
+  "discarded_fields": ["price_eur", "status", "staff_notes"],
+  "submitted_values": { "price_eur": 0, "status": "confirmed" }
+}
+```
+
+- `source` is `public_form` for anonymous inserts and `server` for trusted callers.
+- `system_assigned` is the post-scrub value of every system-owned column; it is empty
+  for trusted callers, which set their own canonical values.
+- `discarded_fields` lists both pricing/discount and staff-owned columns
+  (`status`, `is_invoiced`, `is_checked_in`, `is_used`, `staff_needed`,
+  `internal_notes`, `staff_notes`, `created_by`, the four email timestamps) that the
+  caller supplied and the trigger overrode.
+- Authenticated staff inserts are not logged here; `audit_log_trigger()` already records
+  those as ordinary `INSERT` entries.
+- Logging failures are swallowed and never block a booking. Retention follows
+  `cleanup_old_audit_logs()` (90 days).
+- Tenant owners and admins can review the entries in the dashboard activity log under
+  the "Booking submitted" filter.
+
+When you add a staff- or system-owned column (step 3 above), also add it to the
+`v_staff_supplied` snapshot and the `v_system_assigned` object, and extend
+`src/test/security/reservations-booking-submission-audit.test.ts`.
+
 Related: `docs/rls-hardening-reservations-and-availability.md`.

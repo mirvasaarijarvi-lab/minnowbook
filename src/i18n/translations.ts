@@ -414,6 +414,7 @@ type TranslationKeys = {
   "admin.created": string;
   "admin.updated": string;
   "admin.deleted": string;
+  "admin.bookingSubmission": string;
   "admin.fieldsChanged": string;
   "admin.revert": string;
   "admin.revertConfirm": string;
@@ -2757,6 +2758,7 @@ const en: TranslationKeys = {
   "admin.created": "Created",
   "admin.updated": "Updated",
   "admin.deleted": "Deleted",
+  "admin.bookingSubmission": "Booking submitted",
   "admin.fieldsChanged": "fields changed",
   "admin.revert": "Revert",
   "admin.revertConfirm": "Revert this change?",
@@ -5616,6 +5618,7 @@ const fi: TranslationKeys = {
   "admin.created": "Luotu",
   "admin.updated": "Päivitetty",
   "admin.deleted": "Poistettu",
+  "admin.bookingSubmission": "Varaus lähetetty",
   "admin.fieldsChanged": "kenttää muutettu",
   "admin.revert": "Palauta",
   "admin.revertConfirm": "Palautetaanko tämä muutos?",
@@ -8484,6 +8487,7 @@ const sv: TranslationKeys = {
   "admin.created": "Skapad",
   "admin.updated": "Uppdaterad",
   "admin.deleted": "Borttagen",
+  "admin.bookingSubmission": "Bokning skickad",
   "admin.fieldsChanged": "fält ändrade",
   "admin.revert": "Återställ",
   "admin.revertConfirm": "Återställ denna ändring?",
