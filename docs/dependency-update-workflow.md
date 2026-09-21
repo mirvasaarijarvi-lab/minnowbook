@@ -92,3 +92,30 @@ together in one change. A commit that updates only one lock file will fail CI.
 * `react-router` is no longer a dependency: the app routes entirely through
   `@tanstack/react-router`. Do not reintroduce it; the removed pin and override
   existed only to hold back its open-redirect advisories.
+
+## GitHub Action versions
+
+Reusable actions are pinned in one place: `.github/action-versions.json`. Each
+entry holds an immutable commit SHA plus the release tag that SHA belongs to.
+
+`scripts/ci/check-action-versions.mjs` runs as the first step of the CI
+pre-build gate (`.github/workflows/ci.yml`, job `schema-gate`) and fails the run
+on:
+
+- mutable refs (`@main`, `@master`, `@v5`, or no ref at all)
+- drift from the manifest pin
+- the same action pinned to two different commits in different jobs or
+  workflows (this is the mismatch that previously broke the CodeQL wrap-up step:
+  `init`/`analyze` on v4.38.1 while `upload-sarif` was still on v4.38.0)
+- a version comment at or below the deprecated major recorded for that action
+- a SHA pin with no `# vX.Y.Z` comment, or an action missing from the manifest
+
+To bump an action:
+
+1. Edit its `sha` and `version` in `.github/action-versions.json`.
+2. Run `bun run check:actions:fix` to rewrite every workflow reference.
+3. Run `bun run check:actions` to verify, then commit the manifest and the
+   workflow changes together.
+
+Local verification: `bun run check:actions` and
+`bunx vitest run scripts/ci/check-action-versions.test.ts`.
