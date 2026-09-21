@@ -607,7 +607,7 @@ export function useBrandingSignedUrlState(
       invalidateBrandingSignedUrl(path, ttlSeconds);
     }
     load(true);
-  }, [path, ttlSeconds, tenantId, fallbackCacheTtlMs, load]);
+  }, [path, ttlSeconds, tenantId, load]);
 
   return { url, status, handleImgError, retry };
 }
