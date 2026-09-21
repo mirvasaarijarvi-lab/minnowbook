@@ -176,6 +176,34 @@
       "when": 1789977646584,
       "tag": "0024_security_alerts_monitoring",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1789978169061,
+      "tag": "0025_reservation_authorization_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1789978257099,
+      "tag": "0026_narrow_anon_grants_customer_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1789978304619,
+      "tag": "0027_refine_reservation_authorization_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1789978351560,
+      "tag": "0028_public_availability_counts",
+      "breakpoints": true
     }
   ]
 }
