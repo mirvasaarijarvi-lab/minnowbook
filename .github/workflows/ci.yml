@@ -54,6 +54,13 @@ jobs:
       - name: Verify bun.lock is in sync with package.json
         uses: ./.github/actions/verify-bun-lockfile-sync
 
+      # Same npm lockfile hygiene gate as the build job, run here first so
+      # the build is skipped entirely when the lockfile is stale or points
+      # at a non-public registry. See docs/dependency-update-workflow.md.
+      - name: Validate package-lock.json (drift + public registry URLs)
+        run: node scripts/ci/check-npm-lockfile-hygiene.mjs
+
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
