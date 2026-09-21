@@ -103,19 +103,18 @@ runs:
 
 
     - name: Restore Bun install cache
-      # Cache the installed Bun toolchain (~/.bun, where setup-bun
-      # installs the binary) AND the verification archive so warm
-      # runs skip both the ~30 MB GitHub release download and the
-      # zip re-download in the checksum step. Cache key includes
-      # the pinned version + OS + arch so a version bump in
-      # bun-pin.env naturally invalidates stale caches.
+      # Cache only the Bun executable and verification archive. Caching all of
+      # ~/.bun also restores ~/.bun/install/cache, which can reintroduce package
+      # archives from an older lockfile before a workflow's dependency cache is
+      # restored. Keep the toolchain cache completely separate from packages.
+      # The v3 suffix invalidates the former broad ~/.bun cache.
       id: bun-cache
       uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
       with:
         path: |
-          ~/.bun
+          ~/.bun/bin
           ~/.bun-verify
-        key: bun-${{ runner.os }}-${{ runner.arch }}-v${{ steps.pin.outputs.version }}-toolchain-v2
+        key: bun-${{ runner.os }}-${{ runner.arch }}-v${{ steps.pin.outputs.version }}-toolchain-v3
 
     - name: Use cached Bun
       if: steps.bun-cache.outputs.cache-hit == 'true'
