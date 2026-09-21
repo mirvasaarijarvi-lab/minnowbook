@@ -29,8 +29,13 @@ jobs:
   test-ci:
     name: npm run test:ci
     runs-on: ubuntu-latest
+    # Hard ceiling so a wedged suite (hung Playwright preview server, stalled
+    # Supabase socket) fails in a readable time instead of occupying the
+    # runner for GitHub's default 6 hours and blocking every queued run.
+    timeout-minutes: 60
     permissions:
       contents: read
+
 
     env:
       # Required by the Deno edge function tests. All values are pulled from
