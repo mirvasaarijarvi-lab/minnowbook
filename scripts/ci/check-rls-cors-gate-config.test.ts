@@ -303,7 +303,7 @@ describe("check-rls-cors-gate-config", () => {
   it("fails when the reporting step is removed", () => {
     const r = run(
       fixture((y) =>
-        y.replace("actions/github-script@v7", "actions/checkout@v5"),
+        y.replace("actions/github-script@v9", "actions/checkout@v5"),
       ),
     );
     expect(r.code).toBe(1);
