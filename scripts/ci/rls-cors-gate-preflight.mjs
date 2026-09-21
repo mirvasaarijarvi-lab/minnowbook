@@ -143,7 +143,9 @@ for (const t of TENANTS) {
 // requests and pull requests from forks. Every input is empty there, which is
 // a structural skip, not a denial — reporting it as a denial opened a tenant
 // access issue on each dependency bump while nothing was actually wrong.
-const SECRETS_UNAVAILABLE =
+const REQUIRE_LIVE =
+  env.RLS_GATE_REQUIRE_LIVE === "1" || env.RLS_GATE_REQUIRE_LIVE === "true";
+const FLAGGED_UNAVAILABLE =
   env.RLS_GATE_SECRETS_UNAVAILABLE === "1" ||
   env.RLS_GATE_SECRETS_UNAVAILABLE === "true";
 const NOTHING_CONFIGURED =
@@ -151,6 +153,17 @@ const NOTHING_CONFIGURED =
   !ANON &&
   !SERVICE &&
   TENANTS.every((t) => !t.email && !t.password && !t.tenantId);
+
+// A pull request run with literally every input empty cannot be a credential
+// mistake: the workflow always passes the secrets through, so an empty set
+// means this run was not allowed to read them (Dependabot, fork, or a
+// re-run of such a pull request, where the actor is not the bot). Relying on
+// the actor alone still filed a denial issue for those runs, so treat the
+// empty set on any pull request as the structural skip it is. A push or a
+// protected-branch run that requires live coverage still fails loudly.
+const PR_EVENT = String(env.GITHUB_EVENT_NAME || "").startsWith("pull_request");
+const SECRETS_UNAVAILABLE =
+  !REQUIRE_LIVE && (FLAGGED_UNAVAILABLE || PR_EVENT);
 
 if (SECRETS_UNAVAILABLE && NOTHING_CONFIGURED) {
   log("");
@@ -163,6 +176,7 @@ if (SECRETS_UNAVAILABLE && NOTHING_CONFIGURED) {
   );
   finish(0, "skip");
 }
+
 
 if (!URL_ || !ANON) {
   problem(
