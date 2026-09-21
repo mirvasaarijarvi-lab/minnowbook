@@ -60,6 +60,11 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "tailwind-merge"
         update-types: ["version-update:semver-major"]
+      # Recharts major upgrades replace a large transitive graph and
+      # Dependabot only refreshes package-lock.json, while CI also requires
+      # bun.lock. Upgrade Recharts majors deliberately with both lockfiles.
+      - dependency-name: "recharts"
+        update-types: ["version-update:semver-major"]
       - dependency-name: "vaul"
         update-types: ["version-update:semver-major"]
       - dependency-name: "@hookform/resolvers"
