@@ -35,6 +35,7 @@ jobs:
   gate-config:
     name: RLS/CORS gate configuration
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
@@ -46,6 +47,7 @@ jobs:
     name: RLS + CORS regression tests
     needs: [gate-config]
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     # Surfaced to the notification job so a tenant-access denial is reported
     # immediately instead of being buried in a failed job's logs.
     outputs:
@@ -243,6 +245,7 @@ jobs:
     needs: [rls-cors-tests]
     if: always() && needs.rls-cors-tests.outputs.tenant_access == 'denied'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
       issues: write
@@ -331,6 +334,7 @@ jobs:
   rls-advisor-gate:
     name: Supabase RLS advisor gate
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
@@ -416,6 +420,7 @@ jobs:
     needs: [gate-config, rls-cors-tests, rls-advisor-gate]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - run: |
           config='${{ needs.gate-config.result }}'
