@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:6b6a08a8-e55b-5f35-9ba8-84b3211a8cac",
+  "serialNumber": "urn:uuid:fa7333f8-2d61-5fad-ae68-b8cc6c6af800",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-21T08:26:46Z",
+    "timestamp": "2026-09-21T08:53:03Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "d16db04dd1894ae7c2f8f01990ccd222f0fc3491"
+          "value": "d0458b34c51d07959ff7eb5d377d0ea8bd17a7b6"
         }
       ]
     }
@@ -396,11 +396,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@types%2Fnode@22.16.5",
+      "bom-ref": "pkg:npm/@types%2Fnode@26.6.1",
       "type": "library",
       "name": "@types/node",
-      "version": "22.16.5",
-      "purl": "pkg:npm/@types%2Fnode@22.16.5",
+      "version": "26.6.1",
+      "purl": "pkg:npm/@types%2Fnode@26.6.1",
       "scope": "optional"
     },
     {
