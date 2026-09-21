@@ -54,6 +54,7 @@ import {
   HeartPulse,
 } from "lucide-react";
 import { useState, useRef } from "react";
+import { buildResourceImageObjectKey } from "@/lib/resource-image-object-key";
 import type { ResourceOpeningHoursEditorHandle } from "./ResourceOpeningHoursEditor";
 import type { ResourceOccasionalSlotsEditorHandle } from "./ResourceOccasionalSlotsEditor";
 import { useT } from "@/contexts/I18nContext";
@@ -295,20 +296,10 @@ const ResourceManagement = () => {
     }
     setUploading(true);
     try {
-      const { sanitizeFileExtension, sanitizePathSegment } =
-        await import("@/lib/sanitize-path");
-      const { assertSafeStorageObjectPath } =
-        await import("@/lib/storage-path");
-      const ext = sanitizeFileExtension(file.name.split(".").pop());
-      const fileName = `resource-${Date.now()}.${ext}`;
-      const safeTenant = sanitizePathSegment(tenantId!);
-      const filePath = assertSafeStorageObjectPath(
-        `${safeTenant}/resources/${fileName}`,
-        {
-          callsite: "resource-management:image-upload",
-          tenantId: tenantId ?? undefined,
-        },
-      );
+      // The object key is built only from the tenant UUID, a literal
+      // extension chosen from the validated MIME type, and a timestamp.
+      // The uploaded file's own name never reaches the storage path.
+      const filePath = buildResourceImageObjectKey(tenantId, file.type);
       const { error: uploadError } = await supabase.storage
         .from("tenant-assets")
         .upload(filePath, file, { upsert: true });
