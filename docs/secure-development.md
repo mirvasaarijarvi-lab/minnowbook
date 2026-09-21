@@ -61,6 +61,8 @@ This document is the formal SDLC for MimmoBook. It describes how features are de
 - Email infrastructure: queued via pgmq, retried with DLQ, with TTLs per category.
 - Monitoring: superadmin DLQ alert banner, storage rejection alerts, edge function logs.
 - Backups: 30-day rolling encrypted backups, restore tested at least annually.
+- Credential rotation: routine and emergency rotation follow `docs/secret-rotation-runbook.md`, guided by `bun run secrets:rotate -- --plan <NAME>`; every rotation is logged in `docs/key-rotation-schedule.md`.
+
 
 ## 8. Incident response
 
