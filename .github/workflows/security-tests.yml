@@ -27,6 +27,7 @@ jobs:
   security-tests:
     name: Run Security Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
 

@@ -24,6 +24,7 @@ jobs:
   offer-kitchen-mapping:
     name: Cross-booking mapping and preview tests
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
 
@@ -75,6 +76,7 @@ jobs:
     name: Node ${{ matrix.node }} on ${{ matrix.os }}
     needs: offer-kitchen-mapping
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     permissions:
       contents: read
     strategy:

@@ -32,6 +32,7 @@ jobs:
   npm-audit:
     name: NPM dependency audit (high/critical)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
@@ -113,6 +114,7 @@ jobs:
   dependency-audit-report:
     name: Dependency audit report
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
@@ -180,6 +182,7 @@ jobs:
   supabase-advisors:
     name: Supabase advisors (security lints)
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
@@ -297,6 +300,7 @@ jobs:
     needs: [npm-audit, supabase-advisors]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - run: |
           echo "npm-audit:          ${{ needs.npm-audit.result }}"

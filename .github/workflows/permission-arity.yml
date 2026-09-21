@@ -25,6 +25,7 @@ jobs:
   arity-check:
     name: Forbid 2-arg has_permission / has_tenant_role
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
 

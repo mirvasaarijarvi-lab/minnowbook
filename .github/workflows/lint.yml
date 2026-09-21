@@ -17,6 +17,7 @@ jobs:
   lint:
     name: ESLint
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
 

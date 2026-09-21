@@ -29,6 +29,7 @@ jobs:
   schema-gate:
     name: Schema & plan references gate
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
 
@@ -138,6 +139,7 @@ jobs:
   build:
     name: Type-check & Build
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     # Gate the dashboard build on the schema/plan checks. If schema-gate
     # fails, this job is skipped entirely so no compute is wasted on a
     # build whose backing schema is already known to be wrong.
