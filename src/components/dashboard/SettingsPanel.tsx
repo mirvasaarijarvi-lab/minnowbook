@@ -843,6 +843,12 @@ const ALLOWED_TYPES = [
   "image/svg+xml",
 ];
 const ALLOWED_HERO_TYPES = ["image/png", "image/jpeg", "image/webp"];
+const DEFAULT_THRESHOLDS: Record<string, number> = {
+  restaurant: 5,
+  venue: 5,
+  guesthouse: 5,
+  hotel: 5,
+};
 
 const SettingsPanel = () => {
   const { tenantId, tenant } = useTenant();
@@ -890,12 +896,6 @@ const SettingsPanel = () => {
     hero_image_url: "",
   });
 
-  const DEFAULT_THRESHOLDS: Record<string, number> = {
-    restaurant: 5,
-    venue: 5,
-    guesthouse: 5,
-    hotel: 5,
-  };
   const [thresholds, setThresholds] =
     useState<Record<string, number>>(DEFAULT_THRESHOLDS);
   const [resourceTypeNames, setResourceTypeNames] = useState<

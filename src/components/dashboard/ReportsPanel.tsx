@@ -231,7 +231,7 @@ const ReservationChart = ({
         ),
       ),
     }));
-  }, [reservations, period, start, end, dateLocale, types, t]);
+  }, [reservations, period, start, end, dateLocale, types, t, typeLabel]);
 
   const colors = [
     "hsl(var(--primary))",
@@ -337,7 +337,10 @@ const ReportsPanel = () => {
     enabled: !!tenantId,
   });
 
-  const allowedTypes = tenant?.allowed_reservation_types ?? ["restaurant"];
+  const allowedTypes = useMemo(
+    () => tenant?.allowed_reservation_types ?? ["restaurant"],
+    [tenant?.allowed_reservation_types],
+  );
 
   const { start, end } = useMemo(() => {
     if (period === "custom") return { start: customStart, end: customEnd };

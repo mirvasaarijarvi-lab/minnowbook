@@ -320,7 +320,7 @@ const BlockedSlotsPanel = () => {
       return format(dateRange.from, "PPP", { locale: dateFnsLocale });
     }
     return `${format(dateRange.from, "MMM d", { locale: dateFnsLocale })} to ${format(dateRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
-  }, [dateRange, t]);
+  }, [dateRange, t, dateFnsLocale]);
 
   const bulkDeleteLabel = useMemo(() => {
     if (!bulkDeleteRange?.from) return t("blocking.pickDate");
@@ -332,7 +332,7 @@ const BlockedSlotsPanel = () => {
       return format(bulkDeleteRange.from, "PPP", { locale: dateFnsLocale });
     }
     return `${format(bulkDeleteRange.from, "MMM d", { locale: dateFnsLocale })} to ${format(bulkDeleteRange.to, "MMM d, yyyy", { locale: dateFnsLocale })}`;
-  }, [bulkDeleteRange, t]);
+  }, [bulkDeleteRange, t, dateFnsLocale]);
 
   return (
     <div className="space-y-4">

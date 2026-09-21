@@ -106,6 +106,9 @@ const GuidedTour = ({
   useEffect(() => {
     if (!isOpen || !step?.view) return;
     onNavigate?.(step.view);
+    // Intentionally keyed to the step index only: including onNavigate or
+    // step.view would re-trigger navigation on every parent re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, currentStep]);
 
   // Position tooltip after a short delay to allow view to render

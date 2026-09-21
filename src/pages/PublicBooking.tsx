@@ -388,9 +388,10 @@ const PublicBookingInner = () => {
   // Pre-select booking type from URL query param (?type=venue, ?type=guesthouse, etc.)
   useEffect(() => {
     const typeParam = searchParams.get("type");
-    if (typeParam && !form.reservation_type) {
-      setForm((prev) => ({ ...prev, reservation_type: typeParam }));
-    }
+    if (!typeParam) return;
+    setForm((prev) =>
+      prev.reservation_type ? prev : { ...prev, reservation_type: typeParam },
+    );
   }, [searchParams]);
 
   // Resolve site from ?site= query param

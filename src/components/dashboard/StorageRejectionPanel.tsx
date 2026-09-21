@@ -144,7 +144,7 @@ const StorageRejectionPanel = () => {
     },
   });
 
-  const events = eventsQuery.data ?? [];
+  const events = useMemo(() => eventsQuery.data ?? [], [eventsQuery.data]);
 
   const { tenantBreakdown, callsiteBreakdown, reasonBreakdown, timeSeries } =
     useMemo(() => {
