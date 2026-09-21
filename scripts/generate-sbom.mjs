@@ -82,7 +82,12 @@ const components = Object.entries(allDeps)
     };
   });
 
-const meta = gitMeta();
+// Deterministic content digest of the dependency set. Replaces the old
+// git-derived timestamp/sha, which differed between a local checkout and
+// CI's shallow clone and made the committed SBOM look permanently stale.
+const depsDigest = createHash("sha256")
+  .update(JSON.stringify({ allDeps, lock: readLockfile() }))
+  .digest("hex");
 const stableSeed = JSON.stringify({
   name: pkg.name,
   version: pkg.version,
@@ -94,7 +99,6 @@ const sbom = {
   serialNumber: `urn:uuid:${deterministicUuid(stableSeed)}`,
   version: 1,
   metadata: {
-    timestamp: meta.isoTs,
     tools: [{ vendor: "MimmoBook", name: "generate-sbom", version: "1.0.0" }],
     component: {
       "bom-ref": `pkg:app/${pkg.name}@${pkg.version ?? "0.0.0"}`,
@@ -102,9 +106,10 @@ const sbom = {
       name: pkg.name,
       version: pkg.version ?? "0.0.0",
       description: pkg.description ?? "MimmoBook reservation management SaaS",
-      properties: [{ name: "git:sha", value: meta.sha }],
+      properties: [{ name: "dependencies:sha256", value: depsDigest }],
     },
   },
+
   components,
 };
 
