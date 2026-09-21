@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:48cf3e8d-bf40-5894-a6f8-02b5f9ed6a5d",
+  "serialNumber": "urn:uuid:7bce5146-6bfb-53b6-b417-4169ace53c88",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-21T06:58:14Z",
+    "timestamp": "2026-09-21T07:20:34Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "9e1b11ee1c8e29ed374a587698b9837d5a20e0fc"
+          "value": "e5392dfe6c5f8360cd5c7e463b11784b44eb4d7d"
         }
       ]
     }
@@ -665,14 +665,6 @@
       "name": "react-resizable-panels",
       "version": "4.6.5",
       "purl": "pkg:npm/react-resizable-panels@4.6.5",
-      "scope": "required"
-    },
-    {
-      "bom-ref": "pkg:npm/react-router@6.30.6",
-      "type": "library",
-      "name": "react-router",
-      "version": "6.30.6",
-      "purl": "pkg:npm/react-router@6.30.6",
       "scope": "required"
     },
     {

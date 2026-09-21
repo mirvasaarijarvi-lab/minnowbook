@@ -39,7 +39,11 @@ This document is the formal SDLC for MimmoBook. It describes how features are de
 
 ## 5. Build and supply chain
 
-- Lockfiles are committed and verified by `lockfile-sync.yml`.
+- Lockfiles are committed and verified by `lockfile-sync.yml`. Dependency changes follow
+  `docs/dependency-update-workflow.md`: lock files are regenerated with
+  `npm install --package-lock-only --ignore-scripts` (no package lifecycle scripts run), and
+  `scripts/ci/check-npm-lockfile-hygiene.mjs` rejects manifest/lockfile drift and any
+  `resolved` URL outside the public registry.
 - All GitHub Actions are pinned by commit SHA, enforced by `workflow-security-regression.yml`.
 - The CycloneDX 1.5 SBOM is regenerated on every dependency change (`scripts/generate-sbom.mjs`) and verified in CI.
 - Dependabot opens PRs for outdated packages; `dependabot-auto-merge.yml` only merges when all required checks pass.

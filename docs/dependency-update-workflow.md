@@ -89,4 +89,6 @@ together in one change. A commit that updates only one lock file will fail CI.
 * `@tanstack/*` router/start packages must move together, and require the
   current major of the validation library (`zod` 4.x) because
   `@tanstack/start-plugin-core` depends on it.
-* `react-router` stays pinned to 6.30.1.
+* `react-router` is no longer a dependency: the app routes entirely through
+  `@tanstack/react-router`. Do not reintroduce it; the removed pin and override
+  existed only to hold back its open-redirect advisories.
