@@ -54,6 +54,9 @@ const COVERED_TABLES = new Set<string>([
   "offers",
   "recurring_blocked_slots",
   "reschedule_requests",
+  // Both covered by security-monitoring-tables-isolation.test.ts.
+  "reservation_access_log",
+  "security_events",
   "reservations",
   "resource_images",
   "resource_opening_hours",
