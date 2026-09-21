@@ -164,14 +164,58 @@ const NOTHING_CONFIGURED =
 const PR_EVENT = String(env.GITHUB_EVENT_NAME || "").startsWith("pull_request");
 const SECRETS_UNAVAILABLE = !REQUIRE_LIVE && (FLAGGED_UNAVAILABLE || PR_EVENT);
 
+/**
+ * Describe the run that is being skipped, so the warning names the pull
+ * request instead of leaving a reader to guess which job produced it. Every
+ * part is optional: a value GitHub did not provide is simply left out.
+ */
+const skipContext = () => {
+  const parts = [];
+  const prNumber =
+    env.GITHUB_EVENT_NAME && String(env.GITHUB_REF_NAME || "").includes("/")
+      ? String(env.GITHUB_REF_NAME).split("/")[0]
+      : "";
+  if (env.GITHUB_REPOSITORY && /^\d+$/.test(prNumber)) {
+    parts.push(`pull request ${env.GITHUB_REPOSITORY}#${prNumber}`);
+  } else if (/^\d+$/.test(prNumber)) {
+    parts.push(`pull request #${prNumber}`);
+  } else if (env.GITHUB_REPOSITORY) {
+    parts.push(`repository ${env.GITHUB_REPOSITORY}`);
+  }
+  if (env.GITHUB_HEAD_REF) parts.push(`branch ${env.GITHUB_HEAD_REF}`);
+  if (env.GITHUB_EVENT_NAME) parts.push(`event ${env.GITHUB_EVENT_NAME}`);
+  if (env.GITHUB_ACTOR) parts.push(`actor ${env.GITHUB_ACTOR}`);
+  if (env.GITHUB_RUN_ID) parts.push(`run ${env.GITHUB_RUN_ID}`);
+  return parts.join(", ");
+};
+
+/** Why this particular run was not allowed to read the stored credentials. */
+const skipCause = () => {
+  if (String(env.GITHUB_ACTOR || "").startsWith("dependabot")) {
+    return "Dependabot pull requests run without access to repository secrets by design.";
+  }
+  if (FLAGGED_UNAVAILABLE) {
+    return "The workflow marked this run as unable to read repository secrets (a Dependabot or forked pull request).";
+  }
+  return "Every credential input arrived empty, which on a pull request means GitHub withheld the repository secrets from this run (a Dependabot or forked pull request, or a re-run of one).";
+};
+
 if (SECRETS_UNAVAILABLE && NOTHING_CONFIGURED) {
   log("");
-  const unavailableWarning =
-    "This run cannot read repository secrets (Dependabot or fork pull request), so no RLS/CORS credentials are available. The live RLS suites will skip and only the offline CORS checks gate this run.";
+  const context = skipContext();
+  const unavailableWarning = [
+    "RLS/CORS credential checks were skipped: this run cannot read repository secrets, so there are no tenant credentials to verify.",
+    context ? `Context: ${context}.` : "",
+    `Why: ${skipCause()}`,
+    "This is not a credential failure: nothing was misconfigured, and a run on a branch in this repository still fails loudly if a credential is missing or wrong.",
+    "Effect: the live RLS suites skip and only the offline CORS checks gate this run, so merge it on the strength of a passing run on the target branch.",
+  ]
+    .filter(Boolean)
+    .join(" ");
   console.log(
     DRY_RUN
       ? `WARN ${unavailableWarning}`
-      : `::warning title=RLS/CORS gate secrets unavailable::${unavailableWarning}`,
+      : `::warning title=RLS/CORS credential checks skipped (secrets unavailable)::${unavailableWarning}`,
   );
   finish(0, "skip");
 }
