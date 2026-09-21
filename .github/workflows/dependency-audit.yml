@@ -336,7 +336,7 @@ jobs:
           echo "Detected package manager: $(cat "$GITHUB_OUTPUT" | grep '^manager=' | cut -d= -f2)"
 
       - name: Set up Node.js
-        # actions/setup-node@v4.1.0
+        # actions/setup-node@v7.1.0
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           # Pinned to Node 22 so the bundled npm (>=10.9) writes the
@@ -521,7 +521,7 @@ jobs:
       # ---------------------------------------------------------------
       - name: Publish dependency audit check run
         if: always() && steps.gate.outcome != 'skipped' && steps.gate.outputs.audit_level != ''
-        # actions/github-script@v7.0.1
+        # actions/github-script@v9.0.1
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         env:
           GATE_AUDIT_LEVEL: ${{ steps.gate.outputs.audit_level }}
@@ -610,7 +610,7 @@ jobs:
       # ---------------------------------------------------------------
       - name: Post audit summary as PR comment
         if: always() && github.event_name == 'pull_request' && hashFiles('audit-comment.md') != ''
-        # actions/github-script@v7.0.1
+        # actions/github-script@v9.0.1
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
@@ -633,7 +633,7 @@ jobs:
 
       - name: Upload audit reports
         if: always()
-        # actions/upload-artifact@v4.4.3
+        # actions/upload-artifact@v7.4.3
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: dependency-audit-reports-${{ steps.detect.outputs.manager }}
@@ -692,8 +692,8 @@ jobs:
       - name: Upload npm SARIF to GitHub code scanning
         if: always() && (steps.detect.outputs.manager == 'npm' || steps.detect.outputs.manager == 'bun-via-npm') && hashFiles('npm-audit.sarif') != '' && steps.validate_npm_sarif.outcome == 'success'
         continue-on-error: true
-        # github/codeql-action/upload-sarif@v3.27.5
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63
+        # github/codeql-action/upload-sarif@v4.38.1
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd
         with:
           sarif_file: npm-audit.sarif
           category: npm-audit
@@ -710,8 +710,8 @@ jobs:
       - name: Upload pnpm SARIF to GitHub code scanning
         if: always() && steps.detect.outputs.manager == 'pnpm' && hashFiles('pnpm-audit.sarif') != '' && steps.validate_pnpm_sarif.outcome == 'success'
         continue-on-error: true
-        # github/codeql-action/upload-sarif@v3.27.5
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63
+        # github/codeql-action/upload-sarif@v4.38.1
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd
         with:
           sarif_file: pnpm-audit.sarif
           category: pnpm-audit
@@ -738,8 +738,8 @@ jobs:
       - name: Upload yarn SARIF to GitHub code scanning
         if: always() && steps.detect.outputs.manager == 'yarn' && hashFiles('yarn-audit.sarif') != '' && steps.validate_yarn_sarif.outcome == 'success'
         continue-on-error: true
-        # github/codeql-action/upload-sarif@v3.27.5
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63
+        # github/codeql-action/upload-sarif@v4.38.1
+        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd
         with:
           sarif_file: yarn-audit.sarif
           category: yarn-audit
