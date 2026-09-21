@@ -366,6 +366,9 @@ const AuditLogPanel = () => {
                   <SelectItem value="INSERT">{t("admin.created")}</SelectItem>
                   <SelectItem value="UPDATE">{t("admin.updated")}</SelectItem>
                   <SelectItem value="DELETE">{t("admin.deleted")}</SelectItem>
+                  <SelectItem value="booking_submission">
+                    {t("admin.bookingSubmission")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
