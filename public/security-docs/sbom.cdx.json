@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:7bce5146-6bfb-53b6-b417-4169ace53c88",
+  "serialNumber": "urn:uuid:356d19da-1443-5ef5-9a12-e3224fb77632",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-21T07:20:34Z",
+    "timestamp": "2026-09-21T07:55:59Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "e5392dfe6c5f8360cd5c7e463b11784b44eb4d7d"
+          "value": "ed84088df528ac97e29f0fe848c650b9a5bf48fb"
         }
       ]
     }
@@ -68,11 +68,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.20.0",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.23.1",
       "type": "library",
       "name": "@lovable.dev/vite-tanstack-config",
-      "version": "2.20.0",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.20.0",
+      "version": "2.23.1",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.23.1",
       "scope": "optional"
     },
     {

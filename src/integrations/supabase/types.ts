@@ -3431,6 +3431,17 @@ export type Database = {
           privilege: string
         }[]
       }
+      audit_reservation_authorization: {
+        Args: never
+        Returns: {
+          check_name: string
+          detail: string
+          object_kind: string
+          object_name: string
+          severity: string
+          status: string
+        }[]
+      }
       claim_access_code: {
         Args: {
           p_access_code_id: string
@@ -3558,6 +3569,19 @@ export type Database = {
           is_active: boolean
           name: string
           slug: string
+        }[]
+      }
+      get_public_availability_counts: {
+        Args: {
+          p_from: string
+          p_reservation_types?: string[]
+          p_site_id?: string
+          p_tenant_id: string
+          p_to: string
+        }
+        Returns: {
+          day: string
+          reservation_count: number
         }[]
       }
       get_published_reviews: {

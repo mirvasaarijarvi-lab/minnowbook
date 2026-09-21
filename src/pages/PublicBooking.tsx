@@ -177,7 +177,7 @@ const AvailabilityCalendar = ({
     return [reservationType];
   }, [reservationType]);
 
-  const { data: monthReservations = [] } = useQuery({
+  const { data: dayCounts = {} } = useQuery({
     queryKey: [
       "public-availability",
       tenantId,
@@ -187,34 +187,26 @@ const AvailabilityCalendar = ({
       reservationType,
     ],
     queryFn: async () => {
-      let query = supabase
-        .from("reservations")
-        .select("date, status, reservation_type")
-        .eq("tenant_id", tenantId)
-        .gte("date", monthStart)
-        .lte("date", monthEnd)
-        .in("status", ["pending", "confirmed"]);
-      if (mappedTypes.length > 0) {
-        query = query.in("reservation_type", mappedTypes);
-      }
-      if (siteId) {
-        query = query.eq("site_id", siteId);
-      }
-      const { data, error } = await query;
+      // Visitors only need per-day counts, never reservation rows.
+      const { data, error } = await supabase.rpc(
+        "get_public_availability_counts",
+        {
+          p_tenant_id: tenantId,
+          p_from: monthStart,
+          p_to: monthEnd,
+          p_reservation_types: mappedTypes.length > 0 ? mappedTypes : undefined,
+          p_site_id: siteId ?? undefined,
+        },
+      );
       if (error) throw error;
-      return data ?? [];
+      const counts: Record<string, number> = {};
+      (data ?? []).forEach((row) => {
+        counts[row.day] = row.reservation_count;
+      });
+      return counts;
     },
     enabled: !!tenantId && mappedTypes.length > 0,
   });
-
-  // Count reservations per day
-  const dayCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    monthReservations.forEach((r) => {
-      counts[r.date] = (counts[r.date] || 0) + 1;
-    });
-    return counts;
-  }, [monthReservations]);
 
   // Use the max threshold across all types as the general full limit
   const fullThreshold = useMemo(() => {
