@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback, ReactNode } from "react";
-import { Session } from "@supabase/supabase-js";
+import { Session, User } from "@supabase/supabase-js";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
