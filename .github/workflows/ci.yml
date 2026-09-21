@@ -198,6 +198,36 @@ jobs:
       - name: Build
         run: bunx vite build
 
+      # Every build publishes a CycloneDX SBOM for the exact dependency set
+      # that produced it, and fails if the committed copies have drifted.
+      - name: Generate SBOM for current dependency set
+        run: |
+          set -euo pipefail
+          node scripts/generate-sbom.mjs
+          if ! git diff --quiet -- docs/sbom.cdx.json docs/sbom.cdx.json.sha256 \
+            public/security-docs/sbom.cdx.json public/security-docs/sbom.cdx.json.sha256; then
+            echo "::error::SBOM is out of date. Run 'node scripts/generate-sbom.mjs' and commit."
+            git diff --stat -- docs/sbom.cdx.json public/security-docs/sbom.cdx.json
+            exit 1
+          fi
+          {
+            echo "## SBOM (CycloneDX 1.5)"
+            echo ""
+            echo "- Components: $(node -e 'console.log(JSON.parse(require("fs").readFileSync("docs/sbom.cdx.json","utf8")).components.length)')"
+            echo "- SHA-256: \`$(cut -d' ' -f1 docs/sbom.cdx.json.sha256)\`"
+          } >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+
+      - name: Upload SBOM artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sbom-cyclonedx-run-${{ github.run_id }}
+          path: |
+            docs/sbom.cdx.json
+            docs/sbom.cdx.json.sha256
+          if-no-files-found: error
+          retention-days: 90
+
       - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v7
