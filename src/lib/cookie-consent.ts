@@ -105,3 +105,11 @@ export function hasAnalyticsConsent(): boolean {
 export function hasMarketingConsent(): boolean {
   return readConsent()?.categories.marketing === true;
 }
+
+/**
+ * Opens the cookie preferences dialog rendered by CookieConsent. Lives here so
+ * the component module only exports a component. See docs/linting-policy.md.
+ */
+export const openCookieSettings = () => {
+  window.dispatchEvent(new CustomEvent("mimmobook:open-cookie-settings"));
+};

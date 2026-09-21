@@ -12,10 +12,6 @@ import {
   DEFAULT_CATEGORIES,
 } from "@/lib/cookie-consent";
 
-export const openCookieSettings = () => {
-  window.dispatchEvent(new CustomEvent("mimmobook:open-cookie-settings"));
-};
-
 const CookieConsent = forwardRef<HTMLDivElement>(
   function CookieConsent(_props, ref) {
     const t = useT();
