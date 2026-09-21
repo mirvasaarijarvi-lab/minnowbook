@@ -258,7 +258,7 @@ jobs:
 
 
       - name: Open or update the tenant access denial issue
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           DENIED_TITLE: ${{ needs.rls-cors-tests.outputs.denied_title }}
           DENIED_REASON: ${{ needs.rls-cors-tests.outputs.denied_reason }}
