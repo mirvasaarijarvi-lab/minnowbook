@@ -38,14 +38,23 @@ describe("npm lockfile hygiene: specifier drift", () => {
     (l.packages[""] as any).dependencies.zod = "3.25.76";
     const drift = collectSpecifierDrift(pkg, l);
     expect(drift).toHaveLength(1);
-    expect(drift[0]).toMatchObject({ name: "zod", manifest: "4.6.5", lockfile: "3.25.76" });
+    expect(drift[0]).toMatchObject({
+      name: "zod",
+      manifest: "4.6.5",
+      lockfile: "3.25.76",
+    });
   });
 
   it("reports a dependency missing from the lockfile", () => {
     const l = lock();
     delete (l.packages[""] as any).dependencies.react;
     expect(collectSpecifierDrift(pkg, l)).toEqual([
-      { field: "dependencies", name: "react", manifest: "^19.0.0", lockfile: null },
+      {
+        field: "dependencies",
+        name: "react",
+        manifest: "^19.0.0",
+        lockfile: null,
+      },
     ]);
   });
 
@@ -53,7 +62,12 @@ describe("npm lockfile hygiene: specifier drift", () => {
     const l = lock();
     (l.packages[""] as any).devDependencies.leftover = "1.0.0";
     expect(collectSpecifierDrift(pkg, l)).toEqual([
-      { field: "devDependencies", name: "leftover", manifest: null, lockfile: "1.0.0" },
+      {
+        field: "devDependencies",
+        name: "leftover",
+        manifest: null,
+        lockfile: "1.0.0",
+      },
     ]);
   });
 });

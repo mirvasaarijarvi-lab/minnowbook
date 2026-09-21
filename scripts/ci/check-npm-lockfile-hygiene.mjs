@@ -50,7 +50,11 @@ export function collectBadRegistryUrls(npmLockJson) {
       continue;
     }
     if (!ALLOWED_REGISTRY_HOSTS.includes(host)) {
-      bad.push({ path, url, reason: `host "${host}" is not a public registry` });
+      bad.push({
+        path,
+        url,
+        reason: `host "${host}" is not a public registry`,
+      });
     }
   }
   return bad;
@@ -60,7 +64,11 @@ export function collectBadRegistryUrls(npmLockJson) {
 export function collectSpecifierDrift(pkgJson, npmLockJson) {
   const root = npmLockJson.packages?.[""] ?? {};
   const drifts = [];
-  for (const field of ["dependencies", "devDependencies", "optionalDependencies"]) {
+  for (const field of [
+    "dependencies",
+    "devDependencies",
+    "optionalDependencies",
+  ]) {
     const expected = pkgJson[field] ?? {};
     const actual = root[field] ?? {};
     const names = new Set([...Object.keys(expected), ...Object.keys(actual)]);
@@ -68,7 +76,12 @@ export function collectSpecifierDrift(pkgJson, npmLockJson) {
       const want = expected[name];
       const got = actual[name];
       if (want === got) continue;
-      drifts.push({ field, name, manifest: want ?? null, lockfile: got ?? null });
+      drifts.push({
+        field,
+        name,
+        manifest: want ?? null,
+        lockfile: got ?? null,
+      });
     }
   }
   return drifts;
@@ -102,7 +115,8 @@ export function collectProblems({ pkgJson, npmLockJson } = {}) {
   };
 }
 
-const FIX = "npm install --package-lock-only --ignore-scripts --no-audit --no-fund";
+const FIX =
+  "npm install --package-lock-only --ignore-scripts --no-audit --no-fund";
 
 function main() {
   const asJson = process.argv.includes("--json");
@@ -114,7 +128,9 @@ function main() {
   }
 
   if (result.missingLockfile) {
-    console.error("::error file=package-lock.json::package-lock.json is missing.");
+    console.error(
+      "::error file=package-lock.json::package-lock.json is missing.",
+    );
     console.error(`Fix: run \`${FIX}\` and commit the result.`);
     process.exit(1);
   }
@@ -140,7 +156,9 @@ function main() {
       "Sandbox-internal registry URLs must be rewritten to registry.npmjs.org, and",
     );
     console.error("declared ranges must match package.json exactly.");
-    console.error(`Fix: run \`${FIX}\` on a machine using the public registry, then commit.`);
+    console.error(
+      `Fix: run \`${FIX}\` on a machine using the public registry, then commit.`,
+    );
     process.exit(1);
   }
 
@@ -149,6 +167,9 @@ function main() {
   );
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
+if (
+  process.argv[1] &&
+  resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))
+) {
   main();
 }
