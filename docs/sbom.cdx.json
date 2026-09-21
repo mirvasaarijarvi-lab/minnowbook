@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:fa7333f8-2d61-5fad-ae68-b8cc6c6af800",
+  "serialNumber": "urn:uuid:963c77b6-8531-5dd6-84a9-328f37bef274",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "fa3184ab39cc6a0ffa462c002e89d50cedf49657afd0117a12a1c123ab2b185f"
+          "value": "d3e593f4eb36f005978a60ad7b7c799c0e2ce4de77411411e8c7a617d61771a9"
         }
       ]
     }
@@ -755,11 +755,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/zod@3.25.76",
+      "bom-ref": "pkg:npm/zod@4.6.5",
       "type": "library",
       "name": "zod",
-      "version": "3.25.76",
-      "purl": "pkg:npm/zod@3.25.76",
+      "version": "4.6.5",
+      "purl": "pkg:npm/zod@4.6.5",
       "scope": "required"
     }
   ]
