@@ -6,7 +6,28 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist", ".output", ".vinxi", "supabase/functions"] },
+  {
+    // Build output, generated reports and third-party caches must never be
+    // linted. In CI the Deno module cache is restored into
+    // `${{ github.workspace }}/.deno-cache` BEFORE the lint step, so without
+    // this ignore ESLint walked tens of thousands of downloaded remote
+    // modules and the "Lint (ESLint)" step appeared to hang for the rest of
+    // the job's 60-minute budget.
+    ignores: [
+      "dist",
+      ".output",
+      ".vinxi",
+      ".deno-cache",
+      ".cache",
+      "coverage",
+      "test-reports",
+      "playwright-report",
+      "blog-jsonld-report",
+      "reports",
+      "drizzle/**/*.sql",
+      "supabase/functions",
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
