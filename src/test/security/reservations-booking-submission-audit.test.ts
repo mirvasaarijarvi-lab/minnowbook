@@ -92,183 +92,178 @@ async function submissionAuditFor(
   return (data as AuditRow | null) ?? null;
 }
 
-describe.runIf(canRun)(
-  "booking submission audit trail (live)",
-  () => {
-    beforeAll(async () => {
-      ctx.service = newService();
+describe.runIf(canRun)("booking submission audit trail (live)", () => {
+  beforeAll(async () => {
+    ctx.service = newService();
 
-      const { data: userRes, error: userErr } =
-        await ctx.service.auth.admin.createUser({
-          email: `ci+submit-audit-${randomUUID().slice(0, 8)}@mimmobook.test`,
-          password: `Ci-Audit-${randomUUID()}-Z9!`,
-          email_confirm: true,
-        });
-      if (userErr || !userRes.user)
-        throw userErr ?? new Error("createUser failed");
-      ctx.ownerId = userRes.user.id;
-      ctx.cleanupUsers.push(ctx.ownerId);
-
-      const tenantId = randomUUID();
-      const shortId = tenantId.slice(0, 8);
-      const { error: tErr } = await ctx.service.from("tenants").insert({
-        id: tenantId,
-        name: `TEST CI submit-audit ${shortId}`,
-        slug: `ci-submit-audit-${shortId}`,
-        tier: "basic",
-        allowed_reservation_types: ["restaurant"],
-        owner_user_id: ctx.ownerId,
-        subscription_status: "trialing",
-        is_active: true,
+    const { data: userRes, error: userErr } =
+      await ctx.service.auth.admin.createUser({
+        email: `ci+submit-audit-${randomUUID().slice(0, 8)}@mimmobook.test`,
+        password: `Ci-Audit-${randomUUID()}-Z9!`,
+        email_confirm: true,
       });
-      if (tErr) throw tErr;
-      ctx.tenantId = tenantId;
-      ctx.cleanupTenants.push(tenantId);
+    if (userErr || !userRes.user)
+      throw userErr ?? new Error("createUser failed");
+    ctx.ownerId = userRes.user.id;
+    ctx.cleanupUsers.push(ctx.ownerId);
 
-      await ctx.service.from("tenant_users").insert({
-        tenant_id: tenantId,
-        user_id: ctx.ownerId,
-        role: "owner",
-        is_approved: true,
-      });
-    }, 60_000);
-
-    afterAll(async () => {
-      if (!ctx.service) return;
-      const swallow = async (p: PromiseLike<unknown>) => {
-        try {
-          await p;
-        } catch {
-          /* best-effort */
-        }
-      };
-      for (const t of ctx.cleanupTenants) {
-        await swallow(ctx.service.from("audit_log").delete().eq("tenant_id", t));
-        await swallow(
-          ctx.service.from("reservations").delete().eq("tenant_id", t),
-        );
-        await swallow(
-          ctx.service.from("tenant_users").delete().eq("tenant_id", t),
-        );
-        await swallow(ctx.service.from("tenants").delete().eq("id", t));
-      }
-      for (const u of ctx.cleanupUsers) {
-        await swallow(ctx.service.auth.admin.deleteUser(u));
-      }
-    }, 60_000);
-
-    it("records a clean public submission with the system-assigned values", async () => {
-      const payload = buildSubmission("clean");
-      const { error } = await newAnon().from("reservations").insert(payload);
-      expect(error, `submission must succeed: ${error?.message}`).toBeNull();
-
-      const reservationId = await reservationIdFor(payload.guest_name);
-      expect(reservationId).toBeTruthy();
-      const entry = await submissionAuditFor(reservationId!);
-      expect(entry, "booking_submission audit entry must exist").toBeTruthy();
-      if (!entry) return;
-
-      const data = entry.new_data ?? {};
-      expect(data.source).toBe("public_form");
-      expect(data.trusted).toBe(false);
-      const assigned = data.system_assigned as Record<string, unknown>;
-      expect(assigned).toBeTruthy();
-      expect(assigned.status).toBe("pending");
-      expect(assigned.is_invoiced).toBe(false);
-      expect(assigned.is_checked_in).toBe(false);
-      expect(assigned.price_eur).toBeNull();
-      expect(assigned.discount_type).toBeNull();
-      expect(assigned.staff_notes).toBeNull();
-      expect(assigned.created_by).toBeNull();
-      expect(data.discarded_fields).toEqual([]);
+    const tenantId = randomUUID();
+    const shortId = tenantId.slice(0, 8);
+    const { error: tErr } = await ctx.service.from("tenants").insert({
+      id: tenantId,
+      name: `TEST CI submit-audit ${shortId}`,
+      slug: `ci-submit-audit-${shortId}`,
+      tier: "basic",
+      allowed_reservation_types: ["restaurant"],
+      owner_user_id: ctx.ownerId,
+      subscription_status: "trialing",
+      is_active: true,
     });
+    if (tErr) throw tErr;
+    ctx.tenantId = tenantId;
+    ctx.cleanupTenants.push(tenantId);
 
-    it("records every discarded staff-owned field an anonymous caller tried to set", async () => {
-      const payload = {
-        ...buildSubmission("hostile"),
-        status: "confirmed",
-        price_eur: 0,
-        discount_type: "percentage",
-        discount_value: 100,
-        staff_notes: "SHOULD_NOT_APPEAR_staff",
-        internal_notes: "SHOULD_NOT_APPEAR_internal",
-        is_invoiced: true,
-      };
-      const { error } = await newAnon().from("reservations").insert(payload);
-      expect(error, `submission must succeed: ${error?.message}`).toBeNull();
-
-      const reservationId = await reservationIdFor(payload.guest_name);
-      expect(reservationId).toBeTruthy();
-      const entry = await submissionAuditFor(reservationId!);
-      expect(entry).toBeTruthy();
-      if (!entry) return;
-
-      const data = entry.new_data ?? {};
-      const discarded = (data.discarded_fields as string[]) ?? [];
-      for (const field of [
-        "price_eur",
-        "discount_type",
-        "discount_value",
-        "status",
-        "is_invoiced",
-        "staff_notes",
-        "internal_notes",
-      ]) {
-        expect(discarded, `${field} must be recorded as discarded`).toContain(
-          field,
-        );
-      }
-      // The submitted (rejected) values are preserved for review.
-      const submitted = data.submitted_values as Record<string, unknown>;
-      expect(submitted.status).toBe("confirmed");
-      expect(Number(submitted.discount_value)).toBe(100);
-      // ...but the stored row still carries the safe values.
-      const { data: row } = await ctx.service
-        .from("reservations")
-        .select("status, price_eur, staff_notes, is_invoiced")
-        .eq("id", reservationId!)
-        .maybeSingle();
-      const stored = row as Record<string, unknown> | null;
-      expect(stored?.status).toBe("pending");
-      expect(stored?.price_eur).toBeNull();
-      expect(stored?.staff_notes).toBeNull();
-      expect(stored?.is_invoiced).toBe(false);
+    await ctx.service.from("tenant_users").insert({
+      tenant_id: tenantId,
+      user_id: ctx.ownerId,
+      role: "owner",
+      is_approved: true,
     });
+  }, 60_000);
 
-    it("records a trusted server-side submission as source=server", async () => {
-      const payload = {
-        ...buildSubmission("server"),
-        price_eur: 120,
-        original_price_eur: 120,
-      };
-      const { error } = await ctx.service.from("reservations").insert(payload);
-      expect(error, `server insert must succeed: ${error?.message}`).toBeNull();
-
-      const reservationId = await reservationIdFor(payload.guest_name);
-      expect(reservationId).toBeTruthy();
-      const entry = await submissionAuditFor(reservationId!);
-      expect(entry).toBeTruthy();
-      const data = entry?.new_data ?? {};
-      expect(data.source).toBe("server");
-      expect(data.trusted).toBe(true);
-      expect(data.discarded_fields).toEqual([]);
-      expect((data.system_assigned as Record<string, unknown>) ?? {}).toEqual(
-        {},
+  afterAll(async () => {
+    if (!ctx.service) return;
+    const swallow = async (p: PromiseLike<unknown>) => {
+      try {
+        await p;
+      } catch {
+        /* best-effort */
+      }
+    };
+    for (const t of ctx.cleanupTenants) {
+      await swallow(ctx.service.from("audit_log").delete().eq("tenant_id", t));
+      await swallow(
+        ctx.service.from("reservations").delete().eq("tenant_id", t),
       );
-    });
+      await swallow(
+        ctx.service.from("tenant_users").delete().eq("tenant_id", t),
+      );
+      await swallow(ctx.service.from("tenants").delete().eq("id", t));
+    }
+    for (const u of ctx.cleanupUsers) {
+      await swallow(ctx.service.auth.admin.deleteUser(u));
+    }
+  }, 60_000);
 
-    it("never exposes booking_submission entries to anonymous callers", async () => {
-      const anon = newAnon();
-      const { data, error } = await anon
-        .from("audit_log")
-        .select("id, action, new_data")
-        .eq("action", "booking_submission")
-        .limit(5);
-      if (error) {
-        expect(error.message).toBeTruthy();
-        return;
-      }
-      expect(data ?? []).toHaveLength(0);
-    });
-  },
-);
+  it("records a clean public submission with the system-assigned values", async () => {
+    const payload = buildSubmission("clean");
+    const { error } = await newAnon().from("reservations").insert(payload);
+    expect(error, `submission must succeed: ${error?.message}`).toBeNull();
+
+    const reservationId = await reservationIdFor(payload.guest_name);
+    expect(reservationId).toBeTruthy();
+    const entry = await submissionAuditFor(reservationId!);
+    expect(entry, "booking_submission audit entry must exist").toBeTruthy();
+    if (!entry) return;
+
+    const data = entry.new_data ?? {};
+    expect(data.source).toBe("public_form");
+    expect(data.trusted).toBe(false);
+    const assigned = data.system_assigned as Record<string, unknown>;
+    expect(assigned).toBeTruthy();
+    expect(assigned.status).toBe("pending");
+    expect(assigned.is_invoiced).toBe(false);
+    expect(assigned.is_checked_in).toBe(false);
+    expect(assigned.price_eur).toBeNull();
+    expect(assigned.discount_type).toBeNull();
+    expect(assigned.staff_notes).toBeNull();
+    expect(assigned.created_by).toBeNull();
+    expect(data.discarded_fields).toEqual([]);
+  });
+
+  it("records every discarded staff-owned field an anonymous caller tried to set", async () => {
+    const payload = {
+      ...buildSubmission("hostile"),
+      status: "confirmed",
+      price_eur: 0,
+      discount_type: "percentage",
+      discount_value: 100,
+      staff_notes: "SHOULD_NOT_APPEAR_staff",
+      internal_notes: "SHOULD_NOT_APPEAR_internal",
+      is_invoiced: true,
+    };
+    const { error } = await newAnon().from("reservations").insert(payload);
+    expect(error, `submission must succeed: ${error?.message}`).toBeNull();
+
+    const reservationId = await reservationIdFor(payload.guest_name);
+    expect(reservationId).toBeTruthy();
+    const entry = await submissionAuditFor(reservationId!);
+    expect(entry).toBeTruthy();
+    if (!entry) return;
+
+    const data = entry.new_data ?? {};
+    const discarded = (data.discarded_fields as string[]) ?? [];
+    for (const field of [
+      "price_eur",
+      "discount_type",
+      "discount_value",
+      "status",
+      "is_invoiced",
+      "staff_notes",
+      "internal_notes",
+    ]) {
+      expect(discarded, `${field} must be recorded as discarded`).toContain(
+        field,
+      );
+    }
+    // The submitted (rejected) values are preserved for review.
+    const submitted = data.submitted_values as Record<string, unknown>;
+    expect(submitted.status).toBe("confirmed");
+    expect(Number(submitted.discount_value)).toBe(100);
+    // ...but the stored row still carries the safe values.
+    const { data: row } = await ctx.service
+      .from("reservations")
+      .select("status, price_eur, staff_notes, is_invoiced")
+      .eq("id", reservationId!)
+      .maybeSingle();
+    const stored = row as Record<string, unknown> | null;
+    expect(stored?.status).toBe("pending");
+    expect(stored?.price_eur).toBeNull();
+    expect(stored?.staff_notes).toBeNull();
+    expect(stored?.is_invoiced).toBe(false);
+  });
+
+  it("records a trusted server-side submission as source=server", async () => {
+    const payload = {
+      ...buildSubmission("server"),
+      price_eur: 120,
+      original_price_eur: 120,
+    };
+    const { error } = await ctx.service.from("reservations").insert(payload);
+    expect(error, `server insert must succeed: ${error?.message}`).toBeNull();
+
+    const reservationId = await reservationIdFor(payload.guest_name);
+    expect(reservationId).toBeTruthy();
+    const entry = await submissionAuditFor(reservationId!);
+    expect(entry).toBeTruthy();
+    const data = entry?.new_data ?? {};
+    expect(data.source).toBe("server");
+    expect(data.trusted).toBe(true);
+    expect(data.discarded_fields).toEqual([]);
+    expect((data.system_assigned as Record<string, unknown>) ?? {}).toEqual({});
+  });
+
+  it("never exposes booking_submission entries to anonymous callers", async () => {
+    const anon = newAnon();
+    const { data, error } = await anon
+      .from("audit_log")
+      .select("id, action, new_data")
+      .eq("action", "booking_submission")
+      .limit(5);
+    if (error) {
+      expect(error.message).toBeTruthy();
+      return;
+    }
+    expect(data ?? []).toHaveLength(0);
+  });
+});
