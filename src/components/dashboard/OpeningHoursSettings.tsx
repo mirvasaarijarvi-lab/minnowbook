@@ -101,6 +101,7 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
   });
 
   const hasSiteOverrides = isSiteLevel && (existingHours?.length ?? 0) > 0;
+  const reservationTypesKey = reservationTypes.join(",");
 
   // Populate state from DB — use site hours if they exist, otherwise fall back to tenant defaults
   useEffect(() => {

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useT } from "@/contexts/I18nContext";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 /**
  * Hook that returns a function to get the display label for a resource type.
@@ -27,16 +27,21 @@ export const useResourceTypeLabel = () => {
     enabled: !!tenantId,
   });
 
-  const customNames =
-    (settings?.resource_type_names as Record<string, string>) ?? {};
+  const customNames = useMemo(
+    () => (settings?.resource_type_names as Record<string, string>) ?? {},
+    [settings?.resource_type_names],
+  );
 
-  const defaultLabels: Record<string, string> = {
-    restaurant: t("dashboard.restaurant"),
-    venue: t("dashboard.venue"),
-    guesthouse: t("dashboard.guesthouse"),
-    hotel: t("dashboard.hotel"),
-    wellness: t("dashboard.wellness"),
-  };
+  const defaultLabels = useMemo<Record<string, string>>(
+    () => ({
+      restaurant: t("dashboard.restaurant"),
+      venue: t("dashboard.venue"),
+      guesthouse: t("dashboard.guesthouse"),
+      hotel: t("dashboard.hotel"),
+      wellness: t("dashboard.wellness"),
+    }),
+    [t],
+  );
 
   /** Returns the custom name if set, otherwise the translated default */
   const typeLabel = useCallback(
