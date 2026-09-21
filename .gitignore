@@ -31,3 +31,6 @@ blog-jsonld-report/
 
 # Offer kitchen mapping test artifact
 offer-kitchen-report/
+
+# ESLint cache (CI restores/saves this to cut repeat lint time)
+.cache/
