@@ -85,6 +85,13 @@ const actionBadgeConfig: Record<
     labelKey: "admin.deleted",
     color: "border-destructive/30 text-destructive bg-destructive/10",
   },
+  // Written by the database when a booking arrives through the public form
+  // or the server booking function: records which fields the system assigned.
+  booking_submission: {
+    icon: ShieldCheck,
+    labelKey: "admin.bookingSubmission",
+    color: "border-muted-foreground/30 text-muted-foreground bg-muted",
+  },
 };
 
 const tableLabels: Record<string, string> = {
