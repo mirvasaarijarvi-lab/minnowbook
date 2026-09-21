@@ -1,4 +1,5 @@
-import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
+import SEOHead from "@/components/SEOHead";
+import { breadcrumbSchema } from "@/lib/seo-schemas";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import SupportContactForm from "@/components/SupportContactForm";

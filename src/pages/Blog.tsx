@@ -4,10 +4,8 @@ import { ArrowRight, Clock, CalendarDays } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import SupportChatWidget from "@/components/SupportChatWidget";
-import SEOHead, {
-  organizationSchema,
-  breadcrumbSchema,
-} from "@/components/SEOHead";
+import SEOHead from "@/components/SEOHead";
+import { organizationSchema, breadcrumbSchema } from "@/lib/seo-schemas";
 import { useT } from "@/contexts/I18nContext";
 
 const blogPosts = [

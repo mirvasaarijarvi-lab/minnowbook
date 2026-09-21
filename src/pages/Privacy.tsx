@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import SEOHead, { breadcrumbSchema } from "@/components/SEOHead";
+import SEOHead from "@/components/SEOHead";
+import { breadcrumbSchema } from "@/lib/seo-schemas";
 import { Link } from "@/lib/router-compat";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
