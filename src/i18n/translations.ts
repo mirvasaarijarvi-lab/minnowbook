@@ -2758,6 +2758,7 @@ const en: TranslationKeys = {
   "admin.created": "Created",
   "admin.updated": "Updated",
   "admin.deleted": "Deleted",
+  "admin.bookingSubmission": "Booking submitted",
   "admin.fieldsChanged": "fields changed",
   "admin.revert": "Revert",
   "admin.revertConfirm": "Revert this change?",
