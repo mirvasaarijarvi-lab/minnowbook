@@ -220,12 +220,13 @@ describe.runIf(canRun)(
           return;
         }
         const { row } = await readBack(payload.guest_name, "id, status");
-        expect(row, `status=${status}: row expected after accepted insert`)
-          .toBeTruthy();
         expect(
-          row?.status,
-          `status=${status} must not persist`,
-        ).not.toBe(status);
+          row,
+          `status=${status}: row expected after accepted insert`,
+        ).toBeTruthy();
+        expect(row?.status, `status=${status} must not persist`).not.toBe(
+          status,
+        );
         expect(row?.status).toBe("pending");
       },
     );
