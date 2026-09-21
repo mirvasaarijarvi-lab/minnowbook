@@ -661,6 +661,12 @@ const ReportsPanel = () => {
 
   /* ── CSV Export ──────────────────────────────────────── */
   const handleExportCSV = () => {
+    logReservationAccess({
+      tenantId,
+      action: "export",
+      recordCount: reservations.length,
+      siteId: effectiveSiteId ?? null,
+    });
     const headers = [
       t("common.date"),
       t("reports.guest"),
@@ -765,6 +771,12 @@ const ReportsPanel = () => {
 
   /* ── PDF Export ──────────────────────────────────────── */
   const handleExportPDF = () => {
+    logReservationAccess({
+      tenantId,
+      action: "export",
+      recordCount: reservations.length,
+      siteId: effectiveSiteId ?? null,
+    });
     const fmtEur = (v: number) => `${v.toFixed(2)} EUR`;
     const buckets = eachDayOrBucketLabels();
     downloadReportPdf({
@@ -946,6 +958,12 @@ const ReportsPanel = () => {
       </table>
     </body></html>`);
     pw.document.close();
+    logReservationAccess({
+      tenantId,
+      action: "print",
+      recordCount: reservations.length,
+      siteId: effectiveSiteId ?? null,
+    });
     pw.print();
   };
 
