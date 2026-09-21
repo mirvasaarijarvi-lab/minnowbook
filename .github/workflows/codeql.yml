@@ -56,13 +56,13 @@ jobs:
     steps:
       - name: Checkout
         # actions/checkout@v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
 
       - name: Initialize CodeQL
         # github/codeql-action/init@v3.27.5
-        uses: github/codeql-action/init@1c5b675653bb5c22dbe9b12b556ec555138e09fd
+        uses: github/codeql-action/init@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
         with:
           languages: ${{ matrix.language }}
           queries: security-and-quality
@@ -76,7 +76,7 @@ jobs:
         # SARIF artifact is produced; only the upload step is best-effort.
         continue-on-error: true
         # github/codeql-action/analyze@v3.27.5
-        uses: github/codeql-action/analyze@1c5b675653bb5c22dbe9b12b556ec555138e09fd
+        uses: github/codeql-action/analyze@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
         with:
           category: "/language:${{ matrix.language }}"
           upload: always

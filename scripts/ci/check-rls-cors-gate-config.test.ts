@@ -100,8 +100,10 @@ describe("check-rls-cors-gate-config", () => {
 
   it("fails when the run logs are no longer uploaded", () => {
     const r = run(
+      // Version-agnostic: the pin is owned by .github/action-versions.json,
+      // so match the action name and ignore whatever ref it carries.
       fixture((y) =>
-        y.replaceAll("actions/upload-artifact@v4", "actions/checkout@v5"),
+        y.replace(/actions\/upload-artifact@\S+/g, "actions/checkout@v5"),
       ),
     );
     expect(r.code).toBe(1);
@@ -303,7 +305,7 @@ describe("check-rls-cors-gate-config", () => {
   it("fails when the reporting step is removed", () => {
     const r = run(
       fixture((y) =>
-        y.replace("actions/github-script@v7", "actions/checkout@v5"),
+        y.replace(/actions\/github-script@\S+/, "actions/checkout@v5"),
       ),
     );
     expect(r.code).toBe(1);

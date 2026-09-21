@@ -34,15 +34,25 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
+
+      # First gate in the pipeline: every reusable action used anywhere in
+      # .github/ must be pinned to the single approved commit recorded in
+      # .github/action-versions.json. Catches mutable refs (@main, @v5),
+      # deprecated majors, missing version comments, and the same action
+      # running at two different versions in different jobs (the mismatch
+      # that previously broke the CodeQL wrap-up step). Runs before Bun is
+      # installed so a workflow-version problem fails in seconds.
+      - name: Validate GitHub Action versions (pins + consistency)
+        run: node scripts/ci/check-action-versions.mjs
 
       - name: Setup Bun
         uses: ./.github/actions/setup-bun-with-diagnostics
 
       - name: Cache Bun dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: |
             ~/.bun/install/cache
@@ -118,7 +128,7 @@ jobs:
 
       - name: Upload schema-gate report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: schema-gate-report-run-${{ github.run_id }}
           path: test-reports/vitest-schema/
@@ -137,7 +147,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
 
@@ -145,7 +155,7 @@ jobs:
         uses: ./.github/actions/setup-bun-with-diagnostics
 
       - name: Cache Bun dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: |
             ~/.bun/install/cache
@@ -217,7 +227,7 @@ jobs:
 
       - name: Upload SBOM artifact
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: sbom-cyclonedx-run-${{ github.run_id }}
           path: |
@@ -228,7 +238,7 @@ jobs:
 
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-reports-vitest-run-${{ github.run_id }}
           path: |

@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
 
@@ -58,7 +58,7 @@ jobs:
       # observations).
       - name: Restore flake history
         id: restore_history
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         continue-on-error: true
         with:
           name: security-concurrency-flake-history
@@ -95,7 +95,7 @@ jobs:
 
       - name: Upload attempt JUnit reports
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: security-concurrency-junit
           path: test-reports/security-concurrency/
@@ -103,7 +103,7 @@ jobs:
 
       - name: Upload updated flake history (drives next run)
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: security-concurrency-flake-history
           path: .github/security-concurrency-flake-history.jsonl

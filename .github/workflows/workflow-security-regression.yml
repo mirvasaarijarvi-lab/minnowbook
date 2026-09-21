@@ -67,7 +67,7 @@ jobs:
     steps:
       - name: Checkout
         # actions/checkout@v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           # Need full history so we can diff against the PR base ref
           # to enumerate which dependabot/auto-merge files actually
@@ -77,7 +77,7 @@ jobs:
 
       - name: Set up Python
         # actions/setup-python@v5.3.0
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.11"
 
@@ -131,13 +131,13 @@ jobs:
     steps:
       - name: Checkout
         # actions/checkout@v4.2.2
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
 
       - name: Set up Python
         # actions/setup-python@v5.3.0
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.11"
 
@@ -180,7 +180,7 @@ jobs:
                 pull-requests: write
               steps:
                 - name: Checkout
-                  uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+                  uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
                   with:
                     persist-credentials: false
                 - name: Merge
@@ -209,7 +209,7 @@ jobs:
               permissions: write-all
               steps:
                 - name: Checkout (unsafe, no persist-credentials)
-                  uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+                  uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
                 - name: Pretend to merge
                   run: echo "this would auto-merge with full secrets"
           YML

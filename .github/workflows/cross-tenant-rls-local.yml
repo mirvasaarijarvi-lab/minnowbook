@@ -65,7 +65,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
 
@@ -78,7 +78,7 @@ jobs:
       # persists across runs, which is safe because lockfile changes
       # invalidate the key automatically.
       - name: Cache Bun dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: |
             ~/.bun/install/cache
@@ -191,7 +191,7 @@ jobs:
 
       - name: Upload RLS report (remote fallback)
         if: always() && steps.docker-check.outputs.available != 'true' && steps.remote-check.outputs.enabled == 'true' && steps.remote-rls-tests.conclusion != 'skipped'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: rls-report-remote-fallback-${{ matrix.label }}
           path: reports/
@@ -1065,7 +1065,7 @@ jobs:
 
       - name: Upload RLS report (local)
         if: always() && steps.supabase-start.outcome == 'success'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           # `reports/` already contains the storage-attempts PDF + JSON
           # alongside the rls-report HTML/JSON, so a single upload covers
@@ -1352,7 +1352,7 @@ jobs:
 
       - name: Upload filtered Postgres logs (RLS failure)
         if: always() && steps.rls-tests.outcome == 'failure'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: rls-postgres-logs-run-${{ github.run_id }}
           path: rls-postgres-logs/
@@ -1387,7 +1387,7 @@ jobs:
 
       - name: Upload Supabase container logs
         if: always() && (job.status == 'failure' || steps.supabase-start.outcome != 'success')
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: supabase-container-logs
           path: supabase-logs/
@@ -1485,7 +1485,7 @@ jobs:
 
       - name: Upload Supabase config + env snapshot
         if: always() && (job.status == 'failure' || steps.supabase-start.outcome != 'success')
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           # Run-id-scoped name so multiple failed runs don't collide when
           # downloaded side-by-side for comparison.
