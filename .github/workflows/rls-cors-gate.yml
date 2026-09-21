@@ -91,7 +91,12 @@ jobs:
       - name: Preflight tenant access
         id: preflight
         env:
+          # Dependabot and fork pull requests cannot read repository secrets at
+          # all. Tell the preflight so it reports a documented offline skip
+          # instead of a tenant-access denial (which opened an issue per bump).
+          RLS_GATE_SECRETS_UNAVAILABLE: ${{ (github.actor == 'dependabot[bot]' || github.event.pull_request.head.repo.fork == true) && '1' || '' }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           RLS_TEST_TENANT_A_EMAIL: ${{ secrets.RLS_TEST_TENANT_A_EMAIL }}
