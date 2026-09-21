@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:963c77b6-8531-5dd6-84a9-328f37bef274",
+  "serialNumber": "urn:uuid:7cfb8d9a-51af-5351-910c-36601e890abf",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "ceba71c3a8e2f3ad08c382b7500670e1910441b66df524136cfca8e331680936"
+          "value": "d2fa9f7c9489468c9a0dffc368a5a7932c871fdd03b68e0d16b5ec0cbe6c139c"
         }
       ]
     }
@@ -627,11 +627,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/react@19.2.0",
+      "bom-ref": "pkg:npm/react@19.3.0",
       "type": "library",
       "name": "react",
-      "version": "19.2.0",
-      "purl": "pkg:npm/react@19.2.0",
+      "version": "19.3.0",
+      "purl": "pkg:npm/react@19.3.0",
       "scope": "required"
     },
     {
@@ -643,11 +643,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-dom@19.2.0",
+      "bom-ref": "pkg:npm/react-dom@19.3.0",
       "type": "library",
       "name": "react-dom",
-      "version": "19.2.0",
-      "purl": "pkg:npm/react-dom@19.2.0",
+      "version": "19.3.0",
+      "purl": "pkg:npm/react-dom@19.3.0",
       "scope": "required"
     },
     {
