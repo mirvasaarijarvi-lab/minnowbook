@@ -231,7 +231,7 @@ const ReservationChart = ({
         ),
       ),
     }));
-  }, [reservations, period, start, end, dateLocale, types, t, typeLabel]);
+  }, [reservations, period, start, end, dateLocale, types, typeLabel]);
 
   const colors = [
     "hsl(var(--primary))",
