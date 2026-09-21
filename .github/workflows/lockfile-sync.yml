@@ -50,6 +50,9 @@ jobs:
           # the most common cause of spurious timeouts on this gate.
           cache: 'npm'
 
+      - name: Validate committed package-lock.json (sync + public registry URLs)
+        run: node scripts/ci/check-npm-lockfile-hygiene.mjs
+
       - name: Regenerate package-lock.json
         run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
 
