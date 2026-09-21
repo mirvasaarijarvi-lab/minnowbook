@@ -8,6 +8,7 @@ import Logo from "@/components/Logo";
 import type { TranslationKey } from "@/i18n/translations";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
+import { recordAuthFailure } from "@/lib/reservationAccessLog";
 import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -159,6 +160,9 @@ const Login = () => {
         password,
       });
       if (error) {
+        // Security alerting: repeated failures raise a platform-admin alert.
+        // Only a masked address and a salted hash are stored server-side.
+        recordAuthFailure(email, error.message || "sign_in_failed");
         // Increment failed attempts
         const newCount = state.count + 1;
         if (newCount >= MAX_ATTEMPTS) {
