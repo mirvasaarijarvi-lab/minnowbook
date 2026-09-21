@@ -33,7 +33,13 @@ export default defineConfig({
     video: "on",
   },
   webServer: {
-    command: "bunx vite preview --port 4173",
+    // `vite preview` can only serve the plain TanStack Start server bundle
+    // (dist/server/server.js). The default deploy build targets Cloudflare and
+    // emits dist/server/index.mjs, which made every run fail with
+    // ERR_MODULE_NOT_FOUND + HTTP 500. The guard script builds the preview shape
+    // when it is missing and is a no-op when CI already built it.
+    command:
+      "node scripts/ci/ensure-e2e-preview-build.mjs && bunx vite preview --port 4173",
     port: 4173,
     reuseExistingServer: !process.env.CI,
   },

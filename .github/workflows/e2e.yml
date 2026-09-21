@@ -106,7 +106,7 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
-        run: bunx vite build
+        run: E2E_PREVIEW_BUILD=1 bunx vite build
 
       - name: Run E2E tests
         if: steps.env-check.outputs.ready == 'true'
