@@ -31,7 +31,6 @@ function readLockfile() {
   return "";
 }
 
-
 // Deterministic UUID v5-ish derivation from a stable string. Avoids
 // pulling in a UUID library; format matches RFC 4122 v5 layout.
 function deterministicUuid(input) {
