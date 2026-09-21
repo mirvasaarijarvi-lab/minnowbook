@@ -139,6 +139,31 @@ for (const t of TENANTS) {
   );
 }
 
+// Some runs cannot see repository secrets at all by design: Dependabot pull
+// requests and pull requests from forks. Every input is empty there, which is
+// a structural skip, not a denial — reporting it as a denial opened a tenant
+// access issue on each dependency bump while nothing was actually wrong.
+const SECRETS_UNAVAILABLE =
+  env.RLS_GATE_SECRETS_UNAVAILABLE === "1" ||
+  env.RLS_GATE_SECRETS_UNAVAILABLE === "true";
+const NOTHING_CONFIGURED =
+  !URL_ &&
+  !ANON &&
+  !SERVICE &&
+  TENANTS.every((t) => !t.email && !t.password && !t.tenantId);
+
+if (SECRETS_UNAVAILABLE && NOTHING_CONFIGURED) {
+  log("");
+  const unavailableWarning =
+    "This run cannot read repository secrets (Dependabot or fork pull request), so no RLS/CORS credentials are available. The live RLS suites will skip and only the offline CORS checks gate this run.";
+  console.log(
+    DRY_RUN
+      ? `WARN ${unavailableWarning}`
+      : `::warning title=RLS/CORS gate secrets unavailable::${unavailableWarning}`,
+  );
+  finish(0, "skip");
+}
+
 if (!URL_ || !ANON) {
   problem(
     "RLS/CORS gate cannot reach the project",
@@ -146,6 +171,7 @@ if (!URL_ || !ANON) {
   );
   finish(1, "denied");
 }
+
 
 // Shape checks: catch a misconfigured value before spending a network round
 // trip that would fail with an opaque 401 or DNS error deep in the logs.
