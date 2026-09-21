@@ -574,8 +574,8 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
                       borderRadius: "8px",
                       fontSize: "12px",
                     }}
-                    formatter={(value: number) => [
-                      `€${value.toFixed(2)}`,
+                    formatter={(value) => [
+                      `€${Number(value ?? 0).toFixed(2)}`,
                       t("dashboard.weekRevenue"),
                     ]}
                   />
