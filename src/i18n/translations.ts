@@ -8487,6 +8487,7 @@ const sv: TranslationKeys = {
   "admin.created": "Skapad",
   "admin.updated": "Uppdaterad",
   "admin.deleted": "Borttagen",
+  "admin.bookingSubmission": "Bokning skickad",
   "admin.fieldsChanged": "fält ändrade",
   "admin.revert": "Återställ",
   "admin.revertConfirm": "Återställ denna ändring?",
