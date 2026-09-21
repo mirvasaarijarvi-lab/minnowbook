@@ -390,9 +390,7 @@ const PublicBookingInner = () => {
     const typeParam = searchParams.get("type");
     if (!typeParam) return;
     setForm((prev) =>
-      prev.reservation_type
-        ? prev
-        : { ...prev, reservation_type: typeParam },
+      prev.reservation_type ? prev : { ...prev, reservation_type: typeParam },
     );
   }, [searchParams]);
 
