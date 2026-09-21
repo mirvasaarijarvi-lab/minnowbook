@@ -14,8 +14,35 @@
 // dist/server/server.js. This script builds that shape when it is missing and
 // stays a no-op when CI already produced it.
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+
+// react and react-dom must be the exact same installed version, or the SSR
+// preview server aborts on boot with "Incompatible React versions" and every
+// Playwright page comes back as ERR_CONNECTION_REFUSED / 500. A divergence here
+// always means a stale or partially restored node_modules, never app code, so
+// fail up front with the fix instead of 100 unexplained test failures.
+function installedVersion(pkg) {
+  const manifest = resolve(process.cwd(), "node_modules", pkg, "package.json");
+  if (!existsSync(manifest)) return null;
+  try {
+    return JSON.parse(readFileSync(manifest, "utf8")).version ?? null;
+  } catch {
+    return null;
+  }
+}
+
+const reactVersion = installedVersion("react");
+const reactDomVersion = installedVersion("react-dom");
+
+if (reactVersion && reactDomVersion && reactVersion !== reactDomVersion) {
+  console.error(
+    `[e2e] Incompatible React versions installed: react ${reactVersion} vs react-dom ${reactDomVersion}.\n` +
+      "[e2e] node_modules is out of step with the lockfile. Reinstall before running e2e:\n" +
+      "[e2e]   rm -rf node_modules && bun install --frozen-lockfile",
+  );
+  process.exit(1);
+}
 
 const serverEntry = resolve(process.cwd(), "dist/server/server.js");
 
