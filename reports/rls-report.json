@@ -1,17 +1,17 @@
 {
-  "generatedAt": "2026-09-21T09:05:32.842Z",
+  "generatedAt": "2026-09-21T09:06:15.150Z",
   "flavor": "default",
   "totals": {
     "total": 192,
     "passed": 189,
     "failed": 0,
     "skipped": 3,
-    "durationMs": 11109.175495000009
+    "durationMs": 9818.91677
   },
   "tenantGuard": [
     {
       "suite": "cross-tenant-rls",
-      "recordedAt": "2026-09-21T09:05:24.044Z",
+      "recordedAt": "2026-09-21T09:06:04.760Z",
       "tenantA": "341849d8-0c52-428d-9efd-3000af4d13a7",
       "tenantB": "d76a4af7-0ea1-4c5b-9f7c-d8db856e8427",
       "membershipA": true,
@@ -27,7 +27,7 @@
       "name": "lists every known tenant-scoped table",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Test manifest sanity > lists every known tenant-scoped table",
       "status": "passed",
-      "durationMs": 2.1238140000000385,
+      "durationMs": 2.5775900000001,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -38,7 +38,7 @@
       "name": "table names follow naming conventions",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Test manifest sanity > table names follow naming conventions",
       "status": "passed",
-      "durationMs": 0.8715130000000499,
+      "durationMs": 2.515952999999854,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -49,7 +49,7 @@
       "name": "anon SELECT * FROM access_code_redemptions returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM access_code_redemptions returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 247.6914670000001,
+      "durationMs": 209.16804000000002,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -60,7 +60,7 @@
       "name": "anon SELECT * FROM archived_reservations returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM archived_reservations returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 261.293007,
+      "durationMs": 98.87694899999997,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -71,7 +71,7 @@
       "name": "anon SELECT * FROM audit_log returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM audit_log returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 242.74918000000002,
+      "durationMs": 107.12324699999999,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -82,7 +82,7 @@
       "name": "anon SELECT * FROM beta_feedback returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM beta_feedback returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 136.91286499999978,
+      "durationMs": 60.9525450000001,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -93,7 +93,7 @@
       "name": "anon SELECT * FROM blocked_slots returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM blocked_slots returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 110.62597700000015,
+      "durationMs": 78.21195999999964,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -104,7 +104,7 @@
       "name": "anon SELECT * FROM booking_tokens returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM booking_tokens returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 100.84238899999991,
+      "durationMs": 60.804049999999734,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -115,7 +115,7 @@
       "name": "anon SELECT * FROM booking_validation_log returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM booking_validation_log returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 177.929799,
+      "durationMs": 57.52239899999995,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -126,7 +126,7 @@
       "name": "anon SELECT * FROM discount_codes returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM discount_codes returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 54.50335600000017,
+      "durationMs": 51.62679799999978,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -137,7 +137,7 @@
       "name": "anon SELECT * FROM email_send_log returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM email_send_log returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 73.86681899999985,
+      "durationMs": 75.34303399999999,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -148,7 +148,7 @@
       "name": "anon SELECT * FROM guest_reviews returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM guest_reviews returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 60.36381500000016,
+      "durationMs": 51.78021000000035,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -159,7 +159,7 @@
       "name": "anon SELECT * FROM kitchen_menu_items returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM kitchen_menu_items returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 109.26680600000009,
+      "durationMs": 60.959734000000026,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -170,7 +170,7 @@
       "name": "anon SELECT * FROM kitchen_orders returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM kitchen_orders returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 65.77354500000001,
+      "durationMs": 52.95235199999979,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -181,7 +181,7 @@
       "name": "anon SELECT * FROM login_history returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM login_history returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 96.30417099999977,
+      "durationMs": 99.43331500000022,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -192,7 +192,7 @@
       "name": "anon SELECT * FROM notifications returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM notifications returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 56.10591400000021,
+      "durationMs": 42.43554700000004,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -203,7 +203,7 @@
       "name": "anon SELECT * FROM offers returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM offers returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 123.79940299999998,
+      "durationMs": 56.25655999999981,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -214,7 +214,7 @@
       "name": "anon SELECT * FROM recurring_blocked_slots returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM recurring_blocked_slots returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 70.82772900000009,
+      "durationMs": 45.833920000000035,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -225,7 +225,7 @@
       "name": "anon SELECT * FROM reservations returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM reservations returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 63.24595899999986,
+      "durationMs": 54.663054999999986,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -236,7 +236,7 @@
       "name": "anon SELECT * FROM resource_images returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM resource_images returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 88.23360099999991,
+      "durationMs": 45.95257100000026,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -247,7 +247,7 @@
       "name": "anon SELECT * FROM resource_opening_hours returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM resource_opening_hours returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 55.39753499999961,
+      "durationMs": 58.653675999999905,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -258,7 +258,7 @@
       "name": "anon SELECT * FROM resource_availability_slots returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM resource_availability_slots returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 85.00361299999986,
+      "durationMs": 50.94871699999976,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -269,7 +269,7 @@
       "name": "anon SELECT * FROM resources returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM resources returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 58.28908799999999,
+      "durationMs": 65.31765499999983,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -280,7 +280,7 @@
       "name": "anon SELECT * FROM special_occasions returns no rows (RLS enforced)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon SELECT * FROM special_occasions returns no rows (RLS enforced)",
       "status": "passed",
-      "durationMs": 48.36075099999971,
+      "durationMs": 44.24154899999985,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -291,7 +291,7 @@
       "name": "anon INSERT into private tenant tables is denied",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon INSERT into private tenant tables is denied",
       "status": "passed",
-      "durationMs": 66.35829100000001,
+      "durationMs": 58.638394999999946,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -302,7 +302,7 @@
       "name": "anon UPDATE on private tenant tables is denied",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Anonymous client RLS enforcement > anon UPDATE on private tenant tables is denied",
       "status": "passed",
-      "durationMs": 57.921839999999975,
+      "durationMs": 69.26125500000035,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -313,7 +313,7 @@
       "name": "user A cannot SELECT tenant B reservations",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot SELECT tenant B reservations",
       "status": "passed",
-      "durationMs": 63.69120000000021,
+      "durationMs": 46.87138100000038,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -324,7 +324,7 @@
       "name": "user B cannot SELECT tenant A reservations",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot SELECT tenant A reservations",
       "status": "passed",
-      "durationMs": 57.84545100000014,
+      "durationMs": 65.78371900000002,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -335,7 +335,7 @@
       "name": "user A cannot INSERT into tenant B audit_log",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT into tenant B audit_log",
       "status": "passed",
-      "durationMs": 64.97102600000017,
+      "durationMs": 48.124115000000074,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -346,7 +346,7 @@
       "name": "user A cannot UPDATE tenant B notifications",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B notifications",
       "status": "passed",
-      "durationMs": 52.71335799999997,
+      "durationMs": 46.977274999999736,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -357,7 +357,7 @@
       "name": "user A cannot read tenant B rows from access_code_redemptions",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from access_code_redemptions",
       "status": "passed",
-      "durationMs": 54.955581000000166,
+      "durationMs": 50.30849699999999,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -368,7 +368,7 @@
       "name": "user A cannot read tenant B rows from archived_reservations",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from archived_reservations",
       "status": "passed",
-      "durationMs": 49.321187000000464,
+      "durationMs": 42.88443699999971,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -379,7 +379,7 @@
       "name": "user A cannot read tenant B rows from audit_log",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from audit_log",
       "status": "passed",
-      "durationMs": 50.35415700000067,
+      "durationMs": 48.15121699999963,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -390,7 +390,7 @@
       "name": "user A cannot read tenant B rows from beta_feedback",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from beta_feedback",
       "status": "passed",
-      "durationMs": 51.81600100000014,
+      "durationMs": 43.50724900000023,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -401,7 +401,7 @@
       "name": "user A cannot read tenant B rows from blocked_slots",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from blocked_slots",
       "status": "passed",
-      "durationMs": 53.279121999999916,
+      "durationMs": 44.110257000000274,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -412,7 +412,7 @@
       "name": "user A cannot read tenant B rows from booking_tokens",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from booking_tokens",
       "status": "passed",
-      "durationMs": 57.11170200000015,
+      "durationMs": 48.79773899999964,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -423,7 +423,7 @@
       "name": "user A cannot read tenant B rows from booking_validation_log",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from booking_validation_log",
       "status": "passed",
-      "durationMs": 53.950754999999845,
+      "durationMs": 48.9649730000001,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -434,7 +434,7 @@
       "name": "user A cannot read tenant B rows from discount_codes",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from discount_codes",
       "status": "passed",
-      "durationMs": 44.965659000000414,
+      "durationMs": 49.850791000000754,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -445,7 +445,7 @@
       "name": "user A cannot read tenant B rows from email_send_log",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from email_send_log",
       "status": "passed",
-      "durationMs": 49.39461100000062,
+      "durationMs": 43.34856200000013,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -456,7 +456,7 @@
       "name": "user A cannot read tenant B rows from guest_reviews",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from guest_reviews",
       "status": "passed",
-      "durationMs": 50.174629000000095,
+      "durationMs": 53.360200999999506,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -467,7 +467,7 @@
       "name": "user A cannot read tenant B rows from kitchen_menu_items",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from kitchen_menu_items",
       "status": "passed",
-      "durationMs": 50.448090999999295,
+      "durationMs": 43.63836300000003,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -478,7 +478,7 @@
       "name": "user A cannot read tenant B rows from kitchen_orders",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from kitchen_orders",
       "status": "passed",
-      "durationMs": 50.551512,
+      "durationMs": 64.38847999999962,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -489,7 +489,7 @@
       "name": "user A cannot read tenant B rows from login_history",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from login_history",
       "status": "passed",
-      "durationMs": 57.973948000000746,
+      "durationMs": 56.99454400000013,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -500,7 +500,7 @@
       "name": "user A cannot read tenant B rows from notifications",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from notifications",
       "status": "passed",
-      "durationMs": 46.87320499999987,
+      "durationMs": 54.21408200000042,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -511,7 +511,7 @@
       "name": "user A cannot read tenant B rows from offers",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from offers",
       "status": "passed",
-      "durationMs": 52.324845000000096,
+      "durationMs": 49.752949000000626,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -522,7 +522,7 @@
       "name": "user A cannot read tenant B rows from recurring_blocked_slots",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from recurring_blocked_slots",
       "status": "passed",
-      "durationMs": 50.82604300000003,
+      "durationMs": 49.918383999999605,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -533,7 +533,7 @@
       "name": "user A cannot read tenant B rows from reservations",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from reservations",
       "status": "passed",
-      "durationMs": 48.217773999999736,
+      "durationMs": 60.40610199999992,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -544,7 +544,7 @@
       "name": "user A cannot read tenant B rows from resource_images",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from resource_images",
       "status": "passed",
-      "durationMs": 52.93816500000048,
+      "durationMs": 48.98185399999966,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -555,7 +555,7 @@
       "name": "user A cannot read tenant B rows from resource_opening_hours",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from resource_opening_hours",
       "status": "passed",
-      "durationMs": 47.820026000000325,
+      "durationMs": 47.529413000000204,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -566,7 +566,7 @@
       "name": "user A cannot read tenant B rows from resource_availability_slots",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from resource_availability_slots",
       "status": "passed",
-      "durationMs": 50.55443099999957,
+      "durationMs": 51.852178000000094,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -577,7 +577,7 @@
       "name": "user A cannot read tenant B rows from resources",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from resources",
       "status": "passed",
-      "durationMs": 58.339176999999836,
+      "durationMs": 47.00022600000011,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -588,7 +588,7 @@
       "name": "user A cannot read tenant B rows from special_occasions",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot read tenant B rows from special_occasions",
       "status": "passed",
-      "durationMs": 46.8417730000001,
+      "durationMs": 44.279671999999664,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -599,7 +599,7 @@
       "name": "user B cannot read tenant A rows from access_code_redemptions",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from access_code_redemptions",
       "status": "passed",
-      "durationMs": 50.34483799999998,
+      "durationMs": 45.276630000000296,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -610,7 +610,7 @@
       "name": "user B cannot read tenant A rows from archived_reservations",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from archived_reservations",
       "status": "passed",
-      "durationMs": 46.52442400000018,
+      "durationMs": 46.437912000000324,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -621,7 +621,7 @@
       "name": "user B cannot read tenant A rows from audit_log",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from audit_log",
       "status": "passed",
-      "durationMs": 75.51360199999999,
+      "durationMs": 42.63591600000018,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -632,7 +632,7 @@
       "name": "user B cannot read tenant A rows from beta_feedback",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from beta_feedback",
       "status": "passed",
-      "durationMs": 40.04957899999954,
+      "durationMs": 44.570206000000326,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -643,7 +643,7 @@
       "name": "user B cannot read tenant A rows from blocked_slots",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from blocked_slots",
       "status": "passed",
-      "durationMs": 57.85680400000001,
+      "durationMs": 44.39489700000013,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -654,7 +654,7 @@
       "name": "user B cannot read tenant A rows from booking_tokens",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from booking_tokens",
       "status": "passed",
-      "durationMs": 38.491603000000396,
+      "durationMs": 48.821436000000176,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -665,7 +665,7 @@
       "name": "user B cannot read tenant A rows from booking_validation_log",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from booking_validation_log",
       "status": "passed",
-      "durationMs": 122.38937600000008,
+      "durationMs": 47.09078899999986,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -676,7 +676,7 @@
       "name": "user B cannot read tenant A rows from discount_codes",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from discount_codes",
       "status": "passed",
-      "durationMs": 92.42108900000039,
+      "durationMs": 41.21368999999959,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -687,7 +687,7 @@
       "name": "user B cannot read tenant A rows from email_send_log",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from email_send_log",
       "status": "passed",
-      "durationMs": 45.978267999999844,
+      "durationMs": 43.12870899999962,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -698,7 +698,7 @@
       "name": "user B cannot read tenant A rows from guest_reviews",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from guest_reviews",
       "status": "passed",
-      "durationMs": 54.531700999999885,
+      "durationMs": 48.351518999999826,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -709,7 +709,7 @@
       "name": "user B cannot read tenant A rows from kitchen_menu_items",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from kitchen_menu_items",
       "status": "passed",
-      "durationMs": 43.85205599999972,
+      "durationMs": 52.8633920000002,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -720,7 +720,7 @@
       "name": "user B cannot read tenant A rows from kitchen_orders",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from kitchen_orders",
       "status": "passed",
-      "durationMs": 53.22239999999965,
+      "durationMs": 47.0993239999998,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -731,7 +731,7 @@
       "name": "user B cannot read tenant A rows from login_history",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from login_history",
       "status": "passed",
-      "durationMs": 52.381241999999475,
+      "durationMs": 43.34775300000001,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -742,7 +742,7 @@
       "name": "user B cannot read tenant A rows from notifications",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from notifications",
       "status": "passed",
-      "durationMs": 48.19885599999998,
+      "durationMs": 42.904207999999926,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -753,7 +753,7 @@
       "name": "user B cannot read tenant A rows from offers",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from offers",
       "status": "passed",
-      "durationMs": 49.98906600000009,
+      "durationMs": 45.05905899999925,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -764,7 +764,7 @@
       "name": "user B cannot read tenant A rows from recurring_blocked_slots",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from recurring_blocked_slots",
       "status": "passed",
-      "durationMs": 54.88140799999928,
+      "durationMs": 47.73550500000056,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -775,7 +775,7 @@
       "name": "user B cannot read tenant A rows from reservations",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from reservations",
       "status": "passed",
-      "durationMs": 65.88549299999977,
+      "durationMs": 45.31645099999969,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -786,7 +786,7 @@
       "name": "user B cannot read tenant A rows from resource_images",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from resource_images",
       "status": "passed",
-      "durationMs": 65.14830900000015,
+      "durationMs": 53.318199999999706,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -797,7 +797,7 @@
       "name": "user B cannot read tenant A rows from resource_opening_hours",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from resource_opening_hours",
       "status": "passed",
-      "durationMs": 44.60938400000032,
+      "durationMs": 50.07468499999959,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -808,7 +808,7 @@
       "name": "user B cannot read tenant A rows from resource_availability_slots",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from resource_availability_slots",
       "status": "passed",
-      "durationMs": 44.0034140000007,
+      "durationMs": 55.449665999999525,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -819,7 +819,7 @@
       "name": "user B cannot read tenant A rows from resources",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from resources",
       "status": "passed",
-      "durationMs": 44.879705999999715,
+      "durationMs": 51.47593499999948,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -830,7 +830,7 @@
       "name": "user B cannot read tenant A rows from special_occasions",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot read tenant A rows from special_occasions",
       "status": "passed",
-      "durationMs": 47.67831800000022,
+      "durationMs": 42.393215999999484,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -841,7 +841,7 @@
       "name": "user A cannot INSERT a forged tenant B row into 'notifications'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'notifications'",
       "status": "passed",
-      "durationMs": 56.74081600000045,
+      "durationMs": 51.079187000000275,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -852,7 +852,7 @@
       "name": "user A cannot INSERT a forged tenant B row into 'booking_validation_log'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'booking_validation_log'",
       "status": "passed",
-      "durationMs": 63.148559999999634,
+      "durationMs": 44.95149600000059,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -863,7 +863,7 @@
       "name": "user A cannot INSERT a forged tenant B row into 'kitchen_menu_items'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'kitchen_menu_items'",
       "status": "passed",
-      "durationMs": 54.58415800000057,
+      "durationMs": 52.468965000000026,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -874,7 +874,7 @@
       "name": "user A cannot INSERT a forged tenant B row into 'kitchen_orders'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'kitchen_orders'",
       "status": "passed",
-      "durationMs": 65.07821499999955,
+      "durationMs": 44.9734610000005,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -885,7 +885,7 @@
       "name": "user A cannot INSERT a forged tenant B row into 'discount_codes'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'discount_codes'",
       "status": "passed",
-      "durationMs": 57.19938700000057,
+      "durationMs": 48.20936200000051,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -896,7 +896,7 @@
       "name": "user A cannot INSERT a forged tenant B row into 'offers'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'offers'",
       "status": "passed",
-      "durationMs": 52.49929200000042,
+      "durationMs": 50.59873500000049,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -907,7 +907,7 @@
       "name": "user A cannot INSERT a forged tenant B row into 'blocked_slots'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'blocked_slots'",
       "status": "passed",
-      "durationMs": 52.82759799999985,
+      "durationMs": 50.18614600000001,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -918,7 +918,7 @@
       "name": "user A cannot INSERT a forged tenant B row into 'special_occasions'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot INSERT a forged tenant B row into 'special_occasions'",
       "status": "passed",
-      "durationMs": 70.62797899999987,
+      "durationMs": 50.13460499999928,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -929,7 +929,7 @@
       "name": "user B cannot INSERT a forged tenant A row into 'notifications'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'notifications'",
       "status": "passed",
-      "durationMs": 65.82318799999939,
+      "durationMs": 43.21003599999949,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -940,7 +940,7 @@
       "name": "user B cannot INSERT a forged tenant A row into 'booking_validation_log'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'booking_validation_log'",
       "status": "passed",
-      "durationMs": 57.02509900000041,
+      "durationMs": 46.16756299999997,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -951,7 +951,7 @@
       "name": "user B cannot INSERT a forged tenant A row into 'kitchen_menu_items'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'kitchen_menu_items'",
       "status": "passed",
-      "durationMs": 43.61537700000008,
+      "durationMs": 43.03912299999956,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -962,7 +962,7 @@
       "name": "user B cannot INSERT a forged tenant A row into 'kitchen_orders'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'kitchen_orders'",
       "status": "passed",
-      "durationMs": 53.2723160000005,
+      "durationMs": 46.05187699999988,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -973,7 +973,7 @@
       "name": "user B cannot INSERT a forged tenant A row into 'discount_codes'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'discount_codes'",
       "status": "passed",
-      "durationMs": 70.60666899999978,
+      "durationMs": 50.985381999999845,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -984,7 +984,7 @@
       "name": "user B cannot INSERT a forged tenant A row into 'offers'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'offers'",
       "status": "passed",
-      "durationMs": 55.6235370000004,
+      "durationMs": 50.35945900000024,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -995,7 +995,7 @@
       "name": "user B cannot INSERT a forged tenant A row into 'blocked_slots'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'blocked_slots'",
       "status": "passed",
-      "durationMs": 45.40809800000079,
+      "durationMs": 43.53956400000061,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1006,7 +1006,7 @@
       "name": "user B cannot INSERT a forged tenant A row into 'special_occasions'",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot INSERT a forged tenant A row into 'special_occasions'",
       "status": "passed",
-      "durationMs": 45.94274000000041,
+      "durationMs": 50.93763099999978,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1017,7 +1017,7 @@
       "name": "user A cannot DELETE tenant B notifications via cross-tenant filter",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B notifications via cross-tenant filter",
       "status": "passed",
-      "durationMs": 71.24823699999979,
+      "durationMs": 52.2807270000003,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1028,7 +1028,7 @@
       "name": "user A cannot UPDATE tenant B reservations via cross-tenant filter",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B reservations via cross-tenant filter",
       "status": "passed",
-      "durationMs": 65.07117500000095,
+      "durationMs": 50.8235279999999,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1039,7 +1039,7 @@
       "name": "user A cannot UPDATE tenant B rows in access_code_redemptions (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in access_code_redemptions (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 38.90176100000099,
+      "durationMs": 51.59252900000047,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1050,7 +1050,7 @@
       "name": "user A cannot UPDATE tenant B rows in archived_reservations (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in archived_reservations (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 58.05738599999859,
+      "durationMs": 59.61142599999948,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1061,7 +1061,7 @@
       "name": "user A cannot UPDATE tenant B rows in audit_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in audit_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 75.27394800000002,
+      "durationMs": 49.97489599999972,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1072,7 +1072,7 @@
       "name": "user A cannot UPDATE tenant B rows in beta_feedback (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in beta_feedback (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 47.56571299999996,
+      "durationMs": 53.20739699999922,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1083,7 +1083,7 @@
       "name": "user A cannot UPDATE tenant B rows in blocked_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in blocked_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 103.38834899999893,
+      "durationMs": 46.27628300000015,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1094,7 +1094,7 @@
       "name": "user A cannot UPDATE tenant B rows in booking_tokens (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in booking_tokens (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 49.67207699999926,
+      "durationMs": 55.663164000000506,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1105,7 +1105,7 @@
       "name": "user A cannot UPDATE tenant B rows in booking_validation_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in booking_validation_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 109.69014000000061,
+      "durationMs": 51.4668300000003,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1116,7 +1116,7 @@
       "name": "user A cannot UPDATE tenant B rows in discount_codes (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in discount_codes (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 46.64499199999955,
+      "durationMs": 55.33153399999992,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1127,7 +1127,7 @@
       "name": "user A cannot UPDATE tenant B rows in email_send_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in email_send_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 59.597020999999586,
+      "durationMs": 50.58061600000019,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1138,7 +1138,7 @@
       "name": "user A cannot UPDATE tenant B rows in guest_reviews (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in guest_reviews (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 47.28253600000062,
+      "durationMs": 53.23402800000076,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1149,7 +1149,7 @@
       "name": "user A cannot UPDATE tenant B rows in kitchen_menu_items (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in kitchen_menu_items (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 53.82699499999944,
+      "durationMs": 98.72844400000031,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1160,7 +1160,7 @@
       "name": "user A cannot UPDATE tenant B rows in kitchen_orders (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in kitchen_orders (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.93812799999978,
+      "durationMs": 58.89397299999928,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1171,7 +1171,7 @@
       "name": "user A cannot UPDATE tenant B rows in login_history (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in login_history (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.14764699999978,
+      "durationMs": 45.22107500000038,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1182,7 +1182,7 @@
       "name": "user A cannot UPDATE tenant B rows in notifications (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in notifications (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 45.64594399999987,
+      "durationMs": 49.48962599999959,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1193,7 +1193,7 @@
       "name": "user A cannot UPDATE tenant B rows in offers (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in offers (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.176949000000604,
+      "durationMs": 45.6453649999994,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1204,7 +1204,7 @@
       "name": "user A cannot UPDATE tenant B rows in recurring_blocked_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in recurring_blocked_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 50.153496999999334,
+      "durationMs": 49.14664300000004,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1215,7 +1215,7 @@
       "name": "user A cannot UPDATE tenant B rows in reservations (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in reservations (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 49.36490199999935,
+      "durationMs": 46.39748700000018,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1226,7 +1226,7 @@
       "name": "user A cannot UPDATE tenant B rows in resource_images (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in resource_images (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 55.98986100000002,
+      "durationMs": 57.5673139999999,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1237,7 +1237,7 @@
       "name": "user A cannot UPDATE tenant B rows in resource_opening_hours (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in resource_opening_hours (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 47.78708899999947,
+      "durationMs": 48.09125899999981,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1248,7 +1248,7 @@
       "name": "user A cannot UPDATE tenant B rows in resource_availability_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in resource_availability_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 47.672404000000824,
+      "durationMs": 52.70349400000032,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1259,7 +1259,7 @@
       "name": "user A cannot UPDATE tenant B rows in resources (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in resources (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 46.043956999999864,
+      "durationMs": 48.19132500000069,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1270,7 +1270,7 @@
       "name": "user A cannot UPDATE tenant B rows in special_occasions (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot UPDATE tenant B rows in special_occasions (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 58.68058799999926,
+      "durationMs": 52.2648879999997,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1281,7 +1281,7 @@
       "name": "user B cannot UPDATE tenant A rows in access_code_redemptions (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in access_code_redemptions (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.73942200000056,
+      "durationMs": 50.52497100000073,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1292,7 +1292,7 @@
       "name": "user B cannot UPDATE tenant A rows in archived_reservations (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in archived_reservations (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 47.25052499999947,
+      "durationMs": 49.00873899999897,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1303,7 +1303,7 @@
       "name": "user B cannot UPDATE tenant A rows in audit_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in audit_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 49.30686699999933,
+      "durationMs": 47.66770899999938,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1314,7 +1314,7 @@
       "name": "user B cannot UPDATE tenant A rows in beta_feedback (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in beta_feedback (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 50.66732299999967,
+      "durationMs": 47.94167700000071,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1325,7 +1325,7 @@
       "name": "user B cannot UPDATE tenant A rows in blocked_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in blocked_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 60.91951499999959,
+      "durationMs": 53.67753099999936,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1336,7 +1336,7 @@
       "name": "user B cannot UPDATE tenant A rows in booking_tokens (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in booking_tokens (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 45.6400420000009,
+      "durationMs": 52.710934000000634,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1347,7 +1347,7 @@
       "name": "user B cannot UPDATE tenant A rows in booking_validation_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in booking_validation_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 77.75483900000108,
+      "durationMs": 57.01076900000044,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1358,7 +1358,7 @@
       "name": "user B cannot UPDATE tenant A rows in discount_codes (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in discount_codes (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 53.30401499999971,
+      "durationMs": 53.35399300000063,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1369,7 +1369,7 @@
       "name": "user B cannot UPDATE tenant A rows in email_send_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in email_send_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 48.27314599999954,
+      "durationMs": 53.27497900000162,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1380,7 +1380,7 @@
       "name": "user B cannot UPDATE tenant A rows in guest_reviews (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in guest_reviews (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 54.99595699999918,
+      "durationMs": 44.32796899999994,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1391,7 +1391,7 @@
       "name": "user B cannot UPDATE tenant A rows in kitchen_menu_items (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in kitchen_menu_items (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.36252200000126,
+      "durationMs": 41.97491700000137,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1402,7 +1402,7 @@
       "name": "user B cannot UPDATE tenant A rows in kitchen_orders (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in kitchen_orders (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 46.57426699999996,
+      "durationMs": 47.46729500000038,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1413,7 +1413,7 @@
       "name": "user B cannot UPDATE tenant A rows in login_history (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in login_history (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 39.700424999999086,
+      "durationMs": 49.68493899999885,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1424,7 +1424,7 @@
       "name": "user B cannot UPDATE tenant A rows in notifications (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in notifications (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 45.06200499999977,
+      "durationMs": 66.58534899999904,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1435,7 +1435,7 @@
       "name": "user B cannot UPDATE tenant A rows in offers (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in offers (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.104998999999225,
+      "durationMs": 69.11772099999871,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1446,7 +1446,7 @@
       "name": "user B cannot UPDATE tenant A rows in recurring_blocked_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in recurring_blocked_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 48.13504400000056,
+      "durationMs": 51.499995000000126,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1457,7 +1457,7 @@
       "name": "user B cannot UPDATE tenant A rows in reservations (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in reservations (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 46.59906899999987,
+      "durationMs": 50.38301399999909,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1468,7 +1468,7 @@
       "name": "user B cannot UPDATE tenant A rows in resource_images (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in resource_images (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 47.48412199999984,
+      "durationMs": 45.97138900000027,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1479,7 +1479,7 @@
       "name": "user B cannot UPDATE tenant A rows in resource_opening_hours (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in resource_opening_hours (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 42.79894500000046,
+      "durationMs": 50.58977899999991,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1490,7 +1490,7 @@
       "name": "user B cannot UPDATE tenant A rows in resource_availability_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in resource_availability_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 47.63637100000051,
+      "durationMs": 54.540947999999844,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1501,7 +1501,7 @@
       "name": "user B cannot UPDATE tenant A rows in resources (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in resources (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 42.651866000000155,
+      "durationMs": 51.913129999999,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1512,7 +1512,7 @@
       "name": "user B cannot UPDATE tenant A rows in special_occasions (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot UPDATE tenant A rows in special_occasions (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 48.8413359999995,
+      "durationMs": 49.66815400000087,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1523,7 +1523,7 @@
       "name": "user A cannot DELETE tenant B rows in access_code_redemptions (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in access_code_redemptions (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 55.197425000000294,
+      "durationMs": 48.34539499999846,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1534,7 +1534,7 @@
       "name": "user A cannot DELETE tenant B rows in archived_reservations (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in archived_reservations (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 65.59238899999946,
+      "durationMs": 43.702981000000364,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1545,7 +1545,7 @@
       "name": "user A cannot DELETE tenant B rows in audit_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in audit_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 40.59694599999966,
+      "durationMs": 40.96614099999897,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1556,7 +1556,7 @@
       "name": "user A cannot DELETE tenant B rows in beta_feedback (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in beta_feedback (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 61.748703000001115,
+      "durationMs": 45.444659000000684,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1567,7 +1567,7 @@
       "name": "user A cannot DELETE tenant B rows in blocked_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in blocked_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 42.13644899999963,
+      "durationMs": 44.58391800000027,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1578,7 +1578,7 @@
       "name": "user A cannot DELETE tenant B rows in booking_tokens (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in booking_tokens (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 50.32930900000065,
+      "durationMs": 44.181157000000894,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1589,7 +1589,7 @@
       "name": "user A cannot DELETE tenant B rows in booking_validation_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in booking_validation_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 42.37776099999974,
+      "durationMs": 47.079923999999664,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1600,7 +1600,7 @@
       "name": "user A cannot DELETE tenant B rows in discount_codes (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in discount_codes (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 56.09882800000014,
+      "durationMs": 44.61770299999989,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1611,7 +1611,7 @@
       "name": "user A cannot DELETE tenant B rows in email_send_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in email_send_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 38.8795310000005,
+      "durationMs": 46.68203600000015,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1622,7 +1622,7 @@
       "name": "user A cannot DELETE tenant B rows in guest_reviews (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in guest_reviews (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 43.220838999999614,
+      "durationMs": 56.09433600000011,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1633,7 +1633,7 @@
       "name": "user A cannot DELETE tenant B rows in kitchen_menu_items (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in kitchen_menu_items (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 40.89652799999931,
+      "durationMs": 47.048219999998764,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1644,7 +1644,7 @@
       "name": "user A cannot DELETE tenant B rows in kitchen_orders (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in kitchen_orders (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 46.181524999999965,
+      "durationMs": 46.39566900000136,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1655,7 +1655,7 @@
       "name": "user A cannot DELETE tenant B rows in login_history (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in login_history (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 39.9070980000015,
+      "durationMs": 40.38185600000179,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1666,7 +1666,7 @@
       "name": "user A cannot DELETE tenant B rows in notifications (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in notifications (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.51717800000006,
+      "durationMs": 43.460848000000624,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1677,7 +1677,7 @@
       "name": "user A cannot DELETE tenant B rows in offers (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in offers (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 43.76018599999952,
+      "durationMs": 56.75285099999928,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1688,7 +1688,7 @@
       "name": "user A cannot DELETE tenant B rows in recurring_blocked_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in recurring_blocked_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 64.18138999999974,
+      "durationMs": 40.11671999999999,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1699,7 +1699,7 @@
       "name": "user A cannot DELETE tenant B rows in reservations (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in reservations (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 50.035077999998975,
+      "durationMs": 50.05621400000018,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1710,7 +1710,7 @@
       "name": "user A cannot DELETE tenant B rows in resource_images (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in resource_images (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 62.100430000000415,
+      "durationMs": 54.52234099999987,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1721,7 +1721,7 @@
       "name": "user A cannot DELETE tenant B rows in resource_opening_hours (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in resource_opening_hours (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 57.34641499999998,
+      "durationMs": 49.27483199999915,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1732,7 +1732,7 @@
       "name": "user A cannot DELETE tenant B rows in resource_availability_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in resource_availability_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 45.50960699999996,
+      "durationMs": 47.4346970000006,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1743,7 +1743,7 @@
       "name": "user A cannot DELETE tenant B rows in resources (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in resources (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 43.217687999998816,
+      "durationMs": 45.44607300000098,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1754,7 +1754,7 @@
       "name": "user A cannot DELETE tenant B rows in special_occasions (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A cannot DELETE tenant B rows in special_occasions (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 53.38258599999972,
+      "durationMs": 42.69143500000064,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1765,7 +1765,7 @@
       "name": "user B cannot DELETE tenant A rows in access_code_redemptions (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in access_code_redemptions (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 42.249816999999894,
+      "durationMs": 59.36221099999966,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1776,7 +1776,7 @@
       "name": "user B cannot DELETE tenant A rows in archived_reservations (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in archived_reservations (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 74.50658400000066,
+      "durationMs": 47.80143700000008,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1787,7 +1787,7 @@
       "name": "user B cannot DELETE tenant A rows in audit_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in audit_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.24572800000169,
+      "durationMs": 52.06530500000008,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1798,7 +1798,7 @@
       "name": "user B cannot DELETE tenant A rows in beta_feedback (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in beta_feedback (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 45.17761700000119,
+      "durationMs": 45.371477000000596,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1809,7 +1809,7 @@
       "name": "user B cannot DELETE tenant A rows in blocked_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in blocked_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 42.50873800000045,
+      "durationMs": 60.51220600000124,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1820,7 +1820,7 @@
       "name": "user B cannot DELETE tenant A rows in booking_tokens (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in booking_tokens (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 52.94067299999915,
+      "durationMs": 48.45898400000078,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1831,7 +1831,7 @@
       "name": "user B cannot DELETE tenant A rows in booking_validation_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in booking_validation_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.33035900000141,
+      "durationMs": 49.95552999999927,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1842,7 +1842,7 @@
       "name": "user B cannot DELETE tenant A rows in discount_codes (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in discount_codes (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 46.51378900000054,
+      "durationMs": 47.18678199999886,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1853,7 +1853,7 @@
       "name": "user B cannot DELETE tenant A rows in email_send_log (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in email_send_log (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 49.35189300000093,
+      "durationMs": 52.38500899999963,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1864,7 +1864,7 @@
       "name": "user B cannot DELETE tenant A rows in guest_reviews (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in guest_reviews (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 47.31395200000043,
+      "durationMs": 42.83532899999955,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1875,7 +1875,7 @@
       "name": "user B cannot DELETE tenant A rows in kitchen_menu_items (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in kitchen_menu_items (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.98365600000034,
+      "durationMs": 59.11168499999985,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1886,7 +1886,7 @@
       "name": "user B cannot DELETE tenant A rows in kitchen_orders (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in kitchen_orders (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 45.84296399999948,
+      "durationMs": 48.977608000001055,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1897,7 +1897,7 @@
       "name": "user B cannot DELETE tenant A rows in login_history (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in login_history (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 47.77898300000015,
+      "durationMs": 52.04924399999982,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1908,7 +1908,7 @@
       "name": "user B cannot DELETE tenant A rows in notifications (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in notifications (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 55.7199899999996,
+      "durationMs": 63.82195899999897,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1919,7 +1919,7 @@
       "name": "user B cannot DELETE tenant A rows in offers (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in offers (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 63.351120999999694,
+      "durationMs": 39.97093000000132,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1930,7 +1930,7 @@
       "name": "user B cannot DELETE tenant A rows in recurring_blocked_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in recurring_blocked_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.02791099999922,
+      "durationMs": 47.99483800000053,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1941,7 +1941,7 @@
       "name": "user B cannot DELETE tenant A rows in reservations (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in reservations (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 45.24773600000117,
+      "durationMs": 45.54056499999933,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1952,7 +1952,7 @@
       "name": "user B cannot DELETE tenant A rows in resource_images (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in resource_images (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.16456300000027,
+      "durationMs": 50.71276399999988,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1963,7 +1963,7 @@
       "name": "user B cannot DELETE tenant A rows in resource_opening_hours (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in resource_opening_hours (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 42.022815000000264,
+      "durationMs": 49.500567999999475,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1974,7 +1974,7 @@
       "name": "user B cannot DELETE tenant A rows in resource_availability_slots (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in resource_availability_slots (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 47.65238800000043,
+      "durationMs": 53.45811800000047,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1985,7 +1985,7 @@
       "name": "user B cannot DELETE tenant A rows in resources (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in resources (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 44.69909500000176,
+      "durationMs": 50.471324999998615,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -1996,7 +1996,7 @@
       "name": "user B cannot DELETE tenant A rows in special_occasions (cross-tenant filter)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B cannot DELETE tenant A rows in special_occasions (cross-tenant filter)",
       "status": "passed",
-      "durationMs": 52.66585499999928,
+      "durationMs": 57.94002800000089,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -2007,7 +2007,7 @@
       "name": "user A CAN read their own tenant_users row (sanity check)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A CAN read their own tenant_users row (sanity check)",
       "status": "passed",
-      "durationMs": 47.38202999999885,
+      "durationMs": 48.22461099999964,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -2018,7 +2018,7 @@
       "name": "user B CAN read their own tenant_users row (sanity check)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B CAN read their own tenant_users row (sanity check)",
       "status": "passed",
-      "durationMs": 55.54911400000128,
+      "durationMs": 47.90104799999972,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -2029,7 +2029,7 @@
       "name": "user A reservations query never leaks tenant B rows (unfiltered)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user A reservations query never leaks tenant B rows (unfiltered)",
       "status": "passed",
-      "durationMs": 188.11757399999988,
+      "durationMs": 190.76584199999888,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -2040,7 +2040,7 @@
       "name": "user B reservations query never leaks tenant A rows (unfiltered)",
       "fullName": "src/test/security/cross-tenant-rls.test.ts > Cross-Tenant RLS Regression Tests > Live cross-tenant access denial > user B reservations query never leaks tenant A rows (unfiltered)",
       "status": "passed",
-      "durationMs": 190.5573940000013,
+      "durationMs": 196.36070199999995,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -2073,7 +2073,7 @@
       "name": "RPC returns at least one tenant-scoped table (sanity)",
       "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > RPC returns at least one tenant-scoped table (sanity)",
       "status": "passed",
-      "durationMs": 0.2999519999993936,
+      "durationMs": 0.20299300000078802,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -2084,7 +2084,7 @@
       "name": "every live tenant-scoped table is covered or explicitly excluded",
       "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > every live tenant-scoped table is covered or explicitly excluded",
       "status": "passed",
-      "durationMs": 0.7995960000007472,
+      "durationMs": 0.17681699999957345,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -2095,7 +2095,7 @@
       "name": "manifest does not list tables that no longer exist in the schema",
       "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > manifest does not list tables that no longer exist in the schema",
       "status": "passed",
-      "durationMs": 2.2909080000008544,
+      "durationMs": 5.078201000000263,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -2106,7 +2106,7 @@
       "name": "no table is in both COVERED_TABLES and EXCLUDED_TABLES",
       "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > no table is in both COVERED_TABLES and EXCLUDED_TABLES",
       "status": "passed",
-      "durationMs": 0.13034999999945285,
+      "durationMs": 0.11258000000088941,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
@@ -2117,7 +2117,7 @@
       "name": "every EXCLUDED_TABLES entry has a non-empty justification",
       "fullName": "src/test/security/tenant-table-manifest.test.ts > Tenant Table Manifest — Coverage Guard > Live schema introspection > every EXCLUDED_TABLES entry has a non-empty justification",
       "status": "passed",
-      "durationMs": 0.14490200000000186,
+      "durationMs": 0.15088999999898078,
       "errorMessage": null,
       "errorStack": null,
       "rlsDetails": null
