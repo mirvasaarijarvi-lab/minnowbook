@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:356d19da-1443-5ef5-9a12-e3224fb77632",
+  "serialNumber": "urn:uuid:6b6a08a8-e55b-5f35-9ba8-84b3211a8cac",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-21T07:55:59Z",
+    "timestamp": "2026-09-21T08:26:46Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "ed84088df528ac97e29f0fe848c650b9a5bf48fb"
+          "value": "d16db04dd1894ae7c2f8f01990ccd222f0fc3491"
         }
       ]
     }
@@ -580,11 +580,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@0.575.0",
+      "bom-ref": "pkg:npm/lucide-react@1.47.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "0.575.0",
-      "purl": "pkg:npm/lucide-react@0.575.0",
+      "version": "1.47.0",
+      "purl": "pkg:npm/lucide-react@1.47.0",
       "scope": "required"
     },
     {
