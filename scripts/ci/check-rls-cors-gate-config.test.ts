@@ -21,6 +21,14 @@ function run(root: string, workflow = WORKFLOW) {
     [SCRIPT, "--root", root, "--workflow", workflow],
     {
       encoding: "utf8",
+      // These tests deliberately break fixture workflows and assert that the
+      // checker rejects them. Never inherit GitHub's live output/summary files:
+      // doing so makes expected fixture failures appear as real workflow
+      // annotations and contaminates the job summary even though Vitest passes.
+      env: {
+        PATH: process.env.PATH ?? "",
+        HOME: process.env.HOME ?? "",
+      },
     },
   );
   return { code: res.status ?? -1, stdout: res.stdout, stderr: res.stderr };
