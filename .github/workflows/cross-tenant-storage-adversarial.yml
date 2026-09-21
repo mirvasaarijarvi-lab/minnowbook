@@ -36,6 +36,7 @@ jobs:
   check-secrets:
     name: Check live-mode secrets
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions: {}
     outputs:
       enabled: ${{ steps.check.outputs.enabled }}
