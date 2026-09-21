@@ -31,7 +31,7 @@ CI also regenerates and verifies it on every PR via `.github/workflows/sbom.yml`
 
 ## Update policy
 
-- **Pinned**: `react-router` and `react-router-dom` are strictly pinned to `6.28.0` (see `docs/dependency-audit-level.md`).
+- **Removed**: `react-router` / `react-router-dom` are no longer dependencies; routing is `@tanstack/react-router`. Do not reintroduce them (they carry unfixed open-redirect advisories in the 6.x line).
 - **Dependabot**: enabled with auto-merge for patch and minor updates that pass CI (see `.github/workflows/dependabot-auto-merge.yml`).
 - **Overrides**: `package.json#overrides` is used to force-resolve transitive dependencies away from known CVEs.
 - **Review cadence**: dependency inventory is reviewed quarterly during the security review meeting.
