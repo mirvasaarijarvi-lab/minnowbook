@@ -598,7 +598,7 @@ export function useBrandingSignedUrlState(
       if (id !== reqIdRef.current) return;
       load(true);
     });
-  }, [path, ttlSeconds, tenantId, load]);
+  }, [path, ttlSeconds, tenantId, fallbackCacheTtlMs, load]);
 
   const retry = useCallback(() => {
     if (path) {
