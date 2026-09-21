@@ -68,20 +68,24 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "react-dom"
         update-types: ["version-update:semver-major"]
-      # React type definitions must stay on the same major as React 18.
+      # React type definitions must stay on the same major as React 19.
       - dependency-name: "@types/react"
         update-types: ["version-update:semver-major"]
       - dependency-name: "@types/react-dom"
         update-types: ["version-update:semver-major"]
-      # Tailwind v4 is a breaking rewrite; project is pinned to v3.
+      # Tailwind v4 is configured through src/styles.css; a v5 rewrite would
+      # need a manual migration.
       - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@tailwindcss/vite"
         update-types: ["version-update:semver-major"]
       - dependency-name: "@tailwindcss/typography"
         update-types: ["version-update:semver-major"]
-      # Vite is pinned to v5 by the Lovable stack.
+      # Vite majors move together with the TanStack Start plugins and need
+      # both lockfiles regenerated; upgrade deliberately.
       - dependency-name: "vite"
         update-types: ["version-update:semver-major"]
-      - dependency-name: "@vitejs/plugin-react-swc"
+      - dependency-name: "@vitejs/plugin-react"
         update-types: ["version-update:semver-major"]
       # shadcn/ui pins these; their majors are breaking API rewrites and are
       # upgraded deliberately, not by bot PRs.
