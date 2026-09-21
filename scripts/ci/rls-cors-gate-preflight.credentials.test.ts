@@ -51,7 +51,9 @@ describe("pull requests that cannot read repository secrets", () => {
       RLS_GATE_SECRETS_UNAVAILABLE: "1",
     });
     expect(r.code).toBe(0);
-    expect(r.out).toContain("::warning title=RLS/CORS gate secrets unavailable");
+    expect(r.out).toContain(
+      "::warning title=RLS/CORS gate secrets unavailable",
+    );
     expect(r.out).not.toContain("::error");
     expect(r.outputs).toContain("mode=skip");
   });
