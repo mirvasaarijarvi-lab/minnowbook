@@ -21,10 +21,7 @@ export interface SubscriptionInfo {
  * unexpected and surface in monitoring.
  */
 export type SignOutReason =
-  | "user_logout"
-  | "mfa_cancel"
-  | "no_tenant"
-  | "corrupted_session";
+  "user_logout" | "mfa_cancel" | "no_tenant" | "corrupted_session";
 
 export interface AuthContextType {
   session: Session | null;

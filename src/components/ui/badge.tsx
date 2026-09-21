@@ -7,8 +7,7 @@ import {
 } from "@/components/ui/badge-variants";
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    BadgeVariantProps {}
+  extends React.HTMLAttributes<HTMLDivElement>, BadgeVariantProps {}
 
 // forwardRef so consumers (Radix Slot via `asChild`, Tooltip triggers, etc.)
 // can attach a ref without React logging

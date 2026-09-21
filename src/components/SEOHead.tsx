@@ -1,12 +1,7 @@
 import { useEffect } from "react";
 import { useI18n } from "@/contexts/I18nContext";
 import type { Language } from "@/i18n/translations";
-import {
-  BASE_URL,
-  LANGUAGES,
-  OG_LOCALES,
-  localizedUrl,
-} from "@/lib/seo-urls";
+import { BASE_URL, LANGUAGES, OG_LOCALES, localizedUrl } from "@/lib/seo-urls";
 
 interface SEOHeadProps {
   title: string;

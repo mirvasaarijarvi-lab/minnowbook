@@ -19,7 +19,11 @@ import ctaBg from "@/assets/cta-bg.png";
 import { useT } from "@/contexts/I18nContext";
 import { TranslationKey } from "@/i18n/translations";
 import SEOHead from "@/components/SEOHead";
-import { organizationSchema, softwareSchema, faqSchema } from "@/lib/seo-schemas";
+import {
+  organizationSchema,
+  softwareSchema,
+  faqSchema,
+} from "@/lib/seo-schemas";
 import { siteOrigin } from "@/lib/site-origin";
 
 const featureKeys: {

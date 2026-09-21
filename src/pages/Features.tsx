@@ -46,7 +46,11 @@ import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
 import SupportChatWidget from "@/components/SupportChatWidget";
 import SEOHead from "@/components/SEOHead";
-import { organizationSchema, softwareSchema, breadcrumbSchema } from "@/lib/seo-schemas";
+import {
+  organizationSchema,
+  softwareSchema,
+  breadcrumbSchema,
+} from "@/lib/seo-schemas";
 import { useT } from "@/contexts/I18nContext";
 
 const featureGroups = [

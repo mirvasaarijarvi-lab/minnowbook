@@ -36,7 +36,6 @@ export type ShimRouteProps = {
   children?: ReactNode;
 };
 
-
 export function matchPath(
   pattern: string,
   pathname: string,
