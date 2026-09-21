@@ -1,10 +1,10 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:878c0e71-4452-523e-a023-c882596a7bc0",
+  "serialNumber": "urn:uuid:6842a0ff-18a9-55a4-a770-281b8c9032bc",
   "version": 1,
   "metadata": {
-    "timestamp": "2026-09-18T10:17:21Z",
+    "timestamp": "2026-09-21T05:22:20Z",
     "tools": [
       {
         "vendor": "MimmoBook",
@@ -21,7 +21,7 @@
       "properties": [
         {
           "name": "git:sha",
-          "value": "9433ee659ce9a9769dae7c9bcd40c9f651eefd00"
+          "value": "b611536bb18da356b56793405ed26c94f5f4353c"
         }
       ]
     }
@@ -676,11 +676,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/recharts@2.15.4",
+      "bom-ref": "pkg:npm/recharts@3.10.1",
       "type": "library",
       "name": "recharts",
-      "version": "2.15.4",
-      "purl": "pkg:npm/recharts@2.15.4",
+      "version": "3.10.1",
+      "purl": "pkg:npm/recharts@3.10.1",
       "scope": "required"
     },
     {
