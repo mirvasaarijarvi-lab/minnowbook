@@ -169,6 +169,13 @@
       "when": 1789727161961,
       "tag": "0023_pro_tier_five_resources_per_type",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789977646584,
+      "tag": "0024_security_alerts_monitoring",
+      "breakpoints": true
     }
   ]
 }

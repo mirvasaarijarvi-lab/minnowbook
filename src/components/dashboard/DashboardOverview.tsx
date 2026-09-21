@@ -41,6 +41,7 @@ import ShareBookingPageCard from "./ShareBookingPageCard";
 import ActionAlertsBanner from "./ActionAlertsBanner";
 import BetaFeedbackCard from "./BetaFeedbackCard";
 import EmailFailureAlert from "./EmailFailureAlert";
+import SecurityAlertsBanner from "./SecurityAlertsBanner";
 import OnboardingChecklist from "./OnboardingChecklist";
 
 import { useMemo } from "react";
@@ -386,6 +387,9 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
 
       {/* Email failure monitoring (superadmin only) */}
       <EmailFailureAlert />
+
+      {/* Failed sign-ins and unusual reservation access (superadmin only) */}
+      <SecurityAlertsBanner />
 
       {/* Action-required alerts */}
       <ActionAlertsBanner
