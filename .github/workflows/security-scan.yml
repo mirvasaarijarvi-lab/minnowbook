@@ -105,6 +105,77 @@ jobs:
           fi
           echo "✅ No high/critical npm advisories (allowlist applied)."
 
+  # Human-readable companion to the gate above. Publishes the full audit
+  # result as a downloadable report + step summary, and on pull requests
+  # annotates ONLY the advisories the PR itself introduces (diffed against
+  # the base branch), so reviewers are never trained to ignore annotations
+  # for the documented pre-existing allowlist.
+  dependency-audit-report:
+    name: Dependency audit report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun-with-diagnostics
+
+      - name: Cache Bun dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock', 'bun.lockb', 'package.json') }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # `|| true`: a non-zero exit only means advisories exist; the report
+      # script decides what blocks. An empty file means "no baseline".
+      - name: Audit this commit
+        run: |
+          mkdir -p audit-report
+          bun audit --json --audit-level=low > audit-report/head.json 2>/dev/null || true
+
+      - name: Audit the base branch (pull requests only)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          # Separate worktree + node_modules so the base install cannot
+          # disturb the head checkout we just audited.
+          git worktree add /tmp/audit-base "$BASE_SHA"
+          cd /tmp/audit-base
+          bun install --frozen-lockfile
+          bun audit --json --audit-level=low \
+            > "$GITHUB_WORKSPACE/audit-report/base.json" 2>/dev/null || true
+
+      - name: Build report and annotate new vulnerabilities
+        run: |
+          # manager=pnpm: that parser accepts both audit JSON shapes bun
+          # can emit ({ advisories } and { vulnerabilities }).
+          node .github/workflows/scripts/audit-report.mjs \
+            --manager=pnpm \
+            --label=bun \
+            --head=audit-report/head.json \
+            --base=audit-report/base.json \
+            --out-dir=audit-report \
+            --fail-on=high \
+            --allowlist=GHSA-5xrq-8626-4rwp
+
+      - name: Upload dependency audit report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dependency-audit-report-run-${{ github.run_id }}
+          path: audit-report/
+          if-no-files-found: warn
+          retention-days: 30
 
   supabase-advisors:
     name: Supabase advisors (security lints)
@@ -220,7 +291,6 @@ jobs:
             fi
             exit 1
           fi
-
 
   summary:
     name: Security scan summary

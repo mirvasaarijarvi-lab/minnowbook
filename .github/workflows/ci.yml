@@ -60,7 +60,6 @@ jobs:
       - name: Validate package-lock.json (drift + public registry URLs)
         run: node scripts/ci/check-npm-lockfile-hygiene.mjs
 
-
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
@@ -165,7 +164,6 @@ jobs:
       # See docs/dependency-update-workflow.md.
       - name: Validate package-lock.json (drift + public registry URLs)
         run: node scripts/ci/check-npm-lockfile-hygiene.mjs
-
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
