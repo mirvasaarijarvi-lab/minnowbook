@@ -414,6 +414,7 @@ type TranslationKeys = {
   "admin.created": string;
   "admin.updated": string;
   "admin.deleted": string;
+  "admin.bookingSubmission": string;
   "admin.fieldsChanged": string;
   "admin.revert": string;
   "admin.revertConfirm": string;
