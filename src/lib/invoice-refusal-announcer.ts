@@ -66,9 +66,12 @@ export function announceInvoiceRefusal(
   const text = alternate ? `${message}\u00A0` : message;
   refillTimer = setTimeout(() => {
     refillTimer = null;
+    // The page (or a test environment) may be gone by the time this runs.
+    if (typeof document === "undefined") return;
     const current = document.getElementById(REGION_ID);
     if (current) current.textContent = text;
   }, 60);
+
 }
 
 /** Clear the announcement, for example after a successful retry. */
