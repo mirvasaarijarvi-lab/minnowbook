@@ -219,7 +219,7 @@ jobs:
       # run page. Uploaded on failure too — that is when it is needed.
       - name: Upload RLS gate logs and report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rls-cors-gate-logs
           path: |
@@ -399,7 +399,7 @@ jobs:
 
       - name: Upload advisor gate log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rls-cors-gate-logs-advisor
           path: test-reports/logs/
