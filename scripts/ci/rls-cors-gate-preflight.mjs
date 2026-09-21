@@ -173,6 +173,7 @@ if (!URL_ || !ANON) {
 }
 
 
+
 // Shape checks: catch a misconfigured value before spending a network round
 // trip that would fail with an opaque 401 or DNS error deep in the logs.
 if (!/^https:\/\/[^\s/]+$/.test(URL_.replace(/\/$/, ""))) {
