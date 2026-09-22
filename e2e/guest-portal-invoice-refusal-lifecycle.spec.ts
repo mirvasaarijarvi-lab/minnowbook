@@ -132,6 +132,27 @@ async function openBooking(page: Page, token: string) {
   });
 }
 
+/**
+ * Close any notification that is currently on screen. A visible toast sits in
+ * a fixed layer and can cover the submit button, so repeat clicks in this spec
+ * dismiss the previous notification first, exactly as a guest would.
+ */
+async function dismissToasts(page: Page) {
+  const closers = page.locator(
+    "[data-radix-toast-viewport] button, [data-sonner-toaster] button[data-close-button]",
+  );
+  for (let i = await closers.count(); i > 0; i -= 1) {
+    const closer = closers.first();
+    if (!(await closer.isVisible().catch(() => false))) break;
+    await closer.click({ force: true }).catch(() => undefined);
+  }
+  await page
+    .locator("[data-radix-toast-viewport] li, [data-sonner-toast]")
+    .first()
+    .waitFor({ state: "hidden", timeout: 5_000 })
+    .catch(() => undefined);
+}
+
 /** Fill the change request and submit it, returning the submit button. */
 async function requestNewDate(page: Page) {
   const button = page.getByRole("button", { name: "Request new date" });
@@ -180,6 +201,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
 
     // --- 2. A retry that fails the same way --------------------------------
     const firstAnnouncement = await page.locator(REGION).textContent();
+    await dismissToasts(page);
     await button.click();
     await expect
       .poll(() => page.locator(REGION).textContent(), { timeout: 10_000 })
@@ -193,6 +215,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
 
     // --- 3. A different reason replaces the previous wording ---------------
     state.outcome = "cancelled-rule";
+    await dismissToasts(page);
     await button.click();
     await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({
       timeout: 15_000,
@@ -207,6 +230,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
 
     // --- 4. A successful retry clears message and announcement ------------
     state.outcome = "ok";
+    await dismissToasts(page);
     await button.click();
     await expect(
       page.getByText("Your change request has been sent"),
@@ -245,6 +269,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
     await expect(page.getByText(GUEST_INVOICED)).toHaveCount(0);
 
     state.outcome = "ok";
+    await dismissToasts(page);
     await buttonB.click();
     await expect(
       page.getByText("Your change request has been sent"),
