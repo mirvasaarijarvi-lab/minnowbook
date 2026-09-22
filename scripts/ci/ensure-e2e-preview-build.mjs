@@ -17,6 +17,8 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { nodeVersionError } from "./assert-node-version.mjs";
+
 // Shared Node floor guard (see scripts/ci/assert-node-version.mjs): the backend
 // client needs a native WebSocket, which Node only ships from v22.
 const nodeError = nodeVersionError(process.versions.node, "e2e");
