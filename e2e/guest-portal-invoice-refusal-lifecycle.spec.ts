@@ -132,41 +132,62 @@ async function openBooking(page: Page, token: string) {
   });
 }
 
+const TOAST_SELECTOR =
+  "[data-radix-toast-viewport] li, [data-sonner-toast], [data-radix-toast-viewport] li:visible, [data-sonner-toast]:visible";
+
 /**
- * Close any notification that is currently on screen. A visible toast sits in
- * a fixed layer and can cover the submit button, so repeat clicks in this spec
- * dismiss the previous notification first, exactly as a guest would.
+ * Close every notification that is currently on screen. A visible toast sits
+ * in a fixed layer and can cover the submit button, so repeat clicks in this
+ * spec dismiss the previous notification first, exactly as a guest would.
+ *
+ * Toast libraries keep a dismissed node in the DOM while its exit animation
+ * runs, so this waits until no toast node is left at all before returning:
+ * an animating node still intercepts pointer events over the form.
  */
 async function dismissToasts(page: Page) {
-  const visibleToasts = page.locator(
-    "[data-radix-toast-viewport] li:visible, [data-sonner-toast]:visible",
-  );
+  const toasts = page.locator(TOAST_SELECTOR);
 
-  // Sonner keeps dismissed toast nodes in the DOM while their exit animation
-  // runs. Selecting the first unfiltered close button can therefore keep
-  // finding an already hidden, removed toast and leave the visible toast over
-  // the form. Always target a close control inside a currently visible toast.
-  for (let pass = 0; pass < 3; pass += 1) {
-    const toast = visibleToasts.first();
-    if (!(await toast.isVisible().catch(() => false))) return;
-    const closer = toast
-      .locator("button[data-close-button]:visible, button:visible")
-      .first();
-    await expect(
-      closer,
-      "visible notifications need a close control",
-    ).toBeVisible();
-    await closer.click({ force: true });
-    await toast
-      .waitFor({ state: "hidden", timeout: 2_000 })
+  for (let pass = 0; pass < 10; pass += 1) {
+    if ((await toasts.count()) === 0) return;
+    const closers = page.locator(
+      "[data-radix-toast-viewport] li button:visible, [data-sonner-toast] button:visible",
+    );
+    const count = await closers.count();
+    for (let i = count - 1; i >= 0; i -= 1) {
+      await closers
+        .nth(i)
+        .click({ force: true, timeout: 2_000 })
+        .catch(() => undefined);
+    }
+    await page
+      .waitForFunction(
+        (sel) => document.querySelectorAll(sel).length === 0,
+        TOAST_SELECTOR,
+        { timeout: 2_000 },
+      )
       .catch(() => undefined);
-    if ((await visibleToasts.count()) === 0) return;
   }
 
   await expect(
-    visibleToasts,
-    "all visible notifications should close",
-  ).toHaveCount(0, { timeout: 8_000 });
+    toasts,
+    "all notifications should close before the next click",
+  ).toHaveCount(0, { timeout: 10_000 });
+}
+
+/**
+ * The guest-facing refusal wording appears twice on purpose: in the notice on
+ * screen and in the assertive live region for screen readers. Scope screen
+ * assertions to the notice so they stay unambiguous; the live region is
+ * checked separately through `announced`.
+ */
+const notice = (page: Page, text: string) =>
+  page.locator("[data-sonner-toast]").filter({ hasText: text });
+
+/** Click the submit button again, with the notification layer cleared. */
+async function clickAgain(page: Page, button: ReturnType<Page["getByRole"]>) {
+  await dismissToasts(page);
+  await button.scrollIntoViewIfNeeded();
+  await button.click();
 }
 
 /** Fill the change request and submit it, returning the submit button. */
@@ -174,6 +195,10 @@ async function requestNewDate(page: Page) {
   const button = page.getByRole("button", { name: "Request new date" });
   await page.locator("#reschedule-date").fill(futureDate(45));
   await expect(button).toBeEnabled();
+  // Any notice still on screen would sit over the button, so clear the layer
+  // first: this is the only thing that can intercept the click.
+  await dismissToasts(page);
+  await button.scrollIntoViewIfNeeded();
   await button.click();
   return button;
 }
@@ -189,6 +214,23 @@ const announced = (page: Page) =>
   );
 
 test.describe("Invoice refusal notice lifecycle", () => {
+  // Pre-answer the cookie banner and pin the language. The banner is a fixed
+  // overlay above the portal's action buttons, so leaving it open makes every
+  // repeat click land on the banner instead of "Request new date".
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem("mimmobook-lang", "en");
+      window.localStorage.setItem(
+        "cookie-consent",
+        JSON.stringify({
+          version: 1,
+          categories: { necessary: true, analytics: false, marketing: false },
+          updatedAt: new Date().toISOString(),
+        }),
+      );
+    });
+  });
+
   test("replaces, announces and clears refusals across retries and bookings", async ({
     page,
   }) => {
@@ -198,7 +240,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
 
     // --- 1. A refused action: message on screen, announced to a reader ------
     const button = await requestNewDate(page);
-    const refusal = page.getByText(GUEST_INVOICED);
+    const refusal = notice(page, GUEST_INVOICED);
     await expect(refusal).toBeVisible({ timeout: 15_000 });
     // Guests never see the internal, staff-only instruction.
     await expect(page.getByText(STAFF_ONLY_WORDING)).toHaveCount(0);
@@ -217,13 +259,12 @@ test.describe("Invoice refusal notice lifecycle", () => {
 
     // --- 2. A retry that fails the same way --------------------------------
     const firstAnnouncement = await page.locator(REGION).textContent();
-    await dismissToasts(page);
-    await button.click();
+    await clickAgain(page, button);
     await expect
       .poll(() => page.locator(REGION).textContent(), { timeout: 10_000 })
       .not.toBe(firstAnnouncement);
     // Still exactly one refusal on screen, not two stacked copies.
-    await expect(page.getByText(GUEST_INVOICED)).toHaveCount(1);
+    await expect(notice(page, GUEST_INVOICED)).toHaveCount(1);
     await expect
       .poll(() => announced(page), { timeout: 10_000 })
       .toContain("already been invoiced");
@@ -231,13 +272,12 @@ test.describe("Invoice refusal notice lifecycle", () => {
 
     // --- 3. A different reason replaces the previous wording ---------------
     state.outcome = "cancelled-rule";
-    await dismissToasts(page);
-    await button.click();
-    await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({
+    await clickAgain(page, button);
+    await expect(notice(page, GUEST_CANCELLED)).toBeVisible({
       timeout: 15_000,
     });
     await expect(
-      page.getByText(GUEST_INVOICED),
+      notice(page, GUEST_INVOICED),
       "the earlier reason must be gone",
     ).toHaveCount(0);
     await expect
@@ -246,14 +286,13 @@ test.describe("Invoice refusal notice lifecycle", () => {
 
     // --- 4. A successful retry clears message and announcement ------------
     state.outcome = "ok";
-    await dismissToasts(page);
-    await button.click();
+    await clickAgain(page, button);
     await expect(
-      page.getByText("Your change request has been sent"),
+      page.getByText("Your change request has been sent").first(),
     ).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, {
+    await expect(notice(page, GUEST_CANCELLED)).toHaveCount(0, {
       timeout: 15_000,
     });
     await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
@@ -262,7 +301,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
     state.outcome = "invoiced";
     await openBooking(page, "token-a2");
     await requestNewDate(page);
-    await expect(page.getByText(GUEST_INVOICED)).toBeVisible({
+    await expect(notice(page, GUEST_INVOICED)).toBeVisible({
       timeout: 15_000,
     });
 
@@ -271,7 +310,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
       "Second Booking Guest",
     );
     await expect(
-      page.getByText(GUEST_INVOICED),
+      notice(page, GUEST_INVOICED),
       "a refusal from the previous booking must not follow the guest",
     ).toHaveCount(0, { timeout: 15_000 });
     await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
@@ -279,20 +318,19 @@ test.describe("Invoice refusal notice lifecycle", () => {
     // --- 6. The new booking refuses and then succeeds on its own ----------
     state.outcome = "cancelled-rule";
     const buttonB = await requestNewDate(page);
-    await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({
+    await expect(notice(page, GUEST_CANCELLED)).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByText(GUEST_INVOICED)).toHaveCount(0);
+    await expect(notice(page, GUEST_INVOICED)).toHaveCount(0);
 
     state.outcome = "ok";
-    await dismissToasts(page);
-    await buttonB.click();
+    await clickAgain(page, buttonB);
     await expect(
-      page.getByText("Your change request has been sent"),
+      page.getByText("Your change request has been sent").first(),
     ).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, {
+    await expect(notice(page, GUEST_CANCELLED)).toHaveCount(0, {
       timeout: 15_000,
     });
     await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
@@ -308,7 +346,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
     await openBooking(page, "token-a");
     await openBooking(page, "token-b");
     await requestNewDate(page);
-    await expect(page.getByText(GUEST_INVOICED)).toBeVisible({
+    await expect(notice(page, GUEST_INVOICED)).toBeVisible({
       timeout: 15_000,
     });
 
@@ -321,7 +359,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
       },
     );
     await expect(
-      page.getByText(GUEST_INVOICED),
+      notice(page, GUEST_INVOICED),
       "going back must not carry the refusal to the previous booking",
     ).toHaveCount(0, { timeout: 15_000 });
     await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
@@ -329,7 +367,7 @@ test.describe("Invoice refusal notice lifecycle", () => {
     // Refuse here, then go forward again: still nothing stale.
     state.outcome = "cancelled-rule";
     await requestNewDate(page);
-    await expect(page.getByText(GUEST_CANCELLED)).toBeVisible({
+    await expect(notice(page, GUEST_CANCELLED)).toBeVisible({
       timeout: 15_000,
     });
 
@@ -340,10 +378,10 @@ test.describe("Invoice refusal notice lifecycle", () => {
         timeout: 30_000,
       },
     );
-    await expect(page.getByText(GUEST_CANCELLED)).toHaveCount(0, {
+    await expect(notice(page, GUEST_CANCELLED)).toHaveCount(0, {
       timeout: 15_000,
     });
-    await expect(page.getByText(GUEST_INVOICED)).toHaveCount(0);
+    await expect(notice(page, GUEST_INVOICED)).toHaveCount(0);
     await expect.poll(() => announced(page), { timeout: 10_000 }).toBe("");
   });
 });
