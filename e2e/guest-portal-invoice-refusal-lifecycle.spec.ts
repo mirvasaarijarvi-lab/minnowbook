@@ -138,28 +138,35 @@ async function openBooking(page: Page, token: string) {
  * dismiss the previous notification first, exactly as a guest would.
  */
 async function dismissToasts(page: Page) {
-  const toasts = page.locator(
-    "[data-radix-toast-viewport] li, [data-sonner-toast]",
-  );
-  const closers = page.locator(
-    "[data-radix-toast-viewport] button, [data-sonner-toaster] button[data-close-button]",
+  const visibleToasts = page.locator(
+    "[data-radix-toast-viewport] li:visible, [data-sonner-toast]:visible",
   );
 
-  // Two passes: click every close control, then give any notification that
-  // refuses to go (or has no control) time to expire on its own.
-  for (let pass = 0; pass < 2; pass += 1) {
-    for (let i = await closers.count(); i > 0; i -= 1) {
-      const closer = closers.first();
-      if (!(await closer.isVisible().catch(() => false))) break;
-      await closer.click({ force: true }).catch(() => undefined);
-    }
-    if ((await toasts.count()) === 0) return;
-    await toasts
-      .first()
-      .waitFor({ state: "hidden", timeout: 8_000 })
+  // Sonner keeps dismissed toast nodes in the DOM while their exit animation
+  // runs. Selecting the first unfiltered close button can therefore keep
+  // finding an already hidden, removed toast and leave the visible toast over
+  // the form. Always target a close control inside a currently visible toast.
+  for (let pass = 0; pass < 3; pass += 1) {
+    const toast = visibleToasts.first();
+    if (!(await toast.isVisible().catch(() => false))) return;
+    const closer = toast
+      .locator("button[data-close-button]:visible, button:visible")
+      .first();
+    await expect(
+      closer,
+      "visible notifications need a close control",
+    ).toBeVisible();
+    await closer.click({ force: true });
+    await toast
+      .waitFor({ state: "hidden", timeout: 2_000 })
       .catch(() => undefined);
-    if ((await toasts.count()) === 0) return;
+    if ((await visibleToasts.count()) === 0) return;
   }
+
+  await expect(
+    visibleToasts,
+    "all visible notifications should close",
+  ).toHaveCount(0, { timeout: 8_000 });
 }
 
 /** Fill the change request and submit it, returning the submit button. */
