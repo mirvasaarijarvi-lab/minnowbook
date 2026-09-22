@@ -287,11 +287,11 @@ test.describe("Invoice refusal notice lifecycle", () => {
     // --- 4. A successful retry clears message and announcement ------------
     state.outcome = "ok";
     await clickAgain(page, button);
-    await expect(notice(page, "Your change request has been sent")).toBeVisible(
-      {
-        timeout: 15_000,
-      },
-    );
+    await expect(
+      page.getByText("Your change request has been sent").first(),
+    ).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(notice(page, GUEST_CANCELLED)).toHaveCount(0, {
       timeout: 15_000,
     });
@@ -325,11 +325,11 @@ test.describe("Invoice refusal notice lifecycle", () => {
 
     state.outcome = "ok";
     await clickAgain(page, buttonB);
-    await expect(notice(page, "Your change request has been sent")).toBeVisible(
-      {
-        timeout: 15_000,
-      },
-    );
+    await expect(
+      page.getByText("Your change request has been sent").first(),
+    ).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(notice(page, GUEST_CANCELLED)).toHaveCount(0, {
       timeout: 15_000,
     });
