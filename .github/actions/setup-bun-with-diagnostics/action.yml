@@ -37,10 +37,53 @@ inputs:
       not listed in bun-pin.env.
     required: false
     default: "true"
+  node-version:
+    description: |
+      Node.js major to install before Bun. Defaults to the repo-wide
+      floor in .nvmrc (Node 22), which @supabase/supabase-js and the
+      E2E preview server require: Node 20 has no native WebSocket, so
+      Realtime throws during SSR and every page 500s. Override only
+      for matrix jobs that deliberately test other Node versions.
+    required: false
+    default: ""
 
 runs:
   using: composite
   steps:
+    - name: Resolve Node.js version
+      id: node-pin
+      shell: bash
+      env:
+        INPUT_NODE_VERSION: ${{ inputs.node-version }}
+      run: |
+        set -euo pipefail
+        REQUESTED="${INPUT_NODE_VERSION:-}"
+        if [ -z "$REQUESTED" ]; then
+          NVMRC="${GITHUB_WORKSPACE}/.nvmrc"
+          if [ -f "$NVMRC" ]; then
+            REQUESTED="$(tr -d ' \t\r\n' < "$NVMRC")"
+          else
+            REQUESTED="22"
+          fi
+        fi
+        echo "version=$REQUESTED" >> "$GITHUB_OUTPUT"
+        echo "Node.js version for this job: $REQUESTED"
+
+    - name: Setup Node.js
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: ${{ steps.node-pin.outputs.version }}
+
+    - name: Verify Node.js supports native WebSocket
+      shell: bash
+      run: |
+        set -euo pipefail
+        MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
+        echo "node $(node --version)"
+        if [ "$MAJOR" -lt 22 ]; then
+          echo "::warning::Node $MAJOR is below the repo floor of 22. @supabase/supabase-js Realtime needs native WebSocket (Node 22+); SSR pages will return HTTP 500 on this runtime."
+        fi
+
     - name: Resolve pinned Bun version + checksum
       id: pin
       shell: bash
