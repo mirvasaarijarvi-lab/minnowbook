@@ -150,8 +150,7 @@ async function dismissToasts(page: Page) {
     const toast = visibleToasts.first();
     if (!(await toast.isVisible().catch(() => false))) return;
     const closer = toast
-      .locator("button[data-close-button], button")
-      .filter({ visible: true })
+      .locator("button[data-close-button]:visible, button:visible")
       .first();
     await expect(closer, "visible notifications need a close control").toBeVisible();
     await closer.click({ force: true });
