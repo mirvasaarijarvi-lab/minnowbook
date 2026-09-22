@@ -138,19 +138,26 @@ async function openBooking(page: Page, token: string) {
  * dismiss the previous notification first, exactly as a guest would.
  */
 async function dismissToasts(page: Page) {
+  const toasts = page.locator("[data-radix-toast-viewport] li, [data-sonner-toast]");
   const closers = page.locator(
     "[data-radix-toast-viewport] button, [data-sonner-toaster] button[data-close-button]",
   );
-  for (let i = await closers.count(); i > 0; i -= 1) {
-    const closer = closers.first();
-    if (!(await closer.isVisible().catch(() => false))) break;
-    await closer.click({ force: true }).catch(() => undefined);
+
+  // Two passes: click every close control, then give any notification that
+  // refuses to go (or has no control) time to expire on its own.
+  for (let pass = 0; pass < 2; pass += 1) {
+    for (let i = await closers.count(); i > 0; i -= 1) {
+      const closer = closers.first();
+      if (!(await closer.isVisible().catch(() => false))) break;
+      await closer.click({ force: true }).catch(() => undefined);
+    }
+    if ((await toasts.count()) === 0) return;
+    await toasts
+      .first()
+      .waitFor({ state: "hidden", timeout: 8_000 })
+      .catch(() => undefined);
+    if ((await toasts.count()) === 0) return;
   }
-  await page
-    .locator("[data-radix-toast-viewport] li, [data-sonner-toast]")
-    .first()
-    .waitFor({ state: "hidden", timeout: 5_000 })
-    .catch(() => undefined);
 }
 
 /** Fill the change request and submit it, returning the submit button. */
