@@ -8,7 +8,6 @@ import { assertNodeVersion } from "./scripts/ci/assert-node-version.mjs";
 
 assertNodeVersion("e2e");
 
-
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,

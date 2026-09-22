@@ -14,7 +14,10 @@ export function nodeMajor(version = process.versions.node) {
   return Number.isNaN(major) ? null : major;
 }
 
-export function nodeVersionError(version = process.versions.node, label = "ci") {
+export function nodeVersionError(
+  version = process.versions.node,
+  label = "ci",
+) {
   const major = nodeMajor(version);
   if (major === null || major >= MINIMUM_NODE_MAJOR) return null;
   return (
