@@ -10,6 +10,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      // Every notice gets a close control, so a notification can always be
+      // dismissed instead of sitting over the button underneath it.
+      closeButton
       toastOptions={{
         classNames: {
           toast:
