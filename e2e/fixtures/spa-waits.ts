@@ -42,7 +42,11 @@ export interface SpaLoadOptions {
   navTimeoutMs?: number;
   /** Per-element / per-assertion timeout. Default 20s. */
   elementTimeoutMs?: number;
-  /** CSS selector that must hydrate (have child elements). Default `#root`. */
+  /**
+   * CSS selector that must hydrate (have child elements).
+   * Default `body`: TanStack Start renders the whole document from
+   * `__root.tsx`, so there is no `#root` wrapper to wait for.
+   */
   rootSelector?: string;
   /** CSS selector that must become visible. Default `main`. */
   shellSelector?: string;
@@ -74,7 +78,7 @@ export async function gotoAndWaitForSpa(
 ) {
   const navTimeoutMs = options.navTimeoutMs ?? 30_000;
   const elementTimeoutMs = options.elementTimeoutMs ?? 20_000;
-  const rootSelector = options.rootSelector ?? "#root";
+  const rootSelector = options.rootSelector ?? "body";
   const shellSelector = options.shellSelector ?? "main";
   const notFoundPattern =
     options.notFoundPattern === undefined
