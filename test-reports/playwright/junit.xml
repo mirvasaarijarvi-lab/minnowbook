@@ -1,624 +1,70 @@
-<testsuites id="" name="" tests="110" failures="0" skipped="110" errors="0" time="2.065871">
-<testsuite name="cross-booking-same-guest.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="2" failures="0" skipped="2" time="0" errors="0">
-<testcase name="Cross-booking: same guest, multiple resources/services › public booking page for the test tenant loads" classname="cross-booking-same-guest.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Cross-booking: same guest, multiple resources/services › creates restaurant + guesthouse + venue reservations for the same guest" classname="cross-booking-same-guest.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="dashboard-reservations.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="2" failures="0" skipped="2" time="0" errors="0">
-<testcase name="Dashboard reservations route › redirects unauthenticated users away from /dashboard" classname="dashboard-reservations.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Dashboard reservations route › login page exposes the email/password fields used to reach dashboard" classname="dashboard-reservations.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="guest-portal-flow.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="guest self-service flow › find booking, reschedule, staff approval, and guest cancellation" classname="guest-portal-flow.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="guest-portal-invoice-refusal-lifecycle.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="2" failures="0" skipped="2" time="0" errors="0">
-<testcase name="Invoice refusal notice lifecycle › replaces, announces and clears refusals across retries and bookings" classname="guest-portal-invoice-refusal-lifecycle.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Invoice refusal notice lifecycle › clears a refusal on back and forward navigation between bookings" classname="guest-portal-invoice-refusal-lifecycle.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="multi-resource-invoice-line-items.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Multi-resource invoice line items › line items sum to the charged total for every leg and the group" classname="multi-resource-invoice-line-items.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="no-tenant-navigation.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="9" failures="0" skipped="9" time="0" errors="0">
-<testcase name="Anonymous users hitting protected routes › GET /dashboard as anon redirects to /login" classname="no-tenant-navigation.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Anonymous users hitting protected routes › GET /onboarding as anon redirects to /login" classname="no-tenant-navigation.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Anonymous users hitting protected routes › GET /guide as anon redirects to /login" classname="no-tenant-navigation.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Anonymous users hitting protected routes › GET /superadmin as anon redirects to /login" classname="no-tenant-navigation.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Authenticated user without tenant membership › /dashboard redirects to /onboarding" classname="no-tenant-navigation.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Authenticated user without tenant membership › /onboarding renders the wizard (no redirect loop)" classname="no-tenant-navigation.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Authenticated user without tenant membership › /guide renders without requiring a tenant" classname="no-tenant-navigation.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Authenticated user without tenant membership › /superadmin denies non-admin and bounces to onboarding" classname="no-tenant-navigation.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Authenticated user without tenant membership › full navigation loop: dashboard -&gt; onboarding -&gt; guide -&gt; superadmin" classname="no-tenant-navigation.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="no-tenant-state.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="5" failures="0" skipped="5" time="0" errors="0">
-<testcase name="NoTenantState for logged-in users without a tenant › /dashboard guard redirects no-tenant user to /onboarding" classname="no-tenant-state.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="NoTenantState for logged-in users without a tenant › /guide guard redirects no-tenant user to /onboarding" classname="no-tenant-state.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="NoTenantState for logged-in users without a tenant › /superadmin renders NoTenantState › shows the user&apos;s email and both CTAs" classname="no-tenant-state.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="NoTenantState for logged-in users without a tenant › /superadmin renders NoTenantState › &apos;Complete setup&apos; CTA navigates to /onboarding" classname="no-tenant-state.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="NoTenantState for logged-in users without a tenant › /superadmin renders NoTenantState › &apos;Contact support&apos; CTA opens /support with prefilled area + email" classname="no-tenant-state.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NO_TENANT_EMAIL and E2E_NO_TENANT_PASSWORD to run this suite.">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="offer-confirm-creates-reservations.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Offer confirm creates main + linked cross reservations › confirms offer and produces main + 2 linked reservations" classname="offer-confirm-creates-reservations.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="offer-confirm-kitchen-confirmation.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="9" failures="0" skipped="9" time="0" errors="0">
-<testcase name="Offer confirmation states the Kitchen tab result › offer with food and drinks: confirmation names the lines sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts">
-<properties>
-<property name="serial" value="">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Offer confirmation states the Kitchen tab result › offer without food or drinks: confirmation says nothing was sent to the kitchen" classname="offer-confirm-kitchen-confirmation.spec.ts">
-<properties>
-<property name="serial" value="">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Offer confirmation states the Kitchen tab result › accepted offer&apos;s food and drink lines show up in the Kitchen tab" classname="offer-confirm-kitchen-confirmation.spec.ts">
-<properties>
-<property name="serial" value="">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Kitchen tab announcement wording per language › en: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts">
-<properties>
-<property name="serial" value="">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Kitchen tab announcement wording per language › en: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts">
-<properties>
-<property name="serial" value="">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Kitchen tab announcement wording per language › fi: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts">
-<properties>
-<property name="serial" value="">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Kitchen tab announcement wording per language › fi: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts">
-<properties>
-<property name="serial" value="">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Kitchen tab announcement wording per language › sv: one food or drink line is announced in the singular" classname="offer-confirm-kitchen-confirmation.spec.ts">
-<properties>
-<property name="serial" value="">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Kitchen tab announcement wording per language › sv: several food and drink lines are announced in the plural" classname="offer-confirm-kitchen-confirmation.spec.ts">
-<properties>
-<property name="serial" value="">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-concurrent-invoice-identity.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Concurrent invoicing identity › returns one consistent invoice identifier and a single history entry" classname="public-booking-concurrent-invoice-identity.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-concurrent-invoicing.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Concurrent invoicing › invoices only once and refuses while totals are inconsistent" classname="public-booking-concurrent-invoicing.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-conflicting-discount-codes.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Conflicting discount code combinations › are selected or refused by one policy, whatever the order or duplication" classname="public-booking-conflicting-discount-codes.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-discount-code-normalization.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Discount code normalization › casing, whitespace and URL-encoded input are cleaned before policy runs" classname="public-booking-discount-code-normalization.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-discount-dashboard.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Public booking with a discount code › stores the discounted price and shows it with invoice fields in the dashboard" classname="public-booking-discount-dashboard.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-discount-partial-night.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Discounted partial-night stays › prices partial nights correctly and reflects them in the dashboard" classname="public-booking-discount-partial-night.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-discount-reuse.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Reusing a single-use discount code › counts the code as used once and leaves the first booking&apos;s price unchanged" classname="public-booking-discount-reuse.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-discount-rounding-edge-cases.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Discount rounding edge cases › always round to the same cent in every persisted report" classname="public-booking-discount-rounding-edge-cases.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-idempotency-key.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Booking create idempotency key › repeated creates with the same key never double-apply a promotion" classname="public-booking-idempotency-key.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-invalid-discount.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Public booking with an invalid or expired discount code › rejects the booking, shows an error, and writes no price or invoice data" classname="public-booking-invalid-discount.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-invoice-amount-consistency.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Invoice amounts must reconcile with the report split › rejects invoice amounts that do not match room + breakfast" classname="public-booking-invoice-amount-consistency.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-invoicing-refusal.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Invoicing refused for tampered pricing › returns a clear message and records nothing as invoiced" classname="public-booking-invoicing-refusal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-mixed-concurrent-invoicing.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Mixed concurrent invoicing › rejects the mismatched request while the good one invoices exactly once" classname="public-booking-mixed-concurrent-invoicing.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-multi-code-error-quality.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Multiple promo codes: refusal message quality › every multi-code shape returns the same clean explanation" classname="public-booking-multi-code-error-quality.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-multiple-discount-codes.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Requests carrying multiple discount codes › are refused, and a single code is applied at its own value" classname="public-booking-multiple-discount-codes.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-period-aggregates-invoicing.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Period aggregates and invoicing › move only when invoicing succeeds, never on a refused or tampered attempt" classname="public-booking-period-aggregates-invoicing.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-repeat-invoicing.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Repeat invoicing of the same booking › creates the invoice once and keeps the totals correct" classname="public-booking-repeat-invoicing.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-repeat-submission-totals.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Repeated identical booking submissions › produce identical totals and report figures without double-charging" classname="public-booking-repeat-submission-totals.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-retry-discount-usage.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Retried booking requests and coupon usage › count a coupon once no matter how often the client retries" classname="public-booking-retry-discount-usage.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-server-owned-fields.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Server-owned invoicing flag and pricing notes › client-sent invoiced flags and pricing notes are discarded" classname="public-booking-server-owned-fields.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-service-role-missing.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="public-booking: SUPABASE_SERVICE_ROLE_KEY missing › UI shows a safe error and writes no reservation row" classname="public-booking-service-role-missing.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-staff-branding.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Public booking page branding for authenticated staff › shows site name, colours and logo to a staff user" classname="public-booking-staff-branding.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-staff-pricing-edit-invoicing.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Staff pricing edits and invoicing › blocks invoicing until the edited totals reconcile again" classname="public-booking-staff-pricing-edit-invoicing.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-tampered-breakfast-rate.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Server recalculates breakfast from resource rules, ignoring the client › uses the resource breakfast rate whatever the browser claims" classname="public-booking-tampered-breakfast-rate.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-tampered-discount.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Server recalculates discounts, ignoring the client › applies only tenant-configured promo codes to resource-level prices" classname="public-booking-tampered-discount.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-tampered-invoicing.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Tampered bookings cannot be invoiced until totals are consistent › blocks invoicing until the recalculated total is present and consistent" classname="public-booking-tampered-invoicing.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-tampered-pricing.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Tampered client pricing is recomputed server-side › ignores client-supplied prices and reports the resource-level amounts" classname="public-booking-tampered-pricing.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="public-booking-warmup.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="2" failures="0" skipped="2" time="0" errors="0">
-<testcase name="public-booking warmup › returns 200 with { ok: true, warmup: true }" classname="public-booking-warmup.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="public-booking warmup › rejects malformed warmup payload with 400" classname="public-booking-warmup.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="reservation-and-email-preview.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Smoke: reservation submit + confirmation email preview › submits a reservation and renders the confirmation email preview" classname="reservation-and-email-preview.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="signed-url-malicious-paths.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="19" failures="0" skipped="19" time="0" errors="0">
-<testcase name="mint-tenant-private-url HTTP contract › rejects parent traversal segment with 400 + invalid_storage_path/traversal_or_empty_segment" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects leading parent traversal with 400 + invalid_storage_path/traversal_or_empty_segment" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects current-dir segment with 400 + invalid_storage_path/traversal_or_empty_segment" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects absolute unix path with 400 + invalid_storage_path/absolute" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects double slash empty segment with 400 + invalid_storage_path/traversal_or_empty_segment" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects trailing slash empty segment with 400 + invalid_storage_path/traversal_or_empty_segment" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects windows backslash traversal with 400 + invalid_storage_path/backslash" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects embedded NUL byte with 400 + invalid_storage_path/control_char" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects ASCII control character with 400 + invalid_storage_path/control_char" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects DEL control character with 400 + invalid_storage_path/control_char" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects http scheme with 400 + invalid_storage_path/scheme" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects https scheme with 400 + invalid_storage_path/scheme" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects file scheme with 400 + invalid_storage_path/scheme" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects whitespace only with 400 + invalid_storage_path/empty" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects overly long path with 400 + invalid_storage_path/too_long" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects non-string path with not_a_string" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects non-JSON body with invalid_request" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › rejects GET with 405 method_not_allowed" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="mint-tenant-private-url HTTP contract › well-formed path without auth returns 401 unauthenticated" classname="signed-url-malicious-paths.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="smoke.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="3" failures="0" skipped="3" time="0" errors="0">
-<testcase name="Smoke tests › homepage loads and shows heading" classname="smoke.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Smoke tests › login page is accessible" classname="smoke.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Smoke tests › 404 page renders for unknown routes" classname="smoke.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="storage-path-traversal.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="18" failures="0" skipped="18" time="0" errors="0">
-<testcase name="Signed URL path-traversal hardening › rejects parent traversal segment" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects leading parent traversal" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects current-dir segment" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects absolute unix path" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects double slash empty segment" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects trailing slash empty segment" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects windows backslash traversal" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects embedded NUL byte" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects ASCII control character" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects DEL control character" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects http scheme" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects https scheme" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects file scheme" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects empty string" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects whitespace only" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › rejects overly long path" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › accepts well-formed tenant-scoped keys" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Signed URL path-traversal hardening › non-string input is rejected" classname="storage-path-traversal.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="superadmin-forbidden.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="4" failures="0" skipped="4" time="0" errors="0">
-<testcase name="forbidden-status edge function (always-403 contract) › direct request to forbidden-status returns HTTP 403" classname="superadmin-forbidden.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Anonymous /superadmin visit › redirects to /login (auth-gate happens before role-gate)" classname="superadmin-forbidden.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Authenticated non-admin /superadmin denial flow › non-admin sees Forbidden page with data-http-status=403" classname="superadmin-forbidden.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NON_ADMIN_EMAIL + E2E_NON_ADMIN_PASSWORD to run the authenticated denial flow">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Authenticated non-admin /superadmin denial flow › Forbidden page beacon to forbidden-status produces a real HTTP 403 in the network log" classname="superadmin-forbidden.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_NON_ADMIN_EMAIL + E2E_NON_ADMIN_PASSWORD to run the authenticated denial flow">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="superadmin-mocked-auth.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="3" failures="0" skipped="3" time="0" errors="0">
-<testcase name="/superadmin — mocked auth states (lightweight E2E) › anonymous: redirects to /login, no Forbidden UI, no beacons" classname="superadmin-mocked-auth.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="/superadmin — mocked auth states (lightweight E2E) › authenticated states (require VITE_SUPABASE_URL) › non-admin: Forbidden renders in-place with data-http-status=403 and a real 403 in the network log" classname="superadmin-mocked-auth.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-<testcase name="/superadmin — mocked auth states (lightweight E2E) › authenticated states (require VITE_SUPABASE_URL) › system admin: reaches Superadmin page, no Forbidden UI" classname="superadmin-mocked-auth.spec.ts">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-<testsuite name="tenant-membership-removed.spec.ts" timestamp="2026-09-22T06:37:27.463Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Tenant membership revoked mid-session › removes membership while on /dashboard, shows toast, and lands on /onboarding" classname="tenant-membership-removed.spec.ts">
-<properties>
-<property name="serial" value="">
-</property>
-<property name="skip" value="Set E2E_SUPABASE_URL, E2E_SUPABASE_SERVICE_ROLE_KEY, E2E_MEMBERSHIP_TEST_EMAIL, E2E_MEMBERSHIP_TEST_PASSWORD, and E2E_MEMBERSHIP_TEST_TENANT_ID to run this test.">
-</property>
-</properties>
-<skipped>
-</skipped>
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="2" time="2.883371">
+<testsuite name="guest-portal-invoice-refusal-lifecycle.spec.ts" timestamp="2026-09-22T07:12:46.261Z" hostname="chromium" tests="2" failures="0" skipped="0" time="0.006" errors="2">
+<testcase name="Invoice refusal notice lifecycle › replaces, announces and clears refusals across retries and bookings" classname="guest-portal-invoice-refusal-lifecycle.spec.ts" time="0.004">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/error-context.md]]
+
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/trace.zip]]
+]]>
+</system-out>
+<error message="browserType.launch: Executable doesn&apos;t exist at /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell" type="Error">
+<![CDATA[  [chromium] › guest-portal-invoice-refusal-lifecycle.spec.ts:176:3 › Invoice refusal notice lifecycle › replaces, announces and clears refusals across retries and bookings 
+
+    Error: browserType.launch: Executable doesn't exist at /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
+</testcase>
+<testcase name="Invoice refusal notice lifecycle › clears a refusal on back and forward navigation between bookings" classname="guest-portal-invoice-refusal-lifecycle.spec.ts" time="0.002">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/error-context.md]]
+
+[[ATTACHMENT|../../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/trace.zip]]
+]]>
+</system-out>
+<error message="browserType.launch: Executable doesn&apos;t exist at /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell" type="Error">
+<![CDATA[  [chromium] › guest-portal-invoice-refusal-lifecycle.spec.ts:285:3 › Invoice refusal notice lifecycle › clears a refusal on back and forward navigation between bookings 
+
+    Error: browserType.launch: Executable doesn't exist at /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: ../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/trace.zip
+    Usage:
+
+        npx playwright show-trace ../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+]]>
+</error>
 </testcase>
 </testsuite>
 </testsuites>
