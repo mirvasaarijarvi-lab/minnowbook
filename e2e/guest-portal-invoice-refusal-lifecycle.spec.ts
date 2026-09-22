@@ -152,16 +152,21 @@ async function dismissToasts(page: Page) {
     const closer = toast
       .locator("button[data-close-button]:visible, button:visible")
       .first();
-    await expect(closer, "visible notifications need a close control").toBeVisible();
+    await expect(
+      closer,
+      "visible notifications need a close control",
+    ).toBeVisible();
     await closer.click({ force: true });
-    await toast.waitFor({ state: "hidden", timeout: 2_000 }).catch(() => undefined);
+    await toast
+      .waitFor({ state: "hidden", timeout: 2_000 })
+      .catch(() => undefined);
     if ((await visibleToasts.count()) === 0) return;
   }
 
-  await expect(visibleToasts, "all visible notifications should close").toHaveCount(
-    0,
-    { timeout: 8_000 },
-  );
+  await expect(
+    visibleToasts,
+    "all visible notifications should close",
+  ).toHaveCount(0, { timeout: 8_000 });
 }
 
 /** Fill the change request and submit it, returning the submit button. */
