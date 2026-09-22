@@ -138,7 +138,9 @@ async function openBooking(page: Page, token: string) {
  * dismiss the previous notification first, exactly as a guest would.
  */
 async function dismissToasts(page: Page) {
-  const toasts = page.locator("[data-radix-toast-viewport] li, [data-sonner-toast]");
+  const toasts = page.locator(
+    "[data-radix-toast-viewport] li, [data-sonner-toast]",
+  );
   const closers = page.locator(
     "[data-radix-toast-viewport] button, [data-sonner-toaster] button[data-close-button]",
   );
