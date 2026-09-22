@@ -198,10 +198,13 @@ test.describe("Public booking with an invalid or expired discount code", () => {
         .locator("[data-radix-popper-content-wrapper]")
         .last();
       await popover.getByRole("button", { name: /next month/i }).click();
-      await popover
+      // Calendar versions differ in whether the day is the grid cell itself or
+      // a button inside it, so accept either.
+      const cell = popover
         .getByRole("gridcell", { name: day, exact: true })
-        .first()
-        .click();
+        .or(popover.getByRole("button", { name: day, exact: true }))
+        .first();
+      await cell.click();
       await page.keyboard.press("Escape");
     };
     await pickDay("10");
