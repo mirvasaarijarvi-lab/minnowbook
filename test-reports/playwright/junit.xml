@@ -1,6 +1,6 @@
-<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="2" time="2.883371">
-<testsuite name="guest-portal-invoice-refusal-lifecycle.spec.ts" timestamp="2026-09-22T07:12:46.261Z" hostname="chromium" tests="2" failures="0" skipped="0" time="0.006" errors="2">
-<testcase name="Invoice refusal notice lifecycle › replaces, announces and clears refusals across retries and bookings" classname="guest-portal-invoice-refusal-lifecycle.spec.ts" time="0.004">
+<testsuites id="" name="" tests="2" failures="0" skipped="0" errors="2" time="2.7152000000000003">
+<testsuite name="guest-portal-invoice-refusal-lifecycle.spec.ts" timestamp="2026-09-22T07:13:18.777Z" hostname="chromium" tests="2" failures="0" skipped="0" time="0.005" errors="2">
+<testcase name="Invoice refusal notice lifecycle › replaces, announces and clears refusals across retries and bookings" classname="guest-portal-invoice-refusal-lifecycle.spec.ts" time="0.002">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/error-context.md]]
@@ -8,18 +8,32 @@
 [[ATTACHMENT|../../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/trace.zip]]
 ]]>
 </system-out>
-<error message="browserType.launch: Executable doesn&apos;t exist at /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell" type="Error">
+<system-err>
+<![CDATA[Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.
+]]>
+</system-err>
+<error message="browserType.launch: Target page, context or browser has been closed" type="Error">
 <![CDATA[  [chromium] › guest-portal-invoice-refusal-lifecycle.spec.ts:176:3 › Invoice refusal notice lifecycle › replaces, announces and clears refusals across retries and bookings 
 
-    Error: browserType.launch: Executable doesn't exist at /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
-    ╔════════════════════════════════════════════════════════════╗
-    ║ Looks like Playwright was just installed or updated.       ║
-    ║ Please run the following command to download new browsers: ║
-    ║                                                            ║
-    ║     npx playwright install                                 ║
-    ║                                                            ║
-    ║ <3 Playwright Team                                         ║
-    ╚════════════════════════════════════════════════════════════╝
+    Error: browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+
+    <launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-wZrMQW --remote-debugging-pipe --no-startup-window
+    <launched> pid=27906
+    [pid=27906][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory
+    Call log:
+      - <launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-wZrMQW --remote-debugging-pipe --no-startup-window
+      - <launched> pid=27906
+      - [pid=27906][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory
+      - [pid=27906] <gracefully close start>
+      - [pid=27906] <kill>
+      - [pid=27906] <will force kill>
+      - [pid=27906] exception while trying to kill process: Error: kill ESRCH
+      - [pid=27906] <process did exit: exitCode=127, signal=null>
+      - [pid=27906] starting temporary directories cleanup
+      - [pid=27906] finished temporary directories cleanup
+      - [pid=27906] <gracefully close end>
+
 
     Error Context: ../test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/error-context.md
 
@@ -33,7 +47,7 @@
 ]]>
 </error>
 </testcase>
-<testcase name="Invoice refusal notice lifecycle › clears a refusal on back and forward navigation between bookings" classname="guest-portal-invoice-refusal-lifecycle.spec.ts" time="0.002">
+<testcase name="Invoice refusal notice lifecycle › clears a refusal on back and forward navigation between bookings" classname="guest-portal-invoice-refusal-lifecycle.spec.ts" time="0.003">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/error-context.md]]
@@ -41,18 +55,32 @@
 [[ATTACHMENT|../../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/trace.zip]]
 ]]>
 </system-out>
-<error message="browserType.launch: Executable doesn&apos;t exist at /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell" type="Error">
+<system-err>
+<![CDATA[Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.
+]]>
+</system-err>
+<error message="browserType.launch: Target page, context or browser has been closed" type="Error">
 <![CDATA[  [chromium] › guest-portal-invoice-refusal-lifecycle.spec.ts:285:3 › Invoice refusal notice lifecycle › clears a refusal on back and forward navigation between bookings 
 
-    Error: browserType.launch: Executable doesn't exist at /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell
-    ╔════════════════════════════════════════════════════════════╗
-    ║ Looks like Playwright was just installed or updated.       ║
-    ║ Please run the following command to download new browsers: ║
-    ║                                                            ║
-    ║     npx playwright install                                 ║
-    ║                                                            ║
-    ║ <3 Playwright Team                                         ║
-    ╚════════════════════════════════════════════════════════════╝
+    Error: browserType.launch: Target page, context or browser has been closed
+    Browser logs:
+
+    <launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-O0IoeE --remote-debugging-pipe --no-startup-window
+    <launched> pid=27907
+    [pid=27907][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory
+    Call log:
+      - <launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-O0IoeE --remote-debugging-pipe --no-startup-window
+      - <launched> pid=27907
+      - [pid=27907][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory
+      - [pid=27907] <gracefully close start>
+      - [pid=27907] <kill>
+      - [pid=27907] <will force kill>
+      - [pid=27907] exception while trying to kill process: Error: kill ESRCH
+      - [pid=27907] <process did exit: exitCode=127, signal=null>
+      - [pid=27907] starting temporary directories cleanup
+      - [pid=27907] finished temporary directories cleanup
+      - [pid=27907] <gracefully close end>
+
 
     Error Context: ../test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/error-context.md
 
