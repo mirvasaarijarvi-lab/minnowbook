@@ -147,14 +147,16 @@ async function dismissToasts(page: Page) {
   // finding an already hidden, removed toast and leave the visible toast over
   // the form. Always target a close control inside a currently visible toast.
   for (let pass = 0; pass < 3; pass += 1) {
-    const visibleClosers = page.locator(
-      "[data-radix-toast-viewport] li:visible button:visible, [data-sonner-toast]:visible button[data-close-button]:visible",
-    );
-    while ((await visibleClosers.count()) > 0) {
-      await visibleClosers.first().click({ force: true });
-    }
+    const toast = visibleToasts.first();
+    if (!(await toast.isVisible().catch(() => false))) return;
+    const closer = toast
+      .locator("button[data-close-button], button")
+      .filter({ visible: true })
+      .first();
+    await expect(closer, "visible notifications need a close control").toBeVisible();
+    await closer.click({ force: true });
+    await toast.waitFor({ state: "hidden", timeout: 2_000 }).catch(() => undefined);
     if ((await visibleToasts.count()) === 0) return;
-    await page.waitForTimeout(450);
   }
 
   await expect(visibleToasts, "all visible notifications should close").toHaveCount(
