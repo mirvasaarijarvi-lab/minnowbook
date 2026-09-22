@@ -32,7 +32,6 @@ if (!Number.isNaN(nodeMajor) && nodeMajor < 22) {
   process.exit(1);
 }
 
-
 // react and react-dom must be the exact same installed version, or the SSR
 // preview server aborts on boot with "Incompatible React versions" and every
 // Playwright page comes back as ERR_CONNECTION_REFUSED / 500. A divergence here
