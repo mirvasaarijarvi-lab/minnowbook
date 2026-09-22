@@ -1,6 +1,6 @@
-<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="0" time="14.883953">
-<testsuite name="smoke.spec.ts" timestamp="2026-09-21T17:25:41.925Z" hostname="chromium" tests="3" failures="0" skipped="0" time="22.048" errors="0">
-<testcase name="Smoke tests › homepage loads and shows heading" classname="smoke.spec.ts" time="8.312">
+<testsuites id="" name="" tests="3" failures="0" skipped="0" errors="0" time="11.166053">
+<testsuite name="smoke.spec.ts" timestamp="2026-09-22T06:30:46.120Z" hostname="chromium" tests="3" failures="0" skipped="0" time="16.83" errors="0">
+<testcase name="Smoke tests › homepage loads and shows heading" classname="smoke.spec.ts" time="6.085">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/smoke-Smoke-tests-homepage-loads-and-shows-heading-chromium/test-finished-1.png]]
@@ -11,7 +11,7 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Smoke tests › login page is accessible" classname="smoke.spec.ts" time="7.251">
+<testcase name="Smoke tests › login page is accessible" classname="smoke.spec.ts" time="5.398">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/smoke-Smoke-tests-login-page-is-accessible-chromium/test-finished-1.png]]
@@ -22,7 +22,7 @@
 ]]>
 </system-out>
 </testcase>
-<testcase name="Smoke tests › 404 page renders for unknown routes" classname="smoke.spec.ts" time="6.485">
+<testcase name="Smoke tests › 404 page renders for unknown routes" classname="smoke.spec.ts" time="5.347">
 <system-out>
 <![CDATA[
 [[ATTACHMENT|../../test-results/smoke-Smoke-tests-404-page-renders-for-unknown-routes-chromium/test-finished-1.png]]
