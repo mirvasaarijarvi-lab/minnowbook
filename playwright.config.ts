@@ -1,5 +1,14 @@
 import { defineConfig } from "@playwright/test";
 
+// Fail before any browser, preview server, or spec starts when the runtime is
+// below the repo-wide Node 22 floor. Node 20 has no native WebSocket, so the
+// backend client throws during SSR and every page answers HTTP 500, which shows
+// up as dozens of misleading "real regressions" instead of one clear cause.
+import { assertNodeVersion } from "./scripts/ci/assert-node-version.mjs";
+
+assertNodeVersion("e2e");
+
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
