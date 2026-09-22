@@ -101,6 +101,9 @@ jobs:
           # The checksum step needs sha256sum, which only the Linux runner
           # ships; the pinned version itself is still installed everywhere.
           verify-checksum: ${{ runner.os == 'Linux' }}
+          # This matrix deliberately exercises Node 20/22/24, so keep the
+          # matrix version instead of the repo-wide Node 22 floor.
+          node-version: ${{ matrix.node }}
 
       - name: Install dependencies
         shell: bash
