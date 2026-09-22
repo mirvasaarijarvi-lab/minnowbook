@@ -17,18 +17,13 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// @supabase/supabase-js builds a realtime client at import time, and that client
-// requires a native global WebSocket. Node only ships one from v22, so on an
-// older Node the SSR bundle throws
-//   Error: Node.js detected but native WebSocket not found
-// and every preview page answers 500. Fail up front with the real cause.
-const nodeMajor = Number(process.versions.node.split(".")[0]);
-if (!Number.isNaN(nodeMajor) && nodeMajor < 22) {
-  console.error(
-    `[e2e] Node ${process.versions.node} is too old for the preview server.\n` +
-      "[e2e] The backend client needs a native WebSocket, available from Node 22.\n" +
-      "[e2e] Use Node 22 or later (CI pins node-version: 22).",
-  );
+import { nodeVersionError } from "./assert-node-version.mjs";
+
+// Shared Node floor guard (see scripts/ci/assert-node-version.mjs): the backend
+// client needs a native WebSocket, which Node only ships from v22.
+const nodeError = nodeVersionError(process.versions.node, "e2e");
+if (nodeError) {
+  console.error(nodeError);
   process.exit(1);
 }
 
