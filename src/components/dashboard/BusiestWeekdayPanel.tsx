@@ -20,6 +20,7 @@ import { useSiteContext } from "@/hooks/useSiteContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { useAnalyticsT } from "@/i18n/analytics";
+import { useReportsPeriod } from "@/lib/reports-period";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -61,8 +62,11 @@ const BusiestWeekdayPanel = () => {
 
   const allowedTypes = useAllowedReservationTypes();
 
-  const endStr = format(new Date(), "yyyy-MM-dd");
-  const startStr = format(subDays(new Date(), Number(rangeKey)), "yyyy-MM-dd");
+  const period = useReportsPeriod();
+  const endStr = period?.endStr ?? format(new Date(), "yyyy-MM-dd");
+  const startStr =
+    period?.startStr ??
+    format(subDays(new Date(), Number(rangeKey)), "yyyy-MM-dd");
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["busiest-weekday", tenantId, selectedSiteId, startStr, endStr],
@@ -127,7 +131,8 @@ const BusiestWeekdayPanel = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-end gap-3">
-          <div className="space-y-1">
+          {!period && (
+<div className="space-y-1">
             <Label className="text-xs">{t("an.range")}</Label>
             <Select
               value={rangeKey}
@@ -143,6 +148,7 @@ const BusiestWeekdayPanel = () => {
               </SelectContent>
             </Select>
           </div>
+)}
           <div className="space-y-1">
             <Label className="text-xs">{t("an.metric")}</Label>
             <Select

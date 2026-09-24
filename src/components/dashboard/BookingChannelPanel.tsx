@@ -20,6 +20,7 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import { useAllowedReservationTypes } from "@/hooks/useAllowedReservationTypes";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useAnalyticsT } from "@/i18n/analytics";
+import { useReportsPeriod } from "@/lib/reports-period";
 import {
   computeChannelSplitByType,
   buildTrendBuckets,
@@ -60,8 +61,13 @@ const BookingChannelPanel = () => {
 
   const [rangeKey, setRangeKey] = useState<RangeKey>("90");
 
-  const end = useMemo(() => new Date(), []);
-  const start = useMemo(() => subDays(end, Number(rangeKey)), [end, rangeKey]);
+  const period = useReportsPeriod();
+  const now = useMemo(() => new Date(), []);
+  const end = period?.end ?? now;
+  const start = useMemo(
+    () => period?.start ?? subDays(now, Number(rangeKey)),
+    [period?.start, now, rangeKey],
+  );
   const startStr = format(start, "yyyy-MM-dd");
   const endStr = format(end, "yyyy-MM-dd");
 
@@ -94,9 +100,10 @@ const BookingChannelPanel = () => {
         start,
         end,
         dateLocale,
-        granularity: Number(rangeKey) > 120 ? "month" : "week",
+        granularity:
+          (end.getTime() - start.getTime()) / 86400000 > 120 ? "month" : "week",
       }),
-    [rows, start, end, dateLocale, rangeKey],
+    [rows, start, end, dateLocale],
   );
 
   const handlePdf = () => {
@@ -163,7 +170,8 @@ const BookingChannelPanel = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="space-y-1">
+          {!period && (
+<div className="space-y-1">
             <Label className="text-xs">{t("an.range")}</Label>
             <Select
               value={rangeKey}
@@ -179,6 +187,7 @@ const BookingChannelPanel = () => {
               </SelectContent>
             </Select>
           </div>
+)}
           <Button
             variant="outline"
             size="sm"

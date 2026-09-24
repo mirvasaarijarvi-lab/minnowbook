@@ -329,4 +329,51 @@
     margin: 1.5cm;
     size: A4;
   }
+
+  /* Reports page printing: only the reports workspace is printed. */
+  body[data-printing-reports] * {
+    visibility: hidden;
+  }
+  body[data-printing-reports] #reports-workspace,
+  body[data-printing-reports] #reports-workspace * {
+    visibility: visible;
+  }
+  body[data-printing-reports] #reports-workspace {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+  body[data-printing-reports] .print-hide,
+  body[data-printing-reports] #reports-workspace button,
+  body[data-printing-reports] #reports-workspace [role="combobox"] {
+    display: none !important;
+  }
+  body[data-printing-reports] .print-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+  body[data-printing-reports][data-print-target] .print-section {
+    display: none;
+  }
+  body[data-printing-reports][data-print-target="operations"] [data-print-section="operations"],
+  body[data-printing-reports][data-print-target="forecast"] [data-print-section="forecast"],
+  body[data-printing-reports][data-print-target="overview"] [data-print-section="overview"],
+  body[data-printing-reports][data-print-target="drilldown"] [data-print-section="drilldown"],
+  body[data-printing-reports][data-print-target="peak-hours"] [data-print-section="peak-hours"],
+  body[data-printing-reports][data-print-target="weekdays"] [data-print-section="weekdays"],
+  body[data-printing-reports][data-print-target="channel"] [data-print-section="channel"],
+  body[data-printing-reports][data-print-target="cross-booking"] [data-print-section="cross-booking"] {
+    display: block;
+  }
+  body[data-printing-reports] thead {
+    display: table-header-group;
+  }
+  body[data-printing-reports] .print-only {
+    display: block !important;
+  }
+}
+
+.print-only {
+  display: none;
 }
