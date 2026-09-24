@@ -151,8 +151,8 @@ const Pricing = () => {
       t("pricing.drilldownAll"),
       t("pricing.drilldownAll"),
     ],
-    [t("pricing.exportCsvPdf"), "✓", "✓", "✓", "✓"],
-    [t("pricing.printReports"), "✓", "✓", "✓", "✓"],
+    [t("pricing.exportCsvPdf"), "—", "✓", "✓", "✓"],
+    [t("pricing.printReports"), "—", "✓", "✓", "✓"],
     [
       t("pricing.supportLevel"),
       "AI chatbot",
