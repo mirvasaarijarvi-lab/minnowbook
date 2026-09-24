@@ -4077,8 +4077,10 @@ const en: TranslationKeys = {
   "pricing.analyticsReports": "Analytics & reports",
   "pricing.drilldownReports": "Drill-down reports",
   "pricing.drilldownBasic": "Resources and tours",
-  "pricing.drilldownPro": "Adds products, channels, weekdays, group size, capacity use, offers",
-  "pricing.drilldownAll": "All groupings, including kitchen items and discount codes",
+  "pricing.drilldownPro":
+    "Adds products, channels, weekdays, group size, capacity use, offers",
+  "pricing.drilldownAll":
+    "All groupings, including kitchen items and discount codes",
   "pricing.exportCsvPdf": "Download CSV and PDF",
   "pricing.printReports": "Print whole page or one section",
   "pricing.resourceLinked": "Every booking saved with its resource",
@@ -4234,7 +4236,8 @@ const en: TranslationKeys = {
   "whatIs.heroSubtitle":
     "MimmoBook is a cloud-based booking platform for service providers and hospitality: barbers, hairdressers, massage therapists, bakers, personal trainers, restaurants, venues, hotels and guesthouses. One tool for all your bookings.",
   "whatIs.seeFeatures": "See all features",
-  "whatIs.definitionTitle": "MimmoBook: Booking for Service Businesses and Hospitality",
+  "whatIs.definitionTitle":
+    "MimmoBook: Booking for Service Businesses and Hospitality",
   "whatIs.definitionP1":
     "MimmoBook is a software-as-a-service (SaaS) platform that helps service businesses and hospitality manage bookings online. Whether you cut hair, give massages, bake to order, coach clients, or run a restaurant, venue, hotel or guesthouse, MimmoBook gives you one dashboard for bookings, customer messages and business performance.",
   "whatIs.definitionP2":
@@ -6950,8 +6953,10 @@ const fi: TranslationKeys = {
   "pricing.analyticsReports": "Aalytiikka ja raportit",
   "pricing.drilldownReports": "Porautuvat raportit",
   "pricing.drilldownBasic": "Resurssit ja kierrokset",
-  "pricing.drilldownPro": "Lisäksi tuotteet, kanavat, viikonpäivät, ryhmäkoko, kapasiteetin käyttö, tarjoukset",
-  "pricing.drilldownAll": "Kaikki ryhmittelyt, myös keittiön tuotteet ja alennuskoodit",
+  "pricing.drilldownPro":
+    "Lisäksi tuotteet, kanavat, viikonpäivät, ryhmäkoko, kapasiteetin käyttö, tarjoukset",
+  "pricing.drilldownAll":
+    "Kaikki ryhmittelyt, myös keittiön tuotteet ja alennuskoodit",
   "pricing.exportCsvPdf": "Lataus CSV ja PDF",
   "pricing.printReports": "Tulosta koko sivu tai yksi osio",
   "pricing.resourceLinked": "Jokainen varaus tallentuu resurssiinsa",
@@ -7104,7 +7109,8 @@ const fi: TranslationKeys = {
   "whatIs.heroSubtitle":
     "MimmoBook on pilvipohjainen varausjärjestelmä palveluyrittäjille ja matkailu- ja ravintola-alalle: parturit, kampaajat, hierojat, leipomot, personal trainerit, ravintolat, tapahtumapaikat, hotellit ja majatalot. Yksi työkalu kaikkiin varauksiin.",
   "whatIs.seeFeatures": "Katso kaikki ominaisuudet",
-  "whatIs.definitionTitle": "MimmoBook: Varaukset palveluyrityksille ja ravintola-alalle",
+  "whatIs.definitionTitle":
+    "MimmoBook: Varaukset palveluyrityksille ja ravintola-alalle",
   "whatIs.definitionP1":
     "MimmoBook on SaaS-alusta, joka auttaa palveluyrityksiä sekä matkailu- ja ravintola-alaa hallitsemaan varauksia verkossa. Leikkaatpa hiuksia, hierot, leivot tilauksesta, valmennat asiakkaita tai pyörität ravintolaa, tapahtumapaikkaa, hotellia tai majataloa, MimmoBook kokoaa varaukset, asiakasviestit ja liiketoiminnan seurannan yhteen näkymään.",
   "whatIs.definitionP2":
@@ -9838,8 +9844,10 @@ const sv: TranslationKeys = {
   "pricing.analyticsReports": "Analys och rapporter",
   "pricing.drilldownReports": "Detaljrapporter",
   "pricing.drilldownBasic": "Resurser och turer",
-  "pricing.drilldownPro": "Även produkter, kanaler, veckodagar, gruppstorlek, kapacitetsutnyttjande, offerter",
-  "pricing.drilldownAll": "Alla grupperingar, även köksartiklar och rabattkoder",
+  "pricing.drilldownPro":
+    "Även produkter, kanaler, veckodagar, gruppstorlek, kapacitetsutnyttjande, offerter",
+  "pricing.drilldownAll":
+    "Alla grupperingar, även köksartiklar och rabattkoder",
   "pricing.exportCsvPdf": "Ladda ner CSV och PDF",
   "pricing.printReports": "Skriv ut hela sidan eller ett avsnitt",
   "pricing.resourceLinked": "Varje bokning sparas med sin resurs",
@@ -9996,7 +10004,8 @@ const sv: TranslationKeys = {
   "whatIs.heroSubtitle":
     "MimmoBook är en molnbaserad bokningsplattform för tjänsteföretag och besöksnäringen: barberare, frisörer, massörer, bagerier, personliga tränare, restauranger, eventlokaler, hotell och gästhus. Ett verktyg för alla dina bokningar.",
   "whatIs.seeFeatures": "Se alla funktioner",
-  "whatIs.definitionTitle": "MimmoBook: Bokningar för tjänsteföretag och besöksnäringen",
+  "whatIs.definitionTitle":
+    "MimmoBook: Bokningar för tjänsteföretag och besöksnäringen",
   "whatIs.definitionP1":
     "MimmoBook är en SaaS-plattform som hjälper tjänsteföretag och besöksnäringen att hantera bokningar online. Oavsett om du klipper hår, ger massage, bakar på beställning, tränar kunder eller driver restaurang, eventlokal, hotell eller gästhus samlar MimmoBook bokningar, kundmeddelanden och uppföljning i en vy.",
   "whatIs.definitionP2":
