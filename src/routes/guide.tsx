@@ -8,7 +8,8 @@ export const Route = createFileRoute("/guide")({
   head: () =>
     routeHead({
       title: "Staff Quick Guide, MimmoBook",
-      description: "Step by step guide for staff on managing reservations, sites and reports in MimmoBook.",
+      description:
+        "Step by step guide for staff on managing reservations, sites and reports in MimmoBook.",
       path: "/guide",
       noindex: true,
     }),

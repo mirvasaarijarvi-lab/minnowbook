@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import BlogPost from "@/pages/BlogPost";
-import { posts } from "@/lib/blogJsonLd";
+import { posts, buildBlogPostJsonLd } from "@/lib/blogJsonLd";
+import { translations } from "@/i18n/translations";
 import { routeHead } from "@/lib/route-head";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -21,7 +22,9 @@ export const Route = createFileRoute("/blog/$slug")({
         ? post.image
         : `https://mimmobook.com${post.image}`
       : undefined;
-    return routeHead({
+    const en = translations.en as unknown as Record<string, string>;
+    const jsonLd = buildBlogPostJsonLd(post, (k) => en[k] ?? k);
+    const head = routeHead({
       title: post.seoTitle,
       description: post.seoDescription,
       path: `/blog/${post.slug}`,
@@ -29,5 +32,12 @@ export const Route = createFileRoute("/blog/$slug")({
       image,
       imageAlt: post.imageAlt,
     });
+    return {
+      ...head,
+      scripts: jsonLd.map((node) => ({
+        type: "application/ld+json",
+        children: JSON.stringify(node),
+      })),
+    };
   },
 });

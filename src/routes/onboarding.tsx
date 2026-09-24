@@ -7,7 +7,8 @@ export const Route = createFileRoute("/onboarding")({
   head: () =>
     routeHead({
       title: "Set Up Your Business, MimmoBook",
-      description: "Set up your business, sites and bookable resources in MimmoBook.",
+      description:
+        "Set up your business, sites and bookable resources in MimmoBook.",
       path: "/onboarding",
       noindex: true,
     }),

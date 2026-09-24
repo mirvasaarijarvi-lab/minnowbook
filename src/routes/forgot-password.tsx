@@ -6,7 +6,8 @@ export const Route = createFileRoute("/forgot-password")({
   head: () =>
     routeHead({
       title: "Forgot Password, MimmoBook",
-      description: "Request a secure link to reset your MimmoBook account password.",
+      description:
+        "Request a secure link to reset your MimmoBook account password.",
       path: "/forgot-password",
       noindex: true,
     }),
