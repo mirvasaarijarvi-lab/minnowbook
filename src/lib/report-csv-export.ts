@@ -48,7 +48,19 @@ export const reportCsvFileName = (
   periodLabel: string,
   siteName?: string | null,
 ): string =>
-  `${prefix}_${periodLabel.replace(/\s/g, "_")}${siteName ? `_${siteName.replace(/\s/g, "_")}` : ""}.csv`;
+  `${safeFilePart(prefix)}_${safeFilePart(periodLabel)}${siteName ? `_${safeFilePart(siteName)}` : ""}.csv`;
+
+/** Keeps file names portable: no path separators or reserved characters. */
+function safeFilePart(s: string): string {
+  return (
+    s
+      .replace(/\s/g, "_")
+      .replace(/[/\\:*?"<>|]/g, "-")
+      // eslint-disable-next-line no-control-regex -- strip control characters from file names
+      .replace(/[\u0000-\u001f]/g, "")
+      .replace(/\.{2,}/g, ".")
+  );
+}
 
 /** Triggers the browser download for an assembled CSV document. */
 export const downloadReportCsv = (fileName: string, csv: string): void => {

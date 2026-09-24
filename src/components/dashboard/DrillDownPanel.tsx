@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { format, subDays } from "date-fns";
-import { ChevronRight, Download, FileText, Layers } from "lucide-react";
+import { ChevronRight, Download, FileText, Layers, Link2 } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -59,7 +60,12 @@ const MODE_BLOCKED_TIERS: Record<DrillMode, string[]> = {
   groupSize: ["basic"],
   discount: ["basic", "professional"],
   guestType: ["basic", "professional"],
+  utilisation: ["basic"],
+  offer: ["basic"],
+  kitchen: ["basic", "professional"],
 };
+
+const ALL_MODES = Object.keys(MODE_BLOCKED_TIERS) as DrillMode[];
 
 const eur = (n: number) => n.toFixed(2);
 
@@ -78,6 +84,30 @@ const DrillDownPanel = () => {
   );
 
   const period = useReportsPeriod();
+
+  // Shareable links: restore the drill path (and period) from the URL once.
+  const setCustomPeriod = period?.setCustom;
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const m = q.get("dd_mode") as DrillMode | null;
+    if (m && ALL_MODES.includes(m)) setMode(m);
+    const ty = q.get("dd_type");
+    if (ty) setType(ty);
+    const g = q.get("dd_group");
+    if (ty && g) setGroup({ key: g, label: q.get("dd_label") ?? g });
+    const from = q.get("dd_from");
+    const to = q.get("dd_to");
+    if (
+      setCustomPeriod &&
+      from &&
+      to &&
+      /^\d{4}-\d{2}-\d{2}$/.test(from) &&
+      /^\d{4}-\d{2}-\d{2}$/.test(to)
+    )
+      setCustomPeriod(new Date(`${from}T00:00:00`), new Date(`${to}T23:59:59`));
+    // Runs once on mount by design: later changes come from the user.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const dateLocale = useDateLocale();
   const now = useMemo(() => new Date(), []);
   const end = period?.end ?? now;
@@ -113,7 +143,7 @@ const DrillDownPanel = () => {
         rq,
         supabase
           .from("resources")
-          .select("id, name")
+          .select("id, name, capacity")
           .eq("tenant_id", tenantId!),
         supabase
           .from("special_occasions")
@@ -126,10 +156,56 @@ const DrillDownPanel = () => {
         prior,
       ]);
       if (res.error) throw res.error;
+      const ids = (res.data ?? []).map((r) => r.id);
+      const offersRes = await supabase
+        .from("offers")
+        .select("reservation_ids")
+        .eq("tenant_id", tenantId!)
+        .not("reservation_ids", "is", null)
+        .limit(5000);
+      const chunks: string[][] = [];
+      for (let i = 0; i < ids.length && i < 2000; i += 200)
+        chunks.push(ids.slice(i, i + 200));
+      const kitchenRes = await Promise.all(
+        chunks.map((c) =>
+          supabase
+            .from("kitchen_orders")
+            .select("reservation_id, item_name, quantity, unit_price_eur")
+            .eq("tenant_id", tenantId!)
+            .in("reservation_id", c),
+        ),
+      );
+      const kitchenItems: NonNullable<DrillContext["kitchenItems"]> = {};
+      for (const k of kitchenRes.flatMap((x) => x.data ?? [])) {
+        (kitchenItems[k.reservation_id] ??= []).push({
+          name: k.item_name,
+          qty: k.quantity,
+          price: Number(k.unit_price_eur) || 0,
+        });
+      }
+      const inPeriod = new Set(ids);
+      const offerIds = new Set(
+        (offersRes.data ?? [])
+          .flatMap((o) => (o.reservation_ids as string[] | null) ?? [])
+          .filter((id) => inPeriod.has(id)),
+      );
       const ctx: DrillContext = {
         resourceNames: Object.fromEntries(
           (resources.data ?? []).map((r) => [r.id, r.name]),
         ),
+        resourceCapacity: Object.fromEntries(
+          (resources.data ?? []).map((r) => [r.id, Number(r.capacity) || 0]),
+        ),
+        periodDays: Math.max(
+          1,
+          Math.round(
+            (new Date(`${endStr}T00:00:00`).getTime() -
+              new Date(`${startStr}T00:00:00`).getTime()) /
+              86400000,
+          ) + 1,
+        ),
+        offerReservationIds: offerIds,
+        kitchenItems,
         occasions: Object.fromEntries(
           (occasions.data ?? []).map((o) => [
             o.id,
@@ -179,6 +255,8 @@ const DrillDownPanel = () => {
     if (mode === "guestType")
       return row.key === "new" ? t("dd.new") : t("dd.returning");
     if (mode === "discount" && row.key === "none") return t("dd.noCode");
+    if (mode === "offer")
+      return row.key === "offer" ? t("dd.fromOffer") : t("dd.direct");
     if (mode === "weekday")
       // 2024-01-01 is a Monday; keys run 1 (Monday) to 7 (Sunday).
       return format(new Date(2024, 0, Number(row.key)), "EEEE", {
@@ -229,7 +307,8 @@ const DrillDownPanel = () => {
         numeric: canSeeGuests ? [4, 5] : [3, 4],
       };
     }
-    const showFill = level === 1 && mode === "occasion";
+    const showFill =
+      level === 1 && (mode === "occasion" || mode === "utilisation");
     const head = [
       level === 0 ? t("an.service") : t(`dd.mode.${mode}`),
       t("dd.bookings"),
@@ -289,6 +368,34 @@ const DrillDownPanel = () => {
     });
   };
 
+  const copyLink = async () => {
+    const url = new URL(window.location.href);
+    for (const k of [
+      "dd_mode",
+      "dd_type",
+      "dd_group",
+      "dd_label",
+      "dd_from",
+      "dd_to",
+    ])
+      url.searchParams.delete(k);
+    url.searchParams.set("dd_mode", mode);
+    if (type) url.searchParams.set("dd_type", type);
+    if (type && group) {
+      url.searchParams.set("dd_group", group.key);
+      url.searchParams.set("dd_label", group.label);
+    }
+    url.searchParams.set("dd_from", startStr);
+    url.searchParams.set("dd_to", endStr);
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      toast.success(t("dd.linkCopied"));
+    } catch {
+      window.history.replaceState(null, "", url.toString());
+      toast.success(t("dd.linkCopied"));
+    }
+  };
+
   const drill = (row: DrillRow) => {
     if (level === 0) setType(row.key);
     else if (level === 1) setGroup({ key: row.key, label: labelFor(row) });
@@ -343,6 +450,10 @@ const DrillDownPanel = () => {
             </div>
           )}
           <div className="ml-auto flex gap-2">
+            <Button variant="outline" size="sm" onClick={copyLink}>
+              <Link2 className="mr-2 h-4 w-4" aria-hidden />
+              {t("dd.copyLink")}
+            </Button>
             <Button
               variant="outline"
               size="sm"
