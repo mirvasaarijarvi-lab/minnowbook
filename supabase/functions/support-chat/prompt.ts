@@ -69,6 +69,11 @@ export const SUPPORT_CHAT_SYSTEM_PROMPT = `You are MimmoBook's friendly support 
 - Dashboard overview with stat cards: today's reservations, week total, pending confirmations, revenue
 - Trend indicators comparing to previous periods
 - Reports panel with date range filtering and data export
+- Reports page period picker: choose This week, month, quarter, year or custom From and To dates at the top; every section uses it
+- Drill-down by resource: Group by resource, product or add-on, special occasion or tour, booking channel, weekday, group size, discount code, or new vs returning guests. Click a service, then a row, to reach the bookings. Only groupings with data appear. Basic: resource and tour. Professional adds product, channel, weekday, group size. Business: all.
+- Every drill-down level downloads as CSV or PDF
+- Printing: "Print whole page" prints every section with a header (business, period); "Print this section" on each card prints only that card
+- How to build a report for one product: Reports, set the period, Drill-down, Group by "Product or add-on", click the service, click the product, then Download CSV or PDF or Print this section
 - Audit log tracking all changes with old/new data snapshots
 - Email delivery logs and failure monitoring
 
