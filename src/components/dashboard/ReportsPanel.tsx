@@ -295,6 +295,19 @@ const ReportsPanel = () => {
   const [compareMode, setCompareMode] = useState(false);
   const [reportSiteId, setReportSiteId] = useState<string | null>(null);
 
+  // Follow the shared Reports period picker. The overview keeps its own
+  // menu so staff can still compare periods, but every change at the top
+  // of the page resets it to the shared period.
+  const sharedPeriod = useReportsPeriod();
+  const sharedStartStr = sharedPeriod?.startStr;
+  const sharedEndStr = sharedPeriod?.endStr;
+  useEffect(() => {
+    if (!sharedStartStr || !sharedEndStr) return;
+    setPeriod("custom");
+    setCustomStart(new Date(`${sharedStartStr}T00:00:00`));
+    setCustomEnd(new Date(`${sharedEndStr}T23:59:59`));
+  }, [sharedStartStr, sharedEndStr]);
+
   // Sites query for site filter
   const { data: allSites } = useQuery({
     queryKey: ["reports-sites", tenantId],
