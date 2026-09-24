@@ -36,6 +36,7 @@ import OperationsSheetPanel from "@/components/dashboard/OperationsSheetPanel";
 import PeakHoursPanel from "@/components/dashboard/PeakHoursPanel";
 import BusiestWeekdayPanel from "@/components/dashboard/BusiestWeekdayPanel";
 import BookingChannelPanel from "@/components/dashboard/BookingChannelPanel";
+import DrillDownPanel from "@/components/dashboard/DrillDownPanel";
 import CrossBookingAuditPanel from "@/components/dashboard/CrossBookingAuditPanel";
 import RescheduleRequestsPanel from "@/components/dashboard/RescheduleRequestsPanel";
 import AdminPanel from "@/components/dashboard/AdminPanel";
@@ -317,6 +318,7 @@ const Dashboard = () => {
         <OperationsSheetPanel />
         <ForecastPanel />
         <ReportsPanel />
+        <DrillDownPanel />
         <div className="grid gap-6 lg:grid-cols-2">
           <PeakHoursPanel />
           <BusiestWeekdayPanel />

@@ -1,0 +1,415 @@
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { format, subDays } from "date-fns";
+import { ChevronRight, Download, FileText, Layers } from "lucide-react";
+
+import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/hooks/useTenant";
+import { useSiteContext } from "@/hooks/useSiteContext";
+import { useTierGate } from "@/hooks/useTierGate";
+import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
+import { useAnalyticsT } from "@/i18n/analytics";
+import {
+  availableModes,
+  filterPath,
+  groupRows,
+  UNASSIGNED,
+  type DrillContext,
+  type DrillMode,
+  type DrillReservation,
+  type DrillRow,
+} from "@/lib/drilldown";
+import {
+  buildReportCsv,
+  downloadReportCsv,
+  reportCsvFileName,
+} from "@/lib/report-csv-export";
+import { downloadReportPdf } from "@/lib/reportsPdf";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+
+type RangeKey = "30" | "90" | "365";
+
+/** Groupings that lower tiers cannot use. */
+const MODE_BLOCKED_TIERS: Record<DrillMode, string[]> = {
+  resource: [],
+  occasion: [],
+  subService: ["basic"],
+  channel: ["basic"],
+};
+
+const eur = (n: number) => n.toFixed(2);
+
+const DrillDownPanel = () => {
+  const { tenantId, isOwner, isAdmin } = useTenant();
+  const { selectedSiteId } = useSiteContext();
+  const { isGated } = useTierGate();
+  const { typeLabel } = useResourceTypeLabel();
+  const t = useAnalyticsT();
+
+  const [rangeKey, setRangeKey] = useState<RangeKey>("90");
+  const [mode, setMode] = useState<DrillMode>("resource");
+  const [type, setType] = useState<string | null>(null);
+  const [group, setGroup] = useState<{ key: string; label: string } | null>(
+    null,
+  );
+
+  const end = useMemo(() => new Date(), []);
+  const start = useMemo(() => subDays(end, Number(rangeKey)), [end, rangeKey]);
+  const startStr = format(start, "yyyy-MM-dd");
+  const endStr = format(end, "yyyy-MM-dd");
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["drilldown", tenantId, selectedSiteId, startStr, endStr],
+    enabled: !!tenantId,
+    queryFn: async () => {
+      let rq = supabase
+        .from("reservations")
+        .select(
+          "id, date, start_time, reservation_type, status, guests_count, price_eur, original_price_eur, room_type, created_by, special_occasion_id, selected_sub_services, guest_name",
+        )
+        .eq("tenant_id", tenantId!)
+        .gte("date", startStr)
+        .lte("date", endStr)
+        .order("date");
+      if (selectedSiteId) rq = rq.eq("site_id", selectedSiteId);
+      const [res, resources, occasions] = await Promise.all([
+        rq,
+        supabase
+          .from("resources")
+          .select("id, name")
+          .eq("tenant_id", tenantId!),
+        supabase
+          .from("special_occasions")
+          .select("id, name, resource_id, capacity")
+          .eq("tenant_id", tenantId!),
+      ]);
+      if (res.error) throw res.error;
+      const ctx: DrillContext = {
+        resourceNames: Object.fromEntries(
+          (resources.data ?? []).map((r) => [r.id, r.name]),
+        ),
+        occasions: Object.fromEntries(
+          (occasions.data ?? []).map((o) => [
+            o.id,
+            { name: o.name, resource_id: o.resource_id, capacity: o.capacity },
+          ]),
+        ),
+      };
+      return { rows: (res.data ?? []) as DrillReservation[], ctx };
+    },
+  });
+
+  const rows = useMemo(() => data?.rows ?? [], [data]);
+  const ctx: DrillContext = useMemo(
+    () => data?.ctx ?? { resourceNames: {}, occasions: {} },
+    [data],
+  );
+  const modes = useMemo(() => availableModes(rows, ctx), [rows, ctx]);
+  const canSeeGuests = isOwner || isAdmin;
+
+  const level: 0 | 1 | 2 = group ? 2 : type ? 1 : 0;
+  const scoped = useMemo(
+    () => filterPath(rows, mode, type, group?.key ?? null, ctx),
+    [rows, mode, type, group, ctx],
+  );
+  const grouped: DrillRow[] = useMemo(
+    () => (level === 2 ? [] : groupRows(scoped, mode, level as 0 | 1, ctx)),
+    [scoped, mode, level, ctx],
+  );
+
+  const labelFor = (row: DrillRow) => {
+    if (level === 0) return typeLabel(row.key);
+    if (row.key === UNASSIGNED) return t("dd.unassigned");
+    if (mode === "channel")
+      return row.key === "public"
+        ? t("an.channel.public")
+        : t("an.channel.staff");
+    return row.label || t("dd.unassigned");
+  };
+
+  const modeLocked = isGated(...MODE_BLOCKED_TIERS[mode]);
+
+  const breadcrumb = [
+    t("dd.all"),
+    type ? typeLabel(type) : null,
+    group ? group.label : null,
+  ].filter(Boolean) as string[];
+
+  const periodLabel = `${format(start, "d.M.yyyy")} to ${format(end, "d.M.yyyy")}`;
+
+  const buildTable = (): {
+    head: string[];
+    body: string[][];
+    numeric: number[];
+  } => {
+    if (level === 2) {
+      const head = [
+        t("dd.date"),
+        t("dd.time"),
+        t("dd.status"),
+        t("dd.guests"),
+        t("dd.revenue"),
+      ];
+      if (canSeeGuests) head.splice(2, 0, t("dd.guest"));
+      return {
+        head,
+        body: scoped.map((r) => {
+          const cells = [
+            format(new Date(`${r.date}T00:00:00`), "d.M.yyyy"),
+            r.start_time?.slice(0, 5) ?? "",
+            r.status ?? "",
+            String(r.guests_count ?? ""),
+            eur(Number(r.price_eur) || 0),
+          ];
+          if (canSeeGuests) cells.splice(2, 0, r.guest_name ?? "");
+          return cells;
+        }),
+        numeric: canSeeGuests ? [4, 5] : [3, 4],
+      };
+    }
+    const showFill = level === 1 && mode === "occasion";
+    const head = [
+      level === 0 ? t("an.service") : t(`dd.mode.${mode}`),
+      t("dd.bookings"),
+      t("dd.guests"),
+      t("dd.revenue"),
+      t("dd.discount"),
+      t("dd.cancelled"),
+    ];
+    if (showFill) head.push(t("dd.fill"));
+    return {
+      head,
+      body: grouped.map((row) => {
+        const cells = [
+          labelFor(row),
+          String(row.bookings),
+          String(row.guests),
+          eur(row.revenue),
+          eur(row.discount),
+          String(row.cancelled),
+        ];
+        if (showFill)
+          cells.push(
+            row.capacity
+              ? `${Math.round((row.guests / row.capacity) * 100)}%`
+              : "",
+          );
+        return cells;
+      }),
+      numeric: [1, 2, 3, 4, 5, 6],
+    };
+  };
+
+  const table = buildTable();
+  const filePrefix = `drilldown_${mode}`;
+
+  const handleCsv = () => {
+    const csv = buildReportCsv(table.head, [
+      [breadcrumb.join(" > ")],
+      ...table.body,
+    ]);
+    downloadReportCsv(reportCsvFileName(filePrefix, periodLabel), csv);
+  };
+
+  const handlePdf = () => {
+    downloadReportPdf({
+      title: t("dd.title"),
+      subtitle: `${breadcrumb.join(" > ")}, ${periodLabel}`,
+      fileName: reportCsvFileName(filePrefix, periodLabel).replace(
+        /\.csv$/,
+        "",
+      ),
+      table: {
+        head: table.head,
+        body: table.body,
+        numericColumns: table.numeric,
+      },
+    });
+  };
+
+  const drill = (row: DrillRow) => {
+    if (level === 0) setType(row.key);
+    else if (level === 1) setGroup({ key: row.key, label: labelFor(row) });
+  };
+
+  return (
+    <Card>
+      <CardHeader className="space-y-2">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <Layers className="h-5 w-5 text-primary" aria-hidden />
+          {t("dd.title")}
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">{t("dd.help")}</p>
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="space-y-1">
+            <Label htmlFor="dd-mode">{t("dd.mode")}</Label>
+            <Select
+              value={mode}
+              onValueChange={(v) => {
+                setMode(v as DrillMode);
+                setGroup(null);
+              }}
+            >
+              <SelectTrigger id="dd-mode" className="w-56">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {modes.map((m) => (
+                  <SelectItem key={m} value={m}>
+                    {t(`dd.mode.${m}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="dd-range">{t("an.range")}</Label>
+            <Select
+              value={rangeKey}
+              onValueChange={(v) => setRangeKey(v as RangeKey)}
+            >
+              <SelectTrigger id="dd-range" className="w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="30">{t("an.last30")}</SelectItem>
+                <SelectItem value="90">{t("an.last90")}</SelectItem>
+                <SelectItem value="365">{t("an.last365")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="ml-auto flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCsv}
+              disabled={modeLocked || table.body.length === 0}
+            >
+              <Download className="mr-2 h-4 w-4" aria-hidden />
+              {t("dd.csv")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePdf}
+              disabled={modeLocked || table.body.length === 0}
+            >
+              <FileText className="mr-2 h-4 w-4" aria-hidden />
+              {t("an.exportPdf")}
+            </Button>
+          </div>
+        </div>
+        <nav
+          aria-label="breadcrumb"
+          className="flex flex-wrap items-center gap-1 text-sm"
+        >
+          {breadcrumb.map((crumb, i) => (
+            <span key={i} className="flex items-center gap-1">
+              {i > 0 && (
+                <ChevronRight
+                  className="h-3 w-3 text-muted-foreground"
+                  aria-hidden
+                />
+              )}
+              {i < breadcrumb.length - 1 ? (
+                <button
+                  type="button"
+                  className="text-primary underline-offset-2 hover:underline"
+                  onClick={() => {
+                    if (i === 0) {
+                      setType(null);
+                      setGroup(null);
+                    } else setGroup(null);
+                  }}
+                >
+                  {crumb}
+                </button>
+              ) : (
+                <span className="font-medium">{crumb}</span>
+              )}
+            </span>
+          ))}
+        </nav>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-40 w-full" />
+        ) : modeLocked ? (
+          <p className="text-sm text-muted-foreground">{t("dd.locked")}</p>
+        ) : table.body.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("an.noData")}</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {table.head.map((h, i) => (
+                    <TableHead
+                      key={h}
+                      className={
+                        i > 0 && table.numeric.includes(i) ? "text-right" : ""
+                      }
+                    >
+                      {h}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {table.body.map((cells, ri) => {
+                  const row = level < 2 ? grouped[ri] : null;
+                  return (
+                    <TableRow key={ri}>
+                      {cells.map((c, ci) => (
+                        <TableCell
+                          key={ci}
+                          className={
+                            ci > 0 && table.numeric.includes(ci)
+                              ? "text-right tabular-nums"
+                              : ""
+                          }
+                        >
+                          {ci === 0 && row ? (
+                            <button
+                              type="button"
+                              className="text-left text-primary underline-offset-2 hover:underline"
+                              onClick={() => drill(row)}
+                            >
+                              {c}
+                            </button>
+                          ) : (
+                            c
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default DrillDownPanel;
