@@ -6,7 +6,15 @@
  * then its room type, then falls back to "unassigned".
  */
 
-export type DrillMode = "resource" | "subService" | "occasion" | "channel";
+export type DrillMode =
+  | "resource"
+  | "subService"
+  | "occasion"
+  | "channel"
+  | "discount"
+  | "guestType"
+  | "weekday"
+  | "groupSize";
 
 export interface DrillReservation {
   id: string;
@@ -22,6 +30,8 @@ export interface DrillReservation {
   special_occasion_id?: string | null;
   selected_sub_services?: unknown;
   guest_name?: string;
+  guest_email?: string | null;
+  discount_code_id?: string | null;
 }
 
 export interface DrillContext {
@@ -122,17 +132,12 @@ export function groupRows(
       add(get(r.reservation_type, r.reservation_type), r);
       continue;
     }
-    if (mode === "resource") {
-      const { key, label } = resourceKeyOf(r, ctx);
-      add(get(key, label), r);
-    } else if (mode === "channel") {
-      const key = r.created_by ? "staff" : "public";
-      add(get(key, key), r);
-    } else if (mode === "occasion") {
-      if (!r.special_occasion_id) continue;
-      const occ = ctx.occasions[r.special_occasion_id];
-      const row = get(r.special_occasion_id, occ?.name ?? "");
-      row.capacity = occ?.capacity;
+    if (mode !== "subService") {
+      const k = simpleKeyOf(r, mode, ctx);
+      if (!k) continue;
+      const row = get(k.key, k.label);
+      if (mode === "occasion" && r.special_occasion_id)
+        row.capacity = ctx.occasions[r.special_occasion_id]?.capacity;
       add(row, r);
     } else {
       for (const s of subServicesOf(r)) {
@@ -156,10 +161,7 @@ export function filterPath(
   return rows.filter((r) => {
     if (type && r.reservation_type !== type) return false;
     if (!groupKey) return true;
-    if (mode === "resource") return resourceKeyOf(r, ctx).key === groupKey;
-    if (mode === "channel")
-      return (r.created_by ? "staff" : "public") === groupKey;
-    if (mode === "occasion") return r.special_occasion_id === groupKey;
+    if (mode !== "subService") return simpleKeyOf(r, mode, ctx)?.key === groupKey;
     return subServicesOf(r).some((s) => s.key === groupKey);
   });
 }
@@ -169,7 +171,9 @@ export function availableModes(
   rows: DrillReservation[],
   ctx: DrillContext,
 ): DrillMode[] {
-  const modes: DrillMode[] = ["resource", "channel"];
+  const modes: DrillMode[] = ["resource", "channel", "weekday", "groupSize"];
+  if (rows.some((r) => r.discount_code_id)) modes.push("discount");
+  if (ctx.priorGuests) modes.push("guestType");
   if (rows.some((r) => subServicesOf(r).length > 0)) modes.push("subService");
   if (
     Object.keys(ctx.occasions).length > 0 &&
