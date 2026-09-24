@@ -115,15 +115,10 @@ const ORGANIZATION_JSON_LD = JSON.stringify({
   ],
 });
 
-const SITE_TITLE = "MimmoBook, Booking Software for Hospitality & Service Pros";
-const SITE_DESCRIPTION =
-  "Online booking for barbers, hairdressers, massage therapists, bakers, personal trainers, restaurants, venues and hotels. Branded booking pages, fewer no-shows.";
+// Page titles, descriptions and share tags live on each route's head(), so
+// the root only carries sitewide defaults and nothing is duplicated.
 const SITE_KEYWORDS =
   "reservation management, booking software, appointment booking, barber booking software, hairdresser booking system, salon appointment software, massage therapist booking, bakery order booking, personal trainer booking app, hospitality, wellness, hyvinvointi, service industry, palveluala, parturi ajanvaraus, kampaaja ajanvaraus, hieroja ajanvaraus, leipomo tilaukset, personal trainer ajanvaraus, frisör bokning, massör bokning, restaurants, venues, hotels, guesthouses, spa booking, ajanvaraus";
-const SOCIAL_TITLE = "MimmoBook, Reservations for Hospitality & Wellness";
-const SOCIAL_DESCRIPTION =
-  "Cloud reservations for restaurants, venues, hotels, guesthouses, wellness and service businesses. Multi-site with branded booking pages.";
-const OG_IMAGE = "https://mimmobook.com/og-image.png";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   {
