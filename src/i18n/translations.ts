@@ -7126,7 +7126,7 @@ const fi: TranslationKeys = {
   "whatIs.whoGuesthouses": "Majatalot",
   "whatIs.whoGuesthousesDesc":
     "Yksinkertaista vierasmajoitusta helppokäyttöisellä huonevarauksella, saatavuuden hallinnalla ja henkilökohtaisella viestinnällä.",
-  "whatIs.whoWellness": "Palveluyrittäjät",
+  "whatIs.whoWellness": "Palvelualan yrittäjät",
   "whatIs.whoWellnessDesc":
     "Parturit, kampaajat, hierojat, kosmetologit, personal trainerit, leipomot ja muut palveluyrittäjät julkaisevat palveluvalikon. Asiakas valitsee haluamansa, ja varaus saa oikean keston ja hinnan.",
   "whatIs.howTitle": "Miten MimmoBook toimii?",
