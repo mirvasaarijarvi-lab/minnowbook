@@ -6,6 +6,8 @@ export const Route = createFileRoute("/features")({
   component: Features,
   head: () =>
     routeHead({
+      image: "https://mimmobook.com/og-share.jpg",
+      imageAlt: "MimmoBook booking features for hospitality and service pros",
       title: "Features, Online Booking for Service Pros and Hospitality",
       description:
         "Branded booking pages, automated reminders, team management, reports and multi-site support for barbers, hairdressers, massage therapists, bakers, personal trainers and venues.",

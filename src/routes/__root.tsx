@@ -115,15 +115,10 @@ const ORGANIZATION_JSON_LD = JSON.stringify({
   ],
 });
 
-const SITE_TITLE = "MimmoBook, Booking Software for Hospitality & Service Pros";
-const SITE_DESCRIPTION =
-  "Online booking for barbers, hairdressers, massage therapists, bakers, personal trainers, restaurants, venues and hotels. Branded booking pages, fewer no-shows.";
+// Page titles, descriptions and share tags live on each route's head(), so
+// the root only carries sitewide defaults and nothing is duplicated.
 const SITE_KEYWORDS =
   "reservation management, booking software, appointment booking, barber booking software, hairdresser booking system, salon appointment software, massage therapist booking, bakery order booking, personal trainer booking app, hospitality, wellness, hyvinvointi, service industry, palveluala, parturi ajanvaraus, kampaaja ajanvaraus, hieroja ajanvaraus, leipomo tilaukset, personal trainer ajanvaraus, frisör bokning, massör bokning, restaurants, venues, hotels, guesthouses, spa booking, ajanvaraus";
-const SOCIAL_TITLE = "MimmoBook, Reservations for Hospitality & Wellness";
-const SOCIAL_DESCRIPTION =
-  "Cloud reservations for restaurants, venues, hotels, guesthouses, wellness and service businesses. Multi-site with branded booking pages.";
-const OG_IMAGE = "https://mimmobook.com/og-image.png";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   {
@@ -131,9 +126,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1.0" },
-        { title: SITE_TITLE },
-        { name: "title", content: SITE_TITLE },
-        { name: "description", content: SITE_DESCRIPTION },
         { name: "keywords", content: SITE_KEYWORDS },
         { name: "author", content: "MimmoBook" },
         {
@@ -160,24 +152,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           content: "grmftut49V7_pI0Q6QhebcuqGgDXmOjAezfhqdWF8sY",
         },
         { property: "og:type", content: "website" },
-        { property: "og:url", content: "https://mimmobook.com/" },
-        { property: "og:title", content: SOCIAL_TITLE },
-        { property: "og:description", content: SOCIAL_DESCRIPTION },
-        { property: "og:image", content: OG_IMAGE },
-        { property: "og:image:secure_url", content: OG_IMAGE },
-        { property: "og:image:type", content: "image/png" },
-        { property: "og:image:width", content: "1200" },
-        { property: "og:image:height", content: "630" },
-        { property: "og:image:alt", content: SOCIAL_TITLE },
         { property: "og:site_name", content: "MimmoBook" },
         { property: "og:locale", content: "en_US" },
         { property: "og:locale:alternate", content: "fi_FI" },
         { property: "og:locale:alternate", content: "sv_SE" },
-        { property: "twitter:card", content: "summary_large_image" },
-        { property: "twitter:url", content: "https://mimmobook.com/" },
-        { property: "twitter:title", content: SOCIAL_TITLE },
-        { property: "twitter:description", content: SOCIAL_DESCRIPTION },
-        { property: "twitter:image", content: OG_IMAGE },
       ],
       links: [
         { rel: "stylesheet", href: appCss },
