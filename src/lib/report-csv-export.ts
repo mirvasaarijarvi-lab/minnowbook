@@ -52,10 +52,14 @@ export const reportCsvFileName = (
 
 /** Keeps file names portable: no path separators or reserved characters. */
 function safeFilePart(s: string): string {
-  return s
-    .replace(/\s/g, "_")
-    .replace(/[/\\:*?"<>|\u0000-\u001f]/g, "-")
-    .replace(/\.{2,}/g, ".");
+  return (
+    s
+      .replace(/\s/g, "_")
+      .replace(/[/\\:*?"<>|]/g, "-")
+      // eslint-disable-next-line no-control-regex -- strip control characters from file names
+      .replace(/[\u0000-\u001f]/g, "")
+      .replace(/\.{2,}/g, ".")
+  );
 }
 
 /** Triggers the browser download for an assembled CSV document. */

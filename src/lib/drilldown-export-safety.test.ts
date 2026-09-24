@@ -18,7 +18,7 @@ const base: DrillReservation = {
 };
 
 const ctx: DrillContext = {
-  resourceNames: { r1: "Hall", r2: "=HYPERLINK(\"http://x\")" },
+  resourceNames: { r1: "Hall", r2: '=HYPERLINK("http://x")' },
   occasions: {},
   resourceCapacity: { r1: 20 },
   periodDays: 2,
@@ -71,7 +71,7 @@ describe("drill-down new groupings", () => {
 
 describe("drill-down download safety", () => {
   it("neutralises spreadsheet formulas in resource names", () => {
-    const csv = buildReportCsv(["Resource"], [["=HYPERLINK(\"http://x\")"]]);
+    const csv = buildReportCsv(["Resource"], [['=HYPERLINK("http://x")']]);
     expect(csv).not.toMatch(/"=HYPERLINK/);
   });
 
