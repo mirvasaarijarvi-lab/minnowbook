@@ -57,10 +57,7 @@ export interface DrillContext {
   /** Reservation ids created from an offer. */
   offerReservationIds?: Set<string>;
   /** Kitchen order lines per reservation id. */
-  kitchenItems?: Record<
-    string,
-    { name: string; qty: number; price: number }[]
-  >;
+  kitchenItems?: Record<string, { name: string; qty: number; price: number }[]>;
 }
 
 export const UNASSIGNED = "__unassigned__";
