@@ -115,6 +115,11 @@ export function resourceKeyOf(
   r: DrillReservation,
   ctx: DrillContext,
 ): { key: string; label: string } {
+  if (r.resource_id && ctx.resourceNames[r.resource_id])
+    return {
+      key: `res:${r.resource_id}`,
+      label: ctx.resourceNames[r.resource_id],
+    };
   const occ = r.special_occasion_id
     ? ctx.occasions[r.special_occasion_id]
     : undefined;
