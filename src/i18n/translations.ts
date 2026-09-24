@@ -4232,18 +4232,18 @@ const en: TranslationKeys = {
   "whatIs.badge": "About the Platform",
   "whatIs.heroTitle": "What Is MimmoBook?",
   "whatIs.heroSubtitle":
-    "MimmoBook is a cloud-based reservation management platform built for restaurants, venues, hotels and guesthouses. One tool to manage all your bookings.",
+    "MimmoBook is a cloud-based booking platform for service providers and hospitality: barbers, hairdressers, massage therapists, bakers, personal trainers, restaurants, venues, hotels and guesthouses. One tool for all your bookings.",
   "whatIs.seeFeatures": "See all features",
-  "whatIs.definitionTitle": "MimmoBook: Reservation Management for Hospitality",
+  "whatIs.definitionTitle": "MimmoBook: Booking for Service Businesses and Hospitality",
   "whatIs.definitionP1":
-    "MimmoBook is a software-as-a-service (SaaS) platform that helps hospitality businesses manage reservations online. Whether you run a restaurant, event venue, hotel, or guesthouse, MimmoBook gives you a centralized dashboard to handle bookings, communicate with guests, and track your business performance.",
+    "MimmoBook is a software-as-a-service (SaaS) platform that helps service businesses and hospitality manage bookings online. Whether you cut hair, give massages, bake to order, coach clients, or run a restaurant, venue, hotel or guesthouse, MimmoBook gives you one dashboard for bookings, customer messages and business performance.",
   "whatIs.definitionP2":
-    "Unlike generic booking tools, MimmoBook is designed specifically for hospitality. It supports multiple reservation types, including table bookings, room reservations, venue hire, catering orders, and popup events, all from a single account. Each business gets a branded booking page that matches their identity.",
+    "Unlike generic booking tools, MimmoBook handles the many ways people book: appointments with a services menu that sets the right length, table bookings, room stays, venue hire, catering orders, pre-orders and pop-up events, all from one account. Each business gets a branded booking page that matches their identity.",
   "whatIs.definitionP3":
-    "MimmoBook is available in English, Finnish, and Swedish, making it ideal for businesses operating in the Nordics and internationally. The platform scales from single-location restaurants to multi-site hospitality groups.",
+    "MimmoBook is available in English, Finnish, and Swedish, making it ideal for businesses operating in the Nordics and internationally. It scales from a one-person salon or bakery to multi-site groups.",
   "whatIs.whoTitle": "Who Is MimmoBook For?",
   "whatIs.whoSubtitle":
-    "MimmoBook serves hospitality businesses of all sizes across four main categories.",
+    "MimmoBook serves service providers and hospitality businesses of all sizes.",
   "whatIs.whoRestaurants": "Restaurants",
   "whatIs.whoRestaurantsDesc":
     "Manage table reservations, set menus, and guest preferences. Handle walk-ins and online bookings from one dashboard.",
@@ -4256,9 +4256,9 @@ const en: TranslationKeys = {
   "whatIs.whoGuesthouses": "Guesthouses",
   "whatIs.whoGuesthousesDesc":
     "Streamline guest stays with simple room booking, availability management, and personalized communication.",
-  "whatIs.whoWellness": "Wellness Services",
+  "whatIs.whoWellness": "Service Providers",
   "whatIs.whoWellnessDesc":
-    "Hairdressers, masseurs, makeup artists, and similar providers can publish a tickable services menu so customers book the right amount of time.",
+    "Barbers, hairdressers, massage therapists, beauticians, personal trainers, bakers and other service pros publish a services menu. Customers tick what they want and the booking gets the right length and price.",
   "whatIs.howTitle": "How Does MimmoBook Work?",
   "whatIs.howSubtitle": "Get started in four simple steps.",
   "whatIs.howStep1": "Sign Up",
@@ -7102,18 +7102,18 @@ const fi: TranslationKeys = {
   "whatIs.badge": "Tietoa alustasta",
   "whatIs.heroTitle": "Mikä on MimmoBook?",
   "whatIs.heroSubtitle":
-    "MimmoBook on pilvipohjainen varausten hallintajärjestelmä ravintoloille, tapahtumapaikoille, hotelleille ja majataloille. Yksi työkalu kaikkien varaustesi hallintaan.",
+    "MimmoBook on pilvipohjainen varausjärjestelmä palveluyrittäjille ja matkailu- ja ravintola-alalle: parturit, kampaajat, hierojat, leipomot, personal trainerit, ravintolat, tapahtumapaikat, hotellit ja majatalot. Yksi työkalu kaikkiin varauksiin.",
   "whatIs.seeFeatures": "Katso kaikki ominaisuudet",
-  "whatIs.definitionTitle": "MimmoBook: Varausten hallinta ravintola-alalle",
+  "whatIs.definitionTitle": "MimmoBook: Varaukset palveluyrityksille ja ravintola-alalle",
   "whatIs.definitionP1":
-    "MimmoBook on SaaS-alusta, joka auttaa majoitus- ja ravintola-alan yrityksiä hallitsemaan varauksia verkossa. Riippumatta siitä, pyöritätkö ravintolaa, tapahtuma­paikkaa, hotellia tai majataloa, MimmoBook tarjoaa keskitetyn hallintapaneelin varausten, vierasviestinnän ja liiketoiminnan seurantaan.",
+    "MimmoBook on SaaS-alusta, joka auttaa palveluyrityksiä sekä matkailu- ja ravintola-alaa hallitsemaan varauksia verkossa. Leikkaatpa hiuksia, hierot, leivot tilauksesta, valmennat asiakkaita tai pyörität ravintolaa, tapahtumapaikkaa, hotellia tai majataloa, MimmoBook kokoaa varaukset, asiakasviestit ja liiketoiminnan seurannan yhteen näkymään.",
   "whatIs.definitionP2":
-    "Toisin kuin yleiset varaustyökalut, MimmoBook on suunniteltu nimenomaan ravintola-alalle. Se tukee useita varaustyyppejä, kuten pöytävarauksia, huonevarauksia, tilavuokrausta, catering-tilauksia ja popup-tapahtumia, kaikki yhdellä tilillä. Jokainen yritys saa brändätyn varaussivun.",
+    "Toisin kuin yleiset varaustyökalut, MimmoBook tukee monia varaustapoja: ajanvaraukset palveluvalikolla, joka mitoittaa keston oikein, pöytävaraukset, huonevaraukset, tilavuokraus, catering, ennakkotilaukset ja popup-tapahtumat, kaikki yhdellä tilillä. Jokainen yritys saa brändätyn varaussivun.",
   "whatIs.definitionP3":
-    "MimmoBook on saatavilla englanniksi, suomeksi ja ruotsiksi, mikä tekee siitä ihanteellisen Pohjoismaissa ja kansainvälisesti toimiville yrityksille. Alusta skaalautuu yksittäisestä ravintolasta usean toimipisteen ravintola-alan konserniin.",
+    "MimmoBook on saatavilla englanniksi, suomeksi ja ruotsiksi, joten se sopii Pohjoismaissa ja kansainvälisesti toimiville yrityksille. Se skaalautuu yhden hengen kampaamosta tai leipomosta usean toimipisteen konserniin.",
   "whatIs.whoTitle": "Kenelle MimmoBook on tarkoitettu?",
   "whatIs.whoSubtitle":
-    "MimmoBook palvelee kaikenkokoisia ravintola-alan yrityksiä neljässä pääkategoriassa.",
+    "MimmoBook palvelee kaikenkokoisia palveluyrityksiä sekä matkailu- ja ravintola-alan yrityksiä.",
   "whatIs.whoRestaurants": "Ravintolat",
   "whatIs.whoRestaurantsDesc":
     "Hallitse pöytävarauksia, set-menuja ja vierastoiveita. Käsittele walk-in- ja verkkovaraukset yhdestä hallintapaneelista.",
@@ -7126,9 +7126,9 @@ const fi: TranslationKeys = {
   "whatIs.whoGuesthouses": "Majatalot",
   "whatIs.whoGuesthousesDesc":
     "Yksinkertaista vierasmajoitusta helppokäyttöisellä huonevarauksella, saatavuuden hallinnalla ja henkilökohtaisella viestinnällä.",
-  "whatIs.whoWellness": "Hyvinvointipalvelut",
+  "whatIs.whoWellness": "Palveluyrittäjät",
   "whatIs.whoWellnessDesc":
-    "Kampaajat, hierojat, meikkitaiteilijat ja vastaavat palveluntarjoajat voivat julkaista palveluvalikon, josta asiakas valitsee haluamansa, ja varauksen kesto mukautuu automaattisesti.",
+    "Parturit, kampaajat, hierojat, kosmetologit, personal trainerit, leipomot ja muut palveluyrittäjät julkaisevat palveluvalikon. Asiakas valitsee haluamansa, ja varaus saa oikean keston ja hinnan.",
   "whatIs.howTitle": "Miten MimmoBook toimii?",
   "whatIs.howSubtitle": "Aloita neljässä yksinkertaisessa vaiheessa.",
   "whatIs.howStep1": "Rekisteröidy",
@@ -9994,18 +9994,18 @@ const sv: TranslationKeys = {
   "whatIs.badge": "Om plattformen",
   "whatIs.heroTitle": "Vad är MimmoBook?",
   "whatIs.heroSubtitle":
-    "MimmoBook är en molnbaserad bokningshanteringsplattform byggd för restauranger, eventlokaler, hotell och gästhus. Ett verktyg för att hantera alla dina bokningar.",
+    "MimmoBook är en molnbaserad bokningsplattform för tjänsteföretag och besöksnäringen: barberare, frisörer, massörer, bagerier, personliga tränare, restauranger, eventlokaler, hotell och gästhus. Ett verktyg för alla dina bokningar.",
   "whatIs.seeFeatures": "Se alla funktioner",
-  "whatIs.definitionTitle": "MimmoBook: Bokningshantering för besöksnäringen",
+  "whatIs.definitionTitle": "MimmoBook: Bokningar för tjänsteföretag och besöksnäringen",
   "whatIs.definitionP1":
-    "MimmoBook är en SaaS-plattform som hjälper besöksnäringsföretag att hantera bokningar online. Oavsett om du driver en restaurang, eventlokal, hotell eller gästhus ger MimmoBook dig en centraliserad instrumentpanel för att hantera bokningar, kommunicera med gäster och spåra affärsprestanda.",
+    "MimmoBook är en SaaS-plattform som hjälper tjänsteföretag och besöksnäringen att hantera bokningar online. Oavsett om du klipper hår, ger massage, bakar på beställning, tränar kunder eller driver restaurang, eventlokal, hotell eller gästhus samlar MimmoBook bokningar, kundmeddelanden och uppföljning i en vy.",
   "whatIs.definitionP2":
-    "Till skillnad från generiska bokningsverktyg är MimmoBook designat specifikt för besöksnäringen. Det stöder flera bokningstyper, inklusive bordsreserveringar, rumsreserveringar, lokalhyra, cateringbeställningar och popup-evenemang, allt från ett enda konto. Varje företag får en varumärkesanpassad bokningssida.",
+    "Till skillnad från generiska bokningsverktyg hanterar MimmoBook många sätt att boka: tidsbokningar med en tjänstemeny som ger rätt längd, bordsbokningar, rumsbokningar, lokalhyra, catering, förbeställningar och popup-evenemang, allt från ett konto. Varje företag får en varumärkesanpassad bokningssida.",
   "whatIs.definitionP3":
-    "MimmoBook finns tillgängligt på engelska, finska och svenska, vilket gör det idealiskt för företag som verkar i Norden och internationellt. Plattformen skalas från enskilda restauranger till besöksnäringsgrupper med flera platser.",
+    "MimmoBook finns på engelska, finska och svenska, vilket passar företag i Norden och internationellt. Den skalar från en enmanssalong eller ett bageri till grupper med flera platser.",
   "whatIs.whoTitle": "Vem är MimmoBook till för?",
   "whatIs.whoSubtitle":
-    "MimmoBook betjänar besöksnäringsföretag i alla storlekar inom fyra huvudkategorier.",
+    "MimmoBook betjänar tjänsteföretag och besöksnäringsföretag i alla storlekar.",
   "whatIs.whoRestaurants": "Restauranger",
   "whatIs.whoRestaurantsDesc":
     "Hantera bordsreserveringar, set-menyer och gästpreferenser. Hantera walk-ins och onlinebokningar från en instrumentpanel.",
@@ -10018,9 +10018,9 @@ const sv: TranslationKeys = {
   "whatIs.whoGuesthouses": "Gästhus",
   "whatIs.whoGuesthousesDesc":
     "Förenkla gästboende med enkel rumsbokning, tillgänglighetshantering och personlig kommunikation.",
-  "whatIs.whoWellness": "Friskvårdstjänster",
+  "whatIs.whoWellness": "Tjänsteföretag",
   "whatIs.whoWellnessDesc":
-    "Frisörer, massörer, makeupartister och liknande leverantörer kan publicera en bockbar tjänstemeny så att kunderna bokar rätt mängd tid.",
+    "Barberare, frisörer, massörer, kosmetologer, personliga tränare, bagerier och andra tjänsteföretag publicerar en tjänstemeny. Kunden bockar i det hen vill ha och bokningen får rätt längd och pris.",
   "whatIs.howTitle": "Hur fungerar MimmoBook?",
   "whatIs.howSubtitle": "Kom igång på fyra enkla steg.",
   "whatIs.howStep1": "Registrera dig",

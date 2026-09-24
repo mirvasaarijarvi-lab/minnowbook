@@ -43,7 +43,7 @@ const WhatIsMimmobook = () => {
             {
               question: "What is MimmoBook?",
               answer:
-                "MimmoBook is a cloud-based SaaS reservation management platform designed for hospitality businesses, including restaurants, event venues, hotels, guesthouses, and wellness service providers (hairdressers, masseurs, makeup artists, and similar).",
+                "MimmoBook is a cloud-based SaaS booking platform for service providers (barbers, hairdressers, massage therapists, beauticians, bakers, personal trainers and similar) and hospitality businesses (restaurants, event venues, hotels and guesthouses).",
             },
             {
               question: "How does MimmoBook work?",
