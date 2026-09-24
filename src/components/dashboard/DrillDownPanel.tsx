@@ -117,8 +117,11 @@ const DrillDownPanel = () => {
     },
   });
 
-  const rows = data?.rows ?? [];
-  const ctx: DrillContext = data?.ctx ?? { resourceNames: {}, occasions: {} };
+  const rows = useMemo(() => data?.rows ?? [], [data]);
+  const ctx: DrillContext = useMemo(
+    () => data?.ctx ?? { resourceNames: {}, occasions: {} },
+    [data],
+  );
   const modes = useMemo(() => availableModes(rows, ctx), [rows, ctx]);
   const canSeeGuests = isOwner || isAdmin;
 
