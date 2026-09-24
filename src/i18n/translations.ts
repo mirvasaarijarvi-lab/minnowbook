@@ -1054,6 +1054,7 @@ type TranslationKeys = {
   "pricing.drilldownAll": string;
   "pricing.exportCsvPdf": string;
   "pricing.printReports": string;
+  "pricing.resourceLinked": string;
   "pricing.offers": string;
   "pricing.crossReservations": string;
   "pricing.supportLevel": string;
@@ -2845,7 +2846,7 @@ const en: TranslationKeys = {
     "Hotel/guesthouse, restaurant, event spaces and service professionals such as massage therapists, barbers, hairdressers, bakers, make-up artists, treatment providers and personal trainers.",
   "features.reportsInsights": "Reports",
   "features.reportsInsightsDesc":
-    "Track trends, occupancy and revenue, drill down by resource, product or tour, download CSV and PDF, and print the whole page or one section for any period.",
+    "Track trends, occupancy and revenue, drill down by resource, product or tour, download CSV and PDF, and print the whole page or one section for any period. Every booking is saved with the resource the guest chose, so totals per resource are exact.",
   "features.automatedEmails": "Automated Emails",
   "features.automatedEmailsDesc":
     "Send confirmation, reminder, and cancellation emails automatically.",
@@ -4080,6 +4081,7 @@ const en: TranslationKeys = {
   "pricing.drilldownAll": "All groupings",
   "pricing.exportCsvPdf": "Download CSV and PDF",
   "pricing.printReports": "Print whole page or one section",
+  "pricing.resourceLinked": "Every booking saved with its resource",
   "pricing.offers": "Offers (event proposals & PDF)",
   "pricing.crossReservations": "Cross-reservations",
   "pricing.supportLevel": "Support",
@@ -4216,7 +4218,7 @@ const en: TranslationKeys = {
   "support.faqC4":
     "Q: What's the difference between AI chatbot and priority support? A: All plans include MimmoAid, our 24/7 AI chatbot. Business plan adds support requests asked on the platform with a guaranteed 24-hour response.",
   "support.faqC5":
-    "Reports: open Reports, choose a period at the top, then use Drill-down by resource to go from a service to a resource, product or tour and on to its bookings. Every level downloads as CSV or PDF. Use Print whole page, or Print this section on any card.",
+    "Reports: open Reports, choose a period at the top, then use Drill-down by resource to go from a service to a resource, product or tour and on to its bookings. Every level downloads as CSV or PDF. Use Print whole page, or Print this section on any card. Each booking is saved with the resource the guest or staff chose, including bookings made from offers. Older bookings that could not be matched to one resource show as Not linked to a resource.",
   "support.catBasics": "Basics",
   "support.catReservations": "Reservations",
   "support.catCommunication": "Communication",
@@ -5711,7 +5713,7 @@ const fi: TranslationKeys = {
     "Hotelli/majatalo, ravintola, tilat tapahtumiin sekä palvelualan ammattilaiset, kuten hierojat, parturit, kampaajat, leipurit, meikkaajat, hoitojen tarjoajat ja personal trainerit.",
   "features.reportsInsights": "Raportointi",
   "features.reportsInsightsDesc":
-    "Seuraa varauksia, käyttöasteita ja tuloja, poraudu resurssiin, tuotteeseen tai kierrokseen, lataa CSV ja PDF ja tulosta koko sivu tai yksi osio mille tahansa aikavälille.",
+    "Seuraa varauksia, käyttöasteita ja tuloja, poraudu resurssiin, tuotteeseen tai kierrokseen, lataa CSV ja PDF ja tulosta koko sivu tai yksi osio mille tahansa aikavälille. Jokainen varaus tallentuu vieraan valitsemaan resurssiin, joten resurssikohtaiset luvut ovat tarkkoja.",
   "features.automatedEmails": "Automaattiset sähköpostit",
   "features.automatedEmailsDesc":
     "Lähetä vahvistus-, muistutus- ja peruutussähköpostit automaattisesti.",
@@ -6952,6 +6954,7 @@ const fi: TranslationKeys = {
   "pricing.drilldownAll": "Kaikki ryhmittelyt",
   "pricing.exportCsvPdf": "Lataus CSV ja PDF",
   "pricing.printReports": "Tulosta koko sivu tai yksi osio",
+  "pricing.resourceLinked": "Jokainen varaus tallentuu resurssiinsa",
   "pricing.offers": "Tarjoukset (tapahtumaehdotukset ja PDF)",
   "pricing.crossReservations": "Ristiinvaraukset",
   "pricing.supportLevel": "Tuki",
@@ -7085,7 +7088,7 @@ const fi: TranslationKeys = {
   "support.faqC4":
     "K: Mitä eroa on tekoälychatbotilla ja prioriteettituella? A: Kaikkiin paketteihin sisältyy MimmoAid, 24/7 toimiva tekoälychatbottimme. Liiketoimintapakettiin lisätään alustalla esitettyihin tukipyyntöihin vuorokauden vastaustakuu.",
   "support.faqC5":
-    "Raportit: avaa Raportit, valitse aikaväli ylhäältä ja käytä Porautuminen resursseittain: palvelusta resurssiin, tuotteeseen tai kierrokseen ja sen varauksiin. Jokaisen tason voi ladata CSV- tai PDF-muodossa. Tulosta koko sivu tai minkä tahansa kortin Tulosta tämä osio.",
+    "Raportit: avaa Raportit, valitse aikaväli ylhäältä ja käytä Porautuminen resursseittain: palvelusta resurssiin, tuotteeseen tai kierrokseen ja sen varauksiin. Jokaisen tason voi ladata CSV- tai PDF-muodossa. Tulosta koko sivu tai minkä tahansa kortin Tulosta tämä osio. Jokainen varaus tallentuu vieraan tai henkilökunnan valitsemaan resurssiin, myös tarjouksista luodut. Vanhemmat varaukset, joita ei voitu yhdistää yhteen resurssiin, näkyvät kohdassa Ei liitetty resurssiin.",
   "support.catBasics": "Perusteet",
   "support.catReservations": "Varaukset",
   "support.catCommunication": "Viestintä",
@@ -8588,7 +8591,7 @@ const sv: TranslationKeys = {
     "Hotell/pensionat, restaurang, evenemangslokaler och yrkesverksamma inom service, som massörer, barberare, frisörer, bagare, makeupartister, behandlare och personliga tränare.",
   "features.reportsInsights": "Rapportering",
   "features.reportsInsightsDesc":
-    "Följ trender, beläggning och intäkter, gå ner per resurs, produkt eller tur, ladda ner CSV och PDF och skriv ut hela sidan eller ett avsnitt för valfri period.",
+    "Följ trender, beläggning och intäkter, gå ner per resurs, produkt eller tur, ladda ner CSV och PDF och skriv ut hela sidan eller ett avsnitt för valfri period. Varje bokning sparas med resursen gästen valde, så siffrorna per resurs är exakta.",
   "features.automatedEmails": "Automatiserade e-postmeddelanden",
   "features.automatedEmailsDesc":
     "Skicka bekräftelse-, påminnelse- och avbokningsmejl automatiskt.",
@@ -9839,6 +9842,7 @@ const sv: TranslationKeys = {
   "pricing.drilldownAll": "Alla grupperingar",
   "pricing.exportCsvPdf": "Ladda ner CSV och PDF",
   "pricing.printReports": "Skriv ut hela sidan eller ett avsnitt",
+  "pricing.resourceLinked": "Varje bokning sparas med sin resurs",
   "pricing.offers": "Offerter (eventförslag och PDF)",
   "pricing.crossReservations": "Korsreservationer",
   "pricing.supportLevel": "Stöd",
@@ -9976,7 +9980,7 @@ const sv: TranslationKeys = {
   "support.faqC4":
     "F: Vad är skillnaden mellan AI-chatbot och prioriterad support? A: Alla planer inkluderar MimmoAid, vår AI-chatbot som är öppen dygnet runt. Affärsplanen lägger till möjlighet för supportförfrågningar som ställs på plattformen med garanterat 24-timmarssvar.",
   "support.faqC5":
-    "Rapporter: öppna Rapporter, välj period överst och använd Detaljvy per resurs för att gå från en tjänst till en resurs, produkt eller tur och vidare till bokningarna. Varje nivå laddas ner som CSV eller PDF. Skriv ut hela sidan eller Skriv ut detta avsnitt på valfritt kort.",
+    "Rapporter: öppna Rapporter, välj period överst och använd Detaljvy per resurs för att gå från en tjänst till en resurs, produkt eller tur och vidare till bokningarna. Varje nivå laddas ner som CSV eller PDF. Skriv ut hela sidan eller Skriv ut detta avsnitt på valfritt kort. Varje bokning sparas med resursen gästen eller personalen valde, även bokningar från offerter. Äldre bokningar som inte kunde kopplas till en resurs visas som Inte kopplad till en resurs.",
   "support.catBasics": "Grunder",
   "support.catReservations": "Bokningar",
   "support.catCommunication": "Kommunikation",

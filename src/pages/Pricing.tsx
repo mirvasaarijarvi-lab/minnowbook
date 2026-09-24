@@ -153,6 +153,7 @@ const Pricing = () => {
     ],
     [t("pricing.exportCsvPdf"), "—", "✓", "✓", "✓"],
     [t("pricing.printReports"), "—", "✓", "✓", "✓"],
+    [t("pricing.resourceLinked"), "✓", "✓", "✓", "✓"],
     [
       t("pricing.supportLevel"),
       "AI chatbot",

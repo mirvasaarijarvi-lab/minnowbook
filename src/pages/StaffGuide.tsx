@@ -796,6 +796,7 @@ const guideContent: Record<Language, GuideContent> = {
         steps: [
           "Pick the period once at the top of Reports. Every section uses it.",
           "Drill-down by resource: choose Group by (resource, product, tour, channel, weekday, group size, discount code, new or returning guests), click a service, then a row, to reach the bookings behind it.",
+          "Every booking is saved with its resource: the one the guest chose, the one you pick in a manual booking, or the space matched from an offer. So resource totals are exact. Older unmatched bookings show as Not linked to a resource.",
           "Download CSV or PDF on any drill-down level. The file name shows the grouping and period.",
           "Print whole page prints every section with a header showing your business and period. Print this section prints one card only.",
           "Select a time period: Week, Month, Quarter, Half-year, Year, or custom range.",
@@ -1184,6 +1185,7 @@ const guideContent: Record<Language, GuideContent> = {
         steps: [
           "Valitse aikaväli kerran Raporttien yläosasta. Kaikki osiot käyttävät sitä.",
           "Porautuminen resursseittain: valitse Ryhmittely (resurssi, tuote, kierros, kanava, viikonpäivä, ryhmän koko, alennuskoodi, uudet tai palaavat vieraat), klikkaa palvelua ja sitten riviä nähdäksesi varaukset.",
+          "Jokainen varaus tallentuu resurssiinsa: vieraan valitsemaan, käsin tehdyssä varauksessa valitsemaasi tai tarjouksen tilasta haettuun. Siksi resurssikohtaiset luvut ovat tarkkoja. Vanhemmat yhdistämättömät varaukset näkyvät kohdassa Ei liitetty resurssiin.",
           "Lataa CSV tai PDF millä tahansa tasolla. Tiedostonimessä näkyy ryhmittely ja aikaväli.",
           "Tulosta koko sivu tulostaa kaikki osiot otsikolla, jossa näkyy yritys ja aikaväli. Tulosta tämä osio tulostaa vain yhden kortin.",
           "Valitse aikaväli: Viikko, Kuukausi, Neljännes, Puoli vuotta, Vuosi tai oma aikaväli.",
@@ -1534,6 +1536,7 @@ const guideContent: Record<Language, GuideContent> = {
         steps: [
           "Välj period en gång överst i Rapporter. Alla avsnitt använder den.",
           "Detaljvy per resurs: välj Gruppera efter, klicka på en tjänst och sedan en rad för att se bokningarna bakom.",
+          "Varje bokning sparas med sin resurs: den gästen valde, den du väljer i en manuell bokning eller utrymmet från en offert. Därför är siffrorna per resurs exakta. Äldre bokningar utan koppling visas som Inte kopplad till en resurs.",
           "Ladda ner CSV eller PDF på varje nivå.",
           "Skriv ut hela sidan, eller Skriv ut detta avsnitt för ett enskilt kort.",
           "Välj tidsperiod: Vecka, Månad, Kvartal, Halvår, År eller anpassat intervall.",
