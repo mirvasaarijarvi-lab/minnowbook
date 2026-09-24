@@ -146,24 +146,29 @@ export const handleSupportChatRequest = async (req: Request): Promise<Response> 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Authentication is OPTIONAL: the support chat widget also renders on
-    // public pages (landing/marketing). If a real signed-in user Bearer token
-    // is sent, we validate it for future user-aware behavior. Anonymous keys,
-    // missing tokens, expired sessions, or malformed tokens are treated as an
-    // anonymous visitor because this endpoint does not expose private data.
+    // Authentication is REQUIRED: the chat calls a metered AI service, so only
+    // signed-in users may use it. Anonymous keys and invalid sessions get 401.
     const authHeader = req.headers.get("Authorization");
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const bearer = authHeader?.replace(/^Bearer\s+/i, "").trim();
     const payload = bearer ? getJwtPayload(bearer) : null;
     const isAuthenticatedUserToken = payload?.role === "authenticated" && typeof payload?.sub === "string";
-    if (bearer && bearer !== anonKey && isAuthenticatedUserToken) {
+    const signInRequired = () =>
+      new Response(
+        JSON.stringify({ error: "Please sign in to use MimmoAid. Kirjaudu sisään käyttääksesi MimmoAidia. Logga in för att använda MimmoAid." }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    if (!bearer || bearer === anonKey || !isAuthenticatedUserToken) {
+      return signInRequired();
+    }
+    {
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabase = createClient(supabaseUrl, anonKey, {
         global: { headers: { Authorization: authHeader! } },
       });
       const { data: { user }, error: authError } = await supabase.auth.getUser(bearer);
       if (authError || !user) {
-        console.warn("support-chat continuing as anonymous after invalid optional session");
+        return signInRequired();
       }
     }
 
