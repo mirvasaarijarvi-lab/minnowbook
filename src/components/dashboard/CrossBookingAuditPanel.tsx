@@ -8,6 +8,7 @@ import { useTenant } from "@/hooks/useTenant";
 import { useSiteContext } from "@/hooks/useSiteContext";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useAnalyticsT } from "@/i18n/analytics";
+import { useReportsPeriod } from "@/lib/reports-period";
 import { downloadReportPdf } from "@/lib/reportsPdf";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -75,8 +76,10 @@ const CrossBookingAuditPanel = () => {
   const [linkedOnly, setLinkedOnly] = useState(false);
 
   const today = useMemo(() => new Date(), []);
-  const startStr = format(subDays(today, Number(rangeKey)), "yyyy-MM-dd");
-  const endStr = format(addDays(today, 180), "yyyy-MM-dd");
+  const period = useReportsPeriod();
+  const startStr =
+    period?.startStr ?? format(subDays(today, Number(rangeKey)), "yyyy-MM-dd");
+  const endStr = period?.endStr ?? format(addDays(today, 180), "yyyy-MM-dd");
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: [
@@ -253,22 +256,24 @@ const CrossBookingAuditPanel = () => {
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="flex flex-wrap items-end gap-4">
-            <div className="space-y-1">
-              <Label className="text-xs">{t("an.range")}</Label>
-              <Select
-                value={rangeKey}
-                onValueChange={(v) => setRangeKey(v as RangeKey)}
-              >
-                <SelectTrigger className="h-8 w-[170px] text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="30">{t("an.last30")}</SelectItem>
-                  <SelectItem value="90">{t("an.last90")}</SelectItem>
-                  <SelectItem value="365">{t("an.last365")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {!period && (
+              <div className="space-y-1">
+                <Label className="text-xs">{t("an.range")}</Label>
+                <Select
+                  value={rangeKey}
+                  onValueChange={(v) => setRangeKey(v as RangeKey)}
+                >
+                  <SelectTrigger className="h-8 w-[170px] text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">{t("an.last30")}</SelectItem>
+                    <SelectItem value="90">{t("an.last90")}</SelectItem>
+                    <SelectItem value="365">{t("an.last365")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="mb-1 flex items-center gap-2">
               <Switch
                 id="cross-linked-only"

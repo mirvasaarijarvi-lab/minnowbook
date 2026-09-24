@@ -9,6 +9,8 @@ import { useSiteContext } from "@/hooks/useSiteContext";
 import { useTierGate } from "@/hooks/useTierGate";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { useAnalyticsT } from "@/i18n/analytics";
+import { useReportsPeriod } from "@/lib/reports-period";
+import { useDateLocale } from "@/hooks/useDateLocale";
 import {
   availableModes,
   filterPath,
@@ -53,6 +55,10 @@ const MODE_BLOCKED_TIERS: Record<DrillMode, string[]> = {
   occasion: [],
   subService: ["basic"],
   channel: ["basic"],
+  weekday: ["basic"],
+  groupSize: ["basic"],
+  discount: ["basic", "professional"],
+  guestType: ["basic", "professional"],
 };
 
 const eur = (n: number) => n.toFixed(2);
@@ -71,8 +77,14 @@ const DrillDownPanel = () => {
     null,
   );
 
-  const end = useMemo(() => new Date(), []);
-  const start = useMemo(() => subDays(end, Number(rangeKey)), [end, rangeKey]);
+  const period = useReportsPeriod();
+  const dateLocale = useDateLocale();
+  const now = useMemo(() => new Date(), []);
+  const end = period?.end ?? now;
+  const start = useMemo(
+    () => period?.start ?? subDays(now, Number(rangeKey)),
+    [period?.start, now, rangeKey],
+  );
   const startStr = format(start, "yyyy-MM-dd");
   const endStr = format(end, "yyyy-MM-dd");
 
@@ -83,14 +95,21 @@ const DrillDownPanel = () => {
       let rq = supabase
         .from("reservations")
         .select(
-          "id, date, start_time, reservation_type, status, guests_count, price_eur, original_price_eur, room_type, created_by, special_occasion_id, selected_sub_services, guest_name",
+          "id, date, start_time, reservation_type, status, guests_count, price_eur, original_price_eur, room_type, created_by, special_occasion_id, selected_sub_services, guest_name, guest_email, discount_code_id",
         )
         .eq("tenant_id", tenantId!)
         .gte("date", startStr)
         .lte("date", endStr)
         .order("date");
       if (selectedSiteId) rq = rq.eq("site_id", selectedSiteId);
-      const [res, resources, occasions] = await Promise.all([
+      let prior = supabase
+        .from("reservations")
+        .select("guest_email")
+        .eq("tenant_id", tenantId!)
+        .lt("date", startStr)
+        .limit(5000);
+      if (selectedSiteId) prior = prior.eq("site_id", selectedSiteId);
+      const [res, resources, occasions, codes, priorRes] = await Promise.all([
         rq,
         supabase
           .from("resources")
@@ -100,6 +119,11 @@ const DrillDownPanel = () => {
           .from("special_occasions")
           .select("id, name, resource_id, capacity")
           .eq("tenant_id", tenantId!),
+        supabase
+          .from("discount_codes")
+          .select("id, code")
+          .eq("tenant_id", tenantId!),
+        prior,
       ]);
       if (res.error) throw res.error;
       const ctx: DrillContext = {
@@ -112,6 +136,16 @@ const DrillDownPanel = () => {
             { name: o.name, resource_id: o.resource_id, capacity: o.capacity },
           ]),
         ),
+        discountCodes: Object.fromEntries(
+          (codes.data ?? []).map((c) => [c.id, c.code]),
+        ),
+        priorGuests: priorRes.error
+          ? undefined
+          : new Set(
+              (priorRes.data ?? []).map((r) =>
+                (r.guest_email ?? "").toLowerCase(),
+              ),
+            ),
       };
       return { rows: (res.data ?? []) as DrillReservation[], ctx };
     },
@@ -142,6 +176,14 @@ const DrillDownPanel = () => {
       return row.key === "public"
         ? t("an.channel.public")
         : t("an.channel.staff");
+    if (mode === "guestType")
+      return row.key === "new" ? t("dd.new") : t("dd.returning");
+    if (mode === "discount" && row.key === "none") return t("dd.noCode");
+    if (mode === "weekday")
+      // 2024-01-01 is a Monday; keys run 1 (Monday) to 7 (Sunday).
+      return format(new Date(2024, 0, Number(row.key)), "EEEE", {
+        locale: dateLocale,
+      });
     return row.label || t("dd.unassigned");
   };
 
@@ -153,7 +195,9 @@ const DrillDownPanel = () => {
     group ? group.label : null,
   ].filter(Boolean) as string[];
 
-  const periodLabel = `${format(start, "d.M.yyyy")} to ${format(end, "d.M.yyyy")}`;
+  const periodLabel =
+    period?.label ??
+    `${format(start, "d.M.yyyy")} to ${format(end, "d.M.yyyy")}`;
 
   const buildTable = (): {
     head: string[];
@@ -280,28 +324,32 @@ const DrillDownPanel = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1">
-            <Label htmlFor="dd-range">{t("an.range")}</Label>
-            <Select
-              value={rangeKey}
-              onValueChange={(v) => setRangeKey(v as RangeKey)}
-            >
-              <SelectTrigger id="dd-range" className="w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="30">{t("an.last30")}</SelectItem>
-                <SelectItem value="90">{t("an.last90")}</SelectItem>
-                <SelectItem value="365">{t("an.last365")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {!period && (
+            <div className="space-y-1">
+              <Label htmlFor="dd-range">{t("an.range")}</Label>
+              <Select
+                value={rangeKey}
+                onValueChange={(v) => setRangeKey(v as RangeKey)}
+              >
+                <SelectTrigger id="dd-range" className="w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">{t("an.last30")}</SelectItem>
+                  <SelectItem value="90">{t("an.last90")}</SelectItem>
+                  <SelectItem value="365">{t("an.last365")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="ml-auto flex gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={handleCsv}
-              disabled={modeLocked || table.body.length === 0}
+              disabled={
+                modeLocked || isGated("basic") || table.body.length === 0
+              }
             >
               <Download className="mr-2 h-4 w-4" aria-hidden />
               {t("dd.csv")}
@@ -310,7 +358,9 @@ const DrillDownPanel = () => {
               variant="outline"
               size="sm"
               onClick={handlePdf}
-              disabled={modeLocked || table.body.length === 0}
+              disabled={
+                modeLocked || isGated("basic") || table.body.length === 0
+              }
             >
               <FileText className="mr-2 h-4 w-4" aria-hidden />
               {t("an.exportPdf")}

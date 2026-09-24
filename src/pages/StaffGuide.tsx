@@ -794,6 +794,10 @@ const guideContent: Record<Language, GuideContent> = {
         mockupId: "reports",
         title: "5. Reports",
         steps: [
+          "Pick the period once at the top of Reports. Every section uses it.",
+          "Drill-down by resource: choose Group by (resource, product, tour, channel, weekday, group size, discount code, new or returning guests), click a service, then a row, to reach the bookings behind it.",
+          "Download CSV or PDF on any drill-down level. The file name shows the grouping and period.",
+          "Print whole page prints every section with a header showing your business and period. Print this section prints one card only.",
           "Select a time period: Week, Month, Quarter, Half-year, Year, or custom range.",
           "Filter by invoicing status (all, invoiced, not invoiced).",
           "KPIs: invoiced, not invoiced, total, room revenue, breakfast revenue.",
@@ -1178,6 +1182,10 @@ const guideContent: Record<Language, GuideContent> = {
         mockupId: "reports",
         title: "5. Raportit",
         steps: [
+          "Valitse aikaväli kerran Raporttien yläosasta. Kaikki osiot käyttävät sitä.",
+          "Porautuminen resursseittain: valitse Ryhmittely (resurssi, tuote, kierros, kanava, viikonpäivä, ryhmän koko, alennuskoodi, uudet tai palaavat vieraat), klikkaa palvelua ja sitten riviä nähdäksesi varaukset.",
+          "Lataa CSV tai PDF millä tahansa tasolla. Tiedostonimessä näkyy ryhmittely ja aikaväli.",
+          "Tulosta koko sivu tulostaa kaikki osiot otsikolla, jossa näkyy yritys ja aikaväli. Tulosta tämä osio tulostaa vain yhden kortin.",
           "Valitse aikaväli: Viikko, Kuukausi, Neljännes, Puoli vuotta, Vuosi tai oma aikaväli.",
           "Suodata laskutustilan mukaan (kaikki, laskutettu, ei laskutettu).",
           "Tunnusluvut: laskutettu, ei laskutettu, yhteensä, huonetulo, aamupalatulo.",
@@ -1524,6 +1532,10 @@ const guideContent: Record<Language, GuideContent> = {
         mockupId: "reports",
         title: "5. Rapporter",
         steps: [
+          "Välj period en gång överst i Rapporter. Alla avsnitt använder den.",
+          "Detaljvy per resurs: välj Gruppera efter, klicka på en tjänst och sedan en rad för att se bokningarna bakom.",
+          "Ladda ner CSV eller PDF på varje nivå.",
+          "Skriv ut hela sidan, eller Skriv ut detta avsnitt för ett enskilt kort.",
           "Välj tidsperiod: Vecka, Månad, Kvartal, Halvår, År eller anpassat intervall.",
           "Filtrera efter faktureringsstatus (alla, fakturerade, ej fakturerade).",
           "Nyckeltal: fakturerat, ej fakturerat, totalt, rumsintäkter, frukostintäkter.",

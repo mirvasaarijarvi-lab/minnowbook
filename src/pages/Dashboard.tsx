@@ -37,6 +37,10 @@ import PeakHoursPanel from "@/components/dashboard/PeakHoursPanel";
 import BusiestWeekdayPanel from "@/components/dashboard/BusiestWeekdayPanel";
 import BookingChannelPanel from "@/components/dashboard/BookingChannelPanel";
 import DrillDownPanel from "@/components/dashboard/DrillDownPanel";
+import {
+  ReportsWorkspace,
+  PrintSection,
+} from "@/components/dashboard/ReportsWorkspace";
 import CrossBookingAuditPanel from "@/components/dashboard/CrossBookingAuditPanel";
 import RescheduleRequestsPanel from "@/components/dashboard/RescheduleRequestsPanel";
 import AdminPanel from "@/components/dashboard/AdminPanel";
@@ -314,18 +318,34 @@ const Dashboard = () => {
     kitchen: gatedView("reservations", <KitchenOrdersPanel />),
     reports: gatedView(
       "reports",
-      <div className="space-y-6">
-        <OperationsSheetPanel />
-        <ForecastPanel />
-        <ReportsPanel />
-        <DrillDownPanel />
+      <ReportsWorkspace>
+        <PrintSection id="operations">
+          <OperationsSheetPanel />
+        </PrintSection>
+        <PrintSection id="forecast">
+          <ForecastPanel />
+        </PrintSection>
+        <PrintSection id="overview">
+          <ReportsPanel />
+        </PrintSection>
+        <PrintSection id="drilldown">
+          <DrillDownPanel />
+        </PrintSection>
         <div className="grid gap-6 lg:grid-cols-2">
-          <PeakHoursPanel />
-          <BusiestWeekdayPanel />
+          <PrintSection id="peak-hours">
+            <PeakHoursPanel />
+          </PrintSection>
+          <PrintSection id="weekdays">
+            <BusiestWeekdayPanel />
+          </PrintSection>
         </div>
-        <BookingChannelPanel />
-        <CrossBookingAuditPanel />
-      </div>,
+        <PrintSection id="channel">
+          <BookingChannelPanel />
+        </PrintSection>
+        <PrintSection id="cross-booking">
+          <CrossBookingAuditPanel />
+        </PrintSection>
+      </ReportsWorkspace>,
     ),
     settings: gatedView("settings", <SettingsPanel />),
     admin: gatedView("admin", <AdminPanel />),

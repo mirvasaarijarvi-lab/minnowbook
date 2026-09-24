@@ -6,7 +6,15 @@
  * then its room type, then falls back to "unassigned".
  */
 
-export type DrillMode = "resource" | "subService" | "occasion" | "channel";
+export type DrillMode =
+  | "resource"
+  | "subService"
+  | "occasion"
+  | "channel"
+  | "discount"
+  | "guestType"
+  | "weekday"
+  | "groupSize";
 
 export interface DrillReservation {
   id: string;
@@ -22,6 +30,8 @@ export interface DrillReservation {
   special_occasion_id?: string | null;
   selected_sub_services?: unknown;
   guest_name?: string;
+  guest_email?: string | null;
+  discount_code_id?: string | null;
 }
 
 export interface DrillContext {
@@ -30,9 +40,60 @@ export interface DrillContext {
     string,
     { name: string; resource_id: string | null; capacity: number }
   >;
+  discountCodes?: Record<string, string>;
+  /** Lowercased emails that booked before the report period. */
+  priorGuests?: Set<string>;
 }
 
 export const UNASSIGNED = "__unassigned__";
+
+/** Bucket for modes that put each booking in exactly one group. */
+export function simpleKeyOf(
+  r: DrillReservation,
+  mode: DrillMode,
+  ctx: DrillContext,
+): { key: string; label: string } | null {
+  switch (mode) {
+    case "resource":
+      return resourceKeyOf(r, ctx);
+    case "channel":
+      return r.created_by
+        ? { key: "staff", label: "staff" }
+        : { key: "public", label: "public" };
+    case "occasion":
+      return r.special_occasion_id
+        ? {
+            key: r.special_occasion_id,
+            label: ctx.occasions[r.special_occasion_id]?.name ?? "",
+          }
+        : null;
+    case "discount": {
+      const id = r.discount_code_id;
+      return id
+        ? { key: id, label: ctx.discountCodes?.[id] ?? "" }
+        : { key: "none", label: "none" };
+    }
+    case "guestType": {
+      const email = (r.guest_email ?? "").toLowerCase();
+      return ctx.priorGuests?.has(email)
+        ? { key: "returning", label: "returning" }
+        : { key: "new", label: "new" };
+    }
+    case "weekday": {
+      const d = new Date(`${r.date}T00:00:00`).getDay();
+      const key = String(((d + 6) % 7) + 1);
+      return { key, label: key };
+    }
+    case "groupSize": {
+      const g = num(r.guests_count);
+      const key =
+        g <= 2 ? "1 to 2" : g <= 5 ? "3 to 5" : g <= 10 ? "6 to 10" : "11+";
+      return { key, label: key };
+    }
+    default:
+      return null;
+  }
+}
 
 export interface DrillRow {
   key: string;
@@ -122,17 +183,12 @@ export function groupRows(
       add(get(r.reservation_type, r.reservation_type), r);
       continue;
     }
-    if (mode === "resource") {
-      const { key, label } = resourceKeyOf(r, ctx);
-      add(get(key, label), r);
-    } else if (mode === "channel") {
-      const key = r.created_by ? "staff" : "public";
-      add(get(key, key), r);
-    } else if (mode === "occasion") {
-      if (!r.special_occasion_id) continue;
-      const occ = ctx.occasions[r.special_occasion_id];
-      const row = get(r.special_occasion_id, occ?.name ?? "");
-      row.capacity = occ?.capacity;
+    if (mode !== "subService") {
+      const k = simpleKeyOf(r, mode, ctx);
+      if (!k) continue;
+      const row = get(k.key, k.label);
+      if (mode === "occasion" && r.special_occasion_id)
+        row.capacity = ctx.occasions[r.special_occasion_id]?.capacity;
       add(row, r);
     } else {
       for (const s of subServicesOf(r)) {
@@ -156,10 +212,8 @@ export function filterPath(
   return rows.filter((r) => {
     if (type && r.reservation_type !== type) return false;
     if (!groupKey) return true;
-    if (mode === "resource") return resourceKeyOf(r, ctx).key === groupKey;
-    if (mode === "channel")
-      return (r.created_by ? "staff" : "public") === groupKey;
-    if (mode === "occasion") return r.special_occasion_id === groupKey;
+    if (mode !== "subService")
+      return simpleKeyOf(r, mode, ctx)?.key === groupKey;
     return subServicesOf(r).some((s) => s.key === groupKey);
   });
 }
@@ -169,7 +223,9 @@ export function availableModes(
   rows: DrillReservation[],
   ctx: DrillContext,
 ): DrillMode[] {
-  const modes: DrillMode[] = ["resource", "channel"];
+  const modes: DrillMode[] = ["resource", "channel", "weekday", "groupSize"];
+  if (rows.some((r) => r.discount_code_id)) modes.push("discount");
+  if (ctx.priorGuests) modes.push("guestType");
   if (rows.some((r) => subServicesOf(r).length > 0)) modes.push("subService");
   if (
     Object.keys(ctx.occasions).length > 0 &&
