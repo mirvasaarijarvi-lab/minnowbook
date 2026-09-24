@@ -37,6 +37,8 @@ export interface OfferPriceLeg {
   space?: string | null;
   /** Resource name backing this leg, when one was found. */
   resourceName?: string | null;
+  /** Resource id backing this leg, saved on the created reservation. */
+  resourceId?: string | null;
   price: number | null;
   reason: OfferPriceReason;
   candidates: Array<{ name: string; price: number }>;

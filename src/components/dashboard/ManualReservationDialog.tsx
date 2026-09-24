@@ -243,6 +243,7 @@ const ManualReservationDialog = ({
         .insert({
           tenant_id: tenantId,
           site_id: resolvedSiteId,
+          resource_id: selectedResourceId || null,
           guest_name: form.guest_name.trim(),
           guest_email: form.guest_email.trim(),
           guest_phone: form.guest_phone.trim() || null,

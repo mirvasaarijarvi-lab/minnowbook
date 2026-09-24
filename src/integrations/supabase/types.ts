@@ -186,6 +186,7 @@ export type Database = {
           pricing_type: string | null
           reminder_email_sent_at: string | null
           reservation_type: string
+          resource_id: string | null
           restaurant_sub_type: string | null
           room_type: string | null
           selected_sub_services: Json | null
@@ -248,6 +249,7 @@ export type Database = {
           pricing_type?: string | null
           reminder_email_sent_at?: string | null
           reservation_type: string
+          resource_id?: string | null
           restaurant_sub_type?: string | null
           room_type?: string | null
           selected_sub_services?: Json | null
@@ -310,6 +312,7 @@ export type Database = {
           pricing_type?: string | null
           reminder_email_sent_at?: string | null
           reservation_type?: string
+          resource_id?: string | null
           restaurant_sub_type?: string | null
           room_type?: string | null
           selected_sub_services?: Json | null
@@ -1618,6 +1621,7 @@ export type Database = {
           pricing_type: string | null
           reminder_email_sent_at: string | null
           reservation_type: string
+          resource_id: string | null
           restaurant_sub_type: string | null
           room_type: string | null
           selected_sub_services: Json | null
@@ -1680,6 +1684,7 @@ export type Database = {
           pricing_type?: string | null
           reminder_email_sent_at?: string | null
           reservation_type: string
+          resource_id?: string | null
           restaurant_sub_type?: string | null
           room_type?: string | null
           selected_sub_services?: Json | null
@@ -1742,6 +1747,7 @@ export type Database = {
           pricing_type?: string | null
           reminder_email_sent_at?: string | null
           reservation_type?: string
+          resource_id?: string | null
           restaurant_sub_type?: string | null
           room_type?: string | null
           selected_sub_services?: Json | null
@@ -1764,6 +1770,13 @@ export type Database = {
             columns: ["discount_code_id"]
             isOneToOne: false
             referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
             referencedColumns: ["id"]
           },
           {

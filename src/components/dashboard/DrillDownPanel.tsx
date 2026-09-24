@@ -95,7 +95,7 @@ const DrillDownPanel = () => {
       let rq = supabase
         .from("reservations")
         .select(
-          "id, date, start_time, reservation_type, status, guests_count, price_eur, original_price_eur, room_type, created_by, special_occasion_id, selected_sub_services, guest_name, guest_email, discount_code_id",
+          "id, date, start_time, reservation_type, status, guests_count, price_eur, original_price_eur, room_type, resource_id, created_by, special_occasion_id, selected_sub_services, guest_name, guest_email, discount_code_id",
         )
         .eq("tenant_id", tenantId!)
         .gte("date", startStr)

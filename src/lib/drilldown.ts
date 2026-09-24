@@ -26,6 +26,7 @@ export interface DrillReservation {
   price_eur?: number | null;
   original_price_eur?: number | null;
   room_type?: string | null;
+  resource_id?: string | null;
   created_by?: string | null;
   special_occasion_id?: string | null;
   selected_sub_services?: unknown;
@@ -114,6 +115,11 @@ export function resourceKeyOf(
   r: DrillReservation,
   ctx: DrillContext,
 ): { key: string; label: string } {
+  if (r.resource_id && ctx.resourceNames[r.resource_id])
+    return {
+      key: `res:${r.resource_id}`,
+      label: ctx.resourceNames[r.resource_id],
+    };
   const occ = r.special_occasion_id
     ? ctx.occasions[r.special_occasion_id]
     : undefined;
