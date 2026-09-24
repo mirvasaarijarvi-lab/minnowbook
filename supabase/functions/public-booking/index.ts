@@ -1128,6 +1128,12 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       insertData.selected_sub_services = selected_sub_services;
     }
 
+    // Record which resource the guest booked. Only a resource that was
+    // found under this tenant above is stored, never the raw request value.
+    if (resource_id && pricingResource?.id === resource_id) {
+      insertData.resource_id = resource_id;
+    }
+
     // Wellness: compute end_time = start_time + sum(duration_min) so the
     // slot occupies the correct length on the calendar. Skipped silently
     // when start_time or services are missing (no end_time recorded).
