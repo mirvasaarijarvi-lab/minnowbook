@@ -94,6 +94,8 @@ describe("drilldown", () => {
     expect(availableModes(rows, ctx)).toEqual([
       "resource",
       "channel",
+      "weekday",
+      "groupSize",
       "subService",
       "occasion",
     ]);
