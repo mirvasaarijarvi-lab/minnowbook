@@ -5716,7 +5716,7 @@ const fi: TranslationKeys = {
     "Hotelli/majatalo, ravintola, tilat tapahtumiin sekä palvelualan ammattilaiset, kuten hierojat, parturit, kampaajat, leipurit, meikkaajat, hoitojen tarjoajat ja personal trainerit.",
   "features.reportsInsights": "Raportointi",
   "features.reportsInsightsDesc":
-    "Seuraa varauksia, käyttöasteita ja tuloja, poraudu resurssiin, tuotteeseen tai kierrokseen, lataa CSV ja PDF ja tulosta koko sivu tai yksi osio mille tahansa aikavälille. Jokainen varaus tallentuu käyttäjän valitsemaan resurssiin, joten resurssikohtaiset luvut ovat tarkkoja. Näet kapasiteetin käytön, varauksiksi muuttuneet tarjoukset ja keittiön tuotteet, ja voit jakaa minkä tahansa näkymän linkillä.",
+    "Seuraa varauksia, käyttöasteita ja tuloja, poraudu resurssiin, tuotteeseen tai kierrokseen, lataa CSV ja PDF ja tulosta koko sivu tai yksi osio mille tahansa aikavälille. Jokainen varaus tallentuu käyttäjälinkittyy varaajan valitsemaan resurssiin, joten resurssikohtaiset luvut ovat tarkkoja. Näet kapasiteetin käytön, varauksiksi muuttuneet tarjoukset ja keittiön tuotteet, ja voit jakaa minkä tahansa näkymän linkillä.",
   "features.automatedEmails": "Automaattiset sähköpostit",
   "features.automatedEmailsDesc":
     "Lähetä vahvistus-, muistutus- ja peruutussähköpostit automaattisesti.",
