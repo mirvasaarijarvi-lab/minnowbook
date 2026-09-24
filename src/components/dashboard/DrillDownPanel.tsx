@@ -347,7 +347,9 @@ const DrillDownPanel = () => {
               variant="outline"
               size="sm"
               onClick={handleCsv}
-              disabled={modeLocked || table.body.length === 0}
+              disabled={
+                modeLocked || isGated("basic") || table.body.length === 0
+              }
             >
               <Download className="mr-2 h-4 w-4" aria-hidden />
               {t("dd.csv")}
@@ -356,7 +358,9 @@ const DrillDownPanel = () => {
               variant="outline"
               size="sm"
               onClick={handlePdf}
-              disabled={modeLocked || table.body.length === 0}
+              disabled={
+                modeLocked || isGated("basic") || table.body.length === 0
+              }
             >
               <FileText className="mr-2 h-4 w-4" aria-hidden />
               {t("an.exportPdf")}

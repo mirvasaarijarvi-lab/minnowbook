@@ -3,6 +3,7 @@ import { format, parseISO, isValid } from "date-fns";
 import { Printer } from "lucide-react";
 
 import { useTenant } from "@/hooks/useTenant";
+import { useTierGate } from "@/hooks/useTierGate";
 import { useAnalyticsT } from "@/i18n/analytics";
 import {
   ReportsPeriodContext,
@@ -35,6 +36,7 @@ const PRESETS: Exclude<PeriodPreset, "custom">[] = [
 export function ReportsWorkspace({ children }: { children: ReactNode }) {
   const t = useAnalyticsT();
   const { tenant } = useTenant();
+  const canPrint = !useTierGate().isGated("basic");
   const [preset, setPresetState] = useState<PeriodPreset>("month");
   const [range, setRange] = useState(() => rangeForPreset("month"));
 
@@ -125,10 +127,12 @@ export function ReportsWorkspace({ children }: { children: ReactNode }) {
             />
           </div>
           <p className="text-xs text-muted-foreground">{t("rp.help")}</p>
-          <Button className="ml-auto" onClick={() => printReports()}>
-            <Printer className="mr-2 h-4 w-4" aria-hidden />
-            {t("rp.printAll")}
-          </Button>
+          {canPrint && (
+            <Button className="ml-auto" onClick={() => printReports()}>
+              <Printer className="mr-2 h-4 w-4" aria-hidden />
+              {t("rp.printAll")}
+            </Button>
+          )}
         </div>
 
         <div className="print-only mb-4 border-b pb-2">
@@ -157,19 +161,22 @@ export function PrintSection({
 }) {
   const t = useAnalyticsT();
   const period = useReportsPeriod();
+  const canPrint = !useTierGate().isGated("basic");
   return (
     <section data-print-section={id} className="print-section relative">
-      <div className="print-hide mb-1 flex justify-end">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => printReports(id)}
-          aria-label={t("rp.printSection")}
-        >
-          <Printer className="mr-1 h-4 w-4" aria-hidden />
-          {t("rp.printSection")}
-        </Button>
-      </div>
+      {canPrint && (
+        <div className="print-hide mb-1 flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => printReports(id)}
+            aria-label={t("rp.printSection")}
+          >
+            <Printer className="mr-1 h-4 w-4" aria-hidden />
+            {t("rp.printSection")}
+          </Button>
+        </div>
+      )}
       {period && (
         <p className="print-only text-xs">
           {t("rp.period")}: {period.label}
