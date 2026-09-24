@@ -26,6 +26,7 @@ export interface DrillReservation {
   price_eur?: number | null;
   original_price_eur?: number | null;
   room_type?: string | null;
+  resource_id?: string | null;
   created_by?: string | null;
   special_occasion_id?: string | null;
   selected_sub_services?: unknown;

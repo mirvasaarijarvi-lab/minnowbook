@@ -258,6 +258,7 @@ const OffersManager = () => {
         reservation_type: mainType,
         space: offer.event_space,
         resourceName: mainPriceResource?.name ?? null,
+        resourceId: mainPriceResource?.id ?? null,
         ...mainDesc,
       },
     ];
@@ -275,6 +276,7 @@ const OffersManager = () => {
         reservation_type: resType,
         space: lr.space ?? null,
         resourceName: resource?.name ?? null,
+        resourceId: resource?.id ?? null,
         ...describeOfferReservationPrice({
           reservation_type: resType,
           resource,
@@ -315,6 +317,8 @@ const OffersManager = () => {
           guests_count: offer.guests_count,
           event_type: offer.event_type || null,
           room_type: offer.event_space,
+          resource_id:
+            plan.legs.find((l) => l.key === "main")?.resourceId ?? null,
           special_requests: offer.special_requests || null,
           staff_notes: "Offer to Reservation",
           language: offer.language || "en",
@@ -362,6 +366,8 @@ const OffersManager = () => {
             guests_count: lr.guests_count || offer.guests_count,
             event_type: offer.event_type || null,
             room_type: lr.space || null,
+            resource_id:
+              plan.legs.find((l) => l.key === key)?.resourceId ?? null,
             special_requests: lr.special_requests
               ? `Cross-reservation via offer\n${lr.special_requests}`
               : "Cross-reservation via offer",
