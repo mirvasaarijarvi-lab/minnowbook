@@ -209,6 +209,22 @@ export async function handleSendOfferEmailRequest(req: Request): Promise<Respons
     if (!recipientEmail || !emailSubject || !messageBody) {
       return jsonResponse({ error: "Missing required fields" }, 400);
     }
+    if (emailSubject.length > 200 || /[\r\n]/.test(emailSubject) || messageBody.length > 20000) {
+      return jsonResponse({ error: "Invalid email content" }, 400);
+    }
+
+    // SECURITY: offers may only be emailed to the guest of an offer that
+    // belongs to this business, never to an arbitrary address.
+    const { data: offerMatch } = await supabaseAdmin
+      .from("offers")
+      .select("id")
+      .eq("tenant_id", tenantUser.tenant_id)
+      .ilike("guest_email", recipientEmail)
+      .limit(1)
+      .maybeSingle();
+    if (!offerMatch) {
+      return jsonResponse({ error: "Recipient must be the guest of one of your offers" }, 403);
+    }
 
     const { data: tenantSettings } = await supabaseAdmin
       .from("tenant_settings")
@@ -234,7 +250,23 @@ export async function handleSendOfferEmailRequest(req: Request): Promise<Respons
       const filePath = assertSafeStoragePath(
         `${safeTenantId}/offers/${safeUserId}/${Date.now()}-${safeFilename}`
       );
-      const pdfBytes = decodeBase64(pdfBase64);
+      const MAX_PDF_BYTES = 10 * 1024 * 1024;
+      if (pdfBase64.length > Math.ceil((MAX_PDF_BYTES * 4) / 3) + 4) {
+        return jsonResponse({ error: "PDF too large" }, 413);
+      }
+      let pdfBytes: Uint8Array;
+      try {
+        pdfBytes = decodeBase64(pdfBase64);
+      } catch {
+        return jsonResponse({ error: "Invalid PDF" }, 400);
+      }
+      const isPdf =
+        pdfBytes.length >= 5 &&
+        pdfBytes[0] === 0x25 && pdfBytes[1] === 0x50 && pdfBytes[2] === 0x44 &&
+        pdfBytes[3] === 0x46 && pdfBytes[4] === 0x2d; // "%PDF-"
+      if (!isPdf || pdfBytes.length > MAX_PDF_BYTES) {
+        return jsonResponse({ error: "Invalid PDF" }, 400);
+      }
 
       const { error: uploadError } = await supabaseAdmin.storage
         .from(OFFER_BUCKET)
