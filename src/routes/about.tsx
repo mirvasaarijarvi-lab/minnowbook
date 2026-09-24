@@ -6,6 +6,8 @@ export const Route = createFileRoute("/about")({
   component: About,
   head: () =>
     routeHead({
+      image: "https://mimmobook.com/og-share.jpg",
+      imageAlt: "About MimmoBook booking software",
       title: "About MimmoBook, Our Mission and Values",
       description:
         "Learn about MimmoBook, the reservation platform for restaurants, venues, hotels, guesthouses and wellness pros. Our mission: simpler bookings for all.",

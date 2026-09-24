@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
       ogTitle: "MimmoBook, Reservations for Hospitality & Wellness",
       ogDescription:
         "Cloud reservations for restaurants, venues, hotels, guesthouses, wellness and service businesses. Multi-site with branded booking pages.",
-      image: "https://mimmobook.com/og-image.png",
+      image: "https://mimmobook.com/og-share.jpg",
       imageAlt: "MimmoBook booking software for hospitality and service pros",
     }),
 });
