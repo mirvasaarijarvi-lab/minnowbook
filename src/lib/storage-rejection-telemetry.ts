@@ -57,39 +57,51 @@ function forward(event: RejectedStoragePathEvent): void {
     tenantId: event.tenantId,
   });
 
-  // Prefer sendBeacon when the page is unloading so the event still
-  // ships during navigations. Fall back to fetch with keepalive.
-  try {
-    if (
-      typeof navigator !== "undefined" &&
-      typeof navigator.sendBeacon === "function"
-    ) {
-      const blob = new Blob([body], { type: "application/json" });
-      if (navigator.sendBeacon(ENDPOINT, blob)) return;
+  // Tenant-attributed events must prove membership with the user's
+  // session token, which sendBeacon cannot carry, so they use fetch.
+  void (async () => {
+    let token: string | null = null;
+    if (event.tenantId) {
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data } = await supabase.auth.getSession();
+        token = data.session?.access_token ?? null;
+      } catch {
+        token = null;
+      }
     }
-  } catch {
-    // Ignore, fall through to fetch.
-  }
 
-  try {
-    void fetch(ENDPOINT, {
-      method: "POST",
-      headers: {
+    if (!token) {
+      try {
+        if (
+          typeof navigator !== "undefined" &&
+          typeof navigator.sendBeacon === "function"
+        ) {
+          const blob = new Blob([body], { type: "application/json" });
+          if (navigator.sendBeacon(ENDPOINT, blob)) return;
+        }
+      } catch {
+        // Ignore, fall through to fetch.
+      }
+    }
+
+    try {
+      const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        // Edge function is public (verify_jwt = false in defaults)
-        // but we still send the publishable key so platform-level
-        // request gating treats it as a known client.
         apikey: ANON_KEY,
-      },
-      body,
-      keepalive: true,
-      credentials: "omit",
-    }).catch(() => {
-      // Swallow. Logging here would risk feedback loops.
-    });
-  } catch {
-    // Same: never let telemetry break the calling page.
-  }
+      };
+      if (token) headers.Authorization = `Bearer ${token}`;
+      await fetch(ENDPOINT, {
+        method: "POST",
+        headers,
+        body,
+        keepalive: true,
+        credentials: "omit",
+      });
+    } catch {
+      // Never let telemetry break the calling page.
+    }
+  })();
 }
 
 let installed = false;

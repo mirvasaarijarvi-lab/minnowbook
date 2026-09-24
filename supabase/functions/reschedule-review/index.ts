@@ -133,6 +133,11 @@ export async function handleRescheduleReviewRequest(req: Request): Promise<Respo
     if (!membership || membership.is_approved === false || !allowedRoles.includes(String(membership.role))) {
       return json({ error: "Insufficient permissions" }, 403);
     }
+    // Only owners and admins may put their own words into a guest email
+    // sent in the venue's name. Staff decisions still go out with the
+    // fixed template text, without the free-text note.
+    const canWriteGuestNote = ["owner", "admin", "superadmin"].includes(String(membership.role));
+    const guestNote = canWriteGuestNote ? staffNote : null;
 
     const { data: reservation } = await adminClient
       .from("reservations")

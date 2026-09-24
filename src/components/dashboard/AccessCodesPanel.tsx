@@ -56,10 +56,13 @@ interface AccessCode {
 }
 
 function generateCode(): string {
+  // 32 symbols divide 256 evenly, so byte % 32 is unbiased.
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const bytes = new Uint8Array(12);
+  crypto.getRandomValues(bytes);
   let code = "BETA-";
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  for (let i = 0; i < bytes.length; i++) {
+    code += chars.charAt(bytes[i] % chars.length);
   }
   return code;
 }
