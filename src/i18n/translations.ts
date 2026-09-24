@@ -7088,7 +7088,7 @@ const fi: TranslationKeys = {
   "support.faqC4":
     "K: Mitä eroa on tekoälychatbotilla ja prioriteettituella? A: Kaikkiin paketteihin sisältyy MimmoAid, 24/7 toimiva tekoälychatbottimme. Liiketoimintapakettiin lisätään alustalla esitettyihin tukipyyntöihin vuorokauden vastaustakuu.",
   "support.faqC5":
-    "Raportit: avaa Raportit, valitse aikaväli ylhäältä ja käytä Porautuminen resursseittain: palvelusta resurssiin, tuotteeseen tai kierrokseen ja sen varauksiin. Jokaisen tason voi ladata CSV- tai PDF-muodossa. Tulosta koko sivu tai minkä tahansa kortin Tulosta tämä osio. Jokainen varaus tallentuu vieraan tai henkilökunnan valitsemaan resurssiin, myös tarjouksista luodut. Vanhemmat varaukset, joita ei voitu yhdistää yhteen resurssiin, näkyvät kohdassa Ei resurssia.",
+    "Raportit: avaa Raportit, valitse aikaväli ylhäältä ja käytä Porautuminen resursseittain: palvelusta resurssiin, tuotteeseen tai kierrokseen ja sen varauksiin. Jokaisen tason voi ladata CSV- tai PDF-muodossa. Tulosta koko sivu tai minkä tahansa kortin Tulosta tämä osio. Jokainen varaus tallentuu vieraan tai henkilökunnan valitsemaan resurssiin, myös tarjouksista luodut. Vanhemmat varaukset, joita ei voitu yhdistää yhteen resurssiin, näkyvät kohdassa Ei liitetty resurssiin.",
   "support.catBasics": "Perusteet",
   "support.catReservations": "Varaukset",
   "support.catCommunication": "Viestintä",
@@ -9980,7 +9980,7 @@ const sv: TranslationKeys = {
   "support.faqC4":
     "F: Vad är skillnaden mellan AI-chatbot och prioriterad support? A: Alla planer inkluderar MimmoAid, vår AI-chatbot som är öppen dygnet runt. Affärsplanen lägger till möjlighet för supportförfrågningar som ställs på plattformen med garanterat 24-timmarssvar.",
   "support.faqC5":
-    "Rapporter: öppna Rapporter, välj period överst och använd Detaljvy per resurs för att gå från en tjänst till en resurs, produkt eller tur och vidare till bokningarna. Varje nivå laddas ner som CSV eller PDF. Skriv ut hela sidan eller Skriv ut detta avsnitt på valfritt kort. Varje bokning sparas med resursen gästen eller personalen valde, även bokningar från offerter. Äldre bokningar som inte kunde kopplas till en resurs visas som Ingen resurs.",
+    "Rapporter: öppna Rapporter, välj period överst och använd Detaljvy per resurs för att gå från en tjänst till en resurs, produkt eller tur och vidare till bokningarna. Varje nivå laddas ner som CSV eller PDF. Skriv ut hela sidan eller Skriv ut detta avsnitt på valfritt kort. Varje bokning sparas med resursen gästen eller personalen valde, även bokningar från offerter. Äldre bokningar som inte kunde kopplas till en resurs visas som Inte kopplad till en resurs.",
   "support.catBasics": "Grunder",
   "support.catReservations": "Bokningar",
   "support.catCommunication": "Kommunikation",

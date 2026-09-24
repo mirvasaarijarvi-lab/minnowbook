@@ -1185,7 +1185,7 @@ const guideContent: Record<Language, GuideContent> = {
         steps: [
           "Valitse aikaväli kerran Raporttien yläosasta. Kaikki osiot käyttävät sitä.",
           "Porautuminen resursseittain: valitse Ryhmittely (resurssi, tuote, kierros, kanava, viikonpäivä, ryhmän koko, alennuskoodi, uudet tai palaavat vieraat), klikkaa palvelua ja sitten riviä nähdäksesi varaukset.",
-          "Jokainen varaus tallentuu resurssiinsa: vieraan valitsemaan, käsin tehdyssä varauksessa valitsemaasi tai tarjouksen tilasta haettuun. Siksi resurssikohtaiset luvut ovat tarkkoja. Vanhemmat yhdistämättömät varaukset näkyvät kohdassa Ei resurssia.",
+          "Jokainen varaus tallentuu resurssiinsa: vieraan valitsemaan, käsin tehdyssä varauksessa valitsemaasi tai tarjouksen tilasta haettuun. Siksi resurssikohtaiset luvut ovat tarkkoja. Vanhemmat yhdistämättömät varaukset näkyvät kohdassa Ei liitetty resurssiin.",
           "Lataa CSV tai PDF millä tahansa tasolla. Tiedostonimessä näkyy ryhmittely ja aikaväli.",
           "Tulosta koko sivu tulostaa kaikki osiot otsikolla, jossa näkyy yritys ja aikaväli. Tulosta tämä osio tulostaa vain yhden kortin.",
           "Valitse aikaväli: Viikko, Kuukausi, Neljännes, Puoli vuotta, Vuosi tai oma aikaväli.",
@@ -1536,7 +1536,7 @@ const guideContent: Record<Language, GuideContent> = {
         steps: [
           "Välj period en gång överst i Rapporter. Alla avsnitt använder den.",
           "Detaljvy per resurs: välj Gruppera efter, klicka på en tjänst och sedan en rad för att se bokningarna bakom.",
-          "Varje bokning sparas med sin resurs: den gästen valde, den du väljer i en manuell bokning eller utrymmet från en offert. Därför är siffrorna per resurs exakta. Äldre bokningar utan koppling visas som Ingen resurs.",
+          "Varje bokning sparas med sin resurs: den gästen valde, den du väljer i en manuell bokning eller utrymmet från en offert. Därför är siffrorna per resurs exakta. Äldre bokningar utan koppling visas som Inte kopplad till en resurs.",
           "Ladda ner CSV eller PDF på varje nivå.",
           "Skriv ut hela sidan, eller Skriv ut detta avsnitt för ett enskilt kort.",
           "Välj tidsperiod: Vecka, Månad, Kvartal, Halvår, År eller anpassat intervall.",
