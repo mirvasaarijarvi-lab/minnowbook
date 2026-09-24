@@ -67,6 +67,26 @@ describe("drilldown", () => {
       expect.objectContaining({ key: "s1", revenue: 10, guests: 2 }),
     ]);
   });
+  it("groups by weekday, group size and new vs returning", () => {
+    const withPrior = { ...ctx, priorGuests: new Set(["a@x.test"]) };
+    const rs = [
+      { ...rows[0], guest_email: "A@x.test" },
+      { ...rows[1], guest_email: "b@x.test" },
+    ];
+    expect(
+      groupRows(rs, "guestType", 1, withPrior)
+        .map((r) => r.key)
+        .sort(),
+    ).toEqual(["new", "returning"]);
+    expect(
+      groupRows(rows, "weekday", 1, ctx).find((r) => r.key === "2")?.bookings,
+    ).toBe(1);
+    expect(
+      groupRows(rows, "groupSize", 1, ctx)
+        .map((r) => r.key)
+        .sort(),
+    ).toEqual(["1 to 2", "3 to 5"]);
+  });
   it("filters a path and lists modes with data", () => {
     expect(
       filterPath(rows, "channel", "sauna", "staff", ctx).map((r) => r.id),

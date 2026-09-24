@@ -161,7 +161,8 @@ export function filterPath(
   return rows.filter((r) => {
     if (type && r.reservation_type !== type) return false;
     if (!groupKey) return true;
-    if (mode !== "subService") return simpleKeyOf(r, mode, ctx)?.key === groupKey;
+    if (mode !== "subService")
+      return simpleKeyOf(r, mode, ctx)?.key === groupKey;
     return subServicesOf(r).some((s) => s.key === groupKey);
   });
 }

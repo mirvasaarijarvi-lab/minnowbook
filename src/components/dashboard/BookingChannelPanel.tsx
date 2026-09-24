@@ -171,23 +171,23 @@ const BookingChannelPanel = () => {
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           {!period && (
-<div className="space-y-1">
-            <Label className="text-xs">{t("an.range")}</Label>
-            <Select
-              value={rangeKey}
-              onValueChange={(v) => setRangeKey(v as RangeKey)}
-            >
-              <SelectTrigger className="h-8 w-[170px] text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="30">{t("an.last30")}</SelectItem>
-                <SelectItem value="90">{t("an.last90")}</SelectItem>
-                <SelectItem value="365">{t("an.last365")}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-)}
+            <div className="space-y-1">
+              <Label className="text-xs">{t("an.range")}</Label>
+              <Select
+                value={rangeKey}
+                onValueChange={(v) => setRangeKey(v as RangeKey)}
+              >
+                <SelectTrigger className="h-8 w-[170px] text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="30">{t("an.last30")}</SelectItem>
+                  <SelectItem value="90">{t("an.last90")}</SelectItem>
+                  <SelectItem value="365">{t("an.last365")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <Button
             variant="outline"
             size="sm"
