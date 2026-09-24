@@ -1,67 +1,49 @@
+# Drill-down reports by resource
+
 ## Goal
+Let tenant owners and admins click from a report total down to the detail behind it, grouped by the resources they set up (saunas, rooms, tables, event spaces, sub-services, special occasions), and download each level as CSV or PDF. A drill-down only appears once the tenant has the data it needs. It is never shown empty.
 
-Make occasional slot pickers and availability calculations honor a single, explicit timezone (resource override, otherwise tenant) instead of silently using the browser's local zone. Today, `tenant_settings.timezone` exists but is never read, resources have no timezone field at all, and pickers like `ResourceOccasionalSlotsEditor` use `new Date()` / `format()` in browser local time. That means a staff member on holiday in another country can accidentally create a "Tuesday 09:00" slot that lands on Monday for the tenant.
-
-## Approach
-
-1. Add a per-resource override; fall back to tenant; final fallback to `Europe/Helsinki` (project default for the Finland-based product).
-2. Provide one tiny helper (`getEffectiveTimezone`, `tzNow`, `tzFormat`, `tzToday`, `tzDayOfWeek`) so every caller goes through the same code path. No `date-fns-tz` style date-math acrobatics in components.
-3. Wire the helper into the places where local-time assumptions exist today and where they're about to be added: occasional slots editor, weekly opening-hours editor display, and the public booking availability resolver.
-4. Surface the effective timezone in the UI (small caption next to the pickers) so staff in a different physical zone know what they're scheduling against.
-
-## Scope
-
-### Schema
-
-- New migration: add `resources.timezone TEXT NULL` (IANA name, e.g. `Europe/Helsinki`). Null means "inherit tenant".
-- No change to `tenant_settings.timezone` — it already exists.
-- No change to `resource_availability_slots` — `slot_date` / `start_time` / `end_time` stay timezone-naive and are interpreted in the resource's effective timezone. This matches `resource_opening_hours` and avoids a destructive backfill.
-
-### New helper: `src/lib/timezone.ts`
-
-```ts
-getEffectiveTimezone({ resourceTz, tenantTz }): string  // resource ?? tenant ?? "Europe/Helsinki"
-tzToday(tz): string                                     // yyyy-MM-dd in tz
-tzNow(tz): { date: string; time: string }               // for "is this slot in the past?" checks
-tzFormat(iso, pattern, tz, locale): string              // wraps Intl
-tzDayOfWeek(iso, tz): 0..6                              // Sunday=0, used by weekly hours
+## How it works for the user
+```text
+Reports > Drill-down
+  Level 1: Service type   (Sauna | Hotel | Restaurant | Venue ...)
+  Level 2: Resource       (Sauna A, Sauna B, Room 101 ...)
+  Level 3: Product / sub-service / occasion
+  Level 4: Reservation list (date, guests, status, price)
 ```
+- Uses the date range, site and comparison period already on the Reports page.
+- A breadcrumb at the top lets you go back up. Clicking a row goes one level down.
+- "Download CSV" and "Download PDF" export the level you are looking at, with the breadcrumb path in the title and file name.
+- Resource and product names come from the tenant's own setup (custom type labels, sub-services), in EN, FI and SV.
 
-Implementation uses `Intl.DateTimeFormat` with `timeZone` option — no new dependency.
+## Drill-downs (each turns on when its data exists)
+1. **By product / resource** (default): bookings, guests, revenue, discount given, average price, cancellations. Needs at least 1 active resource.
+2. **By sub-service / add-on**: how often each extra (for example towels or breakfast) is picked and what it earns. Needs resources that have sub-services.
+3. **By special occasion or tour**: seats sold vs capacity, fill rate per seating time, revenue. Needs at least 1 special occasion. This matches the Wiurila tours setup.
+4. **Utilisation**: hours or nights booked vs open hours per resource, including blocked time. Needs opening hours.
+5. **Time pattern per resource**: weekday x hour heatmap, down to the reservations in that cell. This reuses the peak hours logic.
+6. **Booking channel per resource**: public page vs staff-created, per resource. This reuses the channel logic.
+7. **Discount code impact**: uses and revenue per code, then per resource. Needs discount codes.
+8. **Guest origin and repeat guests**: new vs returning guests per resource, and group size bands. The export shows totals only, with no guest names at the aggregate levels.
+9. **Offers to bookings**: offer conversion per event space. Needs offers.
+10. **Kitchen items**: quantity and value per menu item per resource. Needs kitchen resources.
 
-### Hook: `useEffectiveTimezone(resourceId?, tenantId)`
+Tier suggestion: Basic gets 1 and 3. Professional adds 2, 4, 5 and 6. Business gets all of them. I can change this.
 
-Reads `resources.timezone` and `tenant_settings_public.timezone` via React Query, returns the resolved IANA string + a `source: "resource" | "tenant" | "default"` flag.
+## Privacy and security
+- All queries stay tenant-scoped and site-scoped under the existing access rules. The export tenant-denial tests are extended to cover the new exports.
+- Only the reservation-list level shows guest names or emails. Only users with the report permission can see or export it.
+- CSV cells are cleaned with the existing sanitizer to block formula injection.
 
-### Files to edit
+## Technical details
+- New pure module `src/lib/drilldown.ts`: `groupBy(level)`, metrics and an availability check per drill-down, with unit tests.
+- New `DrillDownPanel.tsx` inside ReportsPanel. It keeps its state (the breadcrumb stack) in the URL search params, so a view can be shared.
+- Data: one reservations query per range, joined client-side with resources, sub-services (JSONB `selected_sub_services`), special_occasions, discount_codes, offers, kitchen_orders. Existing indexes cover tenant_id + date. If data volumes grow, I can add an RPC with SQL aggregation later.
+- Exports reuse `buildReportCsv`, `reportCsvFileName` and `buildReportPdf`.
+- Tier gating goes through `useTierGate`. Permission checks go through `usePermissions`.
+- i18n keys in EN/FI/SV, with no dashes in the copy.
+- Tests: aggregation unit tests, and new entries in EXPORT_SURFACES for the deny-case suite.
+- No database schema changes.
 
-- `src/components/dashboard/ResourceOccasionalSlotsEditor.tsx`
-  - Replace `new Date()` / `format(...)` with `tzToday` / `tzFormat`.
-  - `past_date` validation uses `tzNow` so a slot at 23:30 in Helsinki isn't rejected as past for a user in California.
-  - Render a small `text-[11px] text-muted-foreground`: "Times shown in {tz}" with a "change" link only when the resource has no override (links to a new per-resource timezone field in the resource form).
-- `src/components/dashboard/ResourceManagement.tsx`
-  - Add an optional Timezone select (IANA list via `Intl.supportedValuesOf("timeZone")`) on the resource form. Placeholder = "Inherit tenant ({tenantTz})".
-  - Persist `resources.timezone`.
-- `src/components/dashboard/ResourceOpeningHoursEditor.tsx`
-  - Use `tzFormat` for any date labels and `tzDayOfWeek` when mapping "today" to a weekday row.
-- `src/pages/PublicBooking.tsx` (availability resolver section that reads `resource_opening_hours` and blocked slots)
-  - Compute "today / current weekday / current time" via `getEffectiveTimezone` for the resource being booked, not `new Date()`.
-  - Same for the day labels shown to the guest.
-- `src/i18n/translations.ts`
-  - Add keys: `timezone.label`, `timezone.inheritTenant`, `timezone.shownIn`, `timezone.fallback` in EN / FI / SV.
-
-### Out of scope (call out, don't do)
-
-- Wiring `resource_availability_slots` into the public booking availability resolver — still the larger separate pass from the previous turn. This change makes the timezone story correct so that pass can land cleanly.
-- Per-site timezone (sites table). If a customer asks, we can layer it between resource and tenant later; the helper signature is already shaped for that.
-- Migrating historic `resource_opening_hours` rows — they remain interpreted in the (new) effective timezone, which for existing single-site Finnish tenants is identical to today's behavior.
-
-### Tests
-
-- Add `src/lib/__tests__/timezone.test.ts`: covers `tzToday` across DST boundary, `tzDayOfWeek` for `Pacific/Auckland` vs `Europe/Helsinki`, and "Inherit tenant" fallback.
-- Update `src/test/security/tenant-table-manifest.test.ts` only if column addition affects manifest snapshot (it won't — manifest tracks tables, not columns).
-
-## Risk & rollback
-
-- Migration only adds a nullable column, safe to roll forward and back.
-- All callers default to current behavior when `timezone` is null on both resource and tenant (Helsinki), so no existing tenant sees a behavior change.
+## Out of scope
+- Scheduled or emailed drill-down reports. These could be added later to the weekly report.
