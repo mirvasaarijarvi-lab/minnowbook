@@ -64,7 +64,8 @@ const en = {
   "an.mail.notSent": "Not sent",
   "an.mail.none": "No messages recorded for this booking.",
   "dd.title": "Drill-down by resource",
-  "dd.help": "Start from a service, open a resource, product or occasion, then see the bookings behind it. Each level can be downloaded.",
+  "dd.help":
+    "Start from a service, open a resource, product or occasion, then see the bookings behind it. Each level can be downloaded.",
   "dd.mode": "Group by",
   "dd.mode.resource": "Resource",
   "dd.mode.subService": "Product or add-on",
@@ -141,7 +142,8 @@ const fi: Partial<Record<AnalyticsKey, string>> = {
   "an.mail.notSent": "Ei lähetetty",
   "an.mail.none": "Tälle varaukselle ei ole kirjattu viestejä.",
   "dd.title": "Porautuminen resursseittain",
-  "dd.help": "Aloita palvelusta, avaa resurssi, tuote tai erikoistapahtuma ja katso sen varaukset. Jokaisen tason voi ladata.",
+  "dd.help":
+    "Aloita palvelusta, avaa resurssi, tuote tai erikoistapahtuma ja katso sen varaukset. Jokaisen tason voi ladata.",
   "dd.mode": "Ryhmittely",
   "dd.mode.resource": "Resurssi",
   "dd.mode.subService": "Tuote tai lisäpalvelu",
@@ -217,7 +219,8 @@ const sv: Partial<Record<AnalyticsKey, string>> = {
   "an.mail.notSent": "Inte skickat",
   "an.mail.none": "Inga meddelanden registrerade för denna bokning.",
   "dd.title": "Detaljvy per resurs",
-  "dd.help": "Börja från en tjänst, öppna en resurs, produkt eller ett evenemang och se bokningarna bakom. Varje nivå kan laddas ner.",
+  "dd.help":
+    "Börja från en tjänst, öppna en resurs, produkt eller ett evenemang och se bokningarna bakom. Varje nivå kan laddas ner.",
   "dd.mode": "Gruppera efter",
   "dd.mode.resource": "Resurs",
   "dd.mode.subService": "Produkt eller tillval",

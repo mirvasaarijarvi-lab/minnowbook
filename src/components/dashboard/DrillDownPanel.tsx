@@ -67,7 +67,9 @@ const DrillDownPanel = () => {
   const [rangeKey, setRangeKey] = useState<RangeKey>("90");
   const [mode, setMode] = useState<DrillMode>("resource");
   const [type, setType] = useState<string | null>(null);
-  const [group, setGroup] = useState<{ key: string; label: string } | null>(null);
+  const [group, setGroup] = useState<{ key: string; label: string } | null>(
+    null,
+  );
 
   const end = useMemo(() => new Date(), []);
   const start = useMemo(() => subDays(end, Number(rangeKey)), [end, rangeKey]);
@@ -90,7 +92,10 @@ const DrillDownPanel = () => {
       if (selectedSiteId) rq = rq.eq("site_id", selectedSiteId);
       const [res, resources, occasions] = await Promise.all([
         rq,
-        supabase.from("resources").select("id, name").eq("tenant_id", tenantId!),
+        supabase
+          .from("resources")
+          .select("id, name")
+          .eq("tenant_id", tenantId!),
         supabase
           .from("special_occasions")
           .select("id, name, resource_id, capacity")
@@ -131,7 +136,9 @@ const DrillDownPanel = () => {
     if (level === 0) return typeLabel(row.key);
     if (row.key === UNASSIGNED) return t("dd.unassigned");
     if (mode === "channel")
-      return row.key === "public" ? t("an.channel.public") : t("an.channel.staff");
+      return row.key === "public"
+        ? t("an.channel.public")
+        : t("an.channel.staff");
     return row.label || t("dd.unassigned");
   };
 
@@ -145,9 +152,19 @@ const DrillDownPanel = () => {
 
   const periodLabel = `${format(start, "d.M.yyyy")} to ${format(end, "d.M.yyyy")}`;
 
-  const buildTable = (): { head: string[]; body: string[][]; numeric: number[] } => {
+  const buildTable = (): {
+    head: string[];
+    body: string[][];
+    numeric: number[];
+  } => {
     if (level === 2) {
-      const head = [t("dd.date"), t("dd.time"), t("dd.status"), t("dd.guests"), t("dd.revenue")];
+      const head = [
+        t("dd.date"),
+        t("dd.time"),
+        t("dd.status"),
+        t("dd.guests"),
+        t("dd.revenue"),
+      ];
       if (canSeeGuests) head.splice(2, 0, t("dd.guest"));
       return {
         head,
@@ -188,7 +205,9 @@ const DrillDownPanel = () => {
         ];
         if (showFill)
           cells.push(
-            row.capacity ? `${Math.round((row.guests / row.capacity) * 100)}%` : "",
+            row.capacity
+              ? `${Math.round((row.guests / row.capacity) * 100)}%`
+              : "",
           );
         return cells;
       }),
@@ -200,7 +219,10 @@ const DrillDownPanel = () => {
   const filePrefix = `drilldown_${mode}`;
 
   const handleCsv = () => {
-    const csv = buildReportCsv(table.head, [[breadcrumb.join(" > ")], ...table.body]);
+    const csv = buildReportCsv(table.head, [
+      [breadcrumb.join(" > ")],
+      ...table.body,
+    ]);
     downloadReportCsv(reportCsvFileName(filePrefix, periodLabel), csv);
   };
 
@@ -208,8 +230,15 @@ const DrillDownPanel = () => {
     downloadReportPdf({
       title: t("dd.title"),
       subtitle: `${breadcrumb.join(" > ")}, ${periodLabel}`,
-      fileName: reportCsvFileName(filePrefix, periodLabel).replace(/\.csv$/, ""),
-      table: { head: table.head, body: table.body, numericColumns: table.numeric },
+      fileName: reportCsvFileName(filePrefix, periodLabel).replace(
+        /\.csv$/,
+        "",
+      ),
+      table: {
+        head: table.head,
+        body: table.body,
+        numericColumns: table.numeric,
+      },
     });
   };
 
@@ -250,7 +279,10 @@ const DrillDownPanel = () => {
           </div>
           <div className="space-y-1">
             <Label htmlFor="dd-range">{t("an.range")}</Label>
-            <Select value={rangeKey} onValueChange={(v) => setRangeKey(v as RangeKey)}>
+            <Select
+              value={rangeKey}
+              onValueChange={(v) => setRangeKey(v as RangeKey)}
+            >
               <SelectTrigger id="dd-range" className="w-44">
                 <SelectValue />
               </SelectTrigger>
@@ -262,20 +294,38 @@ const DrillDownPanel = () => {
             </Select>
           </div>
           <div className="ml-auto flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleCsv} disabled={modeLocked || table.body.length === 0}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCsv}
+              disabled={modeLocked || table.body.length === 0}
+            >
               <Download className="mr-2 h-4 w-4" aria-hidden />
               {t("dd.csv")}
             </Button>
-            <Button variant="outline" size="sm" onClick={handlePdf} disabled={modeLocked || table.body.length === 0}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePdf}
+              disabled={modeLocked || table.body.length === 0}
+            >
               <FileText className="mr-2 h-4 w-4" aria-hidden />
               {t("an.exportPdf")}
             </Button>
           </div>
         </div>
-        <nav aria-label="breadcrumb" className="flex flex-wrap items-center gap-1 text-sm">
+        <nav
+          aria-label="breadcrumb"
+          className="flex flex-wrap items-center gap-1 text-sm"
+        >
           {breadcrumb.map((crumb, i) => (
             <span key={i} className="flex items-center gap-1">
-              {i > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground" aria-hidden />}
+              {i > 0 && (
+                <ChevronRight
+                  className="h-3 w-3 text-muted-foreground"
+                  aria-hidden
+                />
+              )}
               {i < breadcrumb.length - 1 ? (
                 <button
                   type="button"
@@ -309,7 +359,12 @@ const DrillDownPanel = () => {
               <TableHeader>
                 <TableRow>
                   {table.head.map((h, i) => (
-                    <TableHead key={h} className={i > 0 && table.numeric.includes(i) ? "text-right" : ""}>
+                    <TableHead
+                      key={h}
+                      className={
+                        i > 0 && table.numeric.includes(i) ? "text-right" : ""
+                      }
+                    >
                       {h}
                     </TableHead>
                   ))}
@@ -321,7 +376,14 @@ const DrillDownPanel = () => {
                   return (
                     <TableRow key={ri}>
                       {cells.map((c, ci) => (
-                        <TableCell key={ci} className={ci > 0 && table.numeric.includes(ci) ? "text-right tabular-nums" : ""}>
+                        <TableCell
+                          key={ci}
+                          className={
+                            ci > 0 && table.numeric.includes(ci)
+                              ? "text-right tabular-nums"
+                              : ""
+                          }
+                        >
                           {ci === 0 && row ? (
                             <button
                               type="button"

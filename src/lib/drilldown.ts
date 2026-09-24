@@ -26,7 +26,10 @@ export interface DrillReservation {
 
 export interface DrillContext {
   resourceNames: Record<string, string>;
-  occasions: Record<string, { name: string; resource_id: string | null; capacity: number }>;
+  occasions: Record<
+    string,
+    { name: string; resource_id: string | null; capacity: number }
+  >;
 }
 
 export const UNASSIGNED = "__unassigned__";
@@ -43,17 +46,28 @@ export interface DrillRow {
   capacity?: number;
 }
 
-const num = (v: unknown) => (typeof v === "number" && isFinite(v) ? v : Number(v) || 0);
+const num = (v: unknown) =>
+  typeof v === "number" && isFinite(v) ? v : Number(v) || 0;
 
-export function resourceKeyOf(r: DrillReservation, ctx: DrillContext): { key: string; label: string } {
-  const occ = r.special_occasion_id ? ctx.occasions[r.special_occasion_id] : undefined;
+export function resourceKeyOf(
+  r: DrillReservation,
+  ctx: DrillContext,
+): { key: string; label: string } {
+  const occ = r.special_occasion_id
+    ? ctx.occasions[r.special_occasion_id]
+    : undefined;
   if (occ?.resource_id && ctx.resourceNames[occ.resource_id])
-    return { key: `res:${occ.resource_id}`, label: ctx.resourceNames[occ.resource_id] };
+    return {
+      key: `res:${occ.resource_id}`,
+      label: ctx.resourceNames[occ.resource_id],
+    };
   if (r.room_type) return { key: `room:${r.room_type}`, label: r.room_type };
   return { key: UNASSIGNED, label: "" };
 }
 
-export function subServicesOf(r: DrillReservation): { key: string; label: string; qty: number; price: number }[] {
+export function subServicesOf(
+  r: DrillReservation,
+): { key: string; label: string; qty: number; price: number }[] {
   if (!Array.isArray(r.selected_sub_services)) return [];
   return (r.selected_sub_services as any[])
     .filter((s) => s && (s.id || s.name))
@@ -66,7 +80,15 @@ export function subServicesOf(r: DrillReservation): { key: string; label: string
 }
 
 function empty(key: string, label: string): DrillRow {
-  return { key, label, bookings: 0, guests: 0, revenue: 0, discount: 0, cancelled: 0 };
+  return {
+    key,
+    label,
+    bookings: 0,
+    guests: 0,
+    revenue: 0,
+    discount: 0,
+    cancelled: 0,
+  };
 }
 
 function add(row: DrillRow, r: DrillReservation, revenueOverride?: number) {
@@ -135,17 +157,24 @@ export function filterPath(
     if (type && r.reservation_type !== type) return false;
     if (!groupKey) return true;
     if (mode === "resource") return resourceKeyOf(r, ctx).key === groupKey;
-    if (mode === "channel") return (r.created_by ? "staff" : "public") === groupKey;
+    if (mode === "channel")
+      return (r.created_by ? "staff" : "public") === groupKey;
     if (mode === "occasion") return r.special_occasion_id === groupKey;
     return subServicesOf(r).some((s) => s.key === groupKey);
   });
 }
 
 /** Which modes have data to show; modes without data are hidden. */
-export function availableModes(rows: DrillReservation[], ctx: DrillContext): DrillMode[] {
+export function availableModes(
+  rows: DrillReservation[],
+  ctx: DrillContext,
+): DrillMode[] {
   const modes: DrillMode[] = ["resource", "channel"];
   if (rows.some((r) => subServicesOf(r).length > 0)) modes.push("subService");
-  if (Object.keys(ctx.occasions).length > 0 && rows.some((r) => r.special_occasion_id))
+  if (
+    Object.keys(ctx.occasions).length > 0 &&
+    rows.some((r) => r.special_occasion_id)
+  )
     modes.push("occasion");
   return modes;
 }
