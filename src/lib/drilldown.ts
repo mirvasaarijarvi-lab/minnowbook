@@ -1,9 +1,9 @@
 /**
  * Pure helpers for the resource drill-down report.
  *
- * Reservations have no direct resource column. The resource a booking
- * belongs to is resolved, in order, from its special occasion's resource,
- * then its room type, then falls back to "unassigned".
+ * The resource a booking belongs to is resolved, in order, from its saved
+ * resource, its special occasion's resource, then its room type, then
+ * falls back to "unassigned".
  */
 
 export type DrillMode =
@@ -14,7 +14,13 @@ export type DrillMode =
   | "discount"
   | "guestType"
   | "weekday"
-  | "groupSize";
+  | "groupSize"
+  | "utilisation"
+  | "offer"
+  | "kitchen";
+
+/** Modes where one booking can land in several groups. */
+const MULTI_MODES: DrillMode[] = ["subService", "kitchen"];
 
 export interface DrillReservation {
   id: string;
@@ -44,6 +50,17 @@ export interface DrillContext {
   discountCodes?: Record<string, string>;
   /** Lowercased emails that booked before the report period. */
   priorGuests?: Set<string>;
+  /** Seat or unit capacity per resource id, for utilisation. */
+  resourceCapacity?: Record<string, number>;
+  /** Number of days in the report period, for utilisation. */
+  periodDays?: number;
+  /** Reservation ids created from an offer. */
+  offerReservationIds?: Set<string>;
+  /** Kitchen order lines per reservation id. */
+  kitchenItems?: Record<
+    string,
+    { name: string; qty: number; price: number }[]
+  >;
 }
 
 export const UNASSIGNED = "__unassigned__";
@@ -91,9 +108,32 @@ export function simpleKeyOf(
         g <= 2 ? "1 to 2" : g <= 5 ? "3 to 5" : g <= 10 ? "6 to 10" : "11+";
       return { key, label: key };
     }
+    case "utilisation":
+      return resourceKeyOf(r, ctx);
+    case "offer":
+      return ctx.offerReservationIds?.has(r.id)
+        ? { key: "offer", label: "offer" }
+        : { key: "direct", label: "direct" };
     default:
       return null;
   }
+}
+
+/** Groups for modes where one booking can count in several rows. */
+export function multiKeysOf(
+  r: DrillReservation,
+  mode: DrillMode,
+  ctx: DrillContext,
+): { key: string; label: string; qty: number; price: number }[] {
+  if (mode === "subService") return subServicesOf(r);
+  if (mode === "kitchen")
+    return (ctx.kitchenItems?.[r.id] ?? []).map((k) => ({
+      key: k.name.trim().toLowerCase(),
+      label: k.name,
+      qty: Math.max(1, num(k.qty)),
+      price: num(k.price),
+    }));
+  return [];
 }
 
 export interface DrillRow {
@@ -189,15 +229,19 @@ export function groupRows(
       add(get(r.reservation_type, r.reservation_type), r);
       continue;
     }
-    if (mode !== "subService") {
+    if (!MULTI_MODES.includes(mode)) {
       const k = simpleKeyOf(r, mode, ctx);
       if (!k) continue;
       const row = get(k.key, k.label);
       if (mode === "occasion" && r.special_occasion_id)
         row.capacity = ctx.occasions[r.special_occasion_id]?.capacity;
+      if (mode === "utilisation" && k.key.startsWith("res:")) {
+        const cap = ctx.resourceCapacity?.[k.key.slice(4)] ?? 0;
+        if (cap > 0) row.capacity = cap * Math.max(1, ctx.periodDays ?? 1);
+      }
       add(row, r);
     } else {
-      for (const s of subServicesOf(r)) {
+      for (const s of multiKeysOf(r, mode, ctx)) {
         const row = get(s.key, s.label);
         add(row, r, s.price * s.qty);
         if (r.status !== "cancelled") row.guests += s.qty - num(r.guests_count);
@@ -218,9 +262,9 @@ export function filterPath(
   return rows.filter((r) => {
     if (type && r.reservation_type !== type) return false;
     if (!groupKey) return true;
-    if (mode !== "subService")
+    if (!MULTI_MODES.includes(mode))
       return simpleKeyOf(r, mode, ctx)?.key === groupKey;
-    return subServicesOf(r).some((s) => s.key === groupKey);
+    return multiKeysOf(r, mode, ctx).some((s) => s.key === groupKey);
   });
 }
 
@@ -238,5 +282,14 @@ export function availableModes(
     rows.some((r) => r.special_occasion_id)
   )
     modes.push("occasion");
+  if (
+    ctx.resourceCapacity &&
+    Object.values(ctx.resourceCapacity).some((c) => c > 0)
+  )
+    modes.push("utilisation");
+  if (ctx.offerReservationIds && ctx.offerReservationIds.size > 0)
+    modes.push("offer");
+  if (rows.some((r) => (ctx.kitchenItems?.[r.id] ?? []).length > 0))
+    modes.push("kitchen");
   return modes;
 }
