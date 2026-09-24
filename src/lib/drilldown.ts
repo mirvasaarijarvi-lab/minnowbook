@@ -40,9 +40,60 @@ export interface DrillContext {
     string,
     { name: string; resource_id: string | null; capacity: number }
   >;
+  discountCodes?: Record<string, string>;
+  /** Lowercased emails that booked before the report period. */
+  priorGuests?: Set<string>;
 }
 
 export const UNASSIGNED = "__unassigned__";
+
+/** Bucket for modes that put each booking in exactly one group. */
+export function simpleKeyOf(
+  r: DrillReservation,
+  mode: DrillMode,
+  ctx: DrillContext,
+): { key: string; label: string } | null {
+  switch (mode) {
+    case "resource":
+      return resourceKeyOf(r, ctx);
+    case "channel":
+      return r.created_by
+        ? { key: "staff", label: "staff" }
+        : { key: "public", label: "public" };
+    case "occasion":
+      return r.special_occasion_id
+        ? {
+            key: r.special_occasion_id,
+            label: ctx.occasions[r.special_occasion_id]?.name ?? "",
+          }
+        : null;
+    case "discount": {
+      const id = r.discount_code_id;
+      return id
+        ? { key: id, label: ctx.discountCodes?.[id] ?? "" }
+        : { key: "none", label: "none" };
+    }
+    case "guestType": {
+      const email = (r.guest_email ?? "").toLowerCase();
+      return ctx.priorGuests?.has(email)
+        ? { key: "returning", label: "returning" }
+        : { key: "new", label: "new" };
+    }
+    case "weekday": {
+      const d = new Date(`${r.date}T00:00:00`).getDay();
+      const key = String(((d + 6) % 7) + 1);
+      return { key, label: key };
+    }
+    case "groupSize": {
+      const g = num(r.guests_count);
+      const key =
+        g <= 2 ? "1 to 2" : g <= 5 ? "3 to 5" : g <= 10 ? "6 to 10" : "11+";
+      return { key, label: key };
+    }
+    default:
+      return null;
+  }
+}
 
 export interface DrillRow {
   key: string;
