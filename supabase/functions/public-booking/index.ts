@@ -1033,6 +1033,29 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       stall_fee = canonical;
     }
 
+    // SECURITY: sub-service prices are never trusted from the request. Each
+    // selected service is matched (by id, then name) against the resource's
+    // server-side sub_services configuration and its price replaced with the
+    // canonical one. Unknown services keep no price.
+    if (selected_sub_services) {
+      const canonList = subServicesList as Array<{ id?: string; name?: string; price_eur?: number | null }>;
+      selected_sub_services = selected_sub_services.map((s) => {
+        const match =
+          canonList.find((c) => c && typeof c.id === "string" && c.id === s.id) ??
+          canonList.find(
+            (c) => c && typeof c.name === "string" && c.name.trim().toLowerCase() === s.name.trim().toLowerCase(),
+          );
+        const canonical =
+          match && match.price_eur != null && isFinite(Number(match.price_eur)) ? Number(match.price_eur) : null;
+        if (s.price_eur != null && s.price_eur !== canonical) {
+          reasons.push(
+            `[PRICE_OVERRIDE_SUBSERVICE] Client-supplied sub_service price ignored; using server canonical=${canonical ?? "null"}. (${idCtx})`,
+          );
+        }
+        return { ...s, price_eur: canonical };
+      });
+    }
+
     const priced = computeReservationPrice({
       reservation_type,
       resource: pricingResource,
