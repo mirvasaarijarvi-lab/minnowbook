@@ -1,3 +1,5 @@
+// Intentional prompt changes: see docs/mimmoaid-prompt-snapshot.md for how to
+// review the diff and refresh the saved copy with `-u`.
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";

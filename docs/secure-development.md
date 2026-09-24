@@ -36,6 +36,7 @@ This document is the formal SDLC for MimmoBook. It describes how features are de
   - `rls-cors-gate`, `rls-merge-gate`, `permission-arity`
   - `reservation-type-limit-live`, `tier-trigger-tests`
   - `workflow-security-regression`, `sbom`
+- Changes to MimmoAid's instructions must include the refreshed saved copy in the same commit, and reviewers check that its diff holds only the intended wording. See `docs/mimmoaid-prompt-snapshot.md`.
 
 ## 5. Build and supply chain
 
