@@ -73,7 +73,9 @@ const OfferFlowInfographic = () => {
                   <p className="font-semibold">{s.title}</p>
                   <p
                     className={`mt-1 text-sm leading-snug ${
-                      last ? "text-primary-foreground/85" : "text-muted-foreground"
+                      last
+                        ? "text-primary-foreground/85"
+                        : "text-muted-foreground"
                     }`}
                   >
                     {s.desc}

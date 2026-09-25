@@ -82,7 +82,9 @@ const BlogPost = () => {
               <WellnessComparisonTable />
             )}
 
-            {post.slug === "offer-from-guest-booking" && <OfferFlowInfographic />}
+            {post.slug === "offer-from-guest-booking" && (
+              <OfferFlowInfographic />
+            )}
 
             {post.slug === "booking-software-for-service-professionals" && (
               <ServiceProInfographic />
