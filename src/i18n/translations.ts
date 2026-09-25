@@ -2163,6 +2163,8 @@ type TranslationKeys = {
   "offers.trace.booked": string;
   "offers.trace.received": string;
   "offers.trace.missing": string;
+  "offers.trace.missingHelp": string;
+  "offers.trace.loadError": string;
   "offers.trace.offersTitle": string;
   "offers.trace.created": string;
   "offers.trace.openBooking": string;
@@ -5074,6 +5076,8 @@ const en: TranslationKeys = {
   "offers.trace.booked": "Booked for",
   "offers.trace.received": "Received",
   "offers.trace.missing": "The original booking is no longer available.",
+  "offers.trace.missingHelp": "It may have been deleted, or you may not have access to it. The offer itself is unaffected.",
+  "offers.trace.loadError": "Could not load the original booking. Please try again later.",
   "offers.trace.offersTitle": "Offers made from this booking",
   "offers.trace.created": "Created",
   "offers.trace.openBooking": "Open booking",
@@ -8045,6 +8049,8 @@ const fi: TranslationKeys = {
   "offers.trace.booked": "Varattu ajalle",
   "offers.trace.received": "Vastaanotettu",
   "offers.trace.missing": "Alkuperäinen varaus ei ole enää saatavilla.",
+  "offers.trace.missingHelp": "Se on ehkä poistettu, tai sinulla ei ole siihen käyttöoikeutta. Tarjous itsessään ei muutu.",
+  "offers.trace.loadError": "Alkuperäistä varausta ei voitu ladata. Yritä myöhemmin uudelleen.",
   "offers.trace.offersTitle": "Tästä varauksesta tehdyt tarjoukset",
   "offers.trace.created": "Luotu",
   "offers.trace.openBooking": "Avaa varaus",
@@ -11031,6 +11037,8 @@ const sv: TranslationKeys = {
   "offers.trace.booked": "Bokad för",
   "offers.trace.received": "Mottagen",
   "offers.trace.missing": "Den ursprungliga bokningen finns inte längre.",
+  "offers.trace.missingHelp": "Den kan ha raderats, eller så saknar du behörighet till den. Själva offerten påverkas inte.",
+  "offers.trace.loadError": "Den ursprungliga bokningen kunde inte laddas. Försök igen senare.",
   "offers.trace.offersTitle": "Offerter gjorda från denna bokning",
   "offers.trace.created": "Skapad",
   "offers.trace.openBooking": "Öppna bokningen",

@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { useState } from "react";
-import { ExternalLink, FileText, Link2 } from "lucide-react";
+import { AlertCircle, ExternalLink, FileText, Link2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { requestOpenOffer } from "@/lib/offer-focus";
 import ReservationDetailDialog from "./ReservationDetailDialog";
@@ -58,8 +59,9 @@ export function OfferSourceBooking({
       .eq("id", reservationId)
       .maybeSingle();
     if (data) setOpenFull(data);
+    else toast.error(t("offers.trace.missing"));
   };
-  const { data: r, isLoading } = useQuery({
+  const { data: r, isLoading, isError } = useQuery({
     queryKey: ["offer-source-reservation", tenantId, reservationId],
     enabled: !!tenantId,
     queryFn: async () => {
@@ -126,9 +128,19 @@ export function OfferSourceBooking({
           ]}
         />
       ) : (
-        <p className="mt-1 text-muted-foreground">
-          {t("offers.trace.missing")}
-        </p>
+        <div
+          role="status"
+          className="mt-1 flex gap-2 text-muted-foreground"
+          data-testid="offer-source-booking-fallback"
+        >
+          <AlertCircle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden />
+          <div>
+            <p className="font-medium text-foreground">
+              {t(isError ? "offers.trace.loadError" : "offers.trace.missing")}
+            </p>
+            {!isError ? <p>{t("offers.trace.missingHelp")}</p> : null}
+          </div>
+        </div>
       )}
       {r ? (
         <Button
