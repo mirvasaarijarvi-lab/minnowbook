@@ -109,7 +109,7 @@ export async function handleResendConfirmationRequest(req: Request): Promise<Res
       })
 
       if (resendError) {
-        console.error(`Failed to resend to ${row.email}:`, resendError.message)
+        console.error(`Failed to resend to user ${row.id}:`, resendError.message)
         await supabase.from('email_send_log').insert({
           message_id: `resend-${row.id}-${nextWindowIndex}`,
           template_name: 'signup_resend',
@@ -128,10 +128,10 @@ export async function handleResendConfirmationRequest(req: Request): Promise<Res
         status: 'sent',
       })
 
-      console.log(`Resent confirmation to ${row.email} (window ${nextWindowIndex + 1}/${MAX_RESENDS})`)
+      console.log(`Resent confirmation to user ${row.id} (window ${nextWindowIndex + 1}/${MAX_RESENDS})`)
       resent++
     } catch (err) {
-      console.error(`Unexpected error resending to ${row.email}:`, err)
+      console.error(`Unexpected error resending to user ${row.id}:`, err)
     }
 
     // Small delay between sends
