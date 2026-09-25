@@ -8,6 +8,34 @@ import { Badge } from "@/components/ui/badge";
 import { offerTrackStatus } from "@/lib/offer-status";
 
 const fmt = (d?: string | null) => (d ? format(parseISO(d), "d.M.yyyy") : "");
+const fmtTs = (d?: string | null) =>
+  d ? format(parseISO(d), "d.M.yyyy HH:mm") : "";
+
+/** Chronological list of timestamps; empty entries are skipped. */
+function Timeline({
+  items,
+  label,
+}: {
+  items: Array<[string, string | null | undefined]>;
+  label: string;
+}) {
+  const rows = items
+    .filter(([, v]) => !!v)
+    .sort((a, b) => String(a[1]).localeCompare(String(b[1])));
+  if (rows.length === 0) return null;
+  return (
+    <ol aria-label={label} className="mt-1 space-y-0.5 text-muted-foreground">
+      {rows.map(([k, v]) => (
+        <li key={k} className="flex gap-2">
+          <time dateTime={v!} className="tabular-nums text-foreground">
+            {fmtTs(v)}
+          </time>
+          <span>{k}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
 
 /** Shown on an offer: the guest booking it was made from, with contact details. */
 export function OfferSourceBooking({
@@ -24,7 +52,7 @@ export function OfferSourceBooking({
       const { data, error } = await supabase
         .from("reservations")
         .select(
-          "id, guest_name, guest_email, guest_phone, date, start_time, guests_count, status, created_at",
+          "id, guest_name, guest_email, guest_phone, date, start_time, guests_count, status, created_at, updated_at, acknowledgment_email_sent_at, confirmation_email_sent_at, cancellation_email_sent_at",
         )
         .eq("tenant_id", tenantId!)
         .eq("id", reservationId)
@@ -62,10 +90,27 @@ export function OfferSourceBooking({
           </dd>
           <dt>{t("offers.trace.received")}</dt>
           <dd>
-            {fmt(r.created_at)}
+            {fmtTs(r.created_at)}
             {r.status ? ` (${r.status})` : ""}
           </dd>
         </dl>
+      ) : null}
+      {r ? (
+        <Timeline
+          label={t("offers.trace.timeline")}
+          items={[
+            [t("offers.trace.received"), r.created_at],
+            [t("offers.trace.acknowledged"), r.acknowledgment_email_sent_at],
+            [t("offers.trace.confirmed"), r.confirmation_email_sent_at],
+            [t("offers.trace.cancelled"), r.cancellation_email_sent_at],
+            [
+              t("offers.trace.updated"),
+              r.updated_at && r.updated_at !== r.created_at
+                ? r.updated_at
+                : null,
+            ],
+          ]}
+        />
       ) : (
         <p className="mt-1 text-muted-foreground">
           {t("offers.trace.missing")}
@@ -89,7 +134,9 @@ export function ReservationOffers({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("offers")
-        .select("id, status, expires_on, created_at, last_sent_at, event_space")
+        .select(
+          "id, status, expires_on, created_at, updated_at, last_sent_at, guest_accepted_at, accepted_at, declined_at, event_space",
+        )
         .eq("tenant_id", tenantId!)
         .eq("source_reservation_id", reservationId)
         .order("created_at", { ascending: false });
@@ -112,22 +159,37 @@ export function ReservationOffers({
         {data.map((o: any) => {
           const s = offerTrackStatus(o);
           return (
-            <li
-              key={o.id}
-              className="flex flex-wrap items-center gap-2 text-xs"
-            >
-              <Badge variant="outline" className="text-[10px]">
-                {t(`offers.track_${s}` as any)}
-              </Badge>
-              <span>
-                {t("offers.trace.created")} {fmt(o.created_at)}
-                {o.last_sent_at
-                  ? `, ${t("offers.lastSent").toLowerCase()} ${fmt(o.last_sent_at)}`
-                  : ""}
-                {o.expires_on
-                  ? `, ${t("offers.validUntil").toLowerCase()} ${fmt(o.expires_on)}`
-                  : ""}
-              </span>
+            <li key={o.id} className="text-xs">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="text-[10px]">
+                  {t(`offers.track_${s}` as any)}
+                </Badge>
+                <span>
+                  {t("offers.trace.created")} {fmt(o.created_at)}
+                  {o.last_sent_at
+                    ? `, ${t("offers.lastSent").toLowerCase()} ${fmt(o.last_sent_at)}`
+                    : ""}
+                  {o.expires_on
+                    ? `, ${t("offers.validUntil").toLowerCase()} ${fmt(o.expires_on)}`
+                    : ""}
+                </span>
+              </div>
+              <Timeline
+                label={t("offers.trace.timeline")}
+                items={[
+                  [t("offers.trace.created"), o.created_at],
+                  [t("offers.trace.sent"), o.last_sent_at],
+                  [t("offers.trace.guestAccepted"), o.guest_accepted_at],
+                  [t("offers.trace.accepted"), o.accepted_at],
+                  [t("offers.trace.declined"), o.declined_at],
+                  [
+                    t("offers.trace.updated"),
+                    o.updated_at && o.updated_at !== o.created_at
+                      ? o.updated_at
+                      : null,
+                  ],
+                ]}
+              />
             </li>
           );
         })}

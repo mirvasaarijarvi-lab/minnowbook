@@ -2165,6 +2165,15 @@ type TranslationKeys = {
   "offers.trace.missing": string;
   "offers.trace.offersTitle": string;
   "offers.trace.created": string;
+  "offers.trace.timeline": string;
+  "offers.trace.acknowledged": string;
+  "offers.trace.confirmed": string;
+  "offers.trace.cancelled": string;
+  "offers.trace.updated": string;
+  "offers.trace.sent": string;
+  "offers.trace.guestAccepted": string;
+  "offers.trace.accepted": string;
+  "offers.trace.declined": string;
   "offers.expiresSoon": string;
   "offers.filterLabel": string;
   "offers.markDeclined": string;
@@ -5065,6 +5074,15 @@ const en: TranslationKeys = {
   "offers.trace.missing": "The original booking is no longer available.",
   "offers.trace.offersTitle": "Offers made from this booking",
   "offers.trace.created": "Created",
+  "offers.trace.timeline": "History",
+  "offers.trace.acknowledged": "Receipt email sent",
+  "offers.trace.confirmed": "Confirmed",
+  "offers.trace.cancelled": "Cancelled",
+  "offers.trace.updated": "Last changed",
+  "offers.trace.sent": "Offer sent",
+  "offers.trace.guestAccepted": "Guest accepted",
+  "offers.trace.accepted": "Confirmed as reservation",
+  "offers.trace.declined": "Declined",
   "offers.expiresSoon": "Expires soon",
   "offers.filterLabel": "Filter offers by status",
   "offers.markDeclined": "Mark declined",
@@ -8025,6 +8043,15 @@ const fi: TranslationKeys = {
   "offers.trace.missing": "Alkuperäinen varaus ei ole enää saatavilla.",
   "offers.trace.offersTitle": "Tästä varauksesta tehdyt tarjoukset",
   "offers.trace.created": "Luotu",
+  "offers.trace.timeline": "Historia",
+  "offers.trace.acknowledged": "Vastaanottoviesti lähetetty",
+  "offers.trace.confirmed": "Vahvistettu",
+  "offers.trace.cancelled": "Peruttu",
+  "offers.trace.updated": "Muutettu viimeksi",
+  "offers.trace.sent": "Tarjous lähetetty",
+  "offers.trace.guestAccepted": "Vieras hyväksyi",
+  "offers.trace.accepted": "Vahvistettu varaukseksi",
+  "offers.trace.declined": "Hylätty",
   "offers.expiresSoon": "Vanhenee pian",
   "offers.filterLabel": "Suodata tarjouksia tilan mukaan",
   "offers.markDeclined": "Merkitse hylätyksi",
@@ -11000,6 +11027,15 @@ const sv: TranslationKeys = {
   "offers.trace.missing": "Den ursprungliga bokningen finns inte längre.",
   "offers.trace.offersTitle": "Offerter gjorda från denna bokning",
   "offers.trace.created": "Skapad",
+  "offers.trace.timeline": "Historik",
+  "offers.trace.acknowledged": "Mottagningsmejl skickat",
+  "offers.trace.confirmed": "Bekräftad",
+  "offers.trace.cancelled": "Avbokad",
+  "offers.trace.updated": "Senast ändrad",
+  "offers.trace.sent": "Offert skickad",
+  "offers.trace.guestAccepted": "Gästen godkände",
+  "offers.trace.accepted": "Bekräftad som bokning",
+  "offers.trace.declined": "Avböjd",
   "offers.expiresSoon": "Går ut snart",
   "offers.filterLabel": "Filtrera offerter efter status",
   "offers.markDeclined": "Markera som avböjd",
