@@ -1143,6 +1143,9 @@ type TranslationKeys = {
   "support.faqC4": string;
   "support.faqC5": string;
   "pricing.offerFromBooking": string;
+  "pricing.offerStatus": string;
+  "pricing.offerGuestAccept": string;
+  "support.faqC7": string;
   "support.faqC6": string;
   "blog.post10Title": string;
   "blog.post10Excerpt": string;
@@ -4275,6 +4278,10 @@ const en: TranslationKeys = {
   "support.faqC5":
     "Reports: open Reports, choose a period at the top, then use Drill-down by resource to go from a service to a resource, product or tour and on to its bookings. Every level downloads as CSV or PDF. Use Print whole page, or Print this section on any card. Each booking is saved with the resource the guest or staff chose, including bookings made from offers. Older bookings that could not be matched to one resource show as Not linked to a resource. Group by Utilisation of capacity, Offer or direct booking, or Kitchen items for more detail, and use Copy link to share the exact view and period. The overview follows the period chosen at the top.",
   "pricing.offerFromBooking": "Make an offer from a guest booking",
+  "pricing.offerStatus": "Offer status tracking and expiry dates",
+  "pricing.offerGuestAccept": "Guests accept offers online",
+  "support.faqC7":
+    "Offer status and guest acceptance: every offer shows Pending, Accepted, Declined, Expired or Draft, and the buttons at the top of Offers filter by status. Set a Valid until date; open offers become Expired after that day and show Expires soon three days before. Use Mark declined or Reopen as the guest decides. Each offer email has a private link where the guest reviews the offer and presses Accept offer. You get a notification and the offer shows Guest accepted, then you press Confirm to make the booking. An offer made from a guest booking shows that booking's guest and contact details, and the booking lists its offers.",
   "support.faqC6":
     "Offer from a guest booking: open a booking a guest made on your booking page and press Make an offer. The guest's name, contact details, date, times, number of guests, space, event type, special requests and language fill the offer for you. Add the menu, validity and invoicing details, then send the offer email as usual. When the guest accepts, press Confirm on the offer: the original booking becomes the full confirmed reservation with the agreed price, so the guest is never booked twice.",
   "blog.post10Title": "From Guest Booking to Confirmed Offer in One Click",
@@ -4529,7 +4536,7 @@ const en: TranslationKeys = {
     "A built-in guidebook, printable staff guide and a support assistant that answers questions in the app.",
   "features.offersAndCross": "Offers & Cross-Reservations",
   "features.offersAndCrossDesc":
-    "Create offers, generate branded PDFs, and link reservations across spaces and manage everything together. Turn any guest booking into an offer with one click and confirm it into the full reservation.",
+    "Create offers, generate branded PDFs, and link reservations across spaces and manage everything together. Turn any guest booking into an offer with one click and confirm it into the full reservation. Track every offer as pending, accepted, declined or expired, and let guests accept online from a private link.",
 
   // Use Cases
   "useCases.badge": "Use Cases",
@@ -7216,6 +7223,10 @@ const fi: TranslationKeys = {
   "support.faqC5":
     "Raportit: avaa Raportit, valitse aikaväli ylhäältä ja käytä Porautuminen resursseittain: palvelusta resurssiin, tuotteeseen tai kierrokseen ja sen varauksiin. Jokaisen tason voi ladata CSV- tai PDF-muodossa. Tulosta koko sivu tai minkä tahansa kortin Tulosta tämä osio. Jokainen varaus tallentuu vieraan tai henkilökunnan valitsemaan resurssiin, myös tarjouksista luodut. Vanhemmat varaukset, joita ei voitu yhdistää yhteen resurssiin, näkyvät kohdassa Ei liitetty resurssiin. Ryhmittele myös Kapasiteetin käyttö, Tarjous vai suora varaus tai Keittiön tuotteet, ja jaa tarkka näkymä ja aikaväli painikkeella Kopioi linkki. Yleiskatsaus seuraa ylhäällä valittua aikaväliä.",
   "pricing.offerFromBooking": "Tarjous asiakkaan varauksesta",
+  "pricing.offerStatus": "Tarjousten tilan seuranta ja voimassaolopäivät",
+  "pricing.offerGuestAccept": "Vieraat hyväksyvät tarjoukset verkossa",
+  "support.faqC7":
+    "Tarjouksen tila ja vieraan hyväksyntä: jokaisella tarjouksella on tila Odottaa, Hyväksytty, Hylätty, Vanhentunut tai Luonnos, ja Tarjoukset-sivun painikkeilla voit suodattaa tilan mukaan. Anna Voimassa asti -päivä; avoimet tarjoukset vanhenevat sen jälkeen, ja Vanhenee pian näkyy kolme päivää ennen. Käytä Merkitse hylätyksi tai Avaa uudelleen vieraan päätöksen mukaan. Jokaisessa tarjoussähköpostissa on yksityinen linkki, josta vieras tarkistaa tarjouksen ja painaa Hyväksy tarjous. Saat ilmoituksen, tarjouksessa näkyy Vieras hyväksyi, ja vahvistat varauksen painamalla Vahvista. Vieraan varauksesta tehdyssä tarjouksessa näkyvät varauksen vieras ja yhteystiedot, ja varaus näyttää siitä tehdyt tarjoukset.",
   "support.faqC6":
     "Tarjous asiakkaan varauksesta: avaa varaus, jonka asiakas teki varaussivullasi, ja paina Tee tarjous. Asiakkaan nimi, yhteystiedot, päivä, ajat, henkilömäärä, tila, tapahtuman tyyppi, erityistoiveet ja kieli siirtyvät tarjoukselle. Lisää menu, voimassaolo ja laskutustiedot ja lähetä tarjous sähköpostilla tavalliseen tapaan. Kun asiakas hyväksyy, paina tarjouksen Vahvista: alkuperäisestä varauksesta tulee täysi vahvistettu varaus sovitulla hinnalla, joten asiakkaalle ei synny kahta varausta.",
   "blog.post10Title":
@@ -7470,7 +7481,7 @@ const fi: TranslationKeys = {
     "Sisäänrakennettu opas, tulostettava henkilökunnan ohje ja tukiavustaja, joka vastaa kysymyksiin sovelluksessa.",
   "features.offersAndCross": "Tarjoukset ja ristiinvaraukset",
   "features.offersAndCrossDesc":
-    "Luo tarjouksia, generoi brändätyt PDF:t ja yhdistä varauksia tilojen välillä ja hallitse kaikkea yhdessä. Tee asiakkaan varauksesta tarjous yhdellä painalluksella ja vahvista se täydeksi varaukseksi.",
+    "Luo tarjouksia, generoi brändätyt PDF:t ja yhdistä varauksia tilojen välillä ja hallitse kaikkea yhdessä. Tee asiakkaan varauksesta tarjous yhdellä painalluksella ja vahvista se täydeksi varaukseksi. Seuraa jokaista tarjousta tilassa odottaa, hyväksytty, hylätty tai vanhentunut, ja anna vieraiden hyväksyä tarjous verkossa yksityisestä linkistä.",
 
   // Use Cases
   "useCases.badge": "Käyttökohteet",
@@ -10179,6 +10190,10 @@ const sv: TranslationKeys = {
   "support.faqC5":
     "Rapporter: öppna Rapporter, välj period överst och använd Detaljvy per resurs för att gå från en tjänst till en resurs, produkt eller tur och vidare till bokningarna. Varje nivå laddas ner som CSV eller PDF. Skriv ut hela sidan eller Skriv ut detta avsnitt på valfritt kort. Varje bokning sparas med resursen gästen eller personalen valde, även bokningar från offerter. Äldre bokningar som inte kunde kopplas till en resurs visas som Inte kopplad till en resurs. Gruppera även efter Kapacitetsutnyttjande, Offert eller direktbokning eller Köksartiklar, och dela exakt vy och period med Kopiera länk. Översikten följer perioden som valts överst.",
   "pricing.offerFromBooking": "Offert från en gästbokning",
+  "pricing.offerStatus": "Statusuppföljning och giltighetsdatum för offerter",
+  "pricing.offerGuestAccept": "Gäster godkänner offerter online",
+  "support.faqC7":
+    "Offertstatus och gästens godkännande: varje offert visar Väntar, Accepterad, Avböjd, Utgången eller Utkast, och knapparna överst på Offerter filtrerar efter status. Ange ett Giltig till-datum; öppna offerter blir utgångna efter den dagen och visar Går ut snart tre dagar innan. Använd Markera som avböjd eller Öppna igen efter gästens beslut. Varje offertmejl har en privat länk där gästen granskar offerten och trycker på Godkänn offerten. Du får en avisering, offerten visar Gästen godkände och du trycker på Bekräfta för att skapa bokningen. En offert gjord från en gästbokning visar bokningens gäst och kontaktuppgifter, och bokningen listar sina offerter.",
   "support.faqC6":
     "Offert från en gästbokning: öppna en bokning som en gäst gjort på din bokningssida och tryck på Gör ett erbjudande. Gästens namn, kontaktuppgifter, datum, tider, antal gäster, utrymme, typ av evenemang, särskilda önskemål och språk fylls i på erbjudandet. Lägg till meny, giltighet och faktureringsuppgifter och skicka erbjudandet via e-post som vanligt. När gästen accepterar trycker du på Bekräfta på erbjudandet: den ursprungliga bokningen blir den fullständiga bekräftade bokningen med överenskommet pris, så gästen blir aldrig dubbelbokad.",
   "blog.post10Title": "Från gästbokning till erbjudande med ett klick",
@@ -10432,7 +10447,7 @@ const sv: TranslationKeys = {
     "Inbyggd guidebok, utskrivbar personalguide och en supportassistent som svarar i appen.",
   "features.offersAndCross": "Erbjudanden och korsbokningar",
   "features.offersAndCrossDesc":
-    "Skapa erbjudanden, generera varumärkesanpassade PDF:er och länka bokningar mellan utrymmen och hantera allt tillsammans. Gör en gästbokning till ett erbjudande med ett klick och bekräfta den till en fullständig bokning.",
+    "Skapa erbjudanden, generera varumärkesanpassade PDF:er och länka bokningar mellan utrymmen och hantera allt tillsammans. Gör en gästbokning till ett erbjudande med ett klick och bekräfta den till en fullständig bokning. Följ varje offert som väntande, accepterad, avböjd eller utgången, och låt gäster godkänna online via en privat länk.",
 
   // Use Cases
   "useCases.badge": "Användningsfall",
