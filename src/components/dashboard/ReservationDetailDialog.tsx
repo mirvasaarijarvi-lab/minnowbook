@@ -33,7 +33,9 @@ import {
   Download,
   StickyNote,
   Building2,
+  Send,
 } from "lucide-react";
+import OfferCreateDialog from "./OfferCreateDialog";
 import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
@@ -94,6 +96,7 @@ const ReservationDetailDialog = ({
   const { language } = useI18n();
   const { tenant, tenantId } = useTenant();
   const [generating, setGenerating] = useState(false);
+  const [offerOpen, setOfferOpen] = useState(false);
   // Scoped to the open reservation: switching bookings clears any refusal.
   const { showRefusal, clearRefusal } = useInvoiceRefusalNotice(
     open ? ((reservation?.id as string | undefined) ?? null) : null,
@@ -394,6 +397,17 @@ const ReservationDetailDialog = ({
               {t("dashboard.downloadInvoicePdf")}
             </Button>
           )}
+          {canEdit && !r.created_by && r.status !== "cancelled" && (
+            <Button
+              variant="outline"
+              onClick={() => setOfferOpen(true)}
+              className="gap-1.5"
+              data-testid="make-offer-from-booking"
+            >
+              <Send className="h-4 w-4" />
+              {t("offers.makeFromBooking")}
+            </Button>
+          )}
           {canEdit && onEdit && (
             <Button
               onClick={() => {
@@ -408,6 +422,11 @@ const ReservationDetailDialog = ({
           )}
         </DialogFooter>
       </DialogContent>
+      <OfferCreateDialog
+        open={offerOpen}
+        onOpenChange={setOfferOpen}
+        fromReservation={offerOpen ? r : null}
+      />
     </Dialog>
   );
 };
