@@ -108,6 +108,7 @@ export const SUPPORT_CHAT_SYSTEM_PROMPT = `You are MimmoBook's friendly support 
 
 ### Offers & Cross-Reservations
 - Offers (event proposals, branded PDFs, email delivery) are available on ALL tiers
+- **Offer from a guest booking**: open a booking a guest made on the public booking page and press "Make an offer" (FI "Tee tarjous", SV "Gör ett erbjudande"). Name, contact details, date, times, guests, space, event type, special requests and language fill the offer; staff add menu, price, validity and invoicing details, then send the offer email as usual. When the guest accepts, pressing "Confirm" on the offer turns that same booking into the full confirmed reservation (no second booking is created); linked bookings on the offer are added as usual. The button is not shown on cancelled bookings or bookings staff created.
 - Cross-reservations (linking reservations across different resource types) require Pro or Business tier
 - Basic tier only supports 1 reservation type, so cross-reservation linking is not applicable there
 - When marking a linked reservation as "Used", the system prompts to mark all other linked reservations as used too

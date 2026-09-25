@@ -9,6 +9,7 @@ import { useT } from "@/contexts/I18nContext";
 import { posts, buildBlogPostJsonLd } from "@/lib/blogJsonLd";
 import WellnessComparisonTable from "@/components/blog/WellnessComparisonTable";
 import ServiceProInfographic from "@/components/blog/ServiceProInfographic";
+import OfferFlowInfographic from "@/components/blog/OfferFlowInfographic";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
