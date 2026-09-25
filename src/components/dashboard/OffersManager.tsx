@@ -50,7 +50,11 @@ import {
 } from "@/lib/offer-status-announcer";
 import { focusOfferStatusPanel } from "@/lib/offer-status-focus";
 import { OfferSourceBooking } from "./OfferTraceability";
-import { takePendingOffer } from "@/lib/offer-focus";
+import {
+  getOfferOrigin,
+  returnToBooking,
+  takePendingOffer,
+} from "@/lib/offer-focus";
 import {
   OFFER_TRACK_STATUSES,
   expiresSoon,
@@ -134,6 +138,9 @@ const OffersManager = () => {
   }, [offers]);
 
   const [focusedOfferId, setFocusedOfferId] = useState<string | null>(null);
+  const [cameFromBooking, setCameFromBooking] = useState(
+    () => !!getOfferOrigin(),
+  );
   useEffect(() => {
     if (isLoading) return;
     const id = takePendingOffer();
@@ -614,6 +621,26 @@ const OffersManager = () => {
           {t("offers.create")}
         </Button>
       </div>
+
+      {cameFromBooking ? (
+        <div
+          role="status"
+          className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted/40 p-2 text-sm"
+        >
+          <span>{t("offers.trace.openedFromBooking")}</span>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setCameFromBooking(false);
+              returnToBooking();
+            }}
+          >
+            {t("offers.trace.backToBooking")}
+          </Button>
+        </div>
+      ) : null}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative flex-1 w-full sm:max-w-sm">

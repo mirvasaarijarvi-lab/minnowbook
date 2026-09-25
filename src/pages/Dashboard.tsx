@@ -1,5 +1,12 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { OPEN_OFFER_EVENT } from "@/lib/offer-focus";
+import {
+  OPEN_OFFER_EVENT,
+  RETURN_TO_BOOKING_EVENT,
+  setCurrentDashboardView,
+  type BookingReturn,
+} from "@/lib/offer-focus";
+import ReservationDetailDialog from "@/components/dashboard/ReservationDetailDialog";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@/lib/router-compat";
 import NoTenantState from "@/components/NoTenantState";
 import { useState, useEffect, useCallback } from "react";
@@ -9,6 +16,7 @@ import { SiteContext } from "@/hooks/useSiteContext";
 import {
   PERM_CALENDAR_VIEW,
   PERM_RESERVATIONS_VIEW,
+  PERM_RESERVATIONS_EDIT,
   PERM_RESOURCES_VIEW,
   PERM_REPORTS_VIEW,
   PERM_SETTINGS_VIEW,
@@ -176,6 +184,26 @@ const Dashboard = () => {
     window.addEventListener(OPEN_OFFER_EVENT, go);
     return () => window.removeEventListener(OPEN_OFFER_EVENT, go);
   }, []);
+  useEffect(() => {
+    setCurrentDashboardView(currentView);
+  }, [currentView]);
+  const [returnBooking, setReturnBooking] = useState<any | null>(null);
+  useEffect(() => {
+    const back = async (e: Event) => {
+      const o = (e as CustomEvent<BookingReturn>).detail;
+      if (o.view) setCurrentView(o.view as DashboardView);
+      if (!tenantId) return;
+      const { data } = await supabase
+        .from("reservations")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .eq("id", o.reservationId)
+        .maybeSingle();
+      if (data) setReturnBooking(data);
+    };
+    window.addEventListener(RETURN_TO_BOOKING_EVENT, back);
+    return () => window.removeEventListener(RETURN_TO_BOOKING_EVENT, back);
+  }, [tenantId]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -502,6 +530,12 @@ const Dashboard = () => {
             onClose={handleTourClose}
             onComplete={handleTourComplete}
             onNavigate={(view) => handleViewChange(view as DashboardView)}
+          />
+          <ReservationDetailDialog
+            reservation={returnBooking}
+            open={!!returnBooking}
+            onOpenChange={(o) => !o && setReturnBooking(null)}
+            canEdit={can(PERM_RESERVATIONS_EDIT)}
           />
         </div>
       </div>
