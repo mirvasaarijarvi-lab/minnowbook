@@ -226,7 +226,7 @@ export function ReservationOffers({
                   variant="link"
                   size="sm"
                   className="h-auto p-0 text-xs"
-                  onClick={() => requestOpenOffer(o.id)}
+                  onClick={() => requestOpenOffer(o.id, reservationId)}
                 >
                   <ExternalLink className="mr-1 h-3 w-3" aria-hidden />
                   {t("offers.trace.openOffer")}
