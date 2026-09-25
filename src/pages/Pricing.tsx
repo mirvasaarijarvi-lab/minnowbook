@@ -136,6 +136,7 @@ const Pricing = () => {
     [t("pricing.multiLanguage"), "✓", "✓", "✓", "✓"],
     [t("pricing.multisiteManagement"), "—", "—", "✓", "✓"],
     [t("pricing.offers"), "✓", "✓", "✓", "✓"],
+    [t("pricing.offerFromBooking"), "✓", "✓", "✓", "✓"],
     [t("pricing.crossReservations"), "✓", "✓", "✓", "✓"],
     [
       t("pricing.analyticsReports"),
