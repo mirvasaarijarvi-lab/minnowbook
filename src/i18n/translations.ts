@@ -1142,6 +1142,33 @@ type TranslationKeys = {
   "support.faqC3": string;
   "support.faqC4": string;
   "support.faqC5": string;
+  "pricing.offerFromBooking": string;
+  "support.faqC6": string;
+  "blog.post10Title": string;
+  "blog.post10Excerpt": string;
+  "blog.post10C1": string;
+  "blog.post10C2": string;
+  "blog.post10C3": string;
+  "blog.post10C4": string;
+  "blog.ofTitle": string;
+  "blog.ofCaption": string;
+  "blog.ofStep1Title": string;
+  "blog.ofStep1Desc": string;
+  "blog.ofStep2Title": string;
+  "blog.ofStep2Desc": string;
+  "blog.ofStep3Title": string;
+  "blog.ofStep3Desc": string;
+  "blog.ofStep4Title": string;
+  "blog.ofStep4Desc": string;
+  "blog.ofBenefitsTitle": string;
+  "blog.ofBenefit1Title": string;
+  "blog.ofBenefit1Desc": string;
+  "blog.ofBenefit2Title": string;
+  "blog.ofBenefit2Desc": string;
+  "blog.ofBenefit3Title": string;
+  "blog.ofBenefit3Desc": string;
+  "blog.ofBenefit4Title": string;
+  "blog.ofBenefit4Desc": string;
   "support.catBasics": string;
   "support.catReservations": string;
   "support.catCommunication": string;
@@ -4223,6 +4250,33 @@ const en: TranslationKeys = {
     "Q: What's the difference between AI chatbot and priority support? A: All plans include MimmoAid, our 24/7 AI chatbot. Business plan adds support requests asked on the platform with a guaranteed 24-hour response.",
   "support.faqC5":
     "Reports: open Reports, choose a period at the top, then use Drill-down by resource to go from a service to a resource, product or tour and on to its bookings. Every level downloads as CSV or PDF. Use Print whole page, or Print this section on any card. Each booking is saved with the resource the guest or staff chose, including bookings made from offers. Older bookings that could not be matched to one resource show as Not linked to a resource. Group by Utilisation of capacity, Offer or direct booking, or Kitchen items for more detail, and use Copy link to share the exact view and period. The overview follows the period chosen at the top.",
+  "pricing.offerFromBooking": "Make an offer from a guest booking",
+  "support.faqC6": "Offer from a guest booking: open a booking a guest made on your booking page and press Make an offer. The guest's name, contact details, date, times, number of guests, space, event type, special requests and language fill the offer for you. Add the menu, validity and invoicing details, then send the offer email as usual. When the guest accepts, press Confirm on the offer: the original booking becomes the full confirmed reservation with the agreed price, so the guest is never booked twice.",
+  "blog.post10Title": "From Guest Booking to Signed Offer in One Click",
+  "blog.post10Excerpt": "Turn a booking request from your website into a full offer without retyping anything, and confirm it into a real reservation when the guest says yes.",
+  "blog.post10C1": "Many bookings are really the start of a conversation. A guest asks for a room for a birthday dinner for 30, a team day with lunch, or a wedding tasting. The booking page captures the basics, but you still need to agree on the menu, the price and the details. Until now that meant copying everything from the booking into a separate offer by hand.",
+  "blog.post10C2": "In MimmoBook you now open the guest's booking and press Make an offer. The name, email, phone, date, times, number of guests, space, event type, special requests and language move onto the offer automatically. You only add what the guest could not know: the menu, the price, how long the offer is valid and the invoicing details.",
+  "blog.post10C3": "The offer is sent with your branded PDF and email, exactly like any other offer. When the guest accepts, press Confirm. MimmoBook turns the original booking into the full confirmed reservation with the agreed price and space, and adds any linked bookings such as rooms or dining. The guest never ends up with two bookings, and your reports show that the booking came from an offer.",
+  "blog.post10C4": "Offers are included on every MimmoBook plan, from Basic up. If you already take event or group enquiries through your booking page, try it on the next one: it takes a minute instead of a quarter of an hour.",
+  "blog.ofTitle": "How it works",
+  "blog.ofCaption": "Four steps from a booking request to a confirmed reservation.",
+  "blog.ofStep1Title": "Guest books",
+  "blog.ofStep1Desc": "The guest sends a booking from your booking page.",
+  "blog.ofStep2Title": "Make an offer",
+  "blog.ofStep2Desc": "One click fills the offer with the booking details. You add menu and price.",
+  "blog.ofStep3Title": "Offer email",
+  "blog.ofStep3Desc": "The guest receives your branded offer by email.",
+  "blog.ofStep4Title": "Confirm",
+  "blog.ofStep4Desc": "The guest accepts, you press Confirm and the booking becomes a full reservation.",
+  "blog.ofBenefitsTitle": "Why it helps",
+  "blog.ofBenefit1Title": "No retyping",
+  "blog.ofBenefit1Desc": "Guest details move over on their own, so there are no typos in names or dates.",
+  "blog.ofBenefit2Title": "No double bookings",
+  "blog.ofBenefit2Desc": "The original booking is confirmed, not copied, so the guest has one booking.",
+  "blog.ofBenefit3Title": "Faster replies",
+  "blog.ofBenefit3Desc": "Answer an enquiry with a proper offer in minutes while the guest is still keen.",
+  "blog.ofBenefit4Title": "Clear reports",
+  "blog.ofBenefit4Desc": "Reports show which bookings came through an offer and what they were worth.",
   "support.catBasics": "Basics",
   "support.catReservations": "Reservations",
   "support.catCommunication": "Communication",
@@ -4438,7 +4492,7 @@ const en: TranslationKeys = {
     "A built-in guidebook, printable staff guide and a support assistant that answers questions in the app.",
   "features.offersAndCross": "Offers & Cross-Reservations",
   "features.offersAndCrossDesc":
-    "Create offers, generate branded PDFs, and link reservations across spaces and manage everything together.",
+    "Create offers, generate branded PDFs, and link reservations across spaces and manage everything together. Turn any guest booking into an offer with one click and confirm it into the full reservation.",
 
   // Use Cases
   "useCases.badge": "Use Cases",
@@ -7099,6 +7153,33 @@ const fi: TranslationKeys = {
     "K: Mitä eroa on tekoälychatbotilla ja prioriteettituella? A: Kaikkiin paketteihin sisältyy MimmoAid, 24/7 toimiva tekoälychatbottimme. Liiketoimintapakettiin lisätään alustalla esitettyihin tukipyyntöihin vuorokauden vastaustakuu.",
   "support.faqC5":
     "Raportit: avaa Raportit, valitse aikaväli ylhäältä ja käytä Porautuminen resursseittain: palvelusta resurssiin, tuotteeseen tai kierrokseen ja sen varauksiin. Jokaisen tason voi ladata CSV- tai PDF-muodossa. Tulosta koko sivu tai minkä tahansa kortin Tulosta tämä osio. Jokainen varaus tallentuu vieraan tai henkilökunnan valitsemaan resurssiin, myös tarjouksista luodut. Vanhemmat varaukset, joita ei voitu yhdistää yhteen resurssiin, näkyvät kohdassa Ei liitetty resurssiin. Ryhmittele myös Kapasiteetin käyttö, Tarjous vai suora varaus tai Keittiön tuotteet, ja jaa tarkka näkymä ja aikaväli painikkeella Kopioi linkki. Yleiskatsaus seuraa ylhäällä valittua aikaväliä.",
+  "pricing.offerFromBooking": "Tarjous asiakkaan varauksesta",
+  "support.faqC6": "Tarjous asiakkaan varauksesta: avaa varaus, jonka asiakas teki varaussivullasi, ja paina Tee tarjous. Asiakkaan nimi, yhteystiedot, päivä, ajat, henkilömäärä, tila, tapahtuman tyyppi, erityistoiveet ja kieli siirtyvät tarjoukselle. Lisää menu, voimassaolo ja laskutustiedot ja lähetä tarjous sähköpostilla tavalliseen tapaan. Kun asiakas hyväksyy, paina tarjouksen Vahvista: alkuperäisestä varauksesta tulee täysi vahvistettu varaus sovitulla hinnalla, joten asiakkaalle ei synny kahta varausta.",
+  "blog.post10Title": "Asiakkaan varauksesta tarjoukseksi yhdellä painalluksella",
+  "blog.post10Excerpt": "Tee verkkosivusi varauspyynnöstä valmis tarjous kirjoittamatta mitään uudelleen ja vahvista se oikeaksi varaukseksi, kun asiakas sanoo kyllä.",
+  "blog.post10C1": "Moni varaus on oikeastaan keskustelun alku. Asiakas kysyy tilaa 30 hengen syntymäpäiväillalliselle, tyhy-päivää lounaalla tai hääruokien maistelua. Varaussivu kerää perustiedot, mutta menusta, hinnasta ja yksityiskohdista pitää vielä sopia. Tähän asti se tarkoitti tietojen kopioimista käsin varaukselta erilliseen tarjoukseen.",
+  "blog.post10C2": "MimmoBookissa avaat nyt asiakkaan varauksen ja painat Tee tarjous. Nimi, sähköposti, puhelin, päivä, ajat, henkilömäärä, tila, tapahtuman tyyppi, erityistoiveet ja kieli siirtyvät tarjoukselle automaattisesti. Lisäät vain sen, mitä asiakas ei voinut tietää: menun, hinnan, tarjouksen voimassaolon ja laskutustiedot.",
+  "blog.post10C3": "Tarjous lähtee brändättynä PDF:nä ja sähköpostina kuten mikä tahansa tarjous. Kun asiakas hyväksyy, paina Vahvista. MimmoBook tekee alkuperäisestä varauksesta täyden vahvistetun varauksen sovitulla hinnalla ja tilalla ja lisää mahdolliset yhdistetyt varaukset, kuten huoneet tai ruokailun. Asiakkaalle ei synny kahta varausta, ja raporteista näkyy, että varaus tuli tarjouksen kautta.",
+  "blog.post10C4": "Tarjoukset sisältyvät jokaiseen MimmoBookin tilaukseen Basicista alkaen. Jos otat jo tapahtuma- tai ryhmätiedusteluja varaussivun kautta, kokeile seuraavalla kerralla: siihen menee minuutti vartin sijaan.",
+  "blog.ofTitle": "Näin se toimii",
+  "blog.ofCaption": "Neljä vaihetta varauspyynnöstä vahvistettuun varaukseen.",
+  "blog.ofStep1Title": "Asiakas varaa",
+  "blog.ofStep1Desc": "Asiakas lähettää varauksen varaussivultasi.",
+  "blog.ofStep2Title": "Tee tarjous",
+  "blog.ofStep2Desc": "Yksi painallus täyttää tarjouksen varauksen tiedoilla. Lisäät menun ja hinnan.",
+  "blog.ofStep3Title": "Tarjousviesti",
+  "blog.ofStep3Desc": "Asiakas saa brändätyn tarjouksesi sähköpostilla.",
+  "blog.ofStep4Title": "Vahvista",
+  "blog.ofStep4Desc": "Asiakas hyväksyy, painat Vahvista ja varauksesta tulee täysi varaus.",
+  "blog.ofBenefitsTitle": "Miksi siitä on hyötyä",
+  "blog.ofBenefit1Title": "Ei uudelleenkirjoittamista",
+  "blog.ofBenefit1Desc": "Asiakkaan tiedot siirtyvät itsestään, joten nimissä ja päivissä ei ole kirjoitusvirheitä.",
+  "blog.ofBenefit2Title": "Ei tuplavarauksia",
+  "blog.ofBenefit2Desc": "Alkuperäinen varaus vahvistetaan eikä kopioida, joten asiakkaalla on yksi varaus.",
+  "blog.ofBenefit3Title": "Nopeammat vastaukset",
+  "blog.ofBenefit3Desc": "Vastaa tiedusteluun kunnon tarjouksella minuuteissa, kun asiakas on vielä innoissaan.",
+  "blog.ofBenefit4Title": "Selkeät raportit",
+  "blog.ofBenefit4Desc": "Raporteista näet, mitkä varaukset tulivat tarjouksen kautta ja mikä niiden arvo oli.",
   "support.catBasics": "Perusteet",
   "support.catReservations": "Varaukset",
   "support.catCommunication": "Viestintä",
@@ -7314,7 +7395,7 @@ const fi: TranslationKeys = {
     "Sisäänrakennettu opas, tulostettava henkilökunnan ohje ja tukiavustaja, joka vastaa kysymyksiin sovelluksessa.",
   "features.offersAndCross": "Tarjoukset ja ristiinvaraukset",
   "features.offersAndCrossDesc":
-    "Luo tarjouksia, generoi brändätyt PDF:t ja yhdistä varauksia tilojen välillä ja hallitse kaikkea yhdessä.",
+    "Luo tarjouksia, generoi brändätyt PDF:t ja yhdistä varauksia tilojen välillä ja hallitse kaikkea yhdessä. Tee asiakkaan varauksesta tarjous yhdellä painalluksella ja vahvista se täydeksi varaukseksi.",
 
   // Use Cases
   "useCases.badge": "Käyttökohteet",
@@ -9997,6 +10078,33 @@ const sv: TranslationKeys = {
     "F: Vad är skillnaden mellan AI-chatbot och prioriterad support? A: Alla planer inkluderar MimmoAid, vår AI-chatbot som är öppen dygnet runt. Affärsplanen lägger till möjlighet för supportförfrågningar som ställs på plattformen med garanterat 24-timmarssvar.",
   "support.faqC5":
     "Rapporter: öppna Rapporter, välj period överst och använd Detaljvy per resurs för att gå från en tjänst till en resurs, produkt eller tur och vidare till bokningarna. Varje nivå laddas ner som CSV eller PDF. Skriv ut hela sidan eller Skriv ut detta avsnitt på valfritt kort. Varje bokning sparas med resursen gästen eller personalen valde, även bokningar från offerter. Äldre bokningar som inte kunde kopplas till en resurs visas som Inte kopplad till en resurs. Gruppera även efter Kapacitetsutnyttjande, Offert eller direktbokning eller Köksartiklar, och dela exakt vy och period med Kopiera länk. Översikten följer perioden som valts överst.",
+  "pricing.offerFromBooking": "Offert från en gästbokning",
+  "support.faqC6": "Offert från en gästbokning: öppna en bokning som en gäst gjort på din bokningssida och tryck på Gör ett erbjudande. Gästens namn, kontaktuppgifter, datum, tider, antal gäster, utrymme, typ av evenemang, särskilda önskemål och språk fylls i på erbjudandet. Lägg till meny, giltighet och faktureringsuppgifter och skicka erbjudandet via e-post som vanligt. När gästen accepterar trycker du på Bekräfta på erbjudandet: den ursprungliga bokningen blir den fullständiga bekräftade bokningen med överenskommet pris, så gästen blir aldrig dubbelbokad.",
+  "blog.post10Title": "Från gästbokning till erbjudande med ett klick",
+  "blog.post10Excerpt": "Gör en bokningsförfrågan från din webbplats till ett färdigt erbjudande utan att skriva om något, och bekräfta den till en riktig bokning när gästen säger ja.",
+  "blog.post10C1": "Många bokningar är egentligen början på ett samtal. En gäst frågar efter en lokal för en födelsedagsmiddag för 30, en teamdag med lunch eller en provsmakning inför bröllop. Bokningssidan fångar grunderna, men meny, pris och detaljer måste fortfarande bestämmas. Hittills innebar det att kopiera allt från bokningen till ett separat erbjudande för hand.",
+  "blog.post10C2": "I MimmoBook öppnar du nu gästens bokning och trycker på Gör ett erbjudande. Namn, e-post, telefon, datum, tider, antal gäster, utrymme, typ av evenemang, särskilda önskemål och språk flyttas automatiskt till erbjudandet. Du lägger bara till det gästen inte kunde veta: meny, pris, hur länge erbjudandet gäller och faktureringsuppgifter.",
+  "blog.post10C3": "Erbjudandet skickas med din varumärkta PDF och e-post, precis som alla andra erbjudanden. När gästen accepterar trycker du på Bekräfta. MimmoBook gör den ursprungliga bokningen till den fullständiga bekräftade bokningen med överenskommet pris och utrymme, och lägger till eventuella länkade bokningar som rum eller middag. Gästen får aldrig två bokningar, och rapporterna visar att bokningen kom via ett erbjudande.",
+  "blog.post10C4": "Erbjudanden ingår i alla MimmoBooks planer, från Basic och uppåt. Tar du redan emot evenemangs- eller gruppförfrågningar via bokningssidan, prova på nästa: det tar en minut i stället för en kvart.",
+  "blog.ofTitle": "Så fungerar det",
+  "blog.ofCaption": "Fyra steg från bokningsförfrågan till bekräftad bokning.",
+  "blog.ofStep1Title": "Gästen bokar",
+  "blog.ofStep1Desc": "Gästen skickar en bokning från din bokningssida.",
+  "blog.ofStep2Title": "Gör ett erbjudande",
+  "blog.ofStep2Desc": "Ett klick fyller erbjudandet med bokningens uppgifter. Du lägger till meny och pris.",
+  "blog.ofStep3Title": "Erbjudande via e-post",
+  "blog.ofStep3Desc": "Gästen får ditt varumärkta erbjudande via e-post.",
+  "blog.ofStep4Title": "Bekräfta",
+  "blog.ofStep4Desc": "Gästen accepterar, du trycker på Bekräfta och bokningen blir en fullständig bokning.",
+  "blog.ofBenefitsTitle": "Varför det hjälper",
+  "blog.ofBenefit1Title": "Inget omskrivande",
+  "blog.ofBenefit1Desc": "Gästens uppgifter följer med av sig själva, så inga stavfel i namn eller datum.",
+  "blog.ofBenefit2Title": "Inga dubbelbokningar",
+  "blog.ofBenefit2Desc": "Den ursprungliga bokningen bekräftas, inte kopieras, så gästen har en bokning.",
+  "blog.ofBenefit3Title": "Snabbare svar",
+  "blog.ofBenefit3Desc": "Svara på en förfrågan med ett riktigt erbjudande på några minuter medan gästen är intresserad.",
+  "blog.ofBenefit4Title": "Tydliga rapporter",
+  "blog.ofBenefit4Desc": "Rapporterna visar vilka bokningar som kom via ett erbjudande och vad de var värda.",
   "support.catBasics": "Grunder",
   "support.catReservations": "Bokningar",
   "support.catCommunication": "Kommunikation",
@@ -10212,7 +10320,7 @@ const sv: TranslationKeys = {
     "Inbyggd guidebok, utskrivbar personalguide och en supportassistent som svarar i appen.",
   "features.offersAndCross": "Erbjudanden och korsbokningar",
   "features.offersAndCrossDesc":
-    "Skapa erbjudanden, generera varumärkesanpassade PDF:er och länka bokningar mellan utrymmen och hantera allt tillsammans.",
+    "Skapa erbjudanden, generera varumärkesanpassade PDF:er och länka bokningar mellan utrymmen och hantera allt tillsammans. Gör en gästbokning till ett erbjudande med ett klick och bekräfta den till en fullständig bokning.",
 
   // Use Cases
   "useCases.badge": "Användningsfall",
