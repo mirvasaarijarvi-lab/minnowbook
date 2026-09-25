@@ -42,6 +42,26 @@ function Timeline({
   );
 }
 
+/** One-line summary of a guest booking: name, date and time, guests, status. */
+function BookingPreview({ r }: { r: any }) {
+  const t = useT();
+  return (
+    <p
+      className="mt-1 truncate text-foreground"
+      data-testid="origin-booking-preview"
+    >
+      <span className="font-medium">{r.guest_name}</span>
+      {", "}
+      {fmt(r.date)}
+      {r.start_time ? ` ${String(r.start_time).slice(0, 5)}` : ""}
+      {r.guests_count
+        ? `, ${r.guests_count} ${t("common.guests").toLowerCase()}`
+        : ""}
+      {r.status ? ` (${r.status})` : ""}
+    </p>
+  );
+}
+
 /** Shown on an offer: the guest booking it was made from, with contact details. */
 export function OfferSourceBooking({
   reservationId,
@@ -51,6 +71,7 @@ export function OfferSourceBooking({
   const t = useT();
   const { tenantId } = useTenant();
   const [openFull, setOpenFull] = useState<any | null>(null);
+  const [expanded, setExpanded] = useState(false);
   const openBooking = async () => {
     const { data } = await supabase
       .from("reservations")
@@ -91,7 +112,22 @@ export function OfferSourceBooking({
         <Link2 className="h-3 w-3" aria-hidden />
         {t("offers.trace.fromBooking")}
       </p>
+      {r ? <BookingPreview r={r} /> : null}
       {r ? (
+        <Button
+          type="button"
+          variant="link"
+          size="sm"
+          className="h-auto p-0 text-xs"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {t(
+            expanded ? "offers.trace.hideDetails" : "offers.trace.showDetails",
+          )}
+        </Button>
+      ) : null}
+      {r && expanded ? (
         <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-muted-foreground">
           <dt>{t("offers.trace.guest")}</dt>
           <dd className="text-foreground">{r.guest_name}</dd>
@@ -115,7 +151,7 @@ export function OfferSourceBooking({
           </dd>
         </dl>
       ) : null}
-      {r ? (
+      {r && expanded ? (
         <Timeline
           label={t("offers.trace.timeline")}
           items={[
@@ -131,7 +167,7 @@ export function OfferSourceBooking({
             ],
           ]}
         />
-      ) : (
+      ) : r ? null : (
         <div
           role="status"
           className="mt-1 flex gap-2 text-muted-foreground"
@@ -176,6 +212,19 @@ export function ReservationOffers({
 }) {
   const t = useT();
   const { tenantId } = useTenant();
+  const { data: origin } = useQuery({
+    queryKey: ["offer-origin-preview", tenantId, reservationId],
+    enabled: !!tenantId,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("reservations")
+        .select("id, guest_name, date, start_time, guests_count, status")
+        .eq("tenant_id", tenantId!)
+        .eq("id", reservationId)
+        .maybeSingle();
+      return data;
+    },
+  });
   const { data = [] } = useQuery({
     queryKey: ["reservation-offers", tenantId, reservationId],
     enabled: !!tenantId,
@@ -203,6 +252,12 @@ export function ReservationOffers({
         <FileText className="h-4 w-4" aria-hidden />
         {t("offers.trace.offersTitle")}
       </p>
+      {origin ? (
+        <div className="mb-2 text-xs text-muted-foreground">
+          {t("offers.trace.fromBooking")}
+          <BookingPreview r={origin} />
+        </div>
+      ) : null}
       <ul className="space-y-1">
         {data.map((o: any) => {
           const s = offerTrackStatus(o);
