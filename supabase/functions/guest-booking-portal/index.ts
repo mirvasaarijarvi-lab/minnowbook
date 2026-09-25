@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { corsHeaders } from "../_shared/http-headers.ts";
+import { corsHeaders, isOriginAllowed } from "../_shared/http-headers.ts";
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
 const TOKEN_TTL_DAYS = 7;
@@ -229,7 +229,10 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
   });
 
   const action = typeof body.action === "string" ? body.action : "";
-  const origin = typeof body.origin === "string" && /^https:\/\/[a-z0-9.-]+$/i.test(body.origin)
+  // Only our own domains may appear in emailed booking links.
+  const origin = typeof body.origin === "string" &&
+      body.origin.startsWith("https://") &&
+      isOriginAllowed(body.origin)
     ? body.origin
     : "https://mimmobook.com";
 

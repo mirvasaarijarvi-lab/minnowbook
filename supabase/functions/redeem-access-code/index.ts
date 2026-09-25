@@ -500,6 +500,25 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
       );
     }
 
+    // Only workspace owners and admins may change the workspace plan.
+    if (!["owner", "admin", "superadmin"].includes(String(tenantUser.role))) {
+      logDecision({
+        requestId,
+        decision: "reject",
+        reason: "insufficient_role",
+        userIdHash,
+        hadIdempotencyKey,
+      });
+      return respond(
+        await finalize(403, {
+          error: "Only workspace owners or admins can redeem access codes.",
+          code: "INSUFFICIENT_ROLE",
+        }),
+        "insufficient_role",
+      );
+    }
+
+
     tenantIdHash = shortHash(tenantUser.tenant_id);
 
     // Look up the access code by hash via SECURITY DEFINER RPC.

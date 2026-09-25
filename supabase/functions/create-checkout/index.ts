@@ -60,7 +60,7 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
 
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    logStep("User authenticated", { userId: user.id });
 
     const { priceId } = await req.json();
     if (!priceId || typeof priceId !== "string") throw new Error("priceId is required");
