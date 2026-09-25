@@ -1,4 +1,10 @@
 import { useState, forwardRef } from "react";
+import {
+  hashOfferAcceptToken,
+  newOfferAcceptToken,
+  offerAcceptUrl,
+  withAcceptLink,
+} from "@/lib/offer-accept-link";
 import { useQuery } from "@tanstack/react-query";
 import { useT } from "@/contexts/I18nContext";
 import { useUpdateOffer, type Offer } from "@/hooks/useOffers";
@@ -97,13 +103,28 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(
         );
         const pdfBase64 = await blobToBase64(pdfBlob);
 
+        // Fresh review link on every send; only its hash is stored, so an
+        // older link stops working once a new one goes out.
+        const token = newOfferAcceptToken();
+        const tokenHash = await hashOfferAcceptToken(token);
+        const { error: tokenErr } = await supabase
+          .from("offers")
+          .update({ accept_token_hash: tokenHash } as any)
+          .eq("id", offer.id);
+        if (tokenErr) throw tokenErr;
+        const emailBody = withAcceptLink(
+          body,
+          offerAcceptUrl(window.location.origin, token),
+          offer.language || "en",
+        );
+
         const { data, error } = await supabase.functions.invoke(
           "send-offer-email",
           {
             body: {
               to: offer.guest_email,
               subject,
-              textBody: body,
+              textBody: emailBody,
               pdfBase64,
               pdfFilename: `Offer_${offer.guest_name.replace(/\s+/g, "_")}_${offer.event_date}.pdf`,
               businessName: effectiveName,

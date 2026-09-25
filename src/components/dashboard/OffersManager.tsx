@@ -674,6 +674,12 @@ const OffersManager = () => {
                           >
                             {t(`offers.track_${track}` as any)}
                           </Badge>
+                          {offer.guest_accepted_at &&
+                            offer.status !== "confirmed" && (
+                              <Badge className="text-[10px]">
+                                {t("offers.guestAccepted")}
+                              </Badge>
+                            )}
                           {expiresSoon(offer) && (
                             <Badge variant="outline" className="text-[10px]">
                               {t("offers.expiresSoon")}
@@ -704,6 +710,11 @@ const OffersManager = () => {
                           {t("common.guests").toLowerCase()} •{" "}
                           {offer.event_space}
                         </p>
+                        {offer.guest_accept_note && (
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {t("offers.guestNote")}: {offer.guest_accept_note}
+                          </p>
+                        )}
                         {offer.source_reservation_id && (
                           <OfferSourceBooking
                             reservationId={offer.source_reservation_id}

@@ -232,6 +232,13 @@
       "when": 1790343242934,
       "tag": "0032_offer_expiry_and_decline",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1790343753673,
+      "tag": "0033_offer_guest_acceptance",
+      "breakpoints": true
     }
   ]
 }

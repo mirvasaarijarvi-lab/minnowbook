@@ -1150,6 +1150,7 @@ export type Database = {
       }
       offers: {
         Row: {
+          accept_token_hash: string | null
           accepted_at: string | null
           archived_at: string | null
           created_at: string
@@ -1160,6 +1161,8 @@ export type Database = {
           event_space: string
           event_type: string | null
           expires_on: string | null
+          guest_accept_note: string | null
+          guest_accepted_at: string | null
           guest_email: string
           guest_name: string
           guest_phone: string
@@ -1181,6 +1184,7 @@ export type Database = {
           validity_date: string | null
         }
         Insert: {
+          accept_token_hash?: string | null
           accepted_at?: string | null
           archived_at?: string | null
           created_at?: string
@@ -1191,6 +1195,8 @@ export type Database = {
           event_space?: string
           event_type?: string | null
           expires_on?: string | null
+          guest_accept_note?: string | null
+          guest_accepted_at?: string | null
           guest_email: string
           guest_name: string
           guest_phone: string
@@ -1212,6 +1218,7 @@ export type Database = {
           validity_date?: string | null
         }
         Update: {
+          accept_token_hash?: string | null
           accepted_at?: string | null
           archived_at?: string | null
           created_at?: string
@@ -1222,6 +1229,8 @@ export type Database = {
           event_space?: string
           event_type?: string | null
           expires_on?: string | null
+          guest_accept_note?: string | null
+          guest_accepted_at?: string | null
           guest_email?: string
           guest_name?: string
           guest_phone?: string
@@ -3437,6 +3446,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_offer_by_guest: {
+        Args: { _note?: string; _token: string }
+        Returns: Json
+      }
       acknowledge_security_event: {
         Args: { p_event_id: string }
         Returns: undefined
@@ -3603,6 +3616,7 @@ export type Database = {
           slug: string
         }[]
       }
+      get_offer_for_guest: { Args: { _token: string }; Returns: Json }
       get_public_availability_counts: {
         Args: {
           p_from: string
