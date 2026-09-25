@@ -2141,6 +2141,20 @@ type TranslationKeys = {
   "offers.statusExpired": string;
   "offers.validity": string;
   "offers.validityPlaceholder": string;
+  "offers.validityHelp": string;
+  "offers.validUntil": string;
+  "offers.expiresSoon": string;
+  "offers.filterLabel": string;
+  "offers.markDeclined": string;
+  "offers.reopen": string;
+  "offers.declinedSuccess": string;
+  "offers.reopenedSuccess": string;
+  "offers.track_all": string;
+  "offers.track_pending": string;
+  "offers.track_accepted": string;
+  "offers.track_declined": string;
+  "offers.track_expired": string;
+  "offers.track_draft": string;
   "offers.startTime": string;
   "offers.endTime": string;
   "offers.eventSpace": string;
@@ -5003,6 +5017,21 @@ const en: TranslationKeys = {
   "offers.statusExpired": "Expired",
   "offers.validity": "Validity",
   "offers.validityPlaceholder": "e.g. Valid until 31.12.2026",
+  "offers.validityHelp":
+    "Last day the offer is valid. Open offers after this date show as expired.",
+  "offers.validUntil": "Valid until",
+  "offers.expiresSoon": "Expires soon",
+  "offers.filterLabel": "Filter offers by status",
+  "offers.markDeclined": "Mark declined",
+  "offers.reopen": "Reopen",
+  "offers.declinedSuccess": "Offer marked as declined",
+  "offers.reopenedSuccess": "Offer reopened",
+  "offers.track_all": "All",
+  "offers.track_pending": "Pending",
+  "offers.track_accepted": "Accepted",
+  "offers.track_declined": "Declined",
+  "offers.track_expired": "Expired",
+  "offers.track_draft": "Draft",
   "offers.startTime": "Start time",
   "offers.endTime": "End time",
   "offers.eventSpace": "Event space",
@@ -7925,6 +7954,21 @@ const fi: TranslationKeys = {
   "offers.statusExpired": "Vanhentunut",
   "offers.validity": "Voimassaolo",
   "offers.validityPlaceholder": "esim. Voimassa 31.12.2026 asti",
+  "offers.validityHelp":
+    "Viimeinen päivä, jolloin tarjous on voimassa. Avoimet tarjoukset näkyvät tämän jälkeen vanhentuneina.",
+  "offers.validUntil": "Voimassa asti",
+  "offers.expiresSoon": "Vanhenee pian",
+  "offers.filterLabel": "Suodata tarjouksia tilan mukaan",
+  "offers.markDeclined": "Merkitse hylätyksi",
+  "offers.reopen": "Avaa uudelleen",
+  "offers.declinedSuccess": "Tarjous merkitty hylätyksi",
+  "offers.reopenedSuccess": "Tarjous avattu uudelleen",
+  "offers.track_all": "Kaikki",
+  "offers.track_pending": "Odottaa",
+  "offers.track_accepted": "Hyväksytty",
+  "offers.track_declined": "Hylätty",
+  "offers.track_expired": "Vanhentunut",
+  "offers.track_draft": "Luonnos",
   "offers.startTime": "Alkamisaika",
   "offers.endTime": "Päättymisaika",
   "offers.eventSpace": "Tapahtumatila",
@@ -10862,6 +10906,21 @@ const sv: TranslationKeys = {
   "offers.statusExpired": "Utgången",
   "offers.validity": "Giltighet",
   "offers.validityPlaceholder": "t.ex. Giltig till 31.12.2026",
+  "offers.validityHelp":
+    "Sista dagen offerten gäller. Öppna offerter visas som utgångna efter detta datum.",
+  "offers.validUntil": "Giltig till",
+  "offers.expiresSoon": "Går ut snart",
+  "offers.filterLabel": "Filtrera offerter efter status",
+  "offers.markDeclined": "Markera som avböjd",
+  "offers.reopen": "Öppna igen",
+  "offers.declinedSuccess": "Offerten markerad som avböjd",
+  "offers.reopenedSuccess": "Offerten öppnad igen",
+  "offers.track_all": "Alla",
+  "offers.track_pending": "Väntar",
+  "offers.track_accepted": "Accepterad",
+  "offers.track_declined": "Avböjd",
+  "offers.track_expired": "Utgången",
+  "offers.track_draft": "Utkast",
   "offers.startTime": "Starttid",
   "offers.endTime": "Sluttid",
   "offers.eventSpace": "Evenemangslokal",
