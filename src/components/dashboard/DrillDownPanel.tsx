@@ -493,6 +493,7 @@ const DrillDownPanel = () => {
               {i < breadcrumb.length - 1 ? (
                 <button
                   type="button"
+                  data-print-keep
                   className="text-primary underline-offset-2 hover:underline"
                   onClick={() => {
                     if (i === 0) {
