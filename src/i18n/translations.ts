@@ -2164,6 +2164,7 @@ type TranslationKeys = {
   "offers.trace.received": string;
   "offers.trace.missing": string;
   "offers.trace.showDetails": string;
+  "offers.trace.statusCompleted": string;
   "offers.trace.hideDetails": string;
   "offers.trace.openedFromBooking": string;
   "offers.trace.backToBooking": string;
@@ -5081,6 +5082,7 @@ const en: TranslationKeys = {
   "offers.trace.received": "Received",
   "offers.trace.missing": "The original booking is no longer available.",
   "offers.trace.showDetails": "Show details",
+  "offers.trace.statusCompleted": "Completed",
   "offers.trace.hideDetails": "Hide details",
   "offers.trace.openedFromBooking": "You opened this offer from a booking.",
   "offers.trace.backToBooking": "Back to booking",
@@ -8060,6 +8062,7 @@ const fi: TranslationKeys = {
   "offers.trace.received": "Vastaanotettu",
   "offers.trace.missing": "Alkuperäinen varaus ei ole enää saatavilla.",
   "offers.trace.showDetails": "Näytä tiedot",
+  "offers.trace.statusCompleted": "Toteutunut",
   "offers.trace.hideDetails": "Piilota tiedot",
   "offers.trace.openedFromBooking": "Avasit tämän tarjouksen varauksesta.",
   "offers.trace.backToBooking": "Takaisin varaukseen",
@@ -11054,6 +11057,7 @@ const sv: TranslationKeys = {
   "offers.trace.received": "Mottagen",
   "offers.trace.missing": "Den ursprungliga bokningen finns inte längre.",
   "offers.trace.showDetails": "Visa detaljer",
+  "offers.trace.statusCompleted": "Genomförd",
   "offers.trace.hideDetails": "Dölj detaljer",
   "offers.trace.openedFromBooking": "Du öppnade offerten från en bokning.",
   "offers.trace.backToBooking": "Tillbaka till bokningen",
