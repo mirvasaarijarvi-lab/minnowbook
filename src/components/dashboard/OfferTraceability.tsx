@@ -10,7 +10,11 @@ import { offerTrackStatus } from "@/lib/offer-status";
 const fmt = (d?: string | null) => (d ? format(parseISO(d), "d.M.yyyy") : "");
 
 /** Shown on an offer: the guest booking it was made from, with contact details. */
-export function OfferSourceBooking({ reservationId }: { reservationId: string }) {
+export function OfferSourceBooking({
+  reservationId,
+}: {
+  reservationId: string;
+}) {
   const t = useT();
   const { tenantId } = useTenant();
   const { data: r, isLoading } = useQuery({
@@ -52,7 +56,9 @@ export function OfferSourceBooking({ reservationId }: { reservationId: string })
           <dd>
             {fmt(r.date)}
             {r.start_time ? ` ${String(r.start_time).slice(0, 5)}` : ""}
-            {r.guests_count ? `, ${r.guests_count} ${t("common.guests").toLowerCase()}` : ""}
+            {r.guests_count
+              ? `, ${r.guests_count} ${t("common.guests").toLowerCase()}`
+              : ""}
           </dd>
           <dt>{t("offers.trace.received")}</dt>
           <dd>
@@ -61,14 +67,20 @@ export function OfferSourceBooking({ reservationId }: { reservationId: string })
           </dd>
         </dl>
       ) : (
-        <p className="mt-1 text-muted-foreground">{t("offers.trace.missing")}</p>
+        <p className="mt-1 text-muted-foreground">
+          {t("offers.trace.missing")}
+        </p>
       )}
     </div>
   );
 }
 
 /** Shown on a reservation: offers made from this guest booking. */
-export function ReservationOffers({ reservationId }: { reservationId: string }) {
+export function ReservationOffers({
+  reservationId,
+}: {
+  reservationId: string;
+}) {
   const t = useT();
   const { tenantId } = useTenant();
   const { data = [] } = useQuery({
@@ -100,14 +112,21 @@ export function ReservationOffers({ reservationId }: { reservationId: string }) 
         {data.map((o: any) => {
           const s = offerTrackStatus(o);
           return (
-            <li key={o.id} className="flex flex-wrap items-center gap-2 text-xs">
+            <li
+              key={o.id}
+              className="flex flex-wrap items-center gap-2 text-xs"
+            >
               <Badge variant="outline" className="text-[10px]">
                 {t(`offers.track_${s}` as any)}
               </Badge>
               <span>
                 {t("offers.trace.created")} {fmt(o.created_at)}
-                {o.last_sent_at ? `, ${t("offers.lastSent").toLowerCase()} ${fmt(o.last_sent_at)}` : ""}
-                {o.expires_on ? `, ${t("offers.validUntil").toLowerCase()} ${fmt(o.expires_on)}` : ""}
+                {o.last_sent_at
+                  ? `, ${t("offers.lastSent").toLowerCase()} ${fmt(o.last_sent_at)}`
+                  : ""}
+                {o.expires_on
+                  ? `, ${t("offers.validUntil").toLowerCase()} ${fmt(o.expires_on)}`
+                  : ""}
               </span>
             </li>
           );
