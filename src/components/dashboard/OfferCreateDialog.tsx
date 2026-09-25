@@ -288,6 +288,11 @@ const OfferCreateDialog = ({
             {isEditing ? t("offers.edit") : t("offers.create")}
           </DialogTitle>
         </DialogHeader>
+        {!isEditing && fromReservation && (
+          <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
+            {t("offers.fromBookingNote")}
+          </p>
+        )}
 
         <div className="space-y-5">
           {/* Validity */}
