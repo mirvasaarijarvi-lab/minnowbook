@@ -281,10 +281,14 @@ const OfferCreateDialog = ({
             <Label htmlFor="offer-validity">{t("offers.validity")}</Label>
             <Input
               id="offer-validity"
-              value={form.validity_date}
-              onChange={(e) => updateField("validity_date", e.target.value)}
-              placeholder={t("offers.validityPlaceholder")}
+              type="date"
+              className="w-48"
+              value={form.expires_on}
+              onChange={(e) => updateField("expires_on", e.target.value)}
             />
+            <p className="text-xs text-muted-foreground">
+              {t("offers.validityHelp")}
+            </p>
           </div>
 
           {/* Customer info */}

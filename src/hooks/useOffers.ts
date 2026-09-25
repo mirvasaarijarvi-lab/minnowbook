@@ -16,7 +16,11 @@ export interface LinkedReservation {
 export interface Offer {
   id: string;
   tenant_id: string;
-  status: "draft" | "sent" | "confirmed" | "expired";
+  status: "draft" | "sent" | "confirmed" | "declined" | "expired";
+  /** Last valid day (yyyy-MM-dd). Open offers after it count as expired. */
+  expires_on?: string | null;
+  declined_at?: string | null;
+  accepted_at?: string | null;
   validity_date: string | null;
   guest_name: string;
   guest_email: string;
