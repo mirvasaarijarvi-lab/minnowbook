@@ -16,6 +16,7 @@ import { SiteContext } from "@/hooks/useSiteContext";
 import {
   PERM_CALENDAR_VIEW,
   PERM_RESERVATIONS_VIEW,
+  PERM_RESERVATIONS_EDIT,
   PERM_RESOURCES_VIEW,
   PERM_REPORTS_VIEW,
   PERM_SETTINGS_VIEW,

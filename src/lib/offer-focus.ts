@@ -49,5 +49,8 @@ export function getOfferOrigin(): BookingReturn | null {
 export function returnToBooking() {
   const o = origin;
   origin = null;
-  if (o) window.dispatchEvent(new CustomEvent(RETURN_TO_BOOKING_EVENT, { detail: o }));
+  if (o)
+    window.dispatchEvent(
+      new CustomEvent(RETURN_TO_BOOKING_EVENT, { detail: o }),
+    );
 }

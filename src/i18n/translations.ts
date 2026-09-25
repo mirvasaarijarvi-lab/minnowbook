@@ -2163,6 +2163,8 @@ type TranslationKeys = {
   "offers.trace.booked": string;
   "offers.trace.received": string;
   "offers.trace.missing": string;
+  "offers.trace.openedFromBooking": string;
+  "offers.trace.backToBooking": string;
   "offers.trace.missingHelp": string;
   "offers.trace.loadError": string;
   "offers.trace.offersTitle": string;
@@ -5076,6 +5078,8 @@ const en: TranslationKeys = {
   "offers.trace.booked": "Booked for",
   "offers.trace.received": "Received",
   "offers.trace.missing": "The original booking is no longer available.",
+  "offers.trace.openedFromBooking": "You opened this offer from a booking.",
+  "offers.trace.backToBooking": "Back to booking",
   "offers.trace.missingHelp":
     "It may have been deleted, or you may not have access to it. The offer itself is unaffected.",
   "offers.trace.loadError":
@@ -8051,6 +8055,8 @@ const fi: TranslationKeys = {
   "offers.trace.booked": "Varattu ajalle",
   "offers.trace.received": "Vastaanotettu",
   "offers.trace.missing": "Alkuperäinen varaus ei ole enää saatavilla.",
+  "offers.trace.openedFromBooking": "Avasit tämän tarjouksen varauksesta.",
+  "offers.trace.backToBooking": "Takaisin varaukseen",
   "offers.trace.missingHelp":
     "Se on ehkä poistettu, tai sinulla ei ole siihen käyttöoikeutta. Tarjous itsessään ei muutu.",
   "offers.trace.loadError":
@@ -11041,6 +11047,8 @@ const sv: TranslationKeys = {
   "offers.trace.booked": "Bokad för",
   "offers.trace.received": "Mottagen",
   "offers.trace.missing": "Den ursprungliga bokningen finns inte längre.",
+  "offers.trace.openedFromBooking": "Du öppnade offerten från en bokning.",
+  "offers.trace.backToBooking": "Tillbaka till bokningen",
   "offers.trace.missingHelp":
     "Den kan ha raderats, eller så saknar du behörighet till den. Själva offerten påverkas inte.",
   "offers.trace.loadError":
