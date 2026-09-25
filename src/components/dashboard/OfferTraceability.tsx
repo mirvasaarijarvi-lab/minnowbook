@@ -130,6 +130,24 @@ export function OfferSourceBooking({
           {t("offers.trace.missing")}
         </p>
       )}
+      {r ? (
+        <Button
+          type="button"
+          variant="link"
+          size="sm"
+          className="mt-1 h-auto p-0 text-xs"
+          onClick={openBooking}
+        >
+          <ExternalLink className="mr-1 h-3 w-3" aria-hidden />
+          {t("offers.trace.openBooking")}
+        </Button>
+      ) : null}
+      <ReservationDetailDialog
+        reservation={openFull}
+        open={!!openFull}
+        onOpenChange={(o) => !o && setOpenFull(null)}
+        canEdit={false}
+      />
     </div>
   );
 }
