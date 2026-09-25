@@ -132,11 +132,19 @@ const OffersManager = () => {
     return c;
   }, [offers]);
 
+  const [originFilter, setOriginFilter] = useState<
+    "all" | "booking" | "direct"
+  >("all");
+
   const filteredOffers = useMemo(() => {
-    const byStatus =
-      statusFilter === "all"
-        ? offers
-        : offers.filter((o) => offerTrackStatus(o) === statusFilter);
+    const byStatus = offers.filter(
+      (o) =>
+        (statusFilter === "all" || offerTrackStatus(o) === statusFilter) &&
+        (originFilter === "all" ||
+          (originFilter === "booking"
+            ? !!o.source_reservation_id
+            : !o.source_reservation_id)),
+    );
     if (!searchQuery.trim()) return byStatus;
     const q = searchQuery.toLowerCase().trim();
     return byStatus.filter((offer) => {
@@ -145,9 +153,15 @@ const OffersManager = () => {
         offer.event_date.includes(q) ||
         format(parseISO(offer.event_date), "d.M.yyyy").includes(q);
       const spaceMatch = offer.event_space.toLowerCase().includes(q);
-      return nameMatch || dateMatch || spaceMatch;
+      const contactMatch =
+        (offer.guest_email ?? "").toLowerCase().includes(q) ||
+        (offer.guest_phone ?? "").replace(/\s/g, "").includes(q.replace(/\s/g, ""));
+      const sourceMatch = (offer.source_reservation_id ?? "")
+        .toLowerCase()
+        .startsWith(q);
+      return nameMatch || dateMatch || spaceMatch || contactMatch || sourceMatch;
     });
-  }, [offers, searchQuery, statusFilter]);
+  }, [offers, searchQuery, statusFilter, originFilter]);
 
   // Derive a "stale" map for confirmed offers: when every linked reservation
   // has been cancelled, surface a badge so staff can see the offer is no
@@ -621,6 +635,24 @@ const OffersManager = () => {
             <span className="ml-1.5 text-xs opacity-75">
               {s === "all" ? offers.length : (statusCounts[s] ?? 0)}
             </span>
+          </Button>
+        ))}
+      </div>
+
+      <div
+        role="group"
+        aria-label={t("offers.originLabel")}
+        className="flex flex-wrap gap-1.5"
+      >
+        {(["all", "booking", "direct"] as const).map((s) => (
+          <Button
+            key={s}
+            size="sm"
+            variant={originFilter === s ? "secondary" : "ghost"}
+            aria-pressed={originFilter === s}
+            onClick={() => setOriginFilter(s)}
+          >
+            {t(`offers.origin_${s}` as const)}
           </Button>
         ))}
       </div>
