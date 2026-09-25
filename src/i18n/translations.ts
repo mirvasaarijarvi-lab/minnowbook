@@ -4253,7 +4253,7 @@ const en: TranslationKeys = {
   "pricing.offerFromBooking": "Make an offer from a guest booking",
   "support.faqC6":
     "Offer from a guest booking: open a booking a guest made on your booking page and press Make an offer. The guest's name, contact details, date, times, number of guests, space, event type, special requests and language fill the offer for you. Add the menu, validity and invoicing details, then send the offer email as usual. When the guest accepts, press Confirm on the offer: the original booking becomes the full confirmed reservation with the agreed price, so the guest is never booked twice.",
-  "blog.post10Title": "From Guest Booking to Signed Offer in One Click",
+  "blog.post10Title": "From Guest Booking to Confirmed Offer in One Click",
   "blog.post10Excerpt":
     "Turn a booking request from your website into a full offer without retyping anything, and confirm it into a real reservation when the guest says yes.",
   "blog.post10C1":
