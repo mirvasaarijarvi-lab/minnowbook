@@ -77,9 +77,13 @@ const CrossBookingAuditPanel = () => {
 
   const today = useMemo(() => new Date(), []);
   const period = useReportsPeriod();
+  // Always look at least 180 days ahead so upcoming clashes stay visible,
+  // even when the shared Reports period ends sooner.
+  const aheadStr = format(addDays(today, 180), "yyyy-MM-dd");
   const startStr =
     period?.startStr ?? format(subDays(today, Number(rangeKey)), "yyyy-MM-dd");
-  const endStr = period?.endStr ?? format(addDays(today, 180), "yyyy-MM-dd");
+  const endStr =
+    period?.endStr && period.endStr > aheadStr ? period.endStr : aheadStr;
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: [
