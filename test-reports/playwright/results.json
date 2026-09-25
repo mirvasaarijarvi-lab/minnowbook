@@ -4,8 +4,8 @@
       "/nix/store/31sh8fzcbg4sjahp3zj002j0ca8sfvvr-nodejs-22.22.0/bin/node",
       "/dev-server/node_modules/.bin/playwright",
       "test",
-      "e2e/guest-portal-invoice-refusal-lifecycle.spec.ts",
-      "--project=chromium"
+      "e2e/offer-from-public-booking-lifecycle.spec.ts",
+      "--list"
     ],
     "configFile": "/dev-server/playwright.config.ts",
     "rootDir": "/dev-server/e2e",
@@ -18,18 +18,14 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {
-      "actualWorkers": 2
-    },
+    "metadata": {},
     "preserveOutput": "always",
     "projects": [
       {
         "outputDir": "/dev-server/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {
-          "actualWorkers": 2
-        },
+        "metadata": {},
         "id": "chromium",
         "name": "chromium",
         "testDir": "/dev-server/e2e",
@@ -84,130 +80,76 @@
   },
   "suites": [
     {
-      "title": "guest-portal-invoice-refusal-lifecycle.spec.ts",
-      "file": "guest-portal-invoice-refusal-lifecycle.spec.ts",
+      "title": "offer-from-public-booking-lifecycle.spec.ts",
+      "file": "offer-from-public-booking-lifecycle.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Invoice refusal notice lifecycle",
-          "file": "guest-portal-invoice-refusal-lifecycle.spec.ts",
-          "line": 185,
+          "title": "Offer from a public booking: full lifecycle",
+          "file": "offer-from-public-booking-lifecycle.spec.ts",
+          "line": 93,
           "column": 6,
           "specs": [
             {
-              "title": "replaces, announces and clears refusals across retries and bookings",
-              "ok": false,
+              "title": "guest booking data flows into the offer, acceptance converts the same booking",
+              "ok": true,
               "tags": [],
               "tests": [
                 {
                   "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
+                  "annotations": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "failed",
-                      "duration": 4,
-                      "error": {
-                        "message": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-WnaHhT --remote-debugging-pipe --no-startup-window\n<launched> pid=33913\n[pid=33913][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\nCall log:\n\u001b[2m  - <launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-WnaHhT --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=33913\u001b[22m\n\u001b[2m  - [pid=33913][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\u001b[22m\n\u001b[2m  - [pid=33913] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=33913] <kill>\u001b[22m\n\u001b[2m  - [pid=33913] <will force kill>\u001b[22m\n\u001b[2m  - [pid=33913] exception while trying to kill process: Error: kill ESRCH\u001b[22m\n\u001b[2m  - [pid=33913] <process did exit: exitCode=127, signal=null>\u001b[22m\n\u001b[2m  - [pid=33913] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33913] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33913] <gracefully close end>\u001b[22m\n",
-                        "stack": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-WnaHhT --remote-debugging-pipe --no-startup-window\n<launched> pid=33913\n[pid=33913][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\nCall log:\n\u001b[2m  - <launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-WnaHhT --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=33913\u001b[22m\n\u001b[2m  - [pid=33913][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\u001b[22m\n\u001b[2m  - [pid=33913] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=33913] <kill>\u001b[22m\n\u001b[2m  - [pid=33913] <will force kill>\u001b[22m\n\u001b[2m  - [pid=33913] exception while trying to kill process: Error: kill ESRCH\u001b[22m\n\u001b[2m  - [pid=33913] <process did exit: exitCode=127, signal=null>\u001b[22m\n\u001b[2m  - [pid=33913] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33913] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33913] <gracefully close end>\u001b[22m\n"
-                      },
-                      "errors": [
-                        {
-                          "message": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-WnaHhT --remote-debugging-pipe --no-startup-window\n<launched> pid=33913\n[pid=33913][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\nCall log:\n\u001b[2m  - <launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-WnaHhT --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=33913\u001b[22m\n\u001b[2m  - [pid=33913][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\u001b[22m\n\u001b[2m  - [pid=33913] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=33913] <kill>\u001b[22m\n\u001b[2m  - [pid=33913] <will force kill>\u001b[22m\n\u001b[2m  - [pid=33913] exception while trying to kill process: Error: kill ESRCH\u001b[22m\n\u001b[2m  - [pid=33913] <process did exit: exitCode=127, signal=null>\u001b[22m\n\u001b[2m  - [pid=33913] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33913] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33913] <gracefully close end>\u001b[22m\n"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [
-                        {
-                          "text": "Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.\n"
-                        }
-                      ],
-                      "retry": 0,
-                      "startTime": "2026-09-22T07:26:30.708Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "/dev-server/test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "/dev-server/test-results/guest-portal-invoice-refus-6e50b-across-retries-and-bookings-chromium/trace.zip"
-                        }
-                      ]
+                      "type": "skip",
+                      "description": "Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.",
+                      "location": {
+                        "file": "/dev-server/e2e/offer-from-public-booking-lifecycle.spec.ts",
+                        "line": 94,
+                        "column": 8
+                      }
                     }
                   ],
-                  "status": "unexpected"
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
                 }
               ],
-              "id": "554273d6535252a53d4f-e6c99d58590eee98f649",
-              "file": "guest-portal-invoice-refusal-lifecycle.spec.ts",
-              "line": 186,
+              "id": "72e173258a2719c70997-4355a9e7f57173b19e57",
+              "file": "offer-from-public-booking-lifecycle.spec.ts",
+              "line": 99,
               "column": 3
             },
             {
-              "title": "clears a refusal on back and forward navigation between bookings",
-              "ok": false,
+              "title": "declined and expired offers leave the guest booking untouched",
+              "ok": true,
               "tags": [],
               "tests": [
                 {
                   "timeout": 30000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [
+                  "annotations": [
                     {
-                      "workerIndex": 1,
-                      "parallelIndex": 1,
-                      "status": "failed",
-                      "duration": 3,
-                      "error": {
-                        "message": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-w4PSrY --remote-debugging-pipe --no-startup-window\n<launched> pid=33912\n[pid=33912][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\nCall log:\n\u001b[2m  - <launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-w4PSrY --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=33912\u001b[22m\n\u001b[2m  - [pid=33912][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\u001b[22m\n\u001b[2m  - [pid=33912] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=33912] <kill>\u001b[22m\n\u001b[2m  - [pid=33912] <will force kill>\u001b[22m\n\u001b[2m  - [pid=33912] exception while trying to kill process: Error: kill ESRCH\u001b[22m\n\u001b[2m  - [pid=33912] <process did exit: exitCode=127, signal=null>\u001b[22m\n\u001b[2m  - [pid=33912] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33912] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33912] <gracefully close end>\u001b[22m\n",
-                        "stack": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-w4PSrY --remote-debugging-pipe --no-startup-window\n<launched> pid=33912\n[pid=33912][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\nCall log:\n\u001b[2m  - <launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-w4PSrY --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=33912\u001b[22m\n\u001b[2m  - [pid=33912][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\u001b[22m\n\u001b[2m  - [pid=33912] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=33912] <kill>\u001b[22m\n\u001b[2m  - [pid=33912] <will force kill>\u001b[22m\n\u001b[2m  - [pid=33912] exception while trying to kill process: Error: kill ESRCH\u001b[22m\n\u001b[2m  - [pid=33912] <process did exit: exitCode=127, signal=null>\u001b[22m\n\u001b[2m  - [pid=33912] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33912] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33912] <gracefully close end>\u001b[22m\n"
-                      },
-                      "errors": [
-                        {
-                          "message": "Error: browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-w4PSrY --remote-debugging-pipe --no-startup-window\n<launched> pid=33912\n[pid=33912][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\nCall log:\n\u001b[2m  - <launching> /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/playwright_chromiumdev_profile-w4PSrY --remote-debugging-pipe --no-startup-window\u001b[22m\n\u001b[2m  - <launched> pid=33912\u001b[22m\n\u001b[2m  - [pid=33912][err] /opt/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell: error while loading shared libraries: libglib-2.0.so.0: cannot open shared object file: No such file or directory\u001b[22m\n\u001b[2m  - [pid=33912] <gracefully close start>\u001b[22m\n\u001b[2m  - [pid=33912] <kill>\u001b[22m\n\u001b[2m  - [pid=33912] <will force kill>\u001b[22m\n\u001b[2m  - [pid=33912] exception while trying to kill process: Error: kill ESRCH\u001b[22m\n\u001b[2m  - [pid=33912] <process did exit: exitCode=127, signal=null>\u001b[22m\n\u001b[2m  - [pid=33912] starting temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33912] finished temporary directories cleanup\u001b[22m\n\u001b[2m  - [pid=33912] <gracefully close end>\u001b[22m\n"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [
-                        {
-                          "text": "Skipping host requirements validation logic because `PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS` env variable is set.\n"
-                        }
-                      ],
-                      "retry": 0,
-                      "startTime": "2026-09-22T07:26:30.689Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "/dev-server/test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/error-context.md"
-                        },
-                        {
-                          "name": "trace",
-                          "contentType": "application/zip",
-                          "path": "/dev-server/test-results/guest-portal-invoice-refus-27252-navigation-between-bookings-chromium/trace.zip"
-                        }
-                      ]
+                      "type": "skip",
+                      "description": "Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.",
+                      "location": {
+                        "file": "/dev-server/e2e/offer-from-public-booking-lifecycle.spec.ts",
+                        "line": 94,
+                        "column": 8
+                      }
                     }
                   ],
-                  "status": "unexpected"
+                  "expectedStatus": "skipped",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
                 }
               ],
-              "id": "554273d6535252a53d4f-1781665ca84a6a395d44",
-              "file": "guest-portal-invoice-refusal-lifecycle.spec.ts",
-              "line": 295,
+              "id": "72e173258a2719c70997-3187134d16222f17fdd3",
+              "file": "offer-from-public-booking-lifecycle.spec.ts",
+              "line": 245,
               "column": 3
             }
           ]
@@ -217,11 +159,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-22T07:26:27.821Z",
-    "duration": 3009.849,
+    "startTime": "2026-09-25T13:41:02.756Z",
+    "duration": 415.672,
     "expected": 0,
-    "skipped": 0,
-    "unexpected": 2,
+    "skipped": 2,
+    "unexpected": 0,
     "flaky": 0
   }
 }
