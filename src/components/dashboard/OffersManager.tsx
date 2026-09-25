@@ -20,6 +20,8 @@ import {
   ArchiveRestore,
   Search,
   Clock,
+  XCircle,
+  RotateCcw,
 } from "lucide-react";
 import {
   Tooltip,
@@ -47,6 +49,12 @@ import {
   composeOfferStatusMessage,
 } from "@/lib/offer-status-announcer";
 import { focusOfferStatusPanel } from "@/lib/offer-status-focus";
+import {
+  OFFER_TRACK_STATUSES,
+  expiresSoon,
+  offerTrackStatus,
+  type OfferTrackStatus,
+} from "@/lib/offer-status";
 
 import OfferCreateDialog from "./OfferCreateDialog";
 import OfferEmailDialog from "./OfferEmailDialog";
@@ -111,10 +119,26 @@ const OffersManager = () => {
     [],
   );
 
+  const [statusFilter, setStatusFilter] = useState<OfferTrackStatus | "all">(
+    "all",
+  );
+  const statusCounts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const o of offers) {
+      const s = offerTrackStatus(o);
+      c[s] = (c[s] ?? 0) + 1;
+    }
+    return c;
+  }, [offers]);
+
   const filteredOffers = useMemo(() => {
-    if (!searchQuery.trim()) return offers;
+    const byStatus =
+      statusFilter === "all"
+        ? offers
+        : offers.filter((o) => offerTrackStatus(o) === statusFilter);
+    if (!searchQuery.trim()) return byStatus;
     const q = searchQuery.toLowerCase().trim();
-    return offers.filter((offer) => {
+    return byStatus.filter((offer) => {
       const nameMatch = offer.guest_name.toLowerCase().includes(q);
       const dateMatch =
         offer.event_date.includes(q) ||
@@ -122,7 +146,7 @@ const OffersManager = () => {
       const spaceMatch = offer.event_space.toLowerCase().includes(q);
       return nameMatch || dateMatch || spaceMatch;
     });
-  }, [offers, searchQuery]);
+  }, [offers, searchQuery, statusFilter]);
 
   // Derive a "stale" map for confirmed offers: when every linked reservation
   // has been cancelled, surface a badge so staff can see the offer is no
@@ -169,18 +193,31 @@ const OffersManager = () => {
     [statusById],
   );
 
-  const statusColor = (s: string) => {
+  const statusColor = (s: OfferTrackStatus) => {
     switch (s) {
-      case "draft":
-        return "secondary" as const;
-      case "sent":
-        return "default" as const;
-      case "confirmed":
+      case "accepted":
+      case "pending":
         return "default" as const;
       case "expired":
+      case "declined":
         return "destructive" as const;
       default:
         return "secondary" as const;
+    }
+  };
+
+  const setDecision = async (offer: Offer, declined: boolean) => {
+    try {
+      await updateOffer.mutateAsync({
+        id: offer.id,
+        status: declined ? "declined" : offer.last_sent_at ? "sent" : "draft",
+        declined_at: declined ? new Date().toISOString() : null,
+      } as any);
+      toast.success(
+        t(declined ? "offers.declinedSuccess" : "offers.reopenedSuccess"),
+      );
+    } catch {
+      toast.error(t("offers.saveError"));
     }
   };
 
@@ -446,6 +483,7 @@ const OffersManager = () => {
       await updateOffer.mutateAsync({
         id: offer.id,
         status: "confirmed",
+        accepted_at: new Date().toISOString(),
         reservation_ids: resIds,
       });
 
@@ -565,6 +603,27 @@ const OffersManager = () => {
         </div>
       </div>
 
+      <div
+        role="group"
+        aria-label={t("offers.filterLabel")}
+        className="flex flex-wrap gap-1.5"
+      >
+        {(["all", ...OFFER_TRACK_STATUSES] as const).map((s) => (
+          <Button
+            key={s}
+            size="sm"
+            variant={statusFilter === s ? "default" : "outline"}
+            aria-pressed={statusFilter === s}
+            onClick={() => setStatusFilter(s)}
+          >
+            {t(`offers.track_${s}` as any)}
+            <span className="ml-1.5 text-xs opacity-75">
+              {s === "all" ? offers.length : (statusCounts[s] ?? 0)}
+            </span>
+          </Button>
+        ))}
+      </div>
+
       {confirmStatus && (
         <div
           key={confirmStatus.seq}
@@ -594,6 +653,8 @@ const OffersManager = () => {
         <ul className="space-y-2 list-none p-0 m-0">
           {filteredOffers.map((offer) => {
             const isArchived = !!offer.archived_at;
+            const track = offerTrackStatus(offer);
+            const isOpen = track === "pending" || track === "draft";
             return (
               <li key={offer.id}>
                 <Card
@@ -607,13 +668,16 @@ const OffersManager = () => {
                             {offer.guest_name}
                           </span>
                           <Badge
-                            variant={statusColor(offer.status)}
+                            variant={statusColor(track)}
                             className="text-[10px]"
                           >
-                            {t(
-                              `offers.status${offer.status.charAt(0).toUpperCase() + offer.status.slice(1)}` as any,
-                            )}
+                            {t(`offers.track_${track}` as any)}
                           </Badge>
+                          {expiresSoon(offer) && (
+                            <Badge variant="outline" className="text-[10px]">
+                              {t("offers.expiresSoon")}
+                            </Badge>
+                          )}
                           {isArchived && (
                             <Badge variant="outline" className="text-[10px]">
                               {t("offers.archived")}
@@ -639,6 +703,12 @@ const OffersManager = () => {
                           {t("common.guests").toLowerCase()} •{" "}
                           {offer.event_space}
                         </p>
+                        {offer.expires_on && (
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {t("offers.validUntil")}:{" "}
+                            {format(parseISO(offer.expires_on), "d.M.yyyy")}
+                          </p>
+                        )}
                         {offer.last_sent_at && (
                           <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
                             <Clock className="h-3 w-3" />
@@ -672,29 +742,45 @@ const OffersManager = () => {
                           <FileText className="h-3.5 w-3.5 mr-1" />
                           {t("common.edit")}
                         </Button>
-                        {(offer.status === "draft" ||
-                          offer.status === "sent") &&
-                          !isArchived && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setEmailOffer(offer)}
-                            >
-                              <Send className="h-3.5 w-3.5 mr-1" />
-                              {t("offers.send")}
-                            </Button>
-                          )}
-                        {(offer.status === "sent" ||
-                          offer.status === "draft") &&
-                          !isArchived && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleConfirm(offer)}
-                            >
-                              <Check className="h-3.5 w-3.5 mr-1" />
-                              {t("offers.confirm")}
-                            </Button>
-                          )}
+                        {isOpen && !isArchived && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEmailOffer(offer)}
+                          >
+                            <Send className="h-3.5 w-3.5 mr-1" />
+                            {t("offers.send")}
+                          </Button>
+                        )}
+                        {isOpen && !isArchived && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleConfirm(offer)}
+                          >
+                            <Check className="h-3.5 w-3.5 mr-1" />
+                            {t("offers.confirm")}
+                          </Button>
+                        )}
+                        {isOpen && !isArchived && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setDecision(offer, true)}
+                          >
+                            <XCircle className="h-3.5 w-3.5 mr-1" />
+                            {t("offers.markDeclined")}
+                          </Button>
+                        )}
+                        {offer.status === "declined" && !isArchived && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setDecision(offer, false)}
+                          >
+                            <RotateCcw className="h-3.5 w-3.5 mr-1" />
+                            {t("offers.reopen")}
+                          </Button>
+                        )}
                         {isArchived ? (
                           <Button
                             size="sm"

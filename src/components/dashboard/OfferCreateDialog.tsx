@@ -126,6 +126,7 @@ const OfferCreateDialog = ({
   function initForm(offer?: Offer | null) {
     return {
       validity_date: offer?.validity_date || "",
+      expires_on: offer?.expires_on || "",
       guest_name: offer?.guest_name || "",
       guest_email: offer?.guest_email || "",
       guest_phone: offer?.guest_phone || "",
@@ -194,7 +195,11 @@ const OfferCreateDialog = ({
 
     const payload = {
       status: (editOffer?.status || "draft") as any,
-      validity_date: form.validity_date || null,
+      // Keep the printed text in step with the tracked expiry date.
+      validity_date: form.expires_on
+        ? format(parseISO(form.expires_on), "d.M.yyyy")
+        : form.validity_date || null,
+      expires_on: form.expires_on || null,
       guest_name: form.guest_name,
       guest_email: form.guest_email,
       guest_phone: form.guest_phone,
@@ -281,10 +286,14 @@ const OfferCreateDialog = ({
             <Label htmlFor="offer-validity">{t("offers.validity")}</Label>
             <Input
               id="offer-validity"
-              value={form.validity_date}
-              onChange={(e) => updateField("validity_date", e.target.value)}
-              placeholder={t("offers.validityPlaceholder")}
+              type="date"
+              className="w-48"
+              value={form.expires_on}
+              onChange={(e) => updateField("expires_on", e.target.value)}
             />
+            <p className="text-xs text-muted-foreground">
+              {t("offers.validityHelp")}
+            </p>
           </div>
 
           {/* Customer info */}

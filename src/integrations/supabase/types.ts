@@ -1150,13 +1150,16 @@ export type Database = {
       }
       offers: {
         Row: {
+          accepted_at: string | null
           archived_at: string | null
           created_at: string
           created_by: string | null
+          declined_at: string | null
           end_time: string | null
           event_date: string
           event_space: string
           event_type: string | null
+          expires_on: string | null
           guest_email: string
           guest_name: string
           guest_phone: string
@@ -1178,13 +1181,16 @@ export type Database = {
           validity_date: string | null
         }
         Insert: {
+          accepted_at?: string | null
           archived_at?: string | null
           created_at?: string
           created_by?: string | null
+          declined_at?: string | null
           end_time?: string | null
           event_date: string
           event_space?: string
           event_type?: string | null
+          expires_on?: string | null
           guest_email: string
           guest_name: string
           guest_phone: string
@@ -1206,13 +1212,16 @@ export type Database = {
           validity_date?: string | null
         }
         Update: {
+          accepted_at?: string | null
           archived_at?: string | null
           created_at?: string
           created_by?: string | null
+          declined_at?: string | null
           end_time?: string | null
           event_date?: string
           event_space?: string
           event_type?: string | null
+          expires_on?: string | null
           guest_email?: string
           guest_name?: string
           guest_phone?: string
