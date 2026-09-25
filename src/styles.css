@@ -344,9 +344,15 @@
     width: 100%;
   }
   body[data-printing-reports] .print-hide,
-  body[data-printing-reports] #reports-workspace button,
+  body[data-printing-reports] #reports-workspace button:not(td button):not(th button):not(nav button):not([data-print-keep]),
   body[data-printing-reports] #reports-workspace [role="combobox"] {
     display: none !important;
+  }
+  body[data-printing-reports] #reports-workspace td button,
+  body[data-printing-reports] #reports-workspace nav button,
+  body[data-printing-reports] #reports-workspace [data-print-keep] {
+    text-decoration: none !important;
+    color: inherit !important;
   }
   body[data-printing-reports] .print-section {
     break-inside: avoid;
