@@ -105,6 +105,25 @@ export interface BlogPostData {
 }
 
 export const posts: Record<string, BlogPostData> = {
+  "offer-from-guest-booking": {
+    slug: "offer-from-guest-booking",
+    titleKey: "blog.post10Title",
+    dateKey: "2026-09-25",
+    readTime: "3 min",
+    contentKeys: [
+      "blog.post10C1",
+      "blog.post10C2",
+      "blog.post10C3",
+      "blog.post10C4",
+    ],
+    seoTitle: "Turn a Guest Booking into an Offer, MimmoBook",
+    seoDescription:
+      "Make an offer from a guest booking in one click: details fill in automatically, the offer is emailed, and confirming turns it into the full reservation.",
+    relatedSlugs: [
+      "reservation-challenges-small-hospitality",
+      "why-spreadsheets-fail-for-bookings",
+    ],
+  },
   "booking-software-for-service-professionals": {
     slug: "booking-software-for-service-professionals",
     titleKey: "blog.post9Title",

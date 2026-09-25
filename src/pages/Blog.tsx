@@ -74,6 +74,14 @@ const blogPosts = [
     categoryKey: "blog.catGuides" as const,
   },
   {
+    slug: "offer-from-guest-booking",
+    titleKey: "blog.post10Title" as const,
+    excerptKey: "blog.post10Excerpt" as const,
+    date: "2026-09-25",
+    readTime: "3 min",
+    categoryKey: "blog.catGuides" as const,
+  },
+  {
     slug: "booking-software-for-service-professionals",
     titleKey: "blog.post9Title" as const,
     excerptKey: "blog.post9Excerpt" as const,
