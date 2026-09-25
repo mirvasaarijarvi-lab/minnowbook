@@ -30,8 +30,14 @@ const LINE: Record<string, string> = {
 };
 
 /** Adds the review link to the email text, replacing an older link. */
-export function withAcceptLink(body: string, url: string, lang: string): string {
-  const cleaned = body.replace(/\n*\S*\/offer\/[A-Za-z0-9_-]+\S*/g, "").trimEnd();
+export function withAcceptLink(
+  body: string,
+  url: string,
+  lang: string,
+): string {
+  const cleaned = body
+    .replace(/\n*\S*\/offer\/[A-Za-z0-9_-]+\S*/g, "")
+    .trimEnd();
   const line = LINE[lang] ?? LINE.en;
   const withoutOldLine = Object.values(LINE).reduce(
     (acc, l) => acc.split(`\n\n${l}`).join(""),

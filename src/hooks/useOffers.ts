@@ -21,6 +21,8 @@ export interface Offer {
   expires_on?: string | null;
   declined_at?: string | null;
   accepted_at?: string | null;
+  guest_accepted_at?: string | null;
+  guest_accept_note?: string | null;
   validity_date: string | null;
   guest_name: string;
   guest_email: string;

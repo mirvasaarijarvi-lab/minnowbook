@@ -44,9 +44,12 @@ const TXT = {
     note: "Message to the business (optional)",
     accept: "Accept offer",
     accepting: "Accepting...",
-    accepted: "Thank you, you have accepted this offer. The business will confirm your booking.",
-    expired: "This offer has expired. Please contact the business for a new one.",
-    closed: "This offer can no longer be accepted online. Please contact the business.",
+    accepted:
+      "Thank you, you have accepted this offer. The business will confirm your booking.",
+    expired:
+      "This offer has expired. Please contact the business for a new one.",
+    closed:
+      "This offer can no longer be accepted online. Please contact the business.",
     notFound: "This link is not valid. Please check the link in your email.",
     error: "Something went wrong. Please try again.",
     consent: "By accepting you agree to the offer as described above.",
@@ -67,8 +70,10 @@ const TXT = {
     note: "Viesti yritykselle (valinnainen)",
     accept: "Hyväksy tarjous",
     accepting: "Hyväksytään...",
-    accepted: "Kiitos, olet hyväksynyt tarjouksen. Yritys vahvistaa varauksesi.",
-    expired: "Tarjous on vanhentunut. Ota yhteyttä yritykseen uuden tarjouksen saamiseksi.",
+    accepted:
+      "Kiitos, olet hyväksynyt tarjouksen. Yritys vahvistaa varauksesi.",
+    expired:
+      "Tarjous on vanhentunut. Ota yhteyttä yritykseen uuden tarjouksen saamiseksi.",
     closed: "Tarjousta ei voi enää hyväksyä verkossa. Ota yhteyttä yritykseen.",
     notFound: "Linkki ei ole voimassa. Tarkista sähköpostisi linkki.",
     error: "Jokin meni vikaan. Yritä uudelleen.",
@@ -93,7 +98,8 @@ const TXT = {
     accepted: "Tack, du har godkänt offerten. Företaget bekräftar din bokning.",
     expired: "Offerten har gått ut. Kontakta företaget för en ny offert.",
     closed: "Offerten kan inte längre godkännas online. Kontakta företaget.",
-    notFound: "Länken är inte giltig. Kontrollera länken i ditt e-postmeddelande.",
+    notFound:
+      "Länken är inte giltig. Kontrollera länken i ditt e-postmeddelande.",
     error: "Något gick fel. Försök igen.",
     consent: "Genom att godkänna samtycker du till offerten enligt ovan.",
   },
@@ -104,7 +110,9 @@ type Lang = keyof typeof TXT;
 export default function GuestOfferPage() {
   const { token } = useParams({ from: "/offer/$token" });
   const [offer, setOffer] = useState<GuestOffer | null>(null);
-  const [state, setState] = useState<"loading" | "ready" | "missing">("loading");
+  const [state, setState] = useState<"loading" | "ready" | "missing">(
+    "loading",
+  );
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -112,9 +120,12 @@ export default function GuestOfferPage() {
   useEffect(() => {
     let alive = true;
     (async () => {
-      const { data, error } = await (supabase.rpc as any)("get_offer_for_guest", {
-        _token: token,
-      });
+      const { data, error } = await (supabase.rpc as any)(
+        "get_offer_for_guest",
+        {
+          _token: token,
+        },
+      );
       if (!alive) return;
       if (error || !data) {
         setState("missing");
@@ -128,16 +139,20 @@ export default function GuestOfferPage() {
     };
   }, [token]);
 
-  const lang: Lang = (offer?.language as Lang) in TXT ? (offer!.language as Lang) : "en";
+  const lang: Lang =
+    (offer?.language as Lang) in TXT ? (offer!.language as Lang) : "en";
   const t = TXT[lang];
 
   const accept = async () => {
     setBusy(true);
     try {
-      const { data, error } = await (supabase.rpc as any)("accept_offer_by_guest", {
-        _token: token,
-        _note: note || null,
-      });
+      const { data, error } = await (supabase.rpc as any)(
+        "accept_offer_by_guest",
+        {
+          _token: token,
+          _note: note || null,
+        },
+      );
       if (error) throw error;
       setResult(data?.reason ?? "error");
     } catch {
@@ -150,7 +165,10 @@ export default function GuestOfferPage() {
   if (state === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-label="Loading" />
+        <Loader2
+          className="h-6 w-6 animate-spin text-muted-foreground"
+          aria-label="Loading"
+        />
       </main>
     );
   }
@@ -158,7 +176,9 @@ export default function GuestOfferPage() {
   if (state === "missing" || !offer) {
     return (
       <main className="min-h-screen flex items-center justify-center p-4">
-        <p className="text-muted-foreground" role="alert">{TXT.en.notFound}</p>
+        <p className="text-muted-foreground" role="alert">
+          {TXT.en.notFound}
+        </p>
       </main>
     );
   }
@@ -168,16 +188,28 @@ export default function GuestOfferPage() {
     result === "already_accepted" ||
     !!offer.guest_accepted_at ||
     offer.status === "confirmed";
-  const blocked =
-    !done && (offer.expired || result === "expired" ? "expired" : offer.status !== "sent" || result === "not_open" ? "closed" : null);
+  let blocked: "expired" | "closed" | null = null;
+  if (!done) {
+    if (offer.expired || result === "expired") blocked = "expired";
+    else if (offer.status !== "sent" || result === "not_open")
+      blocked = "closed";
+  }
 
   const rows: [string, string | null][] = [
     [t.date, format(parseISO(offer.event_date), "d.M.yyyy")],
-    [t.time, offer.end_time ? `${offer.start_time} to ${offer.end_time}` : offer.start_time],
+    [
+      t.time,
+      offer.end_time
+        ? `${offer.start_time} to ${offer.end_time}`
+        : offer.start_time,
+    ],
     [t.guests, String(offer.guests_count)],
     [t.space, offer.event_space],
     [t.type, offer.event_type],
-    [t.validUntil, offer.expires_on ? format(parseISO(offer.expires_on), "d.M.yyyy") : null],
+    [
+      t.validUntil,
+      offer.expires_on ? format(parseISO(offer.expires_on), "d.M.yyyy") : null,
+    ],
   ];
 
   return (
@@ -214,7 +246,9 @@ export default function GuestOfferPage() {
             .map(([k, v]) => (
               <section key={k}>
                 <h2 className="text-sm font-medium mb-1">{k}</h2>
-                <p className="text-sm whitespace-pre-wrap text-muted-foreground">{v}</p>
+                <p className="text-sm whitespace-pre-wrap text-muted-foreground">
+                  {v}
+                </p>
               </section>
             ))}
 
@@ -223,11 +257,17 @@ export default function GuestOfferPage() {
               role="status"
               className="flex items-start gap-2 rounded-md border border-border bg-muted/50 p-3 text-sm"
             >
-              <CheckCircle2 className="h-5 w-5 text-primary shrink-0" aria-hidden />
+              <CheckCircle2
+                className="h-5 w-5 text-primary shrink-0"
+                aria-hidden
+              />
               {t.accepted}
             </p>
           ) : blocked ? (
-            <p role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
+            <p
+              role="alert"
+              className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm"
+            >
               {blocked === "expired" ? t.expired : t.closed}
             </p>
           ) : (
@@ -243,9 +283,15 @@ export default function GuestOfferPage() {
               </div>
               <p className="text-xs text-muted-foreground">{t.consent}</p>
               {result === "error" && (
-                <p role="alert" className="text-sm text-destructive">{t.error}</p>
+                <p role="alert" className="text-sm text-destructive">
+                  {t.error}
+                </p>
               )}
-              <Button onClick={accept} disabled={busy} className="w-full sm:w-auto">
+              <Button
+                onClick={accept}
+                disabled={busy}
+                className="w-full sm:w-auto"
+              >
                 {busy ? t.accepting : t.accept}
               </Button>
             </div>

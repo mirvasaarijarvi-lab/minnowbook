@@ -36,6 +36,7 @@ import { Route as LegalDpaRouteImport } from './routes/legal/dpa'
 import { Route as LegalRetentionRouteImport } from './routes/legal/retention'
 import { Route as LegalSubprocessorsRouteImport } from './routes/legal/subprocessors'
 import { Route as MyBookingTokenRouteImport } from './routes/my-booking/$token'
+import { Route as OfferTokenRouteImport } from './routes/offer/$token'
 import { Route as SuperadminIndexRouteImport } from './routes/superadmin/index'
 import { Route as SuperadminBlogJsonLdRouteImport } from './routes/superadmin/blog-json-ld'
 import { Route as SuperadminGaDebugRouteImport } from './routes/superadmin/ga-debug'
@@ -176,6 +177,11 @@ const MyBookingTokenRoute = MyBookingTokenRouteImport.update({
   path: '/my-booking/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OfferTokenRoute = OfferTokenRouteImport.update({
+  id: '/offer/$token',
+  path: '/offer/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuperadminIndexRoute = SuperadminIndexRouteImport.update({
   id: '/superadmin/',
   path: '/superadmin/',
@@ -224,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/legal/retention': typeof LegalRetentionRoute
   '/legal/subprocessors': typeof LegalSubprocessorsRoute
   '/my-booking/$token': typeof MyBookingTokenRoute
+  '/offer/$token': typeof OfferTokenRoute
   '/superadmin/blog-json-ld': typeof SuperadminBlogJsonLdRoute
   '/superadmin/ga-debug': typeof SuperadminGaDebugRoute
   '/superadmin/ga-validate': typeof SuperadminGaValidateRoute
@@ -257,6 +264,7 @@ export interface FileRoutesByTo {
   '/legal/retention': typeof LegalRetentionRoute
   '/legal/subprocessors': typeof LegalSubprocessorsRoute
   '/my-booking/$token': typeof MyBookingTokenRoute
+  '/offer/$token': typeof OfferTokenRoute
   '/superadmin/blog-json-ld': typeof SuperadminBlogJsonLdRoute
   '/superadmin/ga-debug': typeof SuperadminGaDebugRoute
   '/superadmin/ga-validate': typeof SuperadminGaValidateRoute
@@ -291,6 +299,7 @@ export interface FileRoutesById {
   '/legal/retention': typeof LegalRetentionRoute
   '/legal/subprocessors': typeof LegalSubprocessorsRoute
   '/my-booking/$token': typeof MyBookingTokenRoute
+  '/offer/$token': typeof OfferTokenRoute
   '/superadmin/blog-json-ld': typeof SuperadminBlogJsonLdRoute
   '/superadmin/ga-debug': typeof SuperadminGaDebugRoute
   '/superadmin/ga-validate': typeof SuperadminGaValidateRoute
@@ -326,6 +335,7 @@ export interface FileRouteTypes {
     | '/legal/retention'
     | '/legal/subprocessors'
     | '/my-booking/$token'
+    | '/offer/$token'
     | '/superadmin/blog-json-ld'
     | '/superadmin/ga-debug'
     | '/superadmin/ga-validate'
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
     | '/legal/retention'
     | '/legal/subprocessors'
     | '/my-booking/$token'
+    | '/offer/$token'
     | '/superadmin/blog-json-ld'
     | '/superadmin/ga-debug'
     | '/superadmin/ga-validate'
@@ -392,6 +403,7 @@ export interface FileRouteTypes {
     | '/legal/retention'
     | '/legal/subprocessors'
     | '/my-booking/$token'
+    | '/offer/$token'
     | '/superadmin/blog-json-ld'
     | '/superadmin/ga-debug'
     | '/superadmin/ga-validate'
@@ -426,6 +438,7 @@ export interface RootRouteChildren {
   LegalRetentionRoute: typeof LegalRetentionRoute
   LegalSubprocessorsRoute: typeof LegalSubprocessorsRoute
   MyBookingTokenRoute: typeof MyBookingTokenRoute
+  OfferTokenRoute: typeof OfferTokenRoute
   SuperadminBlogJsonLdRoute: typeof SuperadminBlogJsonLdRoute
   SuperadminGaDebugRoute: typeof SuperadminGaDebugRoute
   SuperadminGaValidateRoute: typeof SuperadminGaValidateRoute
@@ -624,6 +637,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MyBookingTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/offer/$token': {
+      id: '/offer/$token'
+      path: '/offer/$token'
+      fullPath: '/offer/$token'
+      preLoaderRoute: typeof OfferTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/superadmin/': {
       id: '/superadmin/'
       path: '/superadmin'
@@ -682,6 +702,7 @@ const rootRouteChildren: RootRouteChildren = {
   LegalRetentionRoute: LegalRetentionRoute,
   LegalSubprocessorsRoute: LegalSubprocessorsRoute,
   MyBookingTokenRoute: MyBookingTokenRoute,
+  OfferTokenRoute: OfferTokenRoute,
   SuperadminBlogJsonLdRoute: SuperadminBlogJsonLdRoute,
   SuperadminGaDebugRoute: SuperadminGaDebugRoute,
   SuperadminGaValidateRoute: SuperadminGaValidateRoute,

@@ -2143,6 +2143,8 @@ type TranslationKeys = {
   "offers.validityPlaceholder": string;
   "offers.validityHelp": string;
   "offers.validUntil": string;
+  "offers.guestAccepted": string;
+  "offers.guestNote": string;
   "offers.trace.fromBooking": string;
   "offers.trace.guest": string;
   "offers.trace.contact": string;
@@ -5028,6 +5030,8 @@ const en: TranslationKeys = {
   "offers.validityHelp":
     "Last day the offer is valid. Open offers after this date show as expired.",
   "offers.validUntil": "Valid until",
+  "offers.guestAccepted": "Guest accepted",
+  "offers.guestNote": "Guest message",
   "offers.trace.fromBooking": "Made from a guest booking",
   "offers.trace.guest": "Guest",
   "offers.trace.contact": "Contact",
@@ -7973,6 +7977,8 @@ const fi: TranslationKeys = {
   "offers.validityHelp":
     "Viimeinen päivä, jolloin tarjous on voimassa. Avoimet tarjoukset näkyvät tämän jälkeen vanhentuneina.",
   "offers.validUntil": "Voimassa asti",
+  "offers.guestAccepted": "Vieras hyväksyi",
+  "offers.guestNote": "Vieraan viesti",
   "offers.trace.fromBooking": "Tehty vieraan varauksesta",
   "offers.trace.guest": "Vieras",
   "offers.trace.contact": "Yhteystiedot",
@@ -10933,6 +10939,8 @@ const sv: TranslationKeys = {
   "offers.validityHelp":
     "Sista dagen offerten gäller. Öppna offerter visas som utgångna efter detta datum.",
   "offers.validUntil": "Giltig till",
+  "offers.guestAccepted": "Gästen godkände",
+  "offers.guestNote": "Gästens meddelande",
   "offers.trace.fromBooking": "Gjord från en gästbokning",
   "offers.trace.guest": "Gäst",
   "offers.trace.contact": "Kontakt",
