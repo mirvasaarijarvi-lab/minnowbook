@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { FileText, Link2 } from "lucide-react";
+import { useState } from "react";
+import { ExternalLink, FileText, Link2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { requestOpenOffer } from "@/lib/offer-focus";
+import ReservationDetailDialog from "./ReservationDetailDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
 import { useT } from "@/contexts/I18nContext";
@@ -45,6 +49,16 @@ export function OfferSourceBooking({
 }) {
   const t = useT();
   const { tenantId } = useTenant();
+  const [openFull, setOpenFull] = useState<any | null>(null);
+  const openBooking = async () => {
+    const { data } = await supabase
+      .from("reservations")
+      .select("*")
+      .eq("tenant_id", tenantId!)
+      .eq("id", reservationId)
+      .maybeSingle();
+    if (data) setOpenFull(data);
+  };
   const { data: r, isLoading } = useQuery({
     queryKey: ["offer-source-reservation", tenantId, reservationId],
     enabled: !!tenantId,
