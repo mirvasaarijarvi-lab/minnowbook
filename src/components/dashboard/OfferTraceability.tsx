@@ -187,6 +187,16 @@ export function ReservationOffers({
                     ? `, ${t("offers.validUntil").toLowerCase()} ${fmt(o.expires_on)}`
                     : ""}
                 </span>
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0 text-xs"
+                  onClick={() => requestOpenOffer(o.id)}
+                >
+                  <ExternalLink className="mr-1 h-3 w-3" aria-hidden />
+                  {t("offers.trace.openOffer")}
+                </Button>
               </div>
               <Timeline
                 label={t("offers.trace.timeline")}

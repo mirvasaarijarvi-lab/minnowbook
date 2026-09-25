@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { OPEN_OFFER_EVENT } from "@/lib/offer-focus";
 import { useNavigate } from "@/lib/router-compat";
 import NoTenantState from "@/components/NoTenantState";
 import { useState, useEffect, useCallback } from "react";
@@ -170,6 +171,11 @@ const Dashboard = () => {
   const samplePeriod = useSamplePeriod();
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<DashboardView>("overview");
+  useEffect(() => {
+    const go = () => setCurrentView("offers");
+    window.addEventListener(OPEN_OFFER_EVENT, go);
+    return () => window.removeEventListener(OPEN_OFFER_EVENT, go);
+  }, []);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);

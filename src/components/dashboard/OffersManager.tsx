@@ -50,6 +50,7 @@ import {
 } from "@/lib/offer-status-announcer";
 import { focusOfferStatusPanel } from "@/lib/offer-status-focus";
 import { OfferSourceBooking } from "./OfferTraceability";
+import { takePendingOffer } from "@/lib/offer-focus";
 import {
   OFFER_TRACK_STATUSES,
   expiresSoon,
@@ -132,6 +133,21 @@ const OffersManager = () => {
     return c;
   }, [offers]);
 
+  const [focusedOfferId, setFocusedOfferId] = useState<string | null>(null);
+  useEffect(() => {
+    if (isLoading) return;
+    const id = takePendingOffer();
+    if (!id) return;
+    setStatusFilter("all");
+    setOriginFilter("all");
+    setSearchQuery("");
+    setFocusedOfferId(id);
+    requestAnimationFrame(() =>
+      document
+        .getElementById(`offer-${id}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" }),
+    );
+  }, [isLoading]);
   const [originFilter, setOriginFilter] = useState<
     "all" | "booking" | "direct"
   >("all");
@@ -693,7 +709,15 @@ const OffersManager = () => {
             const track = offerTrackStatus(offer);
             const isOpen = track === "pending" || track === "draft";
             return (
-              <li key={offer.id}>
+              <li
+                key={offer.id}
+                id={`offer-${offer.id}`}
+                className={
+                  focusedOfferId === offer.id
+                    ? "rounded-lg ring-2 ring-primary"
+                    : undefined
+                }
+              >
                 <Card
                   className={`hover:shadow-sm transition-shadow ${isArchived ? "opacity-60" : ""}`}
                 >
