@@ -61,7 +61,11 @@ export function OfferSourceBooking({
     if (data) setOpenFull(data);
     else toast.error(t("offers.trace.missing"));
   };
-  const { data: r, isLoading, isError } = useQuery({
+  const {
+    data: r,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["offer-source-reservation", tenantId, reservationId],
     enabled: !!tenantId,
     queryFn: async () => {
