@@ -49,6 +49,7 @@ import {
   composeOfferStatusMessage,
 } from "@/lib/offer-status-announcer";
 import { focusOfferStatusPanel } from "@/lib/offer-status-focus";
+import { OfferSourceBooking } from "./OfferTraceability";
 import {
   OFFER_TRACK_STATUSES,
   expiresSoon,
@@ -703,6 +704,11 @@ const OffersManager = () => {
                           {t("common.guests").toLowerCase()} •{" "}
                           {offer.event_space}
                         </p>
+                        {offer.source_reservation_id && (
+                          <OfferSourceBooking
+                            reservationId={offer.source_reservation_id}
+                          />
+                        )}
                         {offer.expires_on && (
                           <p className="text-[11px] text-muted-foreground mt-0.5">
                             {t("offers.validUntil")}:{" "}

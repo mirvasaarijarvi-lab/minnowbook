@@ -2143,6 +2143,14 @@ type TranslationKeys = {
   "offers.validityPlaceholder": string;
   "offers.validityHelp": string;
   "offers.validUntil": string;
+  "offers.trace.fromBooking": string;
+  "offers.trace.guest": string;
+  "offers.trace.contact": string;
+  "offers.trace.booked": string;
+  "offers.trace.received": string;
+  "offers.trace.missing": string;
+  "offers.trace.offersTitle": string;
+  "offers.trace.created": string;
   "offers.expiresSoon": string;
   "offers.filterLabel": string;
   "offers.markDeclined": string;
@@ -5020,6 +5028,14 @@ const en: TranslationKeys = {
   "offers.validityHelp":
     "Last day the offer is valid. Open offers after this date show as expired.",
   "offers.validUntil": "Valid until",
+  "offers.trace.fromBooking": "Made from a guest booking",
+  "offers.trace.guest": "Guest",
+  "offers.trace.contact": "Contact",
+  "offers.trace.booked": "Booked for",
+  "offers.trace.received": "Received",
+  "offers.trace.missing": "The original booking is no longer available.",
+  "offers.trace.offersTitle": "Offers made from this booking",
+  "offers.trace.created": "Created",
   "offers.expiresSoon": "Expires soon",
   "offers.filterLabel": "Filter offers by status",
   "offers.markDeclined": "Mark declined",
@@ -7957,6 +7973,14 @@ const fi: TranslationKeys = {
   "offers.validityHelp":
     "Viimeinen päivä, jolloin tarjous on voimassa. Avoimet tarjoukset näkyvät tämän jälkeen vanhentuneina.",
   "offers.validUntil": "Voimassa asti",
+  "offers.trace.fromBooking": "Tehty vieraan varauksesta",
+  "offers.trace.guest": "Vieras",
+  "offers.trace.contact": "Yhteystiedot",
+  "offers.trace.booked": "Varattu ajalle",
+  "offers.trace.received": "Vastaanotettu",
+  "offers.trace.missing": "Alkuperäinen varaus ei ole enää saatavilla.",
+  "offers.trace.offersTitle": "Tästä varauksesta tehdyt tarjoukset",
+  "offers.trace.created": "Luotu",
   "offers.expiresSoon": "Vanhenee pian",
   "offers.filterLabel": "Suodata tarjouksia tilan mukaan",
   "offers.markDeclined": "Merkitse hylätyksi",
@@ -10909,6 +10933,14 @@ const sv: TranslationKeys = {
   "offers.validityHelp":
     "Sista dagen offerten gäller. Öppna offerter visas som utgångna efter detta datum.",
   "offers.validUntil": "Giltig till",
+  "offers.trace.fromBooking": "Gjord från en gästbokning",
+  "offers.trace.guest": "Gäst",
+  "offers.trace.contact": "Kontakt",
+  "offers.trace.booked": "Bokad för",
+  "offers.trace.received": "Mottagen",
+  "offers.trace.missing": "Den ursprungliga bokningen finns inte längre.",
+  "offers.trace.offersTitle": "Offerter gjorda från denna bokning",
+  "offers.trace.created": "Skapad",
   "offers.expiresSoon": "Går ut snart",
   "offers.filterLabel": "Filtrera offerter efter status",
   "offers.markDeclined": "Markera som avböjd",
