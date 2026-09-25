@@ -44,6 +44,7 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { KITCHEN_RESERVATION_TYPES } from "@/lib/offer-kitchen-orders";
 import { buildKitchenPreview } from "@/lib/offer-kitchen-preview";
+import { offerPrefillFromReservation } from "@/lib/offer-from-reservation";
 
 const allTimes: string[] = [];
 for (let h = 6; h <= 23; h++) {
@@ -57,26 +58,6 @@ interface Props {
   editOffer?: Offer | null;
   /** Public booking to start a new offer from; its details fill the form. */
   fromReservation?: any | null;
-}
-
-/** Map a public booking onto the offer form fields. */
-export function offerPrefillFromReservation(r: any): Partial<Offer> {
-  const hhmm = (v?: string | null) => (v ? String(v).slice(0, 5) : "");
-  return {
-    guest_name: r.guest_name ?? "",
-    guest_email: r.guest_email ?? "",
-    guest_phone: r.guest_phone ?? "",
-    event_date: r.date ?? "",
-    start_time: hhmm(r.start_time),
-    end_time: hhmm(r.end_time) || null,
-    guests_count: r.guests_count ?? r.estimated_guests ?? 0,
-    event_space: r.resources?.name ?? r.room_type ?? "",
-    event_type: r.event_type ?? null,
-    special_requests:
-      [r.special_requests, r.dietary_notes].filter(Boolean).join("\n") || null,
-    language: r.language || "en",
-    source_reservation_id: r.id,
-  };
 }
 
 const OfferCreateDialog = ({
