@@ -6,7 +6,10 @@ import {
   futureDate,
   makeTestGuest,
 } from "./fixtures/test-tenant";
-import { callPublicBooking, isPlatformDegraded } from "./fixtures/public-booking-client";
+import {
+  callPublicBooking,
+  isPlatformDegraded,
+} from "./fixtures/public-booking-client";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { offerPrefillFromReservation } from "../src/lib/offer-from-reservation";
 import { offerTrackStatus } from "../src/lib/offer-status";
@@ -109,7 +112,10 @@ test.describe("Offer from a public booking: full lifecycle", () => {
         .eq("tenant_id", tenant.id)
         .single();
       expect(resErr, resErr?.message).toBeNull();
-      expect(original.created_by, "guest bookings have no staff creator").toBeNull();
+      expect(
+        original.created_by,
+        "guest bookings have no staff creator",
+      ).toBeNull();
       expect(original.guest_name).toBe(booking.guest.guest_name);
       expect(original.guest_email).toBe(booking.guest.guest_email);
       expect(original.date).toBe(booking.date);
@@ -152,7 +158,10 @@ test.describe("Offer from a public booking: full lifecycle", () => {
       // --- 3) Send: offer becomes pending --------------------------------
       const { data: sent, error: sentErr } = await sb
         .from("offers")
-        .update({ status: "sent", last_sent_at: new Date().toISOString() } as any)
+        .update({
+          status: "sent",
+          last_sent_at: new Date().toISOString(),
+        } as any)
         .eq("id", offerId!)
         .select()
         .single();
@@ -197,7 +206,9 @@ test.describe("Offer from a public booking: full lifecycle", () => {
       // --- 5) Verify: one full reservation, guest details intact ---------
       const { data: final } = await sb
         .from("reservations")
-        .select("id, status, price_eur, guest_name, guest_email, guest_phone, created_by")
+        .select(
+          "id, status, price_eur, guest_name, guest_email, guest_phone, created_by",
+        )
         .eq("id", booking.id)
         .single();
       expect(final).toMatchObject({
