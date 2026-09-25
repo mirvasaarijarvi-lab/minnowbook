@@ -671,6 +671,15 @@ type TranslationKeys = {
   "dashboard.quickInfo": string;
   "dashboard.checkoutsToday": string;
   "dashboard.uninvoiced": string;
+  "dashboard.originLabel": string;
+  "dashboard.originAll": string;
+  "dashboard.originGuest": string;
+  "dashboard.originStaff": string;
+  "dashboard.originWithOffers": string;
+  "offers.originLabel": string;
+  "offers.origin_all": string;
+  "offers.origin_booking": string;
+  "offers.origin_direct": string;
   "autoReminder.title": string;
   "autoReminder.tooltip": string;
   "autoReminder.hourly": string;
@@ -3115,6 +3124,15 @@ const en: TranslationKeys = {
   "dashboard.quickInfo": "Quick info",
   "dashboard.checkoutsToday": "Check-outs today",
   "dashboard.uninvoiced": "Uninvoiced",
+  "dashboard.originLabel": "Booking source",
+  "dashboard.originAll": "All sources",
+  "dashboard.originGuest": "Guest bookings",
+  "dashboard.originStaff": "Staff bookings",
+  "dashboard.originWithOffers": "Has offers",
+  "offers.originLabel": "Offer source",
+  "offers.origin_all": "All offers",
+  "offers.origin_booking": "From a guest booking",
+  "offers.origin_direct": "Created directly",
   "autoReminder.title": "Auto Reminders",
   "autoReminder.tooltip":
     "Reminder emails are automatically sent 24 hours before each confirmed reservation.",
@@ -6059,6 +6077,15 @@ const fi: TranslationKeys = {
   "dashboard.quickInfo": "Pikatiedot",
   "dashboard.checkoutsToday": "Uloskirjaukset tänään",
   "dashboard.uninvoiced": "Laskuttamatta",
+  "dashboard.originLabel": "Varauksen lähde",
+  "dashboard.originAll": "Kaikki lähteet",
+  "dashboard.originGuest": "Vieraan varaukset",
+  "dashboard.originStaff": "Henkilökunnan varaukset",
+  "dashboard.originWithOffers": "Tarjouksia tehty",
+  "offers.originLabel": "Tarjouksen lähde",
+  "offers.origin_all": "Kaikki tarjoukset",
+  "offers.origin_booking": "Vieraan varauksesta",
+  "offers.origin_direct": "Luotu suoraan",
   "autoReminder.title": "Automaattimuistutukset",
   "autoReminder.tooltip":
     "Muistutussähköpostit lähetetään automaattisesti 24 tuntia ennen vahvistettua varausta.",
@@ -9014,6 +9041,15 @@ const sv: TranslationKeys = {
   "dashboard.quickInfo": "Snabbinfo",
   "dashboard.checkoutsToday": "Utcheckningar idag",
   "dashboard.uninvoiced": "Ej fakturerade",
+  "dashboard.originLabel": "Bokningskälla",
+  "dashboard.originAll": "Alla källor",
+  "dashboard.originGuest": "Gästbokningar",
+  "dashboard.originStaff": "Personalens bokningar",
+  "dashboard.originWithOffers": "Har offerter",
+  "offers.originLabel": "Offertens källa",
+  "offers.origin_all": "Alla offerter",
+  "offers.origin_booking": "Från en gästbokning",
+  "offers.origin_direct": "Skapad direkt",
   "autoReminder.title": "Automatiska påminnelser",
   "autoReminder.tooltip":
     "Påminnelsemejl skickas automatiskt 24 timmar före varje bekräftad bokning.",

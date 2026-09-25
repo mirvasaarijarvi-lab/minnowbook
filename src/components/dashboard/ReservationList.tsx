@@ -122,6 +122,22 @@ const ReservationList = ({
   );
   const [checkoutTodayFilter, setCheckoutTodayFilter] =
     useState<boolean>(!!initialCheckoutToday);
+  const [originFilter, setOriginFilter] = useState<string>("all");
+  const { data: offerSourceIds } = useQuery({
+    queryKey: ["offer-source-ids", tenantId],
+    enabled: !!tenantId && originFilter === "offers",
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("offers")
+        .select("source_reservation_id")
+        .eq("tenant_id", tenantId!)
+        .not("source_reservation_id", "is", null);
+      if (error) throw error;
+      return Array.from(
+        new Set((data ?? []).map((o) => o.source_reservation_id as string)),
+      );
+    },
+  });
   const [specificDate, setSpecificDate] = useState<Date | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [debouncedSearch, setDebouncedSearch] = useState<string>("");
@@ -284,6 +300,15 @@ const ReservationList = ({
     }
     if (invoicedFilter === "uninvoiced") q = q.eq("is_invoiced", false);
     if (invoicedFilter === "invoiced") q = q.eq("is_invoiced", true);
+    if (originFilter === "guest") q = q.is("created_by", null);
+    if (originFilter === "staff") q = q.not("created_by", "is", null);
+    if (originFilter === "offers") {
+      const ids = offerSourceIds ?? [];
+      q = q.in(
+        "id",
+        ids.length ? ids : ["00000000-0000-0000-0000-000000000000"],
+      );
+    }
     const searchClause = buildGuestSearchOrClause(debouncedSearch);
     if (searchClause) q = q.or(searchClause);
     return q;
@@ -302,6 +327,8 @@ const ReservationList = ({
     typeFilter,
     dateFilter,
     invoicedFilter,
+    originFilter,
+    offerSourceIds,
     checkoutTodayFilter,
     specificDate,
     debouncedSearch,
@@ -318,6 +345,8 @@ const ReservationList = ({
       typeFilter,
       dateFilter,
       invoicedFilter,
+      originFilter,
+      offerSourceIds,
       checkoutTodayFilter,
       specificDate ? format(specificDate, "yyyy-MM-dd") : null,
       debouncedSearch,
@@ -922,6 +951,26 @@ const ReservationList = ({
               </SelectItem>
               <SelectItem value="invoiced">
                 {t("dashboard.invoiced")}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={originFilter} onValueChange={setOriginFilter}>
+            <SelectTrigger
+              className="w-full sm:w-[170px]"
+              aria-label={t("dashboard.originLabel")}
+            >
+              <SelectValue placeholder={t("dashboard.originLabel")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("dashboard.originAll")}</SelectItem>
+              <SelectItem value="guest">
+                {t("dashboard.originGuest")}
+              </SelectItem>
+              <SelectItem value="staff">
+                {t("dashboard.originStaff")}
+              </SelectItem>
+              <SelectItem value="offers">
+                {t("dashboard.originWithOffers")}
               </SelectItem>
             </SelectContent>
           </Select>
