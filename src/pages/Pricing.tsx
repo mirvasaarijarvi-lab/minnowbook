@@ -137,6 +137,8 @@ const Pricing = () => {
     [t("pricing.multisiteManagement"), "—", "—", "✓", "✓"],
     [t("pricing.offers"), "✓", "✓", "✓", "✓"],
     [t("pricing.offerFromBooking"), "✓", "✓", "✓", "✓"],
+    [t("pricing.offerStatus"), "✓", "✓", "✓", "✓"],
+    [t("pricing.offerGuestAccept"), "✓", "✓", "✓", "✓"],
     [t("pricing.crossReservations"), "✓", "✓", "✓", "✓"],
     [
       t("pricing.analyticsReports"),
