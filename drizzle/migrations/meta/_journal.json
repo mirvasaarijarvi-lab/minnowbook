@@ -225,6 +225,13 @@
       "when": 1790342537306,
       "tag": "0031_offers_source_reservation",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1790343242934,
+      "tag": "0032_offer_expiry_and_decline",
+      "breakpoints": true
     }
   ]
 }
