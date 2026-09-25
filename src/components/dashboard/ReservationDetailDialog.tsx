@@ -40,6 +40,7 @@ import { useT, useTDynamic } from "@/contexts/I18nContext";
 import { useDateLocale } from "@/hooks/useDateLocale";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import LinkedReservationsPanel from "./LinkedReservationsPanel";
+import { ReservationOffers } from "./OfferTraceability";
 import ReservationEmailTimeline from "./ReservationEmailTimeline";
 import { useInvoiceRefusalNotice } from "@/hooks/useInvoiceRefusalNotice";
 
@@ -363,6 +364,8 @@ const ReservationDetailDialog = ({
               </section>
             </>
           )}
+
+          <ReservationOffers reservationId={r.id} />
 
           <LinkedReservationsPanel
             reservation={r}
