@@ -1169,6 +1169,7 @@ export type Database = {
           linked_reservations: Json | null
           menu: string | null
           reservation_ids: string[] | null
+          source_reservation_id: string | null
           special_requests: string | null
           start_time: string
           status: string
@@ -1196,6 +1197,7 @@ export type Database = {
           linked_reservations?: Json | null
           menu?: string | null
           reservation_ids?: string[] | null
+          source_reservation_id?: string | null
           special_requests?: string | null
           start_time: string
           status?: string
@@ -1223,6 +1225,7 @@ export type Database = {
           linked_reservations?: Json | null
           menu?: string | null
           reservation_ids?: string[] | null
+          source_reservation_id?: string | null
           special_requests?: string | null
           start_time?: string
           status?: string
@@ -1231,6 +1234,13 @@ export type Database = {
           validity_date?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "offers_source_reservation_id_fkey"
+            columns: ["source_reservation_id"]
+            isOneToOne: false
+            referencedRelation: "reservations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "offers_tenant_id_fkey"
             columns: ["tenant_id"]

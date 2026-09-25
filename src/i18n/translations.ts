@@ -2060,6 +2060,8 @@ type TranslationKeys = {
   "offers.title": string;
   "offers.tooltip": string;
   "offers.create": string;
+  "offers.makeFromBooking": string;
+  "offers.fromBookingNote": string;
   "offers.edit": string;
   "offers.empty": string;
   "offers.noResults": string;
@@ -4865,6 +4867,9 @@ const en: TranslationKeys = {
   "offers.title": "Offers",
   "offers.tooltip": "Create and manage offers for events and group bookings",
   "offers.create": "New Offer",
+  "offers.makeFromBooking": "Make an offer",
+  "offers.fromBookingNote":
+    "Made from a guest booking. Confirming the offer turns that booking into a full reservation.",
   "offers.edit": "Edit Offer",
   "offers.empty": "No offers yet",
   "offers.noResults": "No offers match your search",
@@ -7744,6 +7749,9 @@ const fi: TranslationKeys = {
   "offers.tooltip":
     "Luo ja hallinnoi tarjouksia tapahtumille ja ryhmävarauksille",
   "offers.create": "Uusi tarjous",
+  "offers.makeFromBooking": "Tee tarjous",
+  "offers.fromBookingNote":
+    "Tehty asiakkaan varauksesta. Kun vahvistat tarjouksen, varauksesta tulee täysi varaus.",
   "offers.edit": "Muokkaa tarjousta",
   "offers.empty": "Ei tarjouksia vielä",
   "offers.noResults": "Hakuasi vastaavia tarjouksia ei löytynyt",
@@ -10639,6 +10647,9 @@ const sv: TranslationKeys = {
   "offers.tooltip":
     "Skapa och hantera erbjudanden för evenemang och gruppbokningar",
   "offers.create": "Nytt erbjudande",
+  "offers.makeFromBooking": "Gör ett erbjudande",
+  "offers.fromBookingNote":
+    "Skapat från en gästbokning. När du bekräftar erbjudandet blir bokningen en fullständig bokning.",
   "offers.edit": "Redigera erbjudande",
   "offers.empty": "Inga erbjudanden ännu",
   "offers.noResults": "Inga erbjudanden matchar din sökning",

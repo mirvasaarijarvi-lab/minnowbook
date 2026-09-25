@@ -1,0 +1,3 @@
+ALTER TABLE public.offers ADD COLUMN IF NOT EXISTS source_reservation_id uuid REFERENCES public.reservations(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS offers_source_reservation_id_idx ON public.offers(source_reservation_id);
+COMMENT ON COLUMN public.offers.source_reservation_id IS 'Public booking this offer was made from; confirming the offer updates that booking instead of creating a new one.';

@@ -44,6 +44,7 @@ import { useDateLocale } from "@/hooks/useDateLocale";
 import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import { KITCHEN_RESERVATION_TYPES } from "@/lib/offer-kitchen-orders";
 import { buildKitchenPreview } from "@/lib/offer-kitchen-preview";
+import { offerPrefillFromReservation } from "@/lib/offer-from-reservation";
 
 const allTimes: string[] = [];
 for (let h = 6; h <= 23; h++) {
@@ -55,9 +56,16 @@ interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editOffer?: Offer | null;
+  /** Public booking to start a new offer from; its details fill the form. */
+  fromReservation?: any | null;
 }
 
-const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
+const OfferCreateDialog = ({
+  open,
+  onOpenChange,
+  editOffer,
+  fromReservation,
+}: Props) => {
   const t = useT();
   const { user } = useAuth();
   const { tenantId, tenant } = useTenant();
@@ -105,7 +113,12 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
     enabled: !!tenantId,
   });
 
-  const [form, setForm] = useState(() => initForm(editOffer));
+  const seed = (): Offer | null =>
+    editOffer ??
+    (fromReservation
+      ? (offerPrefillFromReservation(fromReservation) as Offer)
+      : null);
+  const [form, setForm] = useState(() => initForm(seed()));
   const [linked, setLinked] = useState<Record<string, LinkedReservation>>(() =>
     initLinked(editOffer),
   );
@@ -121,7 +134,7 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
         : (undefined as Date | undefined),
       start_time: offer?.start_time || "",
       end_time: offer?.end_time || "",
-      guests_count: offer?.guests_count?.toString() || "",
+      guests_count: offer?.guests_count ? offer.guests_count.toString() : "",
       event_space: offer?.event_space || "",
       event_type: offer?.event_type || "",
       invoicing_details: offer?.invoicing_details || "",
@@ -143,9 +156,10 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
 
   useEffect(() => {
     if (!open) return;
-    setForm(initForm(editOffer));
+    setForm(initForm(seed()));
     setLinked(initLinked(editOffer));
-  }, [open, editOffer]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- seed derives from these props
+  }, [open, editOffer, fromReservation]);
 
   const updateField = (key: string, value: any) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -196,6 +210,9 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
       linked_reservations: linked as any,
       created_by: user?.id || null,
       language: form.language,
+      ...(!isEditing && fromReservation?.id
+        ? { source_reservation_id: fromReservation.id as string }
+        : {}),
     };
 
     try {
@@ -252,6 +269,11 @@ const OfferCreateDialog = ({ open, onOpenChange, editOffer }: Props) => {
             {isEditing ? t("offers.edit") : t("offers.create")}
           </DialogTitle>
         </DialogHeader>
+        {!isEditing && fromReservation && (
+          <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
+            {t("offers.fromBookingNote")}
+          </p>
+        )}
 
         <div className="space-y-5">
           {/* Validity */}

@@ -301,34 +301,55 @@ const OffersManager = () => {
       const linkedGroupId = crypto.randomUUID();
       const mainPrice = prices.main ?? null;
 
-      // Create main reservation
-      const { data: mainRes, error: mainErr } = await supabase
-        .from("reservations")
-        .insert({
-          tenant_id: offer.tenant_id,
-          reservation_type: plan.mainType,
-          status: "confirmed",
-          date: offer.event_date,
-          start_time: offer.start_time ? `${offer.start_time}:00` : null,
-          end_time: offer.end_time ? `${offer.end_time}:00` : null,
-          guest_name: offer.guest_name,
-          guest_email: offer.guest_email,
-          guest_phone: offer.guest_phone,
-          guests_count: offer.guests_count,
-          event_type: offer.event_type || null,
-          room_type: offer.event_space,
-          resource_id:
-            plan.legs.find((l) => l.key === "main")?.resourceId ?? null,
-          special_requests: offer.special_requests || null,
-          staff_notes: "Offer to Reservation",
-          language: offer.language || "en",
-          linked_group_id: linkedGroupId,
-          ...(mainPrice != null ? { price_eur: mainPrice } : {}),
-        } as any)
-        .select()
-        .single();
+      const mainRow = {
+        tenant_id: offer.tenant_id,
+        reservation_type: plan.mainType,
+        status: "confirmed",
+        date: offer.event_date,
+        start_time: offer.start_time ? `${offer.start_time}:00` : null,
+        end_time: offer.end_time ? `${offer.end_time}:00` : null,
+        guest_name: offer.guest_name,
+        guest_email: offer.guest_email,
+        guest_phone: offer.guest_phone,
+        guests_count: offer.guests_count,
+        event_type: offer.event_type || null,
+        room_type: offer.event_space,
+        resource_id:
+          plan.legs.find((l) => l.key === "main")?.resourceId ?? null,
+        special_requests: offer.special_requests || null,
+        staff_notes: "Offer to Reservation",
+        language: offer.language || "en",
+        linked_group_id: linkedGroupId,
+        ...(mainPrice != null ? { price_eur: mainPrice } : {}),
+      };
 
-      if (mainErr) throw mainErr;
+      // An offer made from a public booking turns that same booking into the
+      // full reservation, so the guest never ends up with two bookings.
+      let mainRes: any = null;
+      if (offer.source_reservation_id) {
+        const { tenant_id: _tenant, ...updateRow } = mainRow;
+        const { data, error } = await supabase
+          .from("reservations")
+          .update({
+            ...updateRow,
+            staff_notes: "Public booking, confirmed via offer",
+          } as any)
+          .eq("id", offer.source_reservation_id)
+          .eq("tenant_id", offer.tenant_id)
+          .select()
+          .maybeSingle();
+        if (error) throw error;
+        mainRes = data;
+      }
+      if (!mainRes) {
+        const { data, error: mainErr } = await supabase
+          .from("reservations")
+          .insert(mainRow as any)
+          .select()
+          .single();
+        if (mainErr) throw mainErr;
+        mainRes = data;
+      }
       const resIds = [mainRes.id];
 
       // Legs whose menu text becomes kitchen order lines.
