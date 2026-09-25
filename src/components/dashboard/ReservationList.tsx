@@ -327,6 +327,8 @@ const ReservationList = ({
     typeFilter,
     dateFilter,
     invoicedFilter,
+    originFilter,
+    offerSourceIds,
     checkoutTodayFilter,
     specificDate,
     debouncedSearch,
@@ -343,6 +345,8 @@ const ReservationList = ({
       typeFilter,
       dateFilter,
       invoicedFilter,
+      originFilter,
+      offerSourceIds,
       checkoutTodayFilter,
       specificDate ? format(specificDate, "yyyy-MM-dd") : null,
       debouncedSearch,
@@ -947,6 +951,26 @@ const ReservationList = ({
               </SelectItem>
               <SelectItem value="invoiced">
                 {t("dashboard.invoiced")}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={originFilter} onValueChange={setOriginFilter}>
+            <SelectTrigger
+              className="w-full sm:w-[170px]"
+              aria-label={t("dashboard.originLabel")}
+            >
+              <SelectValue placeholder={t("dashboard.originLabel")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("dashboard.originAll")}</SelectItem>
+              <SelectItem value="guest">
+                {t("dashboard.originGuest")}
+              </SelectItem>
+              <SelectItem value="staff">
+                {t("dashboard.originStaff")}
+              </SelectItem>
+              <SelectItem value="offers">
+                {t("dashboard.originWithOffers")}
               </SelectItem>
             </SelectContent>
           </Select>

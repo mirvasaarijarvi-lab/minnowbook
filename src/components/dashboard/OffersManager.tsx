@@ -155,11 +155,15 @@ const OffersManager = () => {
       const spaceMatch = offer.event_space.toLowerCase().includes(q);
       const contactMatch =
         (offer.guest_email ?? "").toLowerCase().includes(q) ||
-        (offer.guest_phone ?? "").replace(/\s/g, "").includes(q.replace(/\s/g, ""));
+        (offer.guest_phone ?? "")
+          .replace(/\s/g, "")
+          .includes(q.replace(/\s/g, ""));
       const sourceMatch = (offer.source_reservation_id ?? "")
         .toLowerCase()
         .startsWith(q);
-      return nameMatch || dateMatch || spaceMatch || contactMatch || sourceMatch;
+      return (
+        nameMatch || dateMatch || spaceMatch || contactMatch || sourceMatch
+      );
     });
   }, [offers, searchQuery, statusFilter, originFilter]);
 
