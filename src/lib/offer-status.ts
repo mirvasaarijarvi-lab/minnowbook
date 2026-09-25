@@ -4,11 +4,7 @@
  * touches them, so the list never shows a stale "pending" offer.
  */
 export type OfferTrackStatus =
-  | "draft"
-  | "pending"
-  | "accepted"
-  | "declined"
-  | "expired";
+  "draft" | "pending" | "accepted" | "declined" | "expired";
 
 export const OFFER_TRACK_STATUSES: OfferTrackStatus[] = [
   "pending",

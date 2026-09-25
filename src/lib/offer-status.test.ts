@@ -19,12 +19,19 @@ describe("offerTrackStatus", () => {
   });
   it("never expires accepted or declined offers", () => {
     expect(
-      offerTrackStatus({ status: "confirmed", expires_on: "2020-01-01" }, today),
+      offerTrackStatus(
+        { status: "confirmed", expires_on: "2020-01-01" },
+        today,
+      ),
     ).toBe("accepted");
   });
   it("flags offers expiring soon", () => {
     const now = new Date("2026-09-25T10:00:00Z");
-    expect(expiresSoon({ status: "sent", expires_on: "2026-09-27" }, 3, now)).toBe(true);
-    expect(expiresSoon({ status: "sent", expires_on: "2026-10-10" }, 3, now)).toBe(false);
+    expect(
+      expiresSoon({ status: "sent", expires_on: "2026-09-27" }, 3, now),
+    ).toBe(true);
+    expect(
+      expiresSoon({ status: "sent", expires_on: "2026-10-10" }, 3, now),
+    ).toBe(false);
   });
 });

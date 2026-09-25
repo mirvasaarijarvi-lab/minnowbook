@@ -213,7 +213,9 @@ const OffersManager = () => {
         status: declined ? "declined" : offer.last_sent_at ? "sent" : "draft",
         declined_at: declined ? new Date().toISOString() : null,
       } as any);
-      toast.success(t(declined ? "offers.declinedSuccess" : "offers.reopenedSuccess"));
+      toast.success(
+        t(declined ? "offers.declinedSuccess" : "offers.reopenedSuccess"),
+      );
     } catch {
       toast.error(t("offers.saveError"));
     }
@@ -741,24 +743,24 @@ const OffersManager = () => {
                           {t("common.edit")}
                         </Button>
                         {isOpen && !isArchived && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setEmailOffer(offer)}
-                            >
-                              <Send className="h-3.5 w-3.5 mr-1" />
-                              {t("offers.send")}
-                            </Button>
-                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setEmailOffer(offer)}
+                          >
+                            <Send className="h-3.5 w-3.5 mr-1" />
+                            {t("offers.send")}
+                          </Button>
+                        )}
                         {isOpen && !isArchived && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleConfirm(offer)}
-                            >
-                              <Check className="h-3.5 w-3.5 mr-1" />
-                              {t("offers.confirm")}
-                            </Button>
-                          )}
+                          <Button
+                            size="sm"
+                            onClick={() => handleConfirm(offer)}
+                          >
+                            <Check className="h-3.5 w-3.5 mr-1" />
+                            {t("offers.confirm")}
+                          </Button>
+                        )}
                         {isOpen && !isArchived && (
                           <Button
                             size="sm"
