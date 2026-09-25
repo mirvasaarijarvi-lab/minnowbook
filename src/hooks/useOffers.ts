@@ -39,6 +39,8 @@ export interface Offer {
   archived_at: string | null;
   last_sent_at: string | null;
   last_send_provider_id: string | null;
+  /** Public booking this offer was made from, if any. */
+  source_reservation_id?: string | null;
 }
 
 export const useOffers = (showArchived = false) => {
