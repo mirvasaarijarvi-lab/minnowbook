@@ -46,19 +46,58 @@ function Timeline({
 function BookingPreview({ r }: { r: any }) {
   const t = useT();
   return (
-    <p
-      className="mt-1 truncate text-foreground"
-      data-testid="origin-booking-preview"
-    >
-      <span className="font-medium">{r.guest_name}</span>
-      {", "}
-      {fmt(r.date)}
-      {r.start_time ? ` ${String(r.start_time).slice(0, 5)}` : ""}
-      {r.guests_count
-        ? `, ${r.guests_count} ${t("common.guests").toLowerCase()}`
-        : ""}
-      {r.status ? ` (${r.status})` : ""}
-    </p>
+    <div className="mt-1 flex min-w-0 items-center gap-2">
+      <BookingStatusBadge r={r} />
+      <p
+        className="min-w-0 truncate text-foreground"
+        data-testid="origin-booking-preview"
+      >
+        <span className="font-medium">{r.guest_name}</span>
+        {", "}
+        {fmt(r.date)}
+        {r.start_time ? ` ${String(r.start_time).slice(0, 5)}` : ""}
+        {r.guests_count
+          ? `, ${r.guests_count} ${t("common.guests").toLowerCase()}`
+          : ""}
+      </p>
+    </div>
+  );
+}
+
+const BOOKING_STATUS: Record<string, { key: string; cls: string }> = {
+  pending: {
+    key: "dashboard.pending",
+    cls: "border-warning bg-warning/15 text-foreground",
+  },
+  confirmed: {
+    key: "dashboard.confirmed",
+    cls: "border-success bg-success/20 text-foreground",
+  },
+  cancelled: {
+    key: "dashboard.cancelled",
+    cls: "border-destructive bg-destructive/10 text-destructive line-through",
+  },
+  completed: {
+    key: "offers.trace.statusCompleted",
+    cls: "border-border bg-muted text-muted-foreground",
+  },
+};
+
+/** Coloured status badge; "completed" covers used or finished bookings. */
+export function BookingStatusBadge({ r }: { r: any }) {
+  const t = useT();
+  const status =
+    r.status === "cancelled"
+      ? "cancelled"
+      : r.status === "completed" || r.is_used
+        ? "completed"
+        : (r.status ?? "pending");
+  const s = BOOKING_STATUS[status];
+  if (!s) return <Badge variant="outline">{status}</Badge>;
+  return (
+    <Badge variant="outline" className={s.cls} data-status={status}>
+      {t(s.key as any)}
+    </Badge>
   );
 }
 
@@ -218,7 +257,9 @@ export function ReservationOffers({
     queryFn: async () => {
       const { data } = await supabase
         .from("reservations")
-        .select("id, guest_name, date, start_time, guests_count, status")
+        .select(
+          "id, guest_name, date, start_time, guests_count, status, is_used",
+        )
         .eq("tenant_id", tenantId!)
         .eq("id", reservationId)
         .maybeSingle();
