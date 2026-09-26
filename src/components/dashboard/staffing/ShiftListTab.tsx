@@ -1,3 +1,4 @@
+import { periodInSiteScope } from "@/lib/staffing/siteScope";
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format, parseISO, startOfWeek } from "date-fns";
 import {
@@ -176,9 +177,7 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
     () =>
       siteFilter === NONE
         ? allPeriods
-        : allPeriods.filter(
-            (p) => p.site_id === siteFilter || p.site_id === null,
-          ),
+        : allPeriods.filter((p) => periodInSiteScope(siteFilter, p.site_id)),
     [allPeriods, siteFilter],
   );
   const { settings } = useStaffingSettings();
