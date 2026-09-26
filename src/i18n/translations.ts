@@ -1159,6 +1159,7 @@ type TranslationKeys = {
   "pricing.staffPayroll": string;
   "pricing.staffLocations": string;
   "support.faqC8": string;
+  "support.faqC9": string;
   "features.staffing": string;
   "features.staffingDesc": string;
   "support.faqC7": string;
@@ -4329,6 +4330,7 @@ const en: TranslationKeys = {
   "pricing.staffPayroll": "Payroll Excel for any pay period and shift change history",
   "pricing.staffLocations": "Shift lists per location and staff access review",
   "support.faqC8": "How do I build a shift list? Open Staffing, press Staff to add roles and people, then New shift list. Pick the role and name on each row and type shifts like 10-18, or codes V, X, Z, L and P for days off and leave. Rows total hours, Sunday and holiday, evening and night hours using your Pay rules and ratios. Pro and Business also record realized hours, download CSV and show staffing needs per hour from your bookings. Business adds a payroll Excel file and a change history. All plans can keep as many shift lists as they need. With several locations, each list belongs to one location or to all locations: choose it when creating the list or later under Location of this list, and the Location filter shows that location's lists plus all-locations lists.",
+  "support.faqC9": "How do I get started with Staffing? Owners and admins see Set up staffing at the top of the Staffing page. It walks through four steps: add your locations, add roles and staff, assign staff to locations with Works at (optional; All locations means they can work anywhere), and create your first shift list. Finished steps get a green tick. Hide guide tucks it away and the Setup guide button brings it back. A shift list for one location only offers staff who work there or at all locations.",
   "features.staffing": "Staffing and Shift Lists",
   "features.staffingDesc": "Build multi-week shift lists with roles, leave codes and automatic hour totals, record realized hours, print worker sheets, export payroll and see hour by hour where your bookings need more staff.",
   "support.faqC7":
@@ -7311,6 +7313,7 @@ const fi: TranslationKeys = {
   "pricing.staffPayroll": "Palkanlaskennan Excel mille tahansa palkkakaudelle ja vuorojen muutoshistoria",
   "pricing.staffLocations": "Toimipistekohtaiset vuorolistat ja käyttöoikeuksien tarkistus",
   "support.faqC8": "Miten teen vuorolistan? Avaa Työvuorot, lisää Henkilöstö-kohdassa tehtävät ja henkilöt ja paina Uusi vuorolista. Valitse rivillä tehtävä ja nimi ja kirjoita vuorot, esim. 10-18, tai koodit V, X, Z, L ja P vapaille ja lomille. Rivit laskevat tunnit, sunnuntai- ja pyhätunnit sekä ilta- ja yötunnit Palkkasääntöjen mukaan. Pro ja Business kirjaavat myös toteutuneet tunnit, lataavat CSV:n ja näyttävät tunneittaisen henkilöstötarpeen varauksista. Business lisää palkanlaskennan Excel-tiedoston ja muutoshistorian. Kaikissa paketeissa voi pitää niin monta vuorolistaa kuin tarvitsee. Jos toimipisteitä on useampi, jokainen lista kuuluu yhdelle toimipisteelle tai kaikille: valitse se listaa tehdessä tai myöhemmin kohdasta Listan toimipiste. Toimipiste-suodatin näyttää sen toimipisteen listat sekä kaikkien toimipisteiden listat.",
+  "support.faqC9": "Miten otan Työvuorot käyttöön? Omistajat ja ylläpitäjät näkevät Työvuorot-sivun yläosassa Henkilöstön käyttöönotto -oppaan. Se käy läpi neljä vaihetta: lisää toimipisteet, lisää roolit ja henkilöstö, liitä henkilöstö toimipisteisiin (valinnainen; Kaikki toimipisteet tarkoittaa, että henkilö voi työskennellä missä tahansa) ja luo ensimmäinen vuorolista. Valmiit vaiheet saavat vihreän merkin. Piilota opas piilottaa sen ja Käyttöönotto-opas-painike tuo sen takaisin. Yhden toimipisteen vuorolista tarjoaa vain sen toimipisteen ja kaikkien toimipisteiden henkilöstöä.",
   "features.staffing": "Työvuorot ja henkilöstö",
   "features.staffingDesc": "Rakenna usean viikon vuorolistat tehtävineen ja lomakoodeineen, tunnit lasketaan automaattisesti. Kirjaa toteumat, tulosta työntekijän listat, vie palkanlaskentaan ja näe tunneittain, missä varaukset tarvitsevat lisää väkeä.",
   "support.faqC7":
@@ -10315,6 +10318,7 @@ const sv: TranslationKeys = {
   "pricing.staffPayroll": "Löne-Excel för valfri löneperiod och ändringshistorik för turer",
   "pricing.staffLocations": "Turlistor per plats och granskning av personalens behörigheter",
   "support.faqC8": "Hur gör jag en turlista? Öppna Personal, lägg till uppgifter och personer under Personal och tryck Ny turlista. Välj uppgift och namn på varje rad och skriv turer som 10-18, eller koderna V, X, Z, L och P för lediga dagar och semester. Raderna summerar timmar, sön- och helgtimmar samt kvälls- och nattimmar enligt dina löneregler. Pro och Business registrerar även utförda timmar, laddar ner CSV och visar personalbehov per timme utifrån bokningarna. Business lägger till en lönefil i Excel och ändringshistorik. Alla paket kan ha så många turlistor som behövs. Med flera platser hör varje lista till en plats eller till alla platser: välj det när listan skapas eller senare under Listans plats. Platsfiltret visar platsens listor och listor för alla platser.",
+  "support.faqC9": "Hur kommer jag igång med Personal? Ägare och administratörer ser Kom igång med personal högst upp på sidan Personal. Den går igenom fyra steg: lägg till platser, lägg till roller och personal, koppla personal till platser med Arbetar på (valfritt; Alla platser betyder att personen kan arbeta överallt) och skapa din första turlista. Klara steg får en grön bock. Dölj guiden döljer den och knappen Kom igång-guide visar den igen. En turlista för en plats erbjuder bara personal som arbetar där eller på alla platser.",
   "features.staffing": "Personal och turlistor",
   "features.staffingDesc": "Bygg turlistor över flera veckor med uppgifter och ledighetskoder och automatiska timsummor, registrera utförda timmar, skriv ut personliga listor, exportera till lön och se timme för timme var bokningarna behöver mer personal.",
   "support.faqC7":
