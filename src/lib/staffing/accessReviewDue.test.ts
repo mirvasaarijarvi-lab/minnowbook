@@ -42,20 +42,23 @@ describe("reviewReminders", () => {
       { site_id: "d", accepted_at: "2026-06-18T12:00:00Z" },
       { site_id: "e", accepted_at: "2026-01-01T12:00:00Z" },
     ];
-    expect(reviewReminders(sites, reviews, 90, NOW).map((r) => r.siteId)).toEqual([
-      "e",
-      "d",
-      "c",
-      "b",
-    ]);
+    expect(
+      reviewReminders(sites, reviews, 90, NOW).map((r) => r.siteId),
+    ).toEqual(["e", "d", "c", "b"]);
   });
 });
 
 describe("accessReviewDays setting", () => {
   it("defaults to 90 and clamps bad values", () => {
     expect(normalizeStaffingSettings(null).accessReviewDays).toBe(90);
-    expect(normalizeStaffingSettings({ accessReviewDays: 30 }).accessReviewDays).toBe(30);
-    expect(normalizeStaffingSettings({ accessReviewDays: 2 }).accessReviewDays).toBe(90);
-    expect(normalizeStaffingSettings({ accessReviewDays: "x" }).accessReviewDays).toBe(90);
+    expect(
+      normalizeStaffingSettings({ accessReviewDays: 30 }).accessReviewDays,
+    ).toBe(30);
+    expect(
+      normalizeStaffingSettings({ accessReviewDays: 2 }).accessReviewDays,
+    ).toBe(90);
+    expect(
+      normalizeStaffingSettings({ accessReviewDays: "x" }).accessReviewDays,
+    ).toBe(90);
   });
 });

@@ -35,7 +35,8 @@ export function reviewDue(
       dueAt,
       daysOverdue: Math.floor(-diff / DAY),
     };
-  if (diff <= DUE_SOON_DAYS * DAY) return { state: "dueSoon", dueAt, daysOverdue: 0 };
+  if (diff <= DUE_SOON_DAYS * DAY)
+    return { state: "dueSoon", dueAt, daysOverdue: 0 };
   return { state: "ok", dueAt, daysOverdue: 0 };
 }
 

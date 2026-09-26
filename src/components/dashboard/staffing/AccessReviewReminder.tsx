@@ -77,12 +77,16 @@ export default function AccessReviewReminder({
   const urgent = reminders.filter((r) => r.due.state !== "dueSoon");
   if (reminders.length === 0) return null;
   const fmt = (d: Date) =>
-    d.toLocaleDateString(lang === "en" ? "en-GB" : lang === "fi" ? "fi-FI" : "sv-SE");
+    d.toLocaleDateString(
+      lang === "en" ? "en-GB" : lang === "fi" ? "fi-FI" : "sv-SE",
+    );
   return (
     <div
       role="status"
       className={`no-print flex flex-wrap items-start gap-3 rounded-md border p-3 text-sm ${
-        urgent.length ? "border-destructive/50 bg-destructive/10" : "border-border bg-muted"
+        urgent.length
+          ? "border-destructive/50 bg-destructive/10"
+          : "border-border bg-muted"
       }`}
     >
       <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
