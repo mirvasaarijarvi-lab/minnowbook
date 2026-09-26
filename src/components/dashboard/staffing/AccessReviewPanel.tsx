@@ -13,6 +13,14 @@ import { accessSnapshot } from "@/lib/staffing/accessSnapshot";
 import { useStaffingSettings } from "@/hooks/useShiftList";
 import { reviewDue } from "@/lib/staffing/accessReviewDue";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import {
+  type AuditPeriod,
+  filterForAuditPeriod,
   accessReviewFileName,
   renderAccessReviewPdf,
   type AccessReviewReport,
@@ -83,6 +91,17 @@ const LABELS = {
     pdfNone: "None",
     pdfFooter: "MimmoBook access review report",
     pdfFailed: "Could not create the PDF",
+    pdfPeriod: "Audit period",
+    pdfAllHistory: "All history",
+    pdfFrom: "From",
+    pdfTo: "To",
+    pdfPeriodHint: "Leave empty to include all history.",
+    pdfDownload: "Download PDF",
+    pdfNoneInPeriod: "No reviews accepted in this period",
+    pdfBadRange: "The start date must be on or before the end date",
+    pdfPeriodText: "{from} to {to}",
+    pdfStart: "start",
+    pdfNow: "today",
     reviewEvery: "Review each location every",
     daysN: "{n} days",
     overdueBy: "Review overdue by {days} days",
@@ -150,6 +169,17 @@ const LABELS = {
     pdfNone: "Ei yhtään",
     pdfFooter: "MimmoBook käyttöoikeusraportti",
     pdfFailed: "PDF:n luominen epäonnistui",
+    pdfPeriod: "Tarkastusjakso",
+    pdfAllHistory: "Koko historia",
+    pdfFrom: "Alkaen",
+    pdfTo: "Asti",
+    pdfPeriodHint: "Jätä tyhjäksi, niin mukana on koko historia.",
+    pdfDownload: "Lataa PDF",
+    pdfNoneInPeriod: "Ei hyväksyttyjä tarkistuksia tällä jaksolla",
+    pdfBadRange: "Alkupäivän täytyy olla sama tai ennen loppupäivää",
+    pdfPeriodText: "{from} ja {to} välillä",
+    pdfStart: "alusta",
+    pdfNow: "tähän päivään",
     reviewEvery: "Tarkista jokainen toimipiste",
     daysN: "{n} päivän välein",
     overdueBy: "Tarkistus myöhässä {days} päivää",
@@ -216,6 +246,17 @@ const LABELS = {
     pdfNone: "Inga",
     pdfFooter: "MimmoBook behörighetsrapport",
     pdfFailed: "Det gick inte att skapa PDF-filen",
+    pdfPeriod: "Granskningsperiod",
+    pdfAllHistory: "Hela historiken",
+    pdfFrom: "Från",
+    pdfTo: "Till",
+    pdfPeriodHint: "Lämna tomt för att ta med hela historiken.",
+    pdfDownload: "Ladda ner PDF",
+    pdfNoneInPeriod: "Inga godkända granskningar under perioden",
+    pdfBadRange: "Startdatumet måste vara samma som eller före slutdatumet",
+    pdfPeriodText: "{from} till {to}",
+    pdfStart: "början",
+    pdfNow: "i dag",
     reviewEvery: "Granska varje plats var",
     daysN: "{n}:e dag",
     overdueBy: "Granskningen är {days} dagar försenad",
@@ -593,9 +634,23 @@ export default function AccessReviewPanel({
         : L.dueOn.replace("{date}", fmt(d.dueAt!.toISOString()));
   };
 
-  const exportPdf = async (s: (typeof perSite)[number]) => {
+  const exportPdf = async (
+    s: (typeof perSite)[number],
+    period: AuditPeriod = {},
+  ): Promise<boolean> => {
+    if (period.from && period.to && period.from > period.to) {
+      toast.error(L.pdfBadRange);
+      return false;
+    }
     try {
       const now = new Date();
+      const hasPeriod = !!(period.from || period.to);
+      const dayText = (d: string) => fmt(`${d}T12:00:00`);
+      const scoped = filterForAuditPeriod(
+        s.history,
+        s.unreviewedChanges,
+        period,
+      );
       const report: AccessReviewReport = {
         title: L.pdfTitle,
         business: (tenant as any)?.name ?? "",
@@ -616,6 +671,17 @@ export default function AccessReviewPanel({
               dueText(s.last?.accepted_at),
           ],
           [L.pdfInterval, L.daysN.replace("{n}", String(interval))],
+          [
+            L.pdfPeriod,
+            hasPeriod
+              ? L.pdfPeriodText
+                  .replace(
+                    "{from}",
+                    period.from ? dayText(period.from) : L.pdfStart,
+                  )
+                  .replace("{to}", period.to ? dayText(period.to) : L.pdfNow)
+              : L.pdfAllHistory,
+          ],
         ],
         sections: [
           {
@@ -653,8 +719,8 @@ export default function AccessReviewPanel({
           },
           {
             heading: L.history,
-            empty: L.never,
-            blocks: s.history.map((h) => {
+            empty: hasPeriod ? L.pdfNoneInPeriod : L.never,
+            blocks: scoped.history.map((h) => {
               const lines: string[] = [
                 h.untilAt
                   ? L.untilNext.replace("{date}", fmt(h.untilAt))
@@ -687,11 +753,11 @@ export default function AccessReviewPanel({
               };
             }),
           },
-          ...(s.unreviewedChanges.length
+          ...(scoped.unreviewed.length
             ? [
                 {
                   heading: L.notReviewedChanges,
-                  blocks: [{ lines: s.unreviewedChanges.map(describeChange) }],
+                  blocks: [{ lines: scoped.unreviewed.map(describeChange) }],
                 },
               ]
             : []),
@@ -700,11 +766,13 @@ export default function AccessReviewPanel({
       };
       const { jsPDF } = await import("jspdf");
       renderAccessReviewPdf(jsPDF, report).save(
-        accessReviewFileName((tenant as any)?.slug, s.site.name, now),
+        accessReviewFileName((tenant as any)?.slug, s.site.name, now, period),
       );
+      return true;
     } catch (e) {
       console.error(e);
       toast.error(L.pdfFailed);
+      return false;
     }
   };
 
@@ -1082,18 +1150,79 @@ export default function AccessReviewPanel({
                 {L.acceptBlocked}
               </span>
             )}
-            <Button
-              size="sm"
-              variant="outline"
-              className="ml-auto"
-              onClick={() => exportPdf(s)}
-            >
-              <FileDown className="mr-1 h-4 w-4" aria-hidden />
-              {L.pdf}
-            </Button>
+            <PdfExportButton
+              L={L}
+              onExport={(period) => exportPdf(s, period)}
+            />
           </div>
         </section>
       ))}
     </div>
+  );
+}
+
+function PdfExportButton({
+  L,
+  onExport,
+}: {
+  L: {
+    pdf: string;
+    pdfPeriod: string;
+    pdfFrom: string;
+    pdfTo: string;
+    pdfPeriodHint: string;
+    pdfDownload: string;
+  };
+  onExport: (period: AuditPeriod) => Promise<boolean>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [busy, setBusy] = useState(false);
+  const download = async () => {
+    setBusy(true);
+    const ok = await onExport({ from: from || undefined, to: to || undefined });
+    setBusy(false);
+    if (ok) setOpen(false);
+  };
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button size="sm" variant="outline" className="ml-auto">
+          <FileDown className="mr-1 h-4 w-4" aria-hidden />
+          {L.pdf}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-72 space-y-3">
+        <p className="text-sm font-medium">{L.pdfPeriod}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <div className="space-y-1">
+            <Label htmlFor="pdf-period-from">{L.pdfFrom}</Label>
+            <Input
+              id="pdf-period-from"
+              type="date"
+              value={from}
+              max={to || undefined}
+              onChange={(e) => setFrom(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="pdf-period-to">{L.pdfTo}</Label>
+            <Input
+              id="pdf-period-to"
+              type="date"
+              value={to}
+              min={from || undefined}
+              onChange={(e) => setTo(e.target.value)}
+            />
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">{L.pdfPeriodHint}</p>
+        <Button size="sm" className="w-full" disabled={busy} onClick={download}>
+          <FileDown className="mr-1 h-4 w-4" aria-hidden />
+          {L.pdfDownload}
+        </Button>
+      </PopoverContent>
+    </Popover>
   );
 }

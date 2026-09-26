@@ -112,11 +112,36 @@ export function renderAccessReviewPdf(
   return doc;
 }
 
+/** Audit period as local calendar dates ("YYYY-MM-DD"), both inclusive and optional. */
+export type AuditPeriod = { from?: string; to?: string };
+
+/** True when the timestamp falls inside the period (local days, inclusive). */
+export function inAuditPeriod(iso: string, period: AuditPeriod): boolean {
+  const t = new Date(iso).getTime();
+  if (period.from && t < new Date(`${period.from}T00:00:00`).getTime())
+    return false;
+  if (period.to && t > new Date(`${period.to}T23:59:59.999`).getTime())
+    return false;
+  return true;
+}
+
+/** Keeps reviews accepted, and unreviewed changes made, inside the period. */
+export function filterForAuditPeriod<
+  H extends { review: { accepted_at: string } },
+  C extends { changed_at: string },
+>(history: H[], unreviewed: C[], period: AuditPeriod) {
+  return {
+    history: history.filter((h) => inAuditPeriod(h.review.accepted_at, period)),
+    unreviewed: unreviewed.filter((c) => inAuditPeriod(c.changed_at, period)),
+  };
+}
+
 /** File name like "mimmin-testi_access-review_hotel-mimmi_2026-09-26.pdf". */
 export function accessReviewFileName(
   slug: string | null | undefined,
   location: string,
   date: Date,
+  period?: AuditPeriod,
 ): string {
   const clean = (s: string) =>
     s
@@ -126,5 +151,9 @@ export function accessReviewFileName(
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || "location";
   const d = date.toISOString().slice(0, 10);
-  return `${clean(slug || "business")}_access-review_${clean(location)}_${d}.pdf`;
+  const range =
+    period?.from || period?.to
+      ? `_period-${period.from ?? "start"}-to-${period.to ?? "now"}`
+      : "";
+  return `${clean(slug || "business")}_access-review_${clean(location)}${range}_${d}.pdf`;
 }
