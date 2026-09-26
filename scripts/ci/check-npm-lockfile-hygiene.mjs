@@ -16,7 +16,7 @@
 //
 // Importable for tests:
 //   import { collectProblems, ALLOWED_REGISTRY_HOSTS } from "./check-npm-lockfile-hygiene.mjs";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
