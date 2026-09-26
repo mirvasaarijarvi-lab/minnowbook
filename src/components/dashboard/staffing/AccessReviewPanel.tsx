@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, AlertTriangle, FileDown } from "lucide-react";
 import { toast } from "sonner";
@@ -1179,6 +1179,7 @@ function PdfExportButton({
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [busy, setBusy] = useState(false);
+  const uid = useId();
   const download = async () => {
     setBusy(true);
     const ok = await onExport({ from: from || undefined, to: to || undefined });
@@ -1197,9 +1198,9 @@ function PdfExportButton({
         <p className="text-sm font-medium">{L.pdfPeriod}</p>
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
-            <Label htmlFor="pdf-period-from">{L.pdfFrom}</Label>
+            <Label htmlFor={`${uid}-from`}>{L.pdfFrom}</Label>
             <Input
-              id="pdf-period-from"
+              id={`${uid}-from`}
               type="date"
               value={from}
               max={to || undefined}
@@ -1207,9 +1208,9 @@ function PdfExportButton({
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="pdf-period-to">{L.pdfTo}</Label>
+            <Label htmlFor={`${uid}-to`}>{L.pdfTo}</Label>
             <Input
-              id="pdf-period-to"
+              id={`${uid}-to`}
               type="date"
               value={to}
               min={from || undefined}
