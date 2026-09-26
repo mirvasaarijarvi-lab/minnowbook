@@ -89,7 +89,7 @@ const blogPosts = [
     readTime: "8 min",
     categoryKey: "blog.catGuides" as const,
   },
-];
+].sort((a, b) => b.date.localeCompare(a.date)); // newest first
 
 const Blog = () => {
   const t = useT();
