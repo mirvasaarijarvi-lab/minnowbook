@@ -9,14 +9,14 @@ name: Stale result check
 on:
   workflow_run:
     workflows:
-      - CI
+      - CI Build Check
       - Lint
       - Lockfile sync (npm)
       - Package registry and audit gate
       - Dependency audit
-      - E2E
-      - Security tests
-      - RLS/CORS gate
+      - E2E Tests
+      - Security Regression Tests (Unit)
+      - RLS / CORS Security Gate
     types: [completed]
 
 permissions: {}
