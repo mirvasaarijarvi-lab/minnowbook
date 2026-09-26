@@ -1,8 +1,18 @@
 import { describe, expect, it, vi } from "vitest";
-import { focusAdjacentShiftField, revealShiftField } from "./shiftFieldNavigation";
+import {
+  focusAdjacentShiftField,
+  revealShiftField,
+} from "./shiftFieldNavigation";
 
 const rect = (left: number, right: number) => ({
-  left, right, top: 0, bottom: 30, width: right - left, height: 30, x: left, y: 0,
+  left,
+  right,
+  top: 0,
+  bottom: 30,
+  width: right - left,
+  height: 30,
+  x: left,
+  y: 0,
   toJSON: () => ({}),
 });
 
@@ -13,16 +23,26 @@ describe("shift field keyboard navigation", () => {
         <table><thead><tr><th data-shift-pinned></th><th data-shift-pinned></th></tr></thead>
         <tbody><tr><td><input data-shift-field /></td><td><input data-shift-field /></td></tr></tbody></table>
       </div>`;
-    const container = document.querySelector<HTMLElement>("[data-testid='shift-table-scroll']");
-    const fields = document.querySelectorAll<HTMLInputElement>("[data-shift-field]");
-    const headers = document.querySelectorAll<HTMLElement>("[data-shift-pinned]");
-    if (!container || fields.length < 2 || headers.length < 2) throw new Error("Test table was not created");
+    const container = document.querySelector<HTMLElement>(
+      "[data-testid='shift-table-scroll']",
+    );
+    const fields =
+      document.querySelectorAll<HTMLInputElement>("[data-shift-field]");
+    const headers = document.querySelectorAll<HTMLElement>(
+      "[data-shift-pinned]",
+    );
+    if (!container || fields.length < 2 || headers.length < 2)
+      throw new Error("Test table was not created");
 
     container.scrollLeft = 20;
     container.scrollTop = 75;
     vi.spyOn(container, "getBoundingClientRect").mockReturnValue(rect(0, 500));
-    headers.forEach((header) => vi.spyOn(header, "getBoundingClientRect").mockReturnValue(rect(0, 150)));
-    vi.spyOn(fields[1], "getBoundingClientRect").mockReturnValue(rect(490, 550));
+    headers.forEach((header) =>
+      vi.spyOn(header, "getBoundingClientRect").mockReturnValue(rect(0, 150)),
+    );
+    vi.spyOn(fields[1], "getBoundingClientRect").mockReturnValue(
+      rect(490, 550),
+    );
     const focus = vi.spyOn(fields[1], "focus");
 
     expect(focusAdjacentShiftField(fields[0], false)).toBe(true);
@@ -34,14 +54,22 @@ describe("shift field keyboard navigation", () => {
   it("reveals a previous field from behind the pinned columns", () => {
     document.body.innerHTML = `
       <div data-testid="shift-table-scroll"><table><thead><tr><th data-shift-pinned></th><th data-shift-pinned></th></tr></thead></table><input data-shift-field /></div>`;
-    const container = document.querySelector<HTMLElement>("[data-testid='shift-table-scroll']");
-    const field = document.querySelector<HTMLInputElement>("[data-shift-field]");
-    const headers = document.querySelectorAll<HTMLElement>("[data-shift-pinned]");
-    if (!container || !field || headers.length < 2) throw new Error("Test table was not created");
+    const container = document.querySelector<HTMLElement>(
+      "[data-testid='shift-table-scroll']",
+    );
+    const field =
+      document.querySelector<HTMLInputElement>("[data-shift-field]");
+    const headers = document.querySelectorAll<HTMLElement>(
+      "[data-shift-pinned]",
+    );
+    if (!container || !field || headers.length < 2)
+      throw new Error("Test table was not created");
 
     container.scrollLeft = 400;
     vi.spyOn(container, "getBoundingClientRect").mockReturnValue(rect(0, 500));
-    headers.forEach((header) => vi.spyOn(header, "getBoundingClientRect").mockReturnValue(rect(0, 150)));
+    headers.forEach((header) =>
+      vi.spyOn(header, "getBoundingClientRect").mockReturnValue(rect(0, 150)),
+    );
     vi.spyOn(field, "getBoundingClientRect").mockReturnValue(rect(250, 300));
 
     revealShiftField(field, container);

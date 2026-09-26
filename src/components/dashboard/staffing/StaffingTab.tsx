@@ -16,9 +16,15 @@ export default function StaffingTab() {
         <TabsTrigger value="shifts">{L.tabShifts}</TabsTrigger>
         <TabsTrigger value="needs">{L.tabNeeds}</TabsTrigger>
       </TabsList>
-      <TabsContent value="shifts"><ShiftListTab lang={lang} /></TabsContent>
+      <TabsContent value="shifts">
+        <ShiftListTab lang={lang} />
+      </TabsContent>
       <TabsContent value="needs">
-        {needsLocked ? <p className="text-sm text-muted-foreground">{L.upgradeNeeds}</p> : <StaffingNeedsPanel lang={lang} />}
+        {needsLocked ? (
+          <p className="text-sm text-muted-foreground">{L.upgradeNeeds}</p>
+        ) : (
+          <StaffingNeedsPanel lang={lang} />
+        )}
       </TabsContent>
     </Tabs>
   );

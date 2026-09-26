@@ -1,17 +1,42 @@
 import { describe, it, expect } from "vitest";
-import { computeRowTotals, finnishSundayWorkHolidays, isSundayWorkDay, parseShiftInput, shiftMinutes, type ShiftCell } from "./shiftList";
+import {
+  computeRowTotals,
+  finnishSundayWorkHolidays,
+  isSundayWorkDay,
+  parseShiftInput,
+  shiftMinutes,
+  type ShiftCell,
+} from "./shiftList";
 
-const w = (start: string, end: string): ShiftCell => ({ start_time: start, end_time: end, code: null });
-const c = (code: ShiftCell["code"]): ShiftCell => ({ start_time: null, end_time: null, code });
-const row = (...xs: Array<[string, ShiftCell | null]>) => computeRowTotals(xs.map(([date, cell]) => ({ date, cell })));
+const w = (start: string, end: string): ShiftCell => ({
+  start_time: start,
+  end_time: end,
+  code: null,
+});
+const c = (code: ShiftCell["code"]): ShiftCell => ({
+  start_time: null,
+  end_time: null,
+  code,
+});
+const row = (...xs: Array<[string, ShiftCell | null]>) =>
+  computeRowTotals(xs.map(([date, cell]) => ({ date, cell })));
 
 describe("Tunnit – working hours summary", () => {
   it("sums a normal week", () => {
-    const t = row(["2026-09-28", w("10:00", "18:00")], ["2026-09-29", w("09:30", "17:00")], ["2026-09-30", w("11:00", "15:15")]);
+    const t = row(
+      ["2026-09-28", w("10:00", "18:00")],
+      ["2026-09-29", w("09:30", "17:00")],
+      ["2026-09-30", w("11:00", "15:15")],
+    );
     expect(t.hours).toBe(8 + 7.5 + 4.25);
   });
   it("ignores empty days and day-off codes in hours", () => {
-    const t = row(["2026-09-28", null], ["2026-09-29", c("V")], ["2026-09-30", c("X")], ["2026-10-01", w("10:00", "14:00")]);
+    const t = row(
+      ["2026-09-28", null],
+      ["2026-09-29", c("V")],
+      ["2026-09-30", c("X")],
+      ["2026-10-01", w("10:00", "14:00")],
+    );
     expect(t.hours).toBe(4);
   });
   it("counts shifts over midnight", () => {
@@ -25,7 +50,14 @@ describe("Tunnit – working hours summary", () => {
 
 describe("X/Z and Loma columns", () => {
   it("counts X+Z days and L as holiday days", () => {
-    const t = row(["2026-09-28", c("X")], ["2026-09-29", c("Z")], ["2026-09-30", c("X")], ["2026-10-01", c("L")], ["2026-10-02", c("V")], ["2026-10-03", c("P")]);
+    const t = row(
+      ["2026-09-28", c("X")],
+      ["2026-09-29", c("Z")],
+      ["2026-09-30", c("X")],
+      ["2026-10-01", c("L")],
+      ["2026-10-02", c("V")],
+      ["2026-10-03", c("P")],
+    );
     expect(t.xzDays).toBe(3);
     expect(t.holidayDays).toBe(1);
     expect(t.codes).toEqual({ V: 1, X: 2, Z: 1, L: 1, P: 1 });
@@ -82,14 +114,30 @@ describe("Su/pyhä h", () => {
     expect(t.eveningHours).toBe(5);
   });
   it("counts vappu, itsenäisyyspäivä, pitkäperjantai and helatorstai (weekdays) as pyhä", () => {
-    for (const d of ["2026-05-01", "2026-04-03", "2026-05-14", "2026-12-25", "2026-01-06", "2027-12-06"]) {
+    for (const d of [
+      "2026-05-01",
+      "2026-04-03",
+      "2026-05-14",
+      "2026-12-25",
+      "2026-01-06",
+      "2027-12-06",
+    ]) {
       expect(isSundayWorkDay(d), d).toBe(true);
       expect(row([d, w("10:00", "14:00")]).sundayHours, d).toBe(4);
     }
   });
   it("2026 moving holidays are right", () => {
     const s = finnishSundayWorkHolidays(2026);
-    for (const d of ["2026-04-03", "2026-04-05", "2026-04-06", "2026-05-14", "2026-05-24", "2026-06-20", "2026-10-31"]) expect(s.has(d), d).toBe(true);
+    for (const d of [
+      "2026-04-03",
+      "2026-04-05",
+      "2026-04-06",
+      "2026-05-14",
+      "2026-05-24",
+      "2026-06-20",
+      "2026-10-31",
+    ])
+      expect(s.has(d), d).toBe(true);
     expect(s.has("2026-06-19")).toBe(false); // juhannusaatto isn't a pyhä
     expect(s.has("2026-12-24")).toBe(false); // jouluaatto isn't a pyhä
   });
@@ -101,16 +149,23 @@ describe("Su/pyhä h", () => {
 describe("full row matches the summary columns", () => {
   it("3-week style mix", () => {
     const t = row(
-      ["2026-10-05", w("10:00", "18:00")],   // 8h
+      ["2026-10-05", w("10:00", "18:00")], // 8h
       ["2026-10-06", c("X")],
-      ["2026-10-07", w("15:00", "23:00")],   // 8h, 5 eve
+      ["2026-10-07", w("15:00", "23:00")], // 8h, 5 eve
       ["2026-10-08", c("Z")],
-      ["2026-10-09", w("18:00", "01:00")],   // 7h, 6 eve, 1 night
+      ["2026-10-09", w("18:00", "01:00")], // 7h, 6 eve, 1 night
       ["2026-10-10", c("V")],
-      ["2026-10-11", w("11:00", "19:00")],   // 8h, 8 sun, 1 eve
+      ["2026-10-11", w("11:00", "19:00")], // 8h, 8 sun, 1 eve
       ["2026-10-12", c("L")],
     );
-    expect(t).toMatchObject({ hours: 31, xzDays: 2, sundayHours: 8, eveningHours: 12, nightHours: 1, holidayDays: 1 });
+    expect(t).toMatchObject({
+      hours: 31,
+      xzDays: 2,
+      sundayHours: 8,
+      eveningHours: 12,
+      nightHours: 1,
+      holidayDays: 1,
+    });
   });
 });
 
