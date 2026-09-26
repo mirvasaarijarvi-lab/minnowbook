@@ -1,4 +1,4 @@
-import { periodInSiteScope } from "@/lib/staffing/siteScope";
+import { periodInSiteScope, memberInListScope } from "@/lib/staffing/siteScope";
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format, parseISO, startOfWeek } from "date-fns";
 import {
