@@ -61,21 +61,37 @@ export function renderAccessReviewPdf(
     y += gap;
   };
 
+  /** Bullet with a hanging indent so wrapped lines line up with the text. */
+  const bullet = (text: string) => {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    const lh = 9.5 * 0.42;
+    const lines = doc.splitTextToSize(pdfSafe(text), WIDTH - 8);
+    lines.forEach((line: string, i: number) => {
+      ensure(lh);
+      if (i === 0) doc.text("-", MARGIN_X + 5, y);
+      doc.text(line, MARGIN_X + 8, y);
+      y += lh;
+    });
+    y += 0.6;
+  };
+
   write(r.title, 16, "bold", 0, 1);
   write(`${r.business}, ${r.location}`, 12, "normal", 0, 3);
   for (const [k, v] of r.meta) write(`${k}: ${v}`, 9.5, "normal", 0, 0.5);
   y += 3;
 
   for (const s of r.sections) {
-    ensure(12);
+    ensure(16);
+    y += 3;
     doc.setDrawColor(180);
-    doc.line(MARGIN_X, y - 3, MARGIN_X + WIDTH, y - 3);
+    doc.line(MARGIN_X, y - 6, MARGIN_X + WIDTH, y - 6);
     write(s.heading, 12, "bold", 0, 2);
     const blocks = s.blocks.filter((b) => b.title || b.lines.length);
     if (blocks.length === 0 && s.empty) write(s.empty, 9.5, "normal", 2, 2);
     for (const b of blocks) {
       if (b.title) write(b.title, 10, "bold", 2, 1);
-      for (const l of b.lines) write(`- ${l}`, 9.5, "normal", 5, 0.6);
+      for (const l of b.lines) bullet(l);
       y += 2;
     }
     y += 2;
