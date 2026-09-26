@@ -23,7 +23,9 @@ vi.mock("@/contexts/AuthContext", () => ({
     user: { id: "user-1", email: "mimmi@example.com", user_metadata: {} },
   }),
 }));
-vi.mock("@/hooks/useTenant", () => ({ useTenant: () => ({ tenantId: "t-1" }) }));
+vi.mock("@/hooks/useTenant", () => ({
+  useTenant: () => ({ tenantId: "t-1" }),
+}));
 
 import SupportContactForm from "./SupportContactForm";
 
@@ -54,7 +56,9 @@ const fill = (subject: string, message: string) => {
 };
 
 const submit = () =>
-  fireEvent.submit(document.getElementById("support-message")!.closest("form")!);
+  fireEvent.submit(
+    document.getElementById("support-message")!.closest("form")!,
+  );
 
 beforeEach(() => {
   localStorage.clear();
@@ -72,12 +76,16 @@ describe.each(LANGS)("contact form in %s", (lang) => {
     waitAWhile();
     fill("ab", "A long enough message for support.");
     submit();
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(f.errSubjectShort));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(f.errSubjectShort),
+    );
     expect(SUPPORT_COPY.en.form.errSubjectShort).not.toBe(f.errSubjectShort);
 
     fill("Varaus puuttuu", "short");
     submit();
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(f.errMessageShort));
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(f.errMessageShort),
+    );
     expect(insert).not.toHaveBeenCalled();
   });
 
