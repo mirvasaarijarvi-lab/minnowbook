@@ -34,7 +34,7 @@ export default function StaffingSettingsDialog({ open, onOpenChange, lang }: { o
           <div className="grid grid-cols-2 gap-2">
             {types.map((t) => (
               <div key={t} className="space-y-1">
-                <Label htmlFor={`gps-${t}`} className="text-xs">{tD(`reservationType.${t}`)}</Label>
+                <Label htmlFor={`gps-${t}`} className="text-xs">{tD(`dashboard.${t}`)}</Label>
                 <Input id={`gps-${t}`} type="number" min={1} max={500} value={s.guestsPerStaff[t] ?? 10}
                   onChange={(e) => setS({ ...s, guestsPerStaff: { ...s.guestsPerStaff, [t]: Number(e.target.value) } })} />
               </div>
