@@ -39,11 +39,18 @@ const SITE_B = {
 };
 
 async function pickLocation(page: Page, name: string, listTitle: string) {
-  await page.getByRole("combobox").filter({ hasText: /locations|Hotel|hotel|site|Mimmi/ }).first().click();
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: /locations|Hotel|hotel|site|Mimmi/ })
+    .first()
+    .click();
   await page.getByRole("option", { name, exact: true }).click();
   // Open one of the test's shift lists so the Payroll Excel controls show.
   await page.getByRole("combobox").nth(1).click();
-  await page.getByRole("option", { name: new RegExp(listTitle) }).first().click();
+  await page
+    .getByRole("option", { name: new RegExp(listTitle) })
+    .first()
+    .click();
 }
 
 /** Press Payroll Excel and return every cell text in the downloaded file. */
