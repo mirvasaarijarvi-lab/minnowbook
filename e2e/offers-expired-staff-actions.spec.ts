@@ -46,12 +46,12 @@ test.describe("Offers page: expired draft/sent offers keep staff actions", () =>
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: signIn, error: signInErr } = await sb.auth.signInWithPassword(
-      {
-        email: STAFF_EMAIL!,
-        password: STAFF_PASSWORD!,
-      },
-    );
+    const { data: signIn, error: signInErr } = STAFF_SESSION
+      ? await sb.auth.setSession(JSON.parse(STAFF_SESSION))
+      : await sb.auth.signInWithPassword({
+          email: STAFF_EMAIL!,
+          password: STAFF_PASSWORD!,
+        });
     expect(signInErr, signInErr?.message).toBeNull();
 
     const stamp = Date.now();
