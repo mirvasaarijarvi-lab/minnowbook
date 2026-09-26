@@ -27,6 +27,7 @@ import { useAllowedReservationTypes } from "@/hooks/useAllowedReservationTypes";
 import { defaultRolesFor } from "@/lib/staffing/staffingNeeds";
 import { STAFF_LABELS, type StaffLang } from "@/lib/staffing/labels";
 
+const ALL = "__all__";
 const EMP = ["regular", "part_time", "relief", "intern"] as const;
 const roleLabel = (r: StaffRole, lang: StaffLang) =>
   lang === "fi" ? r.name_fi : lang === "sv" ? r.name_sv : r.name_en;
@@ -45,6 +46,8 @@ interface Props {
   lang: StaffLang;
   roles: StaffRole[];
   members: StaffMember[];
+  /** Active locations; the location choice shows only with more than one. */
+  sites?: { id: string; name: string }[];
 }
 
 export default function StaffRegisterDialog({
@@ -53,7 +56,9 @@ export default function StaffRegisterDialog({
   lang,
   roles,
   members,
+  sites = [],
 }: Props) {
+  const multiSite = sites.length > 1;
   const L = STAFF_LABELS[lang];
   const m = useShiftMutations(null);
   const { data: contacts = [] } = useStaffContacts(open);
@@ -64,6 +69,7 @@ export default function StaffRegisterDialog({
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [target, setTarget] = useState("");
+  const [siteId, setSiteId] = useState<string>(ALL);
   const [roleName, setRoleName] = useState({ en: "", fi: "", sv: "" });
   const err = (e: unknown) =>
     toast.error(`${L.error}: ${(e as Error)?.message ?? ""}`);
@@ -77,6 +83,7 @@ export default function StaffRegisterDialog({
         employment_type: emp,
         weekly_hours_target: target ? Number(target) : null,
         is_active: true,
+        site_id: siteId === ALL ? null : siteId,
         contact: { phone: phone.trim() || null, email: email.trim() || null },
       },
       {
@@ -220,6 +227,21 @@ export default function StaffRegisterDialog({
               value={target}
               onChange={(e) => setTarget(e.target.value)}
             />
+            {multiSite && (
+              <Select value={siteId} onValueChange={setSiteId}>
+                <SelectTrigger aria-label={L.staffLocation}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL}>{L.allLocations}</SelectItem>
+                  {sites.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Input
               aria-label={L.phone}
               placeholder={L.phone}
@@ -272,6 +294,7 @@ export default function StaffRegisterDialog({
                   <th className="py-1">{L.name}</th>
                   <th>{L.roles}</th>
                   <th>{L.employment}</th>
+                  {multiSite && <th>{L.staffLocation}</th>}
                   <th>{L.phone}</th>
                   <th>{L.email}</th>
                   <th>{L.active}</th>
@@ -297,6 +320,22 @@ export default function StaffRegisterDialog({
                           `emp_${x.employment_type as (typeof EMP)[number]}`
                         ] ?? x.employment_type}
                       </td>
+                      {multiSite && (
+                        <td>
+                          <StaffSiteSelect
+                            member={x}
+                            sites={sites}
+                            label={`${L.staffLocation}: ${x.name}`}
+                            allLabel={L.allLocations}
+                            onChange={(v) =>
+                              m.saveMember.mutate(
+                                { id: x.id, name: x.name, site_id: v },
+                                { onError: err },
+                              )
+                            }
+                          />
+                        </td>
+                      )}
                       <td className="text-xs">{c?.phone ?? ""}</td>
                       <td className="text-xs">{c?.email ?? ""}</td>
                       <td>
@@ -331,5 +370,39 @@ export default function StaffRegisterDialog({
         </section>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Per-person location picker; null means all locations. */
+export function StaffSiteSelect({
+  member,
+  sites,
+  label,
+  allLabel,
+  onChange,
+}: {
+  member: StaffMember;
+  sites: { id: string; name: string }[];
+  label: string;
+  allLabel: string;
+  onChange: (siteId: string | null) => void;
+}) {
+  return (
+    <Select
+      value={member.site_id ?? ALL}
+      onValueChange={(v) => onChange(v === ALL ? null : v)}
+    >
+      <SelectTrigger aria-label={label} className="h-8 w-40 text-xs">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={ALL}>{allLabel}</SelectItem>
+        {sites.map((s) => (
+          <SelectItem key={s.id} value={s.id}>
+            {s.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
