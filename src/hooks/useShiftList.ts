@@ -173,7 +173,7 @@ export async function fetchPayrollRange(
     const g = groups.get(key) ?? {
       staff_member_id: slot.staff_member_id ?? null,
       role_key: slot.role_key ?? null,
-      shifts: [],
+      shifts: [] as ShiftRow[],
     };
     g.shifts.push(shift as ShiftRow);
     groups.set(key, g);
