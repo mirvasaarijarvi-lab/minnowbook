@@ -37,6 +37,7 @@ import {
   useStaffingSettings,
   type StaffRole,
   type ShiftRow,
+  fetchPayrollRange,
 } from "@/hooks/useShiftList";
 import {
   computeRowTotals,
@@ -202,6 +203,14 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
     if (proLocked) setMode("planned");
   }, [proLocked]);
   const period = periods.find((p) => p.id === periodId) ?? null;
+  const [payFrom, setPayFrom] = useState("");
+  const [payTo, setPayTo] = useState("");
+  useEffect(() => {
+    if (!period) return;
+    const s = parseISO(`${period.start_date}T00:00:00`);
+    setPayFrom(period.start_date);
+    setPayTo(format(addDays(s, period.weeks * 7 - 1), "yyyy-MM-dd"));
+  }, [period]);
   const { data } = usePeriodData(period?.id ?? null);
   const m = useShiftMutations(period?.id ?? null);
   const err = (e: unknown) => {
@@ -337,26 +346,33 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   };
 
   const payroll = async () => {
-    if (!period || !data) return;
-    const inDays = new Set(days);
-    const { days: rows, summary } = buildPayroll(
-      data.slots.map((s) => ({
-        worker: workerName(s.staff_member_id),
-        role: roleName(roleMap.get(s.role_key ?? ""), lang),
-        shifts: data.shifts.filter(
-          (x) => x.slot_id === s.id && inDays.has(x.date),
-        ),
-      })),
-      settings.rules,
-    );
+    if (!tenantId || !payFrom || !payTo) return;
+    if (payFrom > payTo) {
+      toast.error(L.payRangeInvalid);
+      return;
+    }
     try {
+      const groups = await fetchPayrollRange(
+        tenantId,
+        payFrom,
+        payTo,
+        siteFilter === NONE ? null : siteFilter,
+      );
+      const { days: rows, summary } = buildPayroll(
+        groups.map((g) => ({
+          worker: workerName(g.staff_member_id),
+          role: roleName(roleMap.get(g.role_key ?? ""), lang),
+          shifts: g.shifts,
+        })),
+        settings.rules,
+      );
       const { buildPayrollWorkbook, XLSX_MIME } =
         await import("@/lib/staffing/shiftPayrollXlsx");
       const buf = await buildPayrollWorkbook(rows, summary, lang);
       const url = URL.createObjectURL(new Blob([buf], { type: XLSX_MIME }));
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${sanitizePathSegment(`${fileBase}_payroll`)}.xlsx`;
+      a.download = `${sanitizePathSegment(`${tenant?.slug ?? "shifts"}_payroll_${payFrom}_${payTo}`)}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -585,6 +601,28 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
           </Button>
           {isAdmin && (
             <>
+              <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                {L.payFrom}
+                <Input
+                  type="date"
+                  value={payFrom}
+                  onChange={(e) => setPayFrom(e.target.value)}
+                  disabled={bizLocked}
+                  className="h-8 w-36"
+                  aria-label={L.payFrom}
+                />
+              </label>
+              <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                {L.payTo}
+                <Input
+                  type="date"
+                  value={payTo}
+                  onChange={(e) => setPayTo(e.target.value)}
+                  disabled={bizLocked}
+                  className="h-8 w-36"
+                  aria-label={L.payTo}
+                />
+              </label>
               <Button
                 size="sm"
                 variant="outline"

@@ -127,6 +127,60 @@ export const useShiftPeriods = () => {
   });
 };
 
+/**
+ * Shifts for a pay period across every shift list, optionally limited to one
+ * location (plus lists that cover all locations). Grouped per worker and role.
+ */
+export async function fetchPayrollRange(
+  tenantId: string,
+  from: string,
+  to: string,
+  siteId: string | null,
+): Promise<
+  {
+    staff_member_id: string | null;
+    role_key: string | null;
+    shifts: ShiftRow[];
+  }[]
+> {
+  let q = sb
+    .from("shifts")
+    .select(
+      "*,shift_slots!inner(id,staff_member_id,role_key,shift_periods!inner(site_id))",
+    )
+    .eq("tenant_id", tenantId)
+    .gte("date", from)
+    .lte("date", to)
+    .order("date");
+  if (siteId)
+    q = q.or(`site_id.eq.${siteId},site_id.is.null`, {
+      referencedTable: "shift_slots.shift_periods",
+    });
+  const { data, error } = await q;
+  if (error) throw error;
+  const groups = new Map<
+    string,
+    {
+      staff_member_id: string | null;
+      role_key: string | null;
+      shifts: ShiftRow[];
+    }
+  >();
+  for (const row of (data ?? []) as any[]) {
+    const slot = row.shift_slots;
+    const key = `${slot.staff_member_id ?? `slot:${slot.id}`}|${slot.role_key ?? ""}`;
+    const { shift_slots: _s, ...shift } = row;
+    const g = groups.get(key) ?? {
+      staff_member_id: slot.staff_member_id ?? null,
+      role_key: slot.role_key ?? null,
+      shifts: [],
+    };
+    g.shifts.push(shift as ShiftRow);
+    groups.set(key, g);
+  }
+  return [...groups.values()];
+}
+
 export const usePeriodData = (periodId: string | null) => {
   const { tenantId } = useTenant();
   return useQuery({
