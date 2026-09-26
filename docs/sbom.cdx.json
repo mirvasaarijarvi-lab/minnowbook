@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:dd91500b-4a57-5ed3-82d4-a9358eb34809",
+  "serialNumber": "urn:uuid:0149a4fe-7497-5b02-b2df-0820bc3fb740",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "972a83f3194c13e120356ecb69c1af23b1ffb22edaf939b8c8430fb791544d12"
+          "value": "19d5d3a92a25858812df962e59c173eec4fe0f72137ed486d7b70ecc33e18e6f"
         }
       ]
     }
@@ -627,11 +627,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/prettier@3.7.3",
+      "bom-ref": "pkg:npm/prettier@3.9.9",
       "type": "library",
       "name": "prettier",
-      "version": "3.7.3",
-      "purl": "pkg:npm/prettier@3.7.3",
+      "version": "3.9.9",
+      "purl": "pkg:npm/prettier@3.9.9",
       "scope": "optional"
     },
     {
