@@ -83,7 +83,7 @@ jobs:
                   `Run: ${run.html_url}`,
                   '',
                   'The check summary lists each vulnerable package, its severity and the fixed version.',
-                ].filter((l) => l !== null).join('\n')
+                ].join('\n')
               : [
                   marker,
                   `### :white_check_mark: ${run.name} passing again`,
@@ -97,14 +97,13 @@ jobs:
               });
               const existing = comments.find((c) => c.body && c.body.includes(marker));
               if (!failed && !existing) continue; // never failed: stay quiet
-              if (existing) {
-                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
-              }
-              // A fresh comment on each new failure so the @mention
-              // notifies again (edits do not re-send notifications).
               if (failed) {
+                // Fresh comment on each failure so the @mention notifies
+                // again (edited comments do not re-send notifications).
                 if (existing) await github.rest.issues.deleteComment({ owner, repo, comment_id: existing.id });
                 await github.rest.issues.createComment({ owner, repo, issue_number, body });
+              } else {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
               }
               core.info(`${failed ? 'Alerted' : 'Resolved'} on PR #${issue_number}.`);
             }
