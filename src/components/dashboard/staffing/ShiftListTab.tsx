@@ -47,10 +47,7 @@ import {
   focusAdjacentShiftField,
   focusShiftFieldByArrow,
 } from "@/lib/staffing/shiftFieldNavigation";
-import {
-  buildPayroll,
-  toCsv,
-} from "@/lib/staffing/shiftPayroll";
+import { buildPayroll, toCsv } from "@/lib/staffing/shiftPayroll";
 import { sanitizePathSegment } from "@/lib/sanitize-path";
 import { STAFF_LABELS, type StaffLang } from "@/lib/staffing/labels";
 import StaffRegisterDialog from "./StaffRegisterDialog";
