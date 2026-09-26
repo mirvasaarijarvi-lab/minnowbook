@@ -57,6 +57,32 @@ export interface Offer {
 
 export const useOffers = (showArchived = false) => {
   const { tenantId } = useTenant();
+  const queryClient = useQueryClient();
+
+  // Live updates: when another staff member confirms an offer, this list
+  // refreshes so their Confirm button is disabled straight away.
+  useEffect(() => {
+    if (!tenantId) return;
+    const channel = supabase
+      .channel(`offers-${tenantId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "offers",
+          filter: `tenant_id=eq.${tenantId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["offers", tenantId] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [tenantId, queryClient]);
+
   return useQuery({
     queryKey: ["offers", tenantId, showArchived],
     queryFn: async () => {
@@ -76,6 +102,9 @@ export const useOffers = (showArchived = false) => {
       return data as unknown as Offer[];
     },
     enabled: !!tenantId,
+    // Fallback if the live connection drops.
+    refetchInterval: 30_000,
+    refetchOnWindowFocus: true,
   });
 };
 
