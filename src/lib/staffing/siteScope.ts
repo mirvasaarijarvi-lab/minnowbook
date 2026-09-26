@@ -13,4 +13,5 @@ export const siteScopeFilter = (siteId: string) =>
 export const periodInSiteScope = (
   selectedSiteId: string | null,
   periodSiteId: string | null,
-) => !selectedSiteId || periodSiteId === null || periodSiteId === selectedSiteId;
+) =>
+  !selectedSiteId || periodSiteId === null || periodSiteId === selectedSiteId;

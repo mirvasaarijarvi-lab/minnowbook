@@ -212,37 +212,37 @@ export const usePeriodData = (periodId: string | null) => {
 };
 
 /** Shifts with times on one date, across every list (for staffing needs). */
+export async function fetchShiftsOnDate(
+  tenantId: string,
+  date: string,
+  siteId: string | null = null,
+) {
+  // Location view: count lists for that location plus lists covering all locations.
+  let q = sb
+    .from("shifts")
+    .select(
+      siteId
+        ? "start_time,end_time,actual_start_time,actual_end_time,code,shift_slots!inner(shift_periods!inner(site_id))"
+        : "start_time,end_time,actual_start_time,actual_end_time,code",
+    )
+    .eq("tenant_id", tenantId)
+    .eq("date", date);
+  if (siteId)
+    q = q.or(siteScopeFilter(siteId), { referencedTable: SITE_SCOPE_TABLE });
+  const { data, error } = await q;
+  if (error) throw error;
+  return data as Pick<
+    ShiftRow,
+    "start_time" | "end_time" | "actual_start_time" | "actual_end_time" | "code"
+  >[];
+}
+
 export const useShiftsOnDate = (date: string, siteId: string | null = null) => {
   const { tenantId } = useTenant();
   return useQuery({
     queryKey: ["shifts_on_date", tenantId, date, siteId],
     enabled: !!tenantId,
-    queryFn: async () => {
-      // Location view: count lists for that location plus lists covering all locations.
-      let q = sb
-        .from("shifts")
-        .select(
-          siteId
-            ? "start_time,end_time,actual_start_time,actual_end_time,code,shift_slots!inner(shift_periods!inner(site_id))"
-            : "start_time,end_time,actual_start_time,actual_end_time,code",
-        )
-        .eq("tenant_id", tenantId)
-        .eq("date", date);
-      if (siteId)
-        q = q.or(siteScopeFilter(siteId), {
-          referencedTable: SITE_SCOPE_TABLE,
-        });
-      const { data, error } = await q;
-      if (error) throw error;
-      return data as Pick<
-        ShiftRow,
-        | "start_time"
-        | "end_time"
-        | "actual_start_time"
-        | "actual_end_time"
-        | "code"
-      >[];
-    },
+    queryFn: () => fetchShiftsOnDate(tenantId!, date, siteId),
   });
 };
 
