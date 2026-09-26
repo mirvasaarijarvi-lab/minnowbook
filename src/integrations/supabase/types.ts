@@ -191,6 +191,7 @@ export type Database = {
           room_type: string | null
           selected_sub_services: Json | null
           site_id: string | null
+          source_offer_id: string | null
           special_occasion_id: string | null
           special_requests: string | null
           staff_needed: boolean | null
@@ -254,6 +255,7 @@ export type Database = {
           room_type?: string | null
           selected_sub_services?: Json | null
           site_id?: string | null
+          source_offer_id?: string | null
           special_occasion_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
@@ -317,6 +319,7 @@ export type Database = {
           room_type?: string | null
           selected_sub_services?: Json | null
           site_id?: string | null
+          source_offer_id?: string | null
           special_occasion_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
@@ -1654,6 +1657,7 @@ export type Database = {
           room_type: string | null
           selected_sub_services: Json | null
           site_id: string | null
+          source_offer_id: string | null
           special_occasion_id: string | null
           special_requests: string | null
           staff_needed: boolean | null
@@ -1717,6 +1721,7 @@ export type Database = {
           room_type?: string | null
           selected_sub_services?: Json | null
           site_id?: string | null
+          source_offer_id?: string | null
           special_occasion_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
@@ -1780,6 +1785,7 @@ export type Database = {
           room_type?: string | null
           selected_sub_services?: Json | null
           site_id?: string | null
+          source_offer_id?: string | null
           special_occasion_id?: string | null
           special_requests?: string | null
           staff_needed?: boolean | null
@@ -1812,6 +1818,13 @@ export type Database = {
             columns: ["site_id"]
             isOneToOne: false
             referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reservations_source_offer_id_fkey"
+            columns: ["source_offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
             referencedColumns: ["id"]
           },
           {
