@@ -9,11 +9,11 @@ import {
   payrollDayValues,
   payrollSummaryHeaders,
   payrollSummaryValues,
-  sanitizeCsvCell,
   type PayrollDayRow,
   type PayrollLang,
   type PayrollSummaryRow,
 } from "./shiftPayroll";
+import { sanitizeCsvCell } from "@/lib/report-csv-export";
 
 const SHEET_NAMES: Record<PayrollLang, { days: string; summary: string }> = {
   en: { days: "Payroll days", summary: "Payroll summary" },
