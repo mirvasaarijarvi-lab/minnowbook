@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { StaffLang } from "@/lib/staffing/labels";
 import { toast } from "sonner";
@@ -15,6 +15,8 @@ const LABELS = {
     never: "{name}: never reviewed",
     dueSoon: "{name}: due {date}",
     open: "Open access review",
+    view: "Review {name} staff and permissions",
+    viewShort: "Staff and permissions",
     mark: "Mark reviewed",
     marked: "{name}: review marked complete",
     openRequests:
@@ -26,6 +28,8 @@ const LABELS = {
     never: "{name}: ei koskaan tarkistettu",
     dueSoon: "{name}: erääntyy {date}",
     open: "Avaa käyttöoikeudet",
+    view: "Tarkista kohteen {name} henkilöstö ja oikeudet",
+    viewShort: "Henkilöstö ja oikeudet",
     mark: "Merkitse tarkistetuksi",
     marked: "{name}: tarkistus merkitty tehdyksi",
     openRequests:
@@ -37,6 +41,8 @@ const LABELS = {
     never: "{name}: aldrig granskad",
     dueSoon: "{name}: förfaller {date}",
     open: "Öppna behörighetsgranskning",
+    view: "Granska personal och behörigheter för {name}",
+    viewShort: "Personal och behörigheter",
     mark: "Markera som granskad",
     marked: "{name}: granskningen markerad som klar",
     openRequests:
@@ -49,7 +55,7 @@ export default function AccessReviewReminder({
   onOpen,
 }: {
   lang: StaffLang;
-  onOpen: () => void;
+  onOpen: (siteId?: string) => void;
 }) {
   const L = LABELS[lang];
   const reminders = useAccessReviewReminders();
@@ -95,6 +101,16 @@ export default function AccessReviewReminder({
                     : L.dueSoon.replace("{date}", fmt(r.due.dueAt!))
                 ).replace("{name}", r.siteName)}
               </span>
+              <Button
+                size="sm"
+                variant="link"
+                className="mr-1 h-7 px-1 text-xs"
+                aria-label={L.view.replace("{name}", r.siteName)}
+                onClick={() => onOpen(r.siteId)}
+              >
+                <Users className="mr-1 h-3.5 w-3.5" aria-hidden />
+                {L.viewShort}
+              </Button>
               {r.due.state !== "dueSoon" && (
                 <Button
                   size="sm"
@@ -111,7 +127,7 @@ export default function AccessReviewReminder({
           ))}
         </ul>
       </div>
-      <Button size="sm" variant="outline" onClick={onOpen}>
+      <Button size="sm" variant="outline" onClick={() => onOpen()}>
         {L.open}
       </Button>
     </div>

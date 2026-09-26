@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, AlertTriangle, FileDown } from "lucide-react";
 import { toast } from "sonner";
@@ -234,7 +234,14 @@ type Person = {
   siteIds?: string[] | null;
 };
 
-export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
+export default function AccessReviewPanel({
+  lang,
+  focus,
+}: {
+  lang: StaffLang;
+  /** Location to scroll to; n changes on every request so repeats work. */
+  focus?: { siteId: string; n: number } | null;
+}) {
   const L = LABELS[lang];
   const { tenantId, tenant, isOwner, isAdmin } = useTenant();
   const canEditSignIn = isOwner || isAdmin;
@@ -419,6 +426,15 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
       u.role === "staff" &&
       !(data?.siteUsers ?? []).some((su) => su.user_id === u.user_id),
   );
+
+  const hasSites = perSite.length > 0;
+  useEffect(() => {
+    if (!focus || !hasSites) return;
+    const el = document.getElementById(`access-site-${focus.siteId}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.focus({ preventScroll: true });
+  }, [focus, hasSites]);
 
   const onErr = (e: unknown) =>
     toast.error(e instanceof Error ? e.message : String(e));
@@ -848,7 +864,14 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
       {perSite.map((s) => (
         <section
           key={s.site.id}
-          className="space-y-3 rounded-lg border border-border bg-card p-4"
+          id={`access-site-${s.site.id}`}
+          tabIndex={-1}
+          aria-label={s.site.name}
+          className={`space-y-3 rounded-lg border bg-card p-4 outline-none ${
+            focus?.siteId === s.site.id
+              ? "border-primary ring-2 ring-primary/40"
+              : "border-border"
+          }`}
         >
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base font-semibold">{s.site.name}</h3>
