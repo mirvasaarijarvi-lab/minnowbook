@@ -116,7 +116,14 @@ describe("Tenant Table Manifest — Coverage Guard", () => {
         auth: { persistSession: false, autoRefreshToken: false },
       });
 
-      const { data, error } = await anon.rpc("list_tenant_scoped_tables");
+      // Retry transient statement timeouts (cold database in CI).
+      let data: unknown[] | null = null;
+      let error: { message: string } | null = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        ({ data, error } = await anon.rpc("list_tenant_scoped_tables"));
+        if (!error || !/timeout/i.test(error.message)) break;
+        await new Promise((r) => setTimeout(r, 2000 * attempt));
+      }
       if (error) {
         throw new Error(
           `Failed to query tenant-scoped tables via RPC: ${error.message}. ` +
