@@ -18,7 +18,7 @@ import {
   Clock,
 } from "lucide-react";
 import { useT, useLanguage } from "@/contexts/I18nContext";
-import { SUPPORT_COPY, getSupportCopy } from "@/i18n/support-copy";
+import { getSupportCopy, type FaqSection } from "@/i18n/support-copy";
 import {
   Accordion,
   AccordionContent,
@@ -26,19 +26,18 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const NEW_FEATURES_FAQ = SUPPORT_COPY.en.faq;
-
-const faqPageSchema = {
+/** FAQ structured data in the page's language. */
+export const faqPageSchema = (faq: FaqSection[]) => ({
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  mainEntity: NEW_FEATURES_FAQ.flatMap((section) =>
+  mainEntity: faq.flatMap((section) =>
     section.items.map(([question, answer]) => ({
       "@type": "Question",
       name: question,
       acceptedAnswer: { "@type": "Answer", text: answer },
     })),
   ),
-};
+});
 
 const Support = () => {
   const t = useT();
@@ -183,15 +182,15 @@ const Support = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SEOHead
-        title="MimmoBook Support – Help Center & Knowledge Base"
-        description="Find answers to common questions about MimmoBook reservation management. Browse help articles on setup, bookings, email templates, team management and billing."
+        title={copy.seoTitle}
+        description={copy.seoDescription}
         path="/support"
         jsonLd={[
           breadcrumbSchema([
-            { name: "Home", url: "https://mimmobook.com/" },
-            { name: "Support", url: "https://mimmobook.com/support" },
+            { name: copy.crumbHome, url: "https://mimmobook.com/" },
+            { name: copy.crumbSupport, url: "https://mimmobook.com/support" },
           ]),
-          faqPageSchema,
+          faqPageSchema(copy.faq),
         ]}
       />
       <MarketingHeader />
