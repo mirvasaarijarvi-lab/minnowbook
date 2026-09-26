@@ -22,7 +22,22 @@ export const periodInSiteScope = (
  */
 export function memberInListScope(
   listSiteId: string | null | undefined,
-  memberSiteId: string | null | undefined,
+  memberSites: string | string[] | null | undefined,
 ): boolean {
-  return !listSiteId || !memberSiteId || listSiteId === memberSiteId;
+  if (!listSiteId || !memberSites) return true;
+  if (Array.isArray(memberSites))
+    return memberSites.length === 0 || memberSites.includes(listSiteId);
+  return listSiteId === memberSites;
+}
+
+/**
+ * The locations a staff member works at, or null for all locations.
+ * `site_ids` wins; older rows fall back to the single `site_id`.
+ */
+export function memberSiteIds(m: {
+  site_id?: string | null;
+  site_ids?: string[] | null;
+}): string[] | null {
+  if (m.site_ids && m.site_ids.length > 0) return m.site_ids;
+  return m.site_id ? [m.site_id] : null;
 }
