@@ -545,7 +545,11 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
                 </Select>
               </div>
             )}
-            <Button onClick={createPeriod} disabled={m.createPeriod.isPending}>
+            <Button
+              id="staffing-new-list"
+              onClick={createPeriod}
+              disabled={m.createPeriod.isPending}
+            >
               <Plus className="mr-1 h-4 w-4" />
               {L.newPeriod}
             </Button>
@@ -966,6 +970,7 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
         lang={lang}
         roles={roles}
         members={members}
+        sites={sites}
       />
       <StaffingSettingsDialog
         open={settingsOpen}

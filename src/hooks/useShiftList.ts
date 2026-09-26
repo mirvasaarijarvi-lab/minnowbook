@@ -23,6 +23,8 @@ export interface StaffMember {
   employment_type: string;
   weekly_hours_target: number | null;
   is_active: boolean;
+  /** null = works at all locations */
+  site_id?: string | null;
 }
 export interface StaffContact {
   staff_member_id: string;
@@ -84,7 +86,7 @@ export const useStaffMembers = () => {
       const { data, error } = await sb
         .from("staff_members")
         .select(
-          "id,name,role_keys,employment_type,weekly_hours_target,is_active",
+          "id,name,role_keys,employment_type,weekly_hours_target,is_active,site_id",
         )
         .eq("tenant_id", tenantId)
         .order("name");
