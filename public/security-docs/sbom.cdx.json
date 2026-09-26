@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:0149a4fe-7497-5b02-b2df-0820bc3fb740",
+  "serialNumber": "urn:uuid:5b9a69fa-a16b-5c18-b6f7-8480d30beee7",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "19d5d3a92a25858812df962e59c173eec4fe0f72137ed486d7b70ecc33e18e6f"
+          "value": "5e045b3f1032b4570ad4777ff4a081c810a61bcfa2890b6354122a5e78f3146d"
         }
       ]
     }
@@ -67,11 +67,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.23.1",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.0",
       "type": "library",
       "name": "@lovable.dev/vite-tanstack-config",
-      "version": "2.23.1",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.23.1",
+      "version": "2.25.0",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.0",
       "scope": "optional"
     },
     {
@@ -299,11 +299,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.97.0",
+      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.117.1",
       "type": "library",
       "name": "@supabase/supabase-js",
-      "version": "2.97.0",
-      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.97.0",
+      "version": "2.117.1",
+      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.117.1",
       "scope": "required"
     },
     {
@@ -323,27 +323,27 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.101.1",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.103.2",
       "type": "library",
       "name": "@tanstack/react-query",
-      "version": "5.101.1",
-      "purl": "pkg:npm/@tanstack%2Freact-query@5.101.1",
+      "version": "5.103.2",
+      "purl": "pkg:npm/@tanstack%2Freact-query@5.103.2",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.38",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.39",
       "type": "library",
       "name": "@tanstack/react-router",
-      "version": "1.170.38",
-      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.38",
+      "version": "1.170.39",
+      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.39",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.168.56",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.168.58",
       "type": "library",
       "name": "@tanstack/react-start",
-      "version": "1.168.56",
-      "purl": "pkg:npm/@tanstack%2Freact-start@1.168.56",
+      "version": "1.168.58",
+      "purl": "pkg:npm/@tanstack%2Freact-start@1.168.58",
       "scope": "required"
     },
     {
@@ -467,19 +467,19 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/drizzle-kit@0.31.10",
+      "bom-ref": "pkg:npm/drizzle-kit@0.31.11",
       "type": "library",
       "name": "drizzle-kit",
-      "version": "0.31.10",
-      "purl": "pkg:npm/drizzle-kit@0.31.10",
+      "version": "0.31.11",
+      "purl": "pkg:npm/drizzle-kit@0.31.11",
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/drizzle-orm@0.45.2",
+      "bom-ref": "pkg:npm/drizzle-orm@0.45.3",
       "type": "library",
       "name": "drizzle-orm",
-      "version": "0.45.2",
-      "purl": "pkg:npm/drizzle-orm@0.45.2",
+      "version": "0.45.3",
+      "purl": "pkg:npm/drizzle-orm@0.45.3",
       "scope": "optional"
     },
     {
@@ -667,11 +667,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-resizable-panels@4.6.5",
+      "bom-ref": "pkg:npm/react-resizable-panels@4.13.2",
       "type": "library",
       "name": "react-resizable-panels",
-      "version": "4.6.5",
-      "purl": "pkg:npm/react-resizable-panels@4.6.5",
+      "version": "4.13.2",
+      "purl": "pkg:npm/react-resizable-panels@4.13.2",
       "scope": "required"
     },
     {
@@ -723,11 +723,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/typescript-eslint@8.56.1",
+      "bom-ref": "pkg:npm/typescript-eslint@8.70.1",
       "type": "library",
       "name": "typescript-eslint",
-      "version": "8.56.1",
-      "purl": "pkg:npm/typescript-eslint@8.56.1",
+      "version": "8.70.1",
+      "purl": "pkg:npm/typescript-eslint@8.70.1",
       "scope": "optional"
     },
     {
