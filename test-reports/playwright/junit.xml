@@ -1,6 +1,14 @@
-<testsuites id="" name="" tests="1" failures="0" skipped="1" errors="0" time="0.275348">
-<testsuite name="offers-expired-staff-actions.spec.ts" timestamp="2026-09-26T12:36:53.869Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Offers page: expired draft/sent offers keep staff actions › shows Send, Confirm and Mark declined for expired draft and sent offers" classname="offers-expired-staff-actions.spec.ts">
+<testsuites id="" name="" tests="2" failures="0" skipped="2" errors="0" time="0.43023500000000015">
+<testsuite name="offer-guest-accepted-confirm.integration.spec.ts" timestamp="2026-09-26T12:38:21.701Z" hostname="chromium" tests="2" failures="0" skipped="2" time="0" errors="0">
+<testcase name="Confirming a guest-accepted offer: exactly one reservation › creates exactly one reservation when the offer has no originating booking" classname="offer-guest-accepted-confirm.integration.spec.ts">
+<properties>
+<property name="skip" value="Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.">
+</property>
+</properties>
+<skipped>
+</skipped>
+</testcase>
+<testcase name="Confirming a guest-accepted offer: exactly one reservation › updates the originating booking in place instead of adding a second one" classname="offer-guest-accepted-confirm.integration.spec.ts">
 <properties>
 <property name="skip" value="Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.">
 </property>
