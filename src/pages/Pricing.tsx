@@ -139,6 +139,9 @@ const Pricing = () => {
     [t("pricing.offerFromBooking"), "✓", "✓", "✓", "✓"],
     [t("pricing.offerStatus"), "✓", "✓", "✓", "✓"],
     [t("pricing.offerGuestAccept"), "✓", "✓", "✓", "✓"],
+    [t("pricing.staffShifts"), "✓", "✓", "✓", "✓"],
+    [t("pricing.staffRealized"), "—", "✓", "✓", "✓"],
+    [t("pricing.staffPayroll"), "—", "—", "✓", "✓"],
     [t("pricing.crossReservations"), "✓", "✓", "✓", "✓"],
     [
       t("pricing.analyticsReports"),

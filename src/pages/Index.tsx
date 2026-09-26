@@ -9,6 +9,7 @@ import {
   Mail,
   ArrowRight,
   Link2,
+  CalendarClock,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
@@ -65,6 +66,11 @@ const featureKeys: {
     icon: Link2,
     titleKey: "features.offersAndCross",
     descKey: "features.offersAndCrossDesc",
+  },
+  {
+    icon: CalendarClock,
+    titleKey: "features.staffing",
+    descKey: "features.staffingDesc",
   },
 ];
 

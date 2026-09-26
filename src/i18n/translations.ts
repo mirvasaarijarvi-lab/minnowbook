@@ -1154,6 +1154,12 @@ type TranslationKeys = {
   "pricing.offerFromBooking": string;
   "pricing.offerStatus": string;
   "pricing.offerGuestAccept": string;
+  "pricing.staffShifts": string;
+  "pricing.staffRealized": string;
+  "pricing.staffPayroll": string;
+  "support.faqC8": string;
+  "features.staffing": string;
+  "features.staffingDesc": string;
   "support.faqC7": string;
   "support.faqC6": string;
   "blog.post10Title": string;
@@ -4317,6 +4323,12 @@ const en: TranslationKeys = {
   "pricing.offerFromBooking": "Make an offer from a guest booking",
   "pricing.offerStatus": "Offer status tracking and expiry dates",
   "pricing.offerGuestAccept": "Guests accept offers online",
+  "pricing.staffShifts": "Staff register and shift lists",
+  "pricing.staffRealized": "Realized hours, CSV and staffing needs",
+  "pricing.staffPayroll": "Payroll export and shift change history",
+  "support.faqC8": "How do I build a shift list? Open Staffing, press Staff to add roles and people, then New shift list. Pick the role and name on each row and type shifts like 10-18, or codes V, X, Z, L and P for days off and leave. Rows total hours, Sunday and holiday, evening and night hours using your Pay rules and ratios. Pro and Business also record realized hours, download CSV and show staffing needs per hour from your bookings. Business adds payroll CSV files and a change history. Basic allows one shift list at a time.",
+  "features.staffing": "Staffing and Shift Lists",
+  "features.staffingDesc": "Build multi-week shift lists with roles, leave codes and automatic hour totals, record realized hours, print worker sheets, export payroll and see hour by hour where your bookings need more staff.",
   "support.faqC7":
     "Offer status and guest acceptance: every offer shows Pending, Accepted, Declined, Expired or Draft, and the buttons at the top of Offers filter by status. Set a Valid until date; open offers become Expired after that day and show Expires soon three days before. Use Mark declined or Reopen as the guest decides. Each offer email has a private link where the guest reviews the offer and presses Accept offer. You get a notification and the offer shows Guest accepted, then you press Confirm to make the booking. An offer made from a guest booking shows that booking's guest and contact details, and the booking lists its offers.",
   "support.faqC6":
@@ -7292,6 +7304,12 @@ const fi: TranslationKeys = {
   "pricing.offerFromBooking": "Tarjous asiakkaan varauksesta",
   "pricing.offerStatus": "Tarjousten tilan seuranta ja voimassaolopäivät",
   "pricing.offerGuestAccept": "Vieraat hyväksyvät tarjoukset verkossa",
+  "pricing.staffShifts": "Henkilöstörekisteri ja vuorolistat",
+  "pricing.staffRealized": "Toteutuneet tunnit, CSV ja henkilöstötarve",
+  "pricing.staffPayroll": "Palkanlaskennan vienti ja vuorojen muutoshistoria",
+  "support.faqC8": "Miten teen vuorolistan? Avaa Työvuorot, lisää Henkilöstö-kohdassa tehtävät ja henkilöt ja paina Uusi vuorolista. Valitse rivillä tehtävä ja nimi ja kirjoita vuorot, esim. 10-18, tai koodit V, X, Z, L ja P vapaille ja lomille. Rivit laskevat tunnit, sunnuntai- ja pyhätunnit sekä ilta- ja yötunnit Palkkasääntöjen mukaan. Pro ja Business kirjaavat myös toteutuneet tunnit, lataavat CSV:n ja näyttävät tunneittaisen henkilöstötarpeen varauksista. Business lisää palkanlaskennan CSV-tiedostot ja muutoshistorian. Basicissa voi olla yksi vuorolista kerrallaan.",
+  "features.staffing": "Työvuorot ja henkilöstö",
+  "features.staffingDesc": "Rakenna usean viikon vuorolistat tehtävineen ja lomakoodeineen, tunnit lasketaan automaattisesti. Kirjaa toteumat, tulosta työntekijän listat, vie palkanlaskentaan ja näe tunneittain, missä varaukset tarvitsevat lisää väkeä.",
   "support.faqC7":
     "Tarjouksen tila ja vieraan hyväksyntä: jokaisella tarjouksella on tila Odottaa, Hyväksytty, Hylätty, Vanhentunut tai Luonnos, ja Tarjoukset-sivun painikkeilla voit suodattaa tilan mukaan. Anna Voimassa asti -päivä; avoimet tarjoukset vanhenevat sen jälkeen, ja Vanhenee pian näkyy kolme päivää ennen. Käytä Merkitse hylätyksi tai Avaa uudelleen vieraan päätöksen mukaan. Jokaisessa tarjoussähköpostissa on yksityinen linkki, josta vieras tarkistaa tarjouksen ja painaa Hyväksy tarjous. Saat ilmoituksen, tarjouksessa näkyy Vieras hyväksyi, ja vahvistat varauksen painamalla Vahvista. Vieraan varauksesta tehdyssä tarjouksessa näkyvät varauksen vieras ja yhteystiedot, ja varaus näyttää siitä tehdyt tarjoukset.",
   "support.faqC6":
@@ -10289,6 +10307,12 @@ const sv: TranslationKeys = {
   "pricing.offerFromBooking": "Offert från en gästbokning",
   "pricing.offerStatus": "Statusuppföljning och giltighetsdatum för offerter",
   "pricing.offerGuestAccept": "Gäster godkänner offerter online",
+  "pricing.staffShifts": "Personalregister och turlistor",
+  "pricing.staffRealized": "Utförda timmar, CSV och personalbehov",
+  "pricing.staffPayroll": "Löneexport och ändringshistorik för turer",
+  "support.faqC8": "Hur gör jag en turlista? Öppna Personal, lägg till uppgifter och personer under Personal och tryck Ny turlista. Välj uppgift och namn på varje rad och skriv turer som 10-18, eller koderna V, X, Z, L och P för lediga dagar och semester. Raderna summerar timmar, sön- och helgtimmar samt kvälls- och nattimmar enligt dina löneregler. Pro och Business registrerar även utförda timmar, laddar ner CSV och visar personalbehov per timme utifrån bokningarna. Business lägger till lönefiler i CSV och ändringshistorik. Basic tillåter en turlista åt gången.",
+  "features.staffing": "Personal och turlistor",
+  "features.staffingDesc": "Bygg turlistor över flera veckor med uppgifter och ledighetskoder och automatiska timsummor, registrera utförda timmar, skriv ut personliga listor, exportera till lön och se timme för timme var bokningarna behöver mer personal.",
   "support.faqC7":
     "Offertstatus och gästens godkännande: varje offert visar Väntar, Accepterad, Avböjd, Utgången eller Utkast, och knapparna överst på Offerter filtrerar efter status. Ange ett Giltig till-datum; öppna offerter blir utgångna efter den dagen och visar Går ut snart tre dagar innan. Använd Markera som avböjd eller Öppna igen efter gästens beslut. Varje offertmejl har en privat länk där gästen granskar offerten och trycker på Godkänn offerten. Du får en avisering, offerten visar Gästen godkände och du trycker på Bekräfta för att skapa bokningen. En offert gjord från en gästbokning visar bokningens gäst och kontaktuppgifter, och bokningen listar sina offerter.",
   "support.faqC6":
