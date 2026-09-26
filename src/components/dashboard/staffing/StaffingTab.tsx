@@ -8,9 +8,8 @@ import ShiftListTab from "./ShiftListTab";
 import StaffingNeedsPanel from "./StaffingNeedsPanel";
 import StaffingSetupGuide from "./StaffingSetupGuide";
 import AccessReviewPanel from "./AccessReviewPanel";
-import AccessReviewReminder, {
-  useAccessReviewReminders,
-} from "./AccessReviewReminder";
+import AccessReviewReminder from "./AccessReviewReminder";
+import { useAccessReviewReminders } from "@/hooks/useAccessReviewReminders";
 
 const REVIEW_TAB = {
   en: "Access review",
