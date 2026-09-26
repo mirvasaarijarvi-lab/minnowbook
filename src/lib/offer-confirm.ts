@@ -127,7 +127,7 @@ export async function writeOfferMainReservation(
   // full reservation, so the guest never ends up with two bookings.
   if (offer.source_reservation_id) {
     const { tenant_id: _tenant, ...updateRow } = mainRow;
-    const { data, error } = await db
+    let q = db
       .from("reservations")
       .update({
         ...updateRow,
@@ -135,11 +135,16 @@ export async function writeOfferMainReservation(
         staff_notes: "Public booking, confirmed via offer",
       })
       .eq("id", offer.source_reservation_id)
-      .eq("tenant_id", offer.tenant_id)
-      .select()
-      .maybeSingle();
+      .eq("tenant_id", offer.tenant_id);
+    // Claim the booking only if no confirm has claimed it yet. Postgres
+    // re-checks this after a competing update commits, so exactly one
+    // simultaneous confirm wins; the others reuse the winner's row below.
+    if (offer.id) q = q.is("source_offer_id", null);
+    const { data, error } = await q.select().maybeSingle();
     if (error) throw error;
     if (data) return data;
+    const won = await claimed();
+    if (won) return won;
   }
   const existing = await claimed();
   if (existing) return existing;
