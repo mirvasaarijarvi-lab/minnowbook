@@ -314,6 +314,9 @@ test.describe("Guest accepts offer online, staff confirm: exactly one reservatio
         ),
       );
       expect(results.every((r) => r.id === source!.id)).toBe(true);
+      // Only one confirm may go on to add linked bookings and kitchen orders;
+      // the Offers page skips those steps when alreadyConfirmed is set.
+      expect(results.filter((r) => !r.alreadyConfirmed)).toHaveLength(1);
       const again = await staffConfirm(sb, offer.id, tenant.resources.venue);
       expect(again.id).toBe(source!.id);
       const rows = await reservationsFor(sb, tenant.id, guest.guest_email);
