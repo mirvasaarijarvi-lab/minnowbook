@@ -1,4 +1,8 @@
-import { periodInSiteScope, memberInListScope } from "@/lib/staffing/siteScope";
+import {
+  periodInSiteScope,
+  memberInListScope,
+  memberSiteIds,
+} from "@/lib/staffing/siteScope";
 import { useEffect, useMemo, useState } from "react";
 import { addDays, format, parseISO, startOfWeek } from "date-fns";
 import {
@@ -39,6 +43,7 @@ import {
   type StaffRole,
   type ShiftRow,
   fetchPayrollRange,
+  fetchWorkerShifts,
 } from "@/hooks/useShiftList";
 import {
   computeRowTotals,
@@ -230,7 +235,7 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   // Staff the open list may use: those at its location plus all-locations
   // staff. An all-locations list may use everyone.
   const siteMembers = useMemo(
-    () => members.filter((x) => memberInListScope(period?.site_id, x.site_id)),
+    () => members.filter((x) => memberInListScope(period?.site_id, memberSiteIds(x))),
     [members, period?.site_id],
   );
   const memberMap = useMemo(
@@ -386,23 +391,37 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   };
 
   const workerSheet = async (memberId: string) => {
-    if (!data) return;
+    if (!data || !tenantId || days.length === 0) return;
     const { createWorkerShiftPdf } =
       await import("@/lib/staffing/workerShiftPdf");
-    const lines = data.slots
-      .filter((s) => s.staff_member_id === memberId)
-      .flatMap((s) =>
-        days.map((d) => {
-          const x = shiftIndex.get(`${s.id}|${d}`);
-          return {
-            date: d,
-            start: x?.start_time?.slice(0, 5) ?? "",
-            end: x?.end_time?.slice(0, 5) ?? "",
-            role: roleName(roleMap.get(s.role_key ?? ""), lang),
-            note: s.notes ?? "",
-          };
-        }),
+    // Every planned shift for this person in the open list's dates, from
+    // every location's lists, so staff at several locations get one sheet.
+    let rows;
+    try {
+      rows = await fetchWorkerShifts(
+        tenantId,
+        memberId,
+        days[0],
+        days[days.length - 1],
       );
+    } catch {
+      toast.error(L.error);
+      return;
+    }
+    const manyPlaces =
+      multiSite && new Set(rows.map((r) => r.site_id ?? "")).size > 1;
+    const lines = rows.map((r) => {
+      const role = roleName(roleMap.get(r.role_key ?? ""), lang);
+      return {
+        date: r.date,
+        start: r.start_time?.slice(0, 5) ?? "",
+        end: r.end_time?.slice(0, 5) ?? "",
+        role: manyPlaces
+          ? [role, siteName(r.site_id)].filter(Boolean).join(", ")
+          : role,
+        note: r.notes ?? "",
+      };
+    });
     const name = memberMap.get(memberId)?.name ?? "";
     createWorkerShiftPdf(name, lines, lang).save(
       `${sanitizePathSegment(`${name}_${period?.start_date ?? ""}`)}.pdf`,
