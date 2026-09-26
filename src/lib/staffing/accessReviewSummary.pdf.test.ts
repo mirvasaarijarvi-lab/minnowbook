@@ -38,7 +38,7 @@ describe("combined access review summary page", () => {
     expect(out).toContain("Access review summary");
     expect(out).toContain("2: Mimmi, Testi");
     expect(out.indexOf("Access review summary")).toBeLessThan(
-      out.indexOf("Hotel A, "),
+      out.indexOf("Biz, Hotel A"),
     );
   });
 
