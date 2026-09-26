@@ -29,21 +29,23 @@ export type OfferStaffAccount = {
 const randomPassword = () =>
   `E2e!${crypto.randomUUID()}${crypto.randomUUID().slice(0, 8)}`;
 
+/**
+ * Look up an existing login's id. Uses a magic-link lookup (nothing is
+ * emailed) because the user list endpoint is unreliable on this project.
+ */
 async function findUserId(
   admin: SupabaseClient,
   email: string,
 ): Promise<string | undefined> {
-  for (let page = 1; page <= 25; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({
-      page,
-      perPage: 200,
-    });
-    if (error) throw new Error(`listUsers failed: ${error.message}`);
-    const hit = data.users.find((u) => u.email?.toLowerCase() === email);
-    if (hit) return hit.id;
-    if (data.users.length < 200) return undefined;
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+  });
+  if (error) {
+    if (/not.*found|no user/i.test(error.message)) return undefined;
+    throw new Error(`lookup of ${email} failed: ${error.message}`);
   }
-  return undefined;
+  return data.user?.id;
 }
 
 /** Remove every two-factor method from a login. */
@@ -68,18 +70,21 @@ async function ensureAccount(
   tenantId: string,
 ): Promise<OfferStaffAccount> {
   const password = randomPassword();
-  let userId = await findUserId(admin, email);
-  if (!userId) {
-    const { data, error } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { display_name: `E2E offer staff ${index}` },
-    });
-    if (error || !data.user)
-      throw new Error(`createUser(${email}) failed: ${error?.message}`);
-    userId = data.user.id;
+  let userId: string | undefined;
+  const created = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { display_name: `E2E offer staff ${index}` },
+  });
+  if (created.data.user) {
+    userId = created.data.user.id;
   } else {
+    userId = await findUserId(admin, email);
+    if (!userId)
+      throw new Error(
+        `createUser(${email}) failed: ${created.error?.message ?? "unknown"}`,
+      );
     const { error } = await admin.auth.admin.updateUserById(userId, {
       password,
       email_confirm: true,
