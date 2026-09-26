@@ -18,11 +18,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   type AuditPeriod,
   filterForAuditPeriod,
   accessReviewFileName,
   renderAccessReviewPdf,
+  renderAccessReviewPdfs,
   type AccessReviewReport,
 } from "@/lib/staffing/accessReviewPdf";
 import {
@@ -102,6 +104,10 @@ const LABELS = {
     pdfPeriodText: "{from} to {to}",
     pdfStart: "start",
     pdfNow: "today",
+    pdfCombined: "Combined audit PDF",
+    pdfLocations: "Locations",
+    pdfAllLocations: "All locations",
+    pdfPickOne: "Choose at least one location",
     reviewEvery: "Review each location every",
     daysN: "{n} days",
     overdueBy: "Review overdue by {days} days",
@@ -180,6 +186,10 @@ const LABELS = {
     pdfPeriodText: "{from} ja {to} välillä",
     pdfStart: "alusta",
     pdfNow: "tähän päivään",
+    pdfCombined: "Yhdistetty tarkastus-PDF",
+    pdfLocations: "Kohteet",
+    pdfAllLocations: "Kaikki kohteet",
+    pdfPickOne: "Valitse vähintään yksi kohde",
     reviewEvery: "Tarkista jokainen toimipiste",
     daysN: "{n} päivän välein",
     overdueBy: "Tarkistus myöhässä {days} päivää",
@@ -257,6 +267,10 @@ const LABELS = {
     pdfPeriodText: "{from} till {to}",
     pdfStart: "början",
     pdfNow: "i dag",
+    pdfCombined: "Samlad gransknings-PDF",
+    pdfLocations: "Platser",
+    pdfAllLocations: "Alla platser",
+    pdfPickOne: "Välj minst en plats",
     reviewEvery: "Granska varje plats var",
     daysN: "{n}:e dag",
     overdueBy: "Granskningen är {days} dagar försenad",
@@ -634,140 +648,179 @@ export default function AccessReviewPanel({
         : L.dueOn.replace("{date}", fmt(d.dueAt!.toISOString()));
   };
 
+  const buildReport = (
+    s: (typeof perSite)[number],
+    period: AuditPeriod,
+    now: Date,
+  ): AccessReviewReport => {
+    const hasPeriod = !!(period.from || period.to);
+    const dayText = (d: string) => fmt(`${d}T12:00:00`);
+    const scoped = filterForAuditPeriod(s.history, s.unreviewedChanges, period);
+    return {
+      title: L.pdfTitle,
+      business: (tenant as any)?.name ?? "",
+      location: s.site.name,
+      meta: [
+        [
+          L.pdfGenerated,
+          now.toLocaleString(
+            lang === "en" ? "en-GB" : lang === "fi" ? "fi-FI" : "sv-SE",
+          ),
+        ],
+        [
+          L.pdfStatus,
+          (s.last
+            ? L.lastAccepted.replace("{date}", fmt(s.last.accepted_at)) + ", "
+            : L.never + ", ") +
+            (s.changed ? L.changed + ", " : "") +
+            dueText(s.last?.accepted_at),
+        ],
+        [L.pdfInterval, L.daysN.replace("{n}", String(interval))],
+        [
+          L.pdfPeriod,
+          hasPeriod
+            ? L.pdfPeriodText
+                .replace(
+                  "{from}",
+                  period.from ? dayText(period.from) : L.pdfStart,
+                )
+                .replace("{to}", period.to ? dayText(period.to) : L.pdfNow)
+            : L.pdfAllHistory,
+        ],
+      ],
+      sections: [
+        {
+          heading: L.pdfCurrent,
+          blocks: [
+            {
+              title: L.signIn,
+              lines: s.signIn.length
+                ? s.signIn.map(
+                    (p) =>
+                      p.name +
+                      (p.tag ? ` (${p.tag})` : "") +
+                      (p.muted ? `, ${L.notApproved}` : ""),
+                  )
+                : [L.none],
+            },
+            {
+              title: L.shiftStaff,
+              lines: s.shift.length
+                ? s.shift.map((p) => p.name + (p.tag ? ` (${p.tag})` : ""))
+                : [L.none],
+            },
+          ],
+        },
+        {
+          heading: L.pdfOpen,
+          empty: L.pdfNone,
+          blocks: [
+            {
+              lines: s.requests.map(
+                (q) => `${fmt(q.created_at)}: ${q.subject_name}: ${q.note}`,
+              ),
+            },
+          ],
+        },
+        {
+          heading: L.history,
+          empty: hasPeriod ? L.pdfNoneInPeriod : L.never,
+          blocks: scoped.history.map((h) => {
+            const lines: string[] = [
+              h.untilAt
+                ? L.untilNext.replace("{date}", fmt(h.untilAt))
+                : L.untilNow,
+            ];
+            const diffs: [string, string[]][] = [
+              [L.gainedSignIn, h.usersAdded.map(userName)],
+              [L.lostSignIn, h.usersRemoved.map(userName)],
+              [L.addedShift, h.staffAdded.map(staffName)],
+              [L.removedShift, h.staffRemoved.map(staffName)],
+            ];
+            const shown = diffs.filter(([, n]) => n.length);
+            if (shown.length)
+              for (const [label, n] of shown)
+                lines.push(`${label}: ${n.join(", ")}`);
+            else lines.push(L.noChanges);
+            for (const c of h.changes)
+              lines.push(`${L.changesLog}: ${describeChange(c)}`);
+            for (const q of h.requests)
+              lines.push(
+                `${L.handled}: ${q.subject_name}: ${q.note} (${
+                  q.status === "done" ? L.reqDone : L.reqDismissed
+                })`,
+              );
+            return {
+              title: L.acceptedBy
+                .replace("{date}", fmt(h.review.accepted_at))
+                .replace("{name}", userName(h.review.accepted_by)),
+              lines,
+            };
+          }),
+        },
+        ...(scoped.unreviewed.length
+          ? [
+              {
+                heading: L.notReviewedChanges,
+                blocks: [{ lines: scoped.unreviewed.map(describeChange) }],
+              },
+            ]
+          : []),
+      ],
+      footer: `${L.pdfFooter}, ${s.site.name}`,
+    };
+  };
+
+  const badRange = (period: AuditPeriod) => {
+    if (period.from && period.to && period.from > period.to) {
+      toast.error(L.pdfBadRange);
+      return true;
+    }
+    return false;
+  };
+
   const exportPdf = async (
     s: (typeof perSite)[number],
     period: AuditPeriod = {},
   ): Promise<boolean> => {
-    if (period.from && period.to && period.from > period.to) {
-      toast.error(L.pdfBadRange);
+    if (badRange(period)) return false;
+    try {
+      const now = new Date();
+      const { jsPDF } = await import("jspdf");
+      renderAccessReviewPdf(jsPDF, buildReport(s, period, now)).save(
+        accessReviewFileName((tenant as any)?.slug, s.site.name, now, period),
+      );
+      return true;
+    } catch (e) {
+      console.error(e);
+      toast.error(L.pdfFailed);
+      return false;
+    }
+  };
+
+  const exportCombined = async (
+    siteIds: string[],
+    period: AuditPeriod = {},
+  ): Promise<boolean> => {
+    if (badRange(period)) return false;
+    const chosen = perSite.filter((x) => siteIds.includes(x.site.id));
+    if (chosen.length === 0) {
+      toast.error(L.pdfPickOne);
       return false;
     }
     try {
       const now = new Date();
-      const hasPeriod = !!(period.from || period.to);
-      const dayText = (d: string) => fmt(`${d}T12:00:00`);
-      const scoped = filterForAuditPeriod(
-        s.history,
-        s.unreviewedChanges,
-        period,
-      );
-      const report: AccessReviewReport = {
-        title: L.pdfTitle,
-        business: (tenant as any)?.name ?? "",
-        location: s.site.name,
-        meta: [
-          [
-            L.pdfGenerated,
-            now.toLocaleString(
-              lang === "en" ? "en-GB" : lang === "fi" ? "fi-FI" : "sv-SE",
-            ),
-          ],
-          [
-            L.pdfStatus,
-            (s.last
-              ? L.lastAccepted.replace("{date}", fmt(s.last.accepted_at)) + ", "
-              : L.never + ", ") +
-              (s.changed ? L.changed + ", " : "") +
-              dueText(s.last?.accepted_at),
-          ],
-          [L.pdfInterval, L.daysN.replace("{n}", String(interval))],
-          [
-            L.pdfPeriod,
-            hasPeriod
-              ? L.pdfPeriodText
-                  .replace(
-                    "{from}",
-                    period.from ? dayText(period.from) : L.pdfStart,
-                  )
-                  .replace("{to}", period.to ? dayText(period.to) : L.pdfNow)
-              : L.pdfAllHistory,
-          ],
-        ],
-        sections: [
-          {
-            heading: L.pdfCurrent,
-            blocks: [
-              {
-                title: L.signIn,
-                lines: s.signIn.length
-                  ? s.signIn.map(
-                      (p) =>
-                        p.name +
-                        (p.tag ? ` (${p.tag})` : "") +
-                        (p.muted ? `, ${L.notApproved}` : ""),
-                    )
-                  : [L.none],
-              },
-              {
-                title: L.shiftStaff,
-                lines: s.shift.length
-                  ? s.shift.map((p) => p.name + (p.tag ? ` (${p.tag})` : ""))
-                  : [L.none],
-              },
-            ],
-          },
-          {
-            heading: L.pdfOpen,
-            empty: L.pdfNone,
-            blocks: [
-              {
-                lines: s.requests.map(
-                  (q) => `${fmt(q.created_at)}: ${q.subject_name}: ${q.note}`,
-                ),
-              },
-            ],
-          },
-          {
-            heading: L.history,
-            empty: hasPeriod ? L.pdfNoneInPeriod : L.never,
-            blocks: scoped.history.map((h) => {
-              const lines: string[] = [
-                h.untilAt
-                  ? L.untilNext.replace("{date}", fmt(h.untilAt))
-                  : L.untilNow,
-              ];
-              const diffs: [string, string[]][] = [
-                [L.gainedSignIn, h.usersAdded.map(userName)],
-                [L.lostSignIn, h.usersRemoved.map(userName)],
-                [L.addedShift, h.staffAdded.map(staffName)],
-                [L.removedShift, h.staffRemoved.map(staffName)],
-              ];
-              const shown = diffs.filter(([, n]) => n.length);
-              if (shown.length)
-                for (const [label, n] of shown)
-                  lines.push(`${label}: ${n.join(", ")}`);
-              else lines.push(L.noChanges);
-              for (const c of h.changes)
-                lines.push(`${L.changesLog}: ${describeChange(c)}`);
-              for (const q of h.requests)
-                lines.push(
-                  `${L.handled}: ${q.subject_name}: ${q.note} (${
-                    q.status === "done" ? L.reqDone : L.reqDismissed
-                  })`,
-                );
-              return {
-                title: L.acceptedBy
-                  .replace("{date}", fmt(h.review.accepted_at))
-                  .replace("{name}", userName(h.review.accepted_by)),
-                lines,
-              };
-            }),
-          },
-          ...(scoped.unreviewed.length
-            ? [
-                {
-                  heading: L.notReviewedChanges,
-                  blocks: [{ lines: scoped.unreviewed.map(describeChange) }],
-                },
-              ]
-            : []),
-        ],
-        footer: `${L.pdfFooter}, ${s.site.name}`,
-      };
       const { jsPDF } = await import("jspdf");
-      renderAccessReviewPdf(jsPDF, report).save(
-        accessReviewFileName((tenant as any)?.slug, s.site.name, now, period),
-      );
+      const name =
+        chosen.length === perSite.length
+          ? "all-locations"
+          : chosen.length === 1
+            ? chosen[0].site.name
+            : `${chosen.length}-locations`;
+      renderAccessReviewPdfs(
+        jsPDF,
+        chosen.map((x) => buildReport(x, period, now)),
+      ).save(accessReviewFileName((tenant as any)?.slug, name, now, period));
       return true;
     } catch (e) {
       console.error(e);
@@ -927,6 +980,17 @@ export default function AccessReviewPanel({
               .map((u) => u.display_name || u.user_id.slice(0, 8))
               .join(", ")}
           </span>
+        </div>
+      )}
+      {perSite.length > 1 && (
+        <div className="flex justify-end">
+          <PdfExportButton
+            L={{ ...L, pdf: L.pdfCombined }}
+            sites={perSite.map((x) => x.site)}
+            onExport={(period, ids) =>
+              exportCombined(ids ?? perSite.map((x) => x.site.id), period)
+            }
+          />
         </div>
       )}
       {perSite.map((s) => (
@@ -1164,8 +1228,13 @@ export default function AccessReviewPanel({
 function PdfExportButton({
   L,
   onExport,
+  sites,
 }: {
+  /** When given, the panel also lets you pick which locations to include. */
+  sites?: { id: string; name: string }[];
   L: {
+    pdfLocations: string;
+    pdfAllLocations: string;
     pdf: string;
     pdfPeriod: string;
     pdfFrom: string;
@@ -1173,16 +1242,23 @@ function PdfExportButton({
     pdfPeriodHint: string;
     pdfDownload: string;
   };
-  onExport: (period: AuditPeriod) => Promise<boolean>;
+  onExport: (period: AuditPeriod, siteIds?: string[]) => Promise<boolean>;
 }) {
   const [open, setOpen] = useState(false);
+  const [picked, setPicked] = useState<string[] | null>(null);
+  const chosen = picked ?? sites?.map((x) => x.id) ?? [];
+  const toggle = (id: string, on: boolean) =>
+    setPicked(on ? [...chosen, id] : chosen.filter((x) => x !== id));
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [busy, setBusy] = useState(false);
   const uid = useId();
   const download = async () => {
     setBusy(true);
-    const ok = await onExport({ from: from || undefined, to: to || undefined });
+    const ok = await onExport(
+      { from: from || undefined, to: to || undefined },
+      sites ? chosen : undefined,
+    );
     setBusy(false);
     if (ok) setOpen(false);
   };
@@ -1195,6 +1271,31 @@ function PdfExportButton({
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-72 space-y-3">
+        {sites && (
+          <fieldset className="space-y-2">
+            <legend className="text-sm font-medium">{L.pdfLocations}</legend>
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={chosen.length === sites.length}
+                onCheckedChange={(v) =>
+                  setPicked(v === true ? sites.map((x) => x.id) : [])
+                }
+              />
+              {L.pdfAllLocations}
+            </label>
+            <div className="max-h-40 space-y-1.5 overflow-y-auto pl-1">
+              {sites.map((x) => (
+                <label key={x.id} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    checked={chosen.includes(x.id)}
+                    onCheckedChange={(v) => toggle(x.id, v === true)}
+                  />
+                  {x.name}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
         <p className="text-sm font-medium">{L.pdfPeriod}</p>
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
@@ -1219,7 +1320,12 @@ function PdfExportButton({
           </div>
         </div>
         <p className="text-xs text-muted-foreground">{L.pdfPeriodHint}</p>
-        <Button size="sm" className="w-full" disabled={busy} onClick={download}>
+        <Button
+          size="sm"
+          className="w-full"
+          disabled={busy || (!!sites && chosen.length === 0)}
+          onClick={download}
+        >
           <FileDown className="mr-1 h-4 w-4" aria-hidden />
           {L.pdfDownload}
         </Button>

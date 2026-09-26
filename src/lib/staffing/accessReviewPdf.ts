@@ -35,11 +35,24 @@ export function renderAccessReviewPdf(
   JsPDFCtor: typeof JsPDF,
   r: AccessReviewReport,
 ): JsPDF {
+  return renderAccessReviewPdfs(JsPDFCtor, [r]);
+}
+
+/**
+ * One PDF with several location reports. Each report starts on a new page
+ * and keeps its own footer; page numbers run through the whole file.
+ */
+export function renderAccessReviewPdfs(
+  JsPDFCtor: typeof JsPDF,
+  reports: AccessReviewReport[],
+): JsPDF {
   const doc = new JsPDFCtor({ unit: "mm", format: "a4" });
+  const footers: string[] = [];
   let y = TOP;
   const ensure = (h: number) => {
     if (y + h > BOTTOM) {
       doc.addPage();
+      footers.push(current);
       y = TOP;
     }
   };
@@ -76,26 +89,33 @@ export function renderAccessReviewPdf(
     y += 0.6;
   };
 
-  write(r.title, 16, "bold", 0, 1);
-  write(`${r.business}, ${r.location}`, 12, "normal", 0, 3);
-  for (const [k, v] of r.meta) write(`${k}: ${v}`, 9.5, "normal", 0, 0.5);
-  y += 3;
-
-  for (const s of r.sections) {
-    ensure(16);
+  let current = "";
+  reports.forEach((r, idx) => {
+    current = r.footer;
+    if (idx > 0) doc.addPage();
+    footers.push(r.footer);
+    y = TOP;
+    write(r.title, 16, "bold", 0, 1);
+    write(`${r.business}, ${r.location}`, 12, "normal", 0, 3);
+    for (const [k, v] of r.meta) write(`${k}: ${v}`, 9.5, "normal", 0, 0.5);
     y += 3;
-    doc.setDrawColor(180);
-    doc.line(MARGIN_X, y - 6, MARGIN_X + WIDTH, y - 6);
-    write(s.heading, 12, "bold", 0, 2);
-    const blocks = s.blocks.filter((b) => b.title || b.lines.length);
-    if (blocks.length === 0 && s.empty) write(s.empty, 9.5, "normal", 2, 2);
-    for (const b of blocks) {
-      if (b.title) write(b.title, 10, "bold", 2, 1);
-      for (const l of b.lines) bullet(l);
+
+    for (const s of r.sections) {
+      ensure(16);
+      y += 3;
+      doc.setDrawColor(180);
+      doc.line(MARGIN_X, y - 6, MARGIN_X + WIDTH, y - 6);
+      write(s.heading, 12, "bold", 0, 2);
+      const blocks = s.blocks.filter((b) => b.title || b.lines.length);
+      if (blocks.length === 0 && s.empty) write(s.empty, 9.5, "normal", 2, 2);
+      for (const b of blocks) {
+        if (b.title) write(b.title, 10, "bold", 2, 1);
+        for (const l of b.lines) bullet(l);
+        y += 2;
+      }
       y += 2;
     }
-    y += 2;
-  }
+  });
 
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
@@ -103,7 +123,7 @@ export function renderAccessReviewPdf(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     doc.setTextColor(110);
-    doc.text(pdfSafe(r.footer), MARGIN_X, PAGE_H - 8);
+    doc.text(pdfSafe(footers[i - 1] ?? ""), MARGIN_X, PAGE_H - 8);
     doc.text(`${i} / ${pages}`, MARGIN_X + WIDTH, PAGE_H - 8, {
       align: "right",
     });
