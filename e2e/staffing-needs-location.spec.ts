@@ -31,8 +31,14 @@ const STAFF_EMAIL = process.env.E2E_STAFF_EMAIL;
 const STAFF_PASSWORD = process.env.E2E_STAFF_PASSWORD;
 const STAFF_SESSION = process.env.E2E_STAFF_SESSION_JSON;
 
-const SITE_A = { id: "64a56b2b-45b9-454c-80e4-76441c167b7e", name: "Hotel Mimmi" };
-const SITE_B = { id: "01e4a3ea-e883-46c2-9932-4a07a1d641db", name: "Second hotel" };
+const SITE_A = {
+  id: "64a56b2b-45b9-454c-80e4-76441c167b7e",
+  name: "Hotel Mimmi",
+};
+const SITE_B = {
+  id: "01e4a3ea-e883-46c2-9932-4a07a1d641db",
+  name: "Second hotel",
+};
 
 const hourRow = (page: Page, hour: string) =>
   page
@@ -44,7 +50,12 @@ async function pickLocation(page: Page, current: RegExp, name: string) {
   await page.getByRole("button", { name, exact: true }).first().click();
 }
 
-async function expectRow(page: Page, hour: string, guests: number, onShift: number) {
+async function expectRow(
+  page: Page,
+  hour: string,
+  guests: number,
+  onShift: number,
+) {
   const row = hourRow(page, hour);
   await expect(row).toHaveCount(1);
   await expect(row.locator("td").nth(1)).toHaveText(String(guests));
@@ -163,7 +174,11 @@ test.describe("Staffing needs follow the selected location", () => {
       await page.locator("#needs-date").fill(day);
 
       // Location A
-      await pickLocation(page, /All sites|Hotel Mimmi|Second hotel|Restaurante|Eventos|Another site/, SITE_A.name);
+      await pickLocation(
+        page,
+        /All sites|Hotel Mimmi|Second hotel|Restaurante|Eventos|Another site/,
+        SITE_A.name,
+      );
       await expectRow(page, "10:00", 20, 1);
       await expectRow(page, "08:00", 0, 1);
       await expect(hourRow(page, "14:00")).toHaveCount(0);
@@ -181,7 +196,11 @@ test.describe("Staffing needs follow the selected location", () => {
       await expectRow(page, "14:00", 30, 1);
     } finally {
       if (periodIds.length) {
-        await sb.from("shifts").delete().eq("date", day).eq("tenant_id", tenant.id);
+        await sb
+          .from("shifts")
+          .delete()
+          .eq("date", day)
+          .eq("tenant_id", tenant.id);
         await sb.from("shift_slots").delete().in("period_id", periodIds);
         await sb.from("shift_periods").delete().in("id", periodIds);
       }
