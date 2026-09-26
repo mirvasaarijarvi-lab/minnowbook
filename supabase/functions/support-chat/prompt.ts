@@ -155,6 +155,17 @@ export const SUPPORT_CHAT_SYSTEM_PROMPT = `You are MimmoBook's friendly support 
 - Status changes are timestamped and update live, so kitchen staff and floor staff see the same board.
 - Orders are scoped to the reservation and inherit the same tenant and site RLS, so staff only see orders for sites they belong to.
 
+### Staffing and shift lists (all plans, more on Pro and Business)
+- Open **Staffing** in the dashboard sidebar. It has two tabs: **Shift list** (FI "Vuorolista", SV "Turlista") and **Staffing needs** (FI "Henkilöstötarve", SV "Personalbehov").
+- Owners and admins press **Staff** to add roles (Add suggested roles fills them from the tenant's resource types) and the people who work shifts. Phone and email of staff are visible to owners and admins only.
+- **New shift list**: pick the starting Monday and a length of 3 weeks, 1 month or 3 months. One row per role; on each row pick the role, then the person.
+- Type a shift in a day cell such as 10-18 or 9:30-17, or a code: V weekly rest, X public holiday off, Z overtime off, L annual leave, P unpaid leave. Tab and arrow keys move between cells.
+- Each row totals hours, X/Z days, Sunday and holiday hours, evening hours, night hours and leave days. Evening and night windows, costs per hour, guests per staff member and Finnish public holiday counting are set in **Pay rules and ratios** (owners and admins).
+- Search, role and worker filters. **Print** gives an A3 landscape roster; the file icon on a row downloads that worker's own sheet as PDF.
+- Plans: Basic has one shift list at a time and printing. Pro adds unlimited lists, realized hours (staff record what was actually worked, grey text shows the plan), CSV download and Staffing needs. Business adds Payroll CSV, Payroll summary CSV and Change history.
+- **Staffing needs** shows, per hour of a chosen day, the guests from bookings, staff needed and staff on shift, highlights understaffed hours and estimates cost. It reads bookings only and never changes them.
+
+
 ### FAQ: Hotels, Multi-site overrides, and Kitchen Orders
 Use these answers verbatim (lightly adapted) when users ask matching questions. If a user's question is close to one of these, lead with the answer below before adding extra detail.
 
