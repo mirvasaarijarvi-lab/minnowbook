@@ -31,12 +31,19 @@ export type AccessChange = {
   subject_name: string;
   old_site_id: string | null;
   new_site_id: string | null;
+  old_site_ids?: string[] | null;
+  new_site_ids?: string[] | null;
   changed_by: string | null;
   changed_at: string;
 };
 
 /** A change matters to a location when it touches it or "all locations". */
 export function changeAffectsSite(c: AccessChange, siteId: string): boolean {
+  if (c.action === "staff_moved" && (c.old_site_ids || c.new_site_ids)) {
+    const hit = (ids: string[] | null | undefined) =>
+      !ids || ids.length === 0 || ids.includes(siteId);
+    return hit(c.old_site_ids) || hit(c.new_site_ids);
+  }
   if (c.action === "staff_moved")
     return (
       c.old_site_id === siteId ||

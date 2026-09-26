@@ -235,7 +235,10 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   // Staff the open list may use: those at its location plus all-locations
   // staff. An all-locations list may use everyone.
   const siteMembers = useMemo(
-    () => members.filter((x) => memberInListScope(period?.site_id, memberSiteIds(x))),
+    () =>
+      members.filter((x) =>
+        memberInListScope(period?.site_id, memberSiteIds(x)),
+      ),
     [members, period?.site_id],
   );
   const memberMap = useMemo(
