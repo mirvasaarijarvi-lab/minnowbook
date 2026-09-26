@@ -1069,6 +1069,7 @@ const guideContent: Record<Language, GuideContent> = {
         title: "22. Staffing and shift lists",
         steps: [
           "Open Staffing in the menu. Shift list is for building the roster, Staffing needs compares your bookings with who is on shift.",
+          "Setup guide (owners and admins): Set up staffing at the top of Staffing walks you through four steps: 1 Add your locations (type a name and press Add location), 2 Add roles and staff (Open staff register), 3 Assign staff to locations (optional, pick Works at for each person, or All locations), 4 Create your first shift list (Go to shift list). Finished steps get a green tick and Done. Hide guide hides it for your business, and the Setup guide button brings it back.",
           "Owners and admins: press Staff to add roles (Add suggested roles fills them in from your resource types) and the people who work shifts. Phone and email are only visible to owners and admins.",
           "Create a list with New shift list: pick the starting Monday and a length of 3 weeks, 1 month or 3 months. One row is added per role.",
           "On each row pick the role first, then the name. Type a shift like 10-18 or 9:30-17 in a day cell, or a code: V weekly rest, X public holiday off, Z overtime off, L annual leave, P unpaid leave. Tab and arrow keys move between cells.",
@@ -1441,6 +1442,7 @@ const guideContent: Record<Language, GuideContent> = {
         title: "22. Työvuorot ja henkilöstötarve",
         steps: [
           "Avaa valikosta Työvuorot. Vuorolistalla rakennat listan, Henkilöstötarve vertaa varauksia vuorossa oleviin.",
+          "Käyttöönotto-opas (omistajat ja ylläpitäjät): Työvuorot-sivun yläosan Henkilöstön käyttöönotto opastaa neljä vaihetta: 1 Lisää toimipisteet (kirjoita nimi ja paina Lisää toimipiste), 2 Lisää roolit ja henkilöstö (Avaa henkilöstörekisteri), 3 Liitä henkilöstö toimipisteisiin (valinnainen, valitse jokaiselle Toimipiste tai Kaikki toimipisteet), 4 Luo ensimmäinen vuorolista (Siirry vuorolistaan). Valmiit vaiheet saavat vihreän merkin ja Valmis-tunnisteen. Piilota opas piilottaa sen yrityksesi osalta, ja Käyttöönotto-opas-painike tuo sen takaisin.",
           "Omistajat ja ylläpitäjät: paina Henkilöstö ja lisää tehtävät (Lisää ehdotetut tehtävät täyttää ne resurssityyppiesi mukaan) sekä vuoroja tekevät henkilöt. Puhelin ja sähköposti näkyvät vain omistajille ja ylläpitäjille.",
           "Luo lista painamalla Uusi vuorolista: valitse aloitusmaanantai ja pituus 3 viikkoa, 1 kk tai 3 kk. Jokaiselle tehtävälle tulee oma rivi.",
           "Valitse rivillä ensin tehtävä, sitten nimi. Kirjoita päivän soluun vuoro, esim. 10-18 tai 9:30-17, tai koodi: V viikkolepopäivä, X arkipyhävapaa, Z ylityövapaa, L vuosiloma, P palkaton vapaa. Sarkain ja nuolinäppäimet siirtävät solusta toiseen.",
@@ -1813,6 +1815,7 @@ const guideContent: Record<Language, GuideContent> = {
         title: "22. Personal och turlistor",
         steps: [
           "Öppna Personal i menyn. Turlistan används för schemat, Personalbehov jämför bokningarna med vem som är i tjänst.",
+          "Kom igång-guide (ägare och administratörer): Kom igång med personal högst upp på Personal guidar dig genom fyra steg: 1 Lägg till dina platser (skriv ett namn och tryck Lägg till plats), 2 Lägg till roller och personal (Öppna personalregistret), 3 Koppla personal till platser (valfritt, välj Arbetar på för varje person, eller Alla platser), 4 Skapa din första turlista (Gå till turlistan). Klara steg får en grön bock och Klart. Dölj guiden döljer den för ditt företag, och knappen Kom igång-guide visar den igen.",
           "Ägare och administratörer: tryck Personal och lägg till uppgifter (Lägg till föreslagna uppgifter fyller i dem utifrån dina resurstyper) och de som arbetar turer. Telefon och e-post syns bara för ägare och administratörer.",
           "Skapa en lista med Ny turlista: välj startmåndag och längd 3 veckor, 1 månad eller 3 månader. En rad läggs till per uppgift.",
           "Välj först uppgift, sedan namn på varje rad. Skriv en tur som 10-18 eller 9:30-17 i dagens cell, eller en kod: V veckovila, X helgdagsledighet, Z övertidsledighet, L semester, P obetald ledighet. Tabb och piltangenter flyttar mellan cellerna.",
