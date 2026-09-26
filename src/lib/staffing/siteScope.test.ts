@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { memberInListScope } from "./siteScope";
 
 /**
  * Regression: staffing needs (and payroll by date) count only shift lists for
