@@ -734,7 +734,14 @@ const OffersManager = () => {
           {filteredOffers.map((offer) => {
             const isArchived = !!offer.archived_at;
             const track = offerTrackStatus(offer);
-            const isOpen = track === "pending" || track === "draft";
+            // Staff keep full control of offers that only expired by date
+            // (stored status still draft/sent), e.g. a late Confirm after
+            // the guest accepted online.
+            const isOpen =
+              track === "pending" ||
+              track === "draft" ||
+              offer.status === "draft" ||
+              offer.status === "sent";
             return (
               <li
                 key={offer.id}
