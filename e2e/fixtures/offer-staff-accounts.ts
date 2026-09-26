@@ -29,6 +29,35 @@ export type OfferStaffAccount = {
   client: SupabaseClient;
 };
 
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+/**
+ * Retry a step that can lose a race with another test run doing the same
+ * thing at the same moment. Waits a little longer, with jitter, each time.
+ */
+async function withRaceRetry<T>(
+  what: string,
+  step: () => Promise<T>,
+  attempts = 5,
+): Promise<T> {
+  let last: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await step();
+    } catch (e) {
+      last = e;
+      if (i < attempts - 1) await sleep(300 * (i + 1) + Math.random() * 400);
+    }
+  }
+  throw new Error(
+    `${what} failed after ${attempts} tries: ${(last as Error)?.message ?? last}`,
+  );
+}
+
+const isDuplicate = (msg: string | undefined) =>
+  /already (been )?registered|already exists|duplicate|unique/i.test(msg ?? "");
+const isGone = (msg: string | undefined) => /not.*found|404/i.test(msg ?? "");
+
 const randomPassword = () =>
   `E2e!${crypto.randomUUID()}${crypto.randomUUID().slice(0, 8)}`;
 
@@ -82,7 +111,9 @@ async function removeTwoFactor(admin: SupabaseClient, userId: string) {
       userId,
       id: f.id,
     });
-    if (delErr) throw new Error(`deleteFactor failed: ${delErr.message}`);
+    // Another run may have removed it a moment ago.
+    if (delErr && !isGone(delErr.message))
+      throw new Error(`deleteFactor failed: ${delErr.message}`);
   }
 }
 
@@ -102,12 +133,19 @@ async function ensureAccount(
       email_confirm: true,
       user_metadata: { display_name: `E2E offer staff ${index}` },
     });
-    // Another run may have created it at the same moment.
-    userId = created.data.user?.id ?? (await findUserId(admin, email));
-    if (!userId)
-      throw new Error(
-        `createUser(${email}) failed: ${created.error?.message ?? "unknown"}`,
-      );
+    userId = created.data.user?.id;
+    if (!userId) {
+      // Another run created it at the same moment: use that login instead.
+      if (created.error && !isDuplicate(created.error.message))
+        throw new Error(
+          `createUser(${email}) failed: ${created.error.message}`,
+        );
+      userId = await withRaceRetry(`lookup of ${email}`, async () => {
+        const id = await findUserId(admin, email);
+        if (!id) throw new Error("login not visible yet");
+        return id;
+      });
+    }
   }
   await removeTwoFactor(admin, userId);
 
@@ -130,7 +168,10 @@ async function ensureAccount(
       is_approved: true,
       display_name: `E2E offer staff ${index}`,
     } as any);
-    if (error) throw new Error(`tenant_users insert failed: ${error.message}`);
+    // Another run may have added the same membership a moment ago; the
+    // role check below still runs on the next call, and the row is identical.
+    if (error && !isDuplicate(error.message))
+      throw new Error(`tenant_users insert failed: ${error.message}`);
   } else if (mine.role !== "admin" || !mine.is_approved) {
     const { error } = await admin
       .from("tenant_users")
@@ -143,7 +184,11 @@ async function ensureAccount(
   const client = createClient(url, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  await signInWithoutPassword(admin, client, email);
+  // Two runs signing in the same login at once can replace each other's
+  // one-time token, so a lost race just asks for a fresh one.
+  await withRaceRetry(`sign-in for ${email}`, () =>
+    signInWithoutPassword(admin, client, email),
+  );
   return { email, userId, client };
 }
 
