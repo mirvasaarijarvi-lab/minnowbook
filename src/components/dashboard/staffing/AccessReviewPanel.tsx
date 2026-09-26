@@ -8,7 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { StaffLang } from "@/lib/staffing/labels";
-import { buildSiteHistory } from "@/lib/staffing/accessReviewHistory";
+import {
+  buildSiteHistory,
+  changeAffectsSite,
+} from "@/lib/staffing/accessReviewHistory";
 
 const LABELS = {
   en: {
@@ -38,6 +41,15 @@ const LABELS = {
     changed: "Access changed since last review",
     ok: "Saved",
     noSites: "Add a location first.",
+    worksAt: "Works at",
+    removeHere: "Remove from this location",
+    giveAccess: "Give sign-in access to this location",
+    changesLog: "Location changes",
+    changeMoved: "{name}: works at {from} → {to}",
+    changeAdded: "{name}: got sign-in access",
+    changeRemoved: "{name}: sign-in access removed",
+    byWho: "by {name}",
+    notReviewedChanges: "Location changes (not reviewed yet)",
     history: "Review history",
     acceptedBy: "Accepted {date} by {name}",
     untilNext: "Changes before the next review on {date}",
@@ -80,6 +92,15 @@ const LABELS = {
     changed: "Käyttöoikeudet muuttuneet edellisen tarkistuksen jälkeen",
     ok: "Tallennettu",
     noSites: "Lisää ensin toimipiste.",
+    worksAt: "Työpaikka",
+    removeHere: "Poista tästä toimipisteestä",
+    giveAccess: "Anna kirjautumisoikeus tähän toimipisteeseen",
+    changesLog: "Toimipistemuutokset",
+    changeMoved: "{name}: työpaikka {from} → {to}",
+    changeAdded: "{name}: sai kirjautumisoikeuden",
+    changeRemoved: "{name}: kirjautumisoikeus poistettu",
+    byWho: "tekijä {name}",
+    notReviewedChanges: "Toimipistemuutokset (ei vielä tarkistettu)",
     history: "Tarkistushistoria",
     acceptedBy: "Hyväksynyt {name}, {date}",
     untilNext: "Muutokset ennen seuraavaa tarkistusta {date}",
@@ -121,6 +142,15 @@ const LABELS = {
     changed: "Behörigheterna har ändrats sedan senaste granskningen",
     ok: "Sparat",
     noSites: "Lägg till en plats först.",
+    worksAt: "Arbetar på",
+    removeHere: "Ta bort från den här platsen",
+    giveAccess: "Ge inloggning till den här platsen",
+    changesLog: "Platsändringar",
+    changeMoved: "{name}: arbetar på {from} → {to}",
+    changeAdded: "{name}: fick inloggning",
+    changeRemoved: "{name}: inloggning borttagen",
+    byWho: "av {name}",
+    notReviewedChanges: "Platsändringar (inte granskade än)",
     history: "Granskningshistorik",
     acceptedBy: "Godkänd {date} av {name}",
     untilNext: "Ändringar före nästa granskning {date}",
@@ -143,11 +173,14 @@ type Person = {
   name: string;
   tag: string;
   muted?: boolean;
+  role?: string;
+  siteId?: string | null;
 };
 
 export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
   const L = LABELS[lang];
-  const { tenantId } = useTenant();
+  const { tenantId, isOwner, isAdmin } = useTenant();
+  const canEditSignIn = isOwner || isAdmin;
   const qc = useQueryClient();
   const key = ["access-review", tenantId];
 
@@ -204,6 +237,14 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
           .select("id,site_id,subject_name,note,status,resolved_at")
           .eq("tenant_id", t)
           .neq("status", "open"),
+        supabase
+          .from("site_access_change_log")
+          .select(
+            "id,action,subject_id,subject_name,old_site_id,new_site_id,changed_by,changed_at",
+          )
+          .eq("tenant_id", t)
+          .order("changed_at", { ascending: false })
+          .limit(1000),
       ]);
       for (const r of [
         sites,
@@ -214,6 +255,7 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
         requests,
         allStaff,
         handled,
+        changes,
       ])
         if (r.error) throw r.error;
       return {
@@ -225,6 +267,7 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
         requests: requests.data ?? [],
         allStaff: allStaff.data ?? [],
         handled: handled.data ?? [],
+        changes: changes.data ?? [],
       };
     },
   });
@@ -244,6 +287,7 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
         )
         .map((u) => ({
           kind: "user",
+          role: u.role,
           id: u.user_id,
           name: u.display_name || u.user_id.slice(0, 8),
           tag:
@@ -256,6 +300,7 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
         .filter((m) => m.site_id === s.id || m.site_id == null)
         .map((m) => ({
           kind: "staff",
+          siteId: m.site_id,
           id: m.id,
           name: m.name,
           tag: m.site_id == null ? L.allLoc : "",
@@ -275,7 +320,23 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
         last,
         changed,
         requests: data.requests.filter((r) => r.site_id === s.id),
-        history: buildSiteHistory(s.id, data.reviews, snapshot, data.handled),
+        history: buildSiteHistory(
+          s.id,
+          data.reviews,
+          snapshot,
+          data.handled,
+          data.changes,
+        ),
+        unreviewedChanges: data.reviews.some((r) => r.site_id === s.id)
+          ? []
+          : data.changes.filter((c) => changeAffectsSite(c, s.id)),
+        addable: data.users.filter(
+          (u) =>
+            u.role === "staff" &&
+            !data.siteUsers.some(
+              (su) => su.site_id === s.id && su.user_id === u.user_id,
+            ),
+        ),
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -344,6 +405,39 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
     onError: onErr,
   });
 
+  const moveStaff = useMutation({
+    mutationFn: async (v: { id: string; siteId: string | null }) => {
+      const { error } = await supabase
+        .from("staff_members")
+        .update({ site_id: v.siteId })
+        .eq("id", v.id)
+        .eq("tenant_id", tenantId!);
+      if (error) throw error;
+    },
+    onSuccess: refresh,
+    onError: onErr,
+  });
+
+  const setSignIn = useMutation({
+    mutationFn: async (v: { userId: string; siteId: string; on: boolean }) => {
+      const { error } = v.on
+        ? await supabase.from("site_users").insert({
+            tenant_id: tenantId!,
+            site_id: v.siteId,
+            user_id: v.userId,
+          } as never)
+        : await supabase
+            .from("site_users")
+            .delete()
+            .eq("tenant_id", tenantId!)
+            .eq("site_id", v.siteId)
+            .eq("user_id", v.userId);
+      if (error) throw error;
+    },
+    onSuccess: refresh,
+    onError: onErr,
+  });
+
   const [draft, setDraft] = useState<{
     siteId: string;
     p: Person;
@@ -364,6 +458,35 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
   };
   const staffName = (id: string) =>
     data?.allStaff.find((x) => x.id === id)?.name ?? L.unknown;
+
+  const siteName = (id: string | null) =>
+    id === null
+      ? L.allLoc
+      : (data?.sites.find((x) => x.id === id)?.name ?? L.unknown);
+  const describeChange = (c: {
+    action: string;
+    subject_name: string;
+    old_site_id: string | null;
+    new_site_id: string | null;
+    changed_by: string | null;
+    changed_at: string;
+  }) => {
+    const name = c.subject_name || L.unknown;
+    const text =
+      c.action === "staff_moved"
+        ? L.changeMoved
+            .replace("{name}", name)
+            .replace("{from}", siteName(c.old_site_id))
+            .replace("{to}", siteName(c.new_site_id))
+        : (c.action === "signin_added"
+            ? L.changeAdded
+            : L.changeRemoved
+          ).replace("{name}", name);
+    const by = c.changed_by
+      ? ` ${L.byWho.replace("{name}", userName(c.changed_by))}`
+      : "";
+    return `${fmt(c.changed_at)}: ${text}${by}`;
+  };
 
   const PersonList = ({
     siteId,
@@ -389,6 +512,40 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
                 </span>
                 {p.tag && <Badge variant="outline">{p.tag}</Badge>}
                 {p.muted && <Badge variant="secondary">{L.notApproved}</Badge>}
+                {p.kind === "staff" && (
+                  <select
+                    aria-label={`${L.worksAt}: ${p.name}`}
+                    className="h-7 rounded border border-input bg-background px-1 text-xs"
+                    value={p.siteId ?? ""}
+                    disabled={moveStaff.isPending}
+                    onChange={(e) =>
+                      moveStaff.mutate({
+                        id: p.id,
+                        siteId: e.target.value || null,
+                      })
+                    }
+                  >
+                    <option value="">{L.allLoc}</option>
+                    {(data?.sites ?? []).map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {p.kind === "user" && p.role === "staff" && canEditSignIn && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7"
+                    disabled={setSignIn.isPending}
+                    onClick={() =>
+                      setSignIn.mutate({ userId: p.id, siteId, on: false })
+                    }
+                  >
+                    {L.removeHere}
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   variant="ghost"
@@ -473,6 +630,29 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
             <div>
               <h4 className="mb-1 text-sm font-medium">{L.signIn}</h4>
               <PersonList siteId={s.site.id} people={s.signIn} />
+              {canEditSignIn && s.addable.length > 0 && (
+                <select
+                  aria-label={L.giveAccess}
+                  className="mt-2 h-8 w-full rounded border border-input bg-background px-2 text-sm"
+                  value=""
+                  disabled={setSignIn.isPending}
+                  onChange={(e) =>
+                    e.target.value &&
+                    setSignIn.mutate({
+                      userId: e.target.value,
+                      siteId: s.site.id,
+                      on: true,
+                    })
+                  }
+                >
+                  <option value="">{L.giveAccess}</option>
+                  {s.addable.map((u) => (
+                    <option key={u.user_id} value={u.user_id}>
+                      {u.display_name || u.user_id.slice(0, 8)}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
             <div>
               <h4 className="mb-1 text-sm font-medium">{L.shiftStaff}</h4>
@@ -517,6 +697,20 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
               </ul>
             </div>
           )}
+          {s.unreviewedChanges.length > 0 && (
+            <details className="rounded border border-border p-2 text-sm">
+              <summary className="cursor-pointer font-medium">
+                {L.notReviewedChanges} ({s.unreviewedChanges.length})
+              </summary>
+              <ul className="mt-2 space-y-0.5">
+                {s.unreviewedChanges.map((c) => (
+                  <li key={c.id} className="break-words">
+                    {describeChange(c)}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
           {s.history.length > 0 && (
             <details className="rounded border border-border p-2 text-sm">
               <summary className="cursor-pointer font-medium">
@@ -558,6 +752,18 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
                         </ul>
                       ) : (
                         <p className="text-muted-foreground">{L.noChanges}</p>
+                      )}
+                      {h.changes.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium">{L.changesLog}</p>
+                          <ul className="space-y-0.5">
+                            {h.changes.map((c) => (
+                              <li key={c.id} className="break-words">
+                                {describeChange(c)}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
                       {h.requests.length > 0 && (
                         <div>
