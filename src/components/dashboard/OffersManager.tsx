@@ -49,7 +49,10 @@ import {
   composeOfferStatusMessage,
 } from "@/lib/offer-status-announcer";
 import { focusOfferStatusPanel } from "@/lib/offer-status-focus";
-import { OfferConfirmedReservation, OfferSourceBooking } from "./OfferTraceability";
+import {
+  OfferConfirmedReservation,
+  OfferSourceBooking,
+} from "./OfferTraceability";
 import {
   offerHasStaffActions,
   writeOfferMainReservation,
