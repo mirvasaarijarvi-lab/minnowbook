@@ -1,0 +1,2 @@
+DROP TRIGGER IF EXISTS shift_periods_tier_limit ON public.shift_periods;
+COMMENT ON FUNCTION public.enforce_shift_period_limit() IS 'DEPRECATED: Basic plan may keep multiple shift lists; trigger removed.';

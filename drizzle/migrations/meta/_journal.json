@@ -246,6 +246,13 @@
       "when": 1790424981685,
       "tag": "0034_staffing_shift_lists",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1790425958965,
+      "tag": "0035_allow_multiple_shift_lists_basic",
+      "breakpoints": true
     }
   ]
 }
