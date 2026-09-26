@@ -72,7 +72,6 @@ function forward(event: RejectedStoragePathEvent): void {
     }
     if (!token) return;
 
-
     if (!token) {
       try {
         if (
