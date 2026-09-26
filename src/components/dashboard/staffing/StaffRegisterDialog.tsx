@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -76,29 +76,66 @@ export default function StaffRegisterDialog({
   const [email, setEmail] = useState("");
   const [target, setTarget] = useState("");
   const [siteId, setSiteId] = useState<string>(ALL);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [roleName, setRoleName] = useState({ en: "", fi: "", sv: "" });
   const err = (e: unknown) =>
     toast.error(`${L.error}: ${(e as Error)?.message ?? ""}`);
 
+  const resetForm = () => {
+    setEditingId(null);
+    setName("");
+    setRoleKeys([]);
+    setEmp("regular");
+    setPhone("");
+    setEmail("");
+    setTarget("");
+    setSiteId(ALL);
+  };
+
+  const startEdit = (x: StaffMember) => {
+    const c = contactOf(x.id);
+    const ids = memberSiteIds(x) ?? [];
+    setEditingId(x.id);
+    setName(x.name);
+    setRoleKeys(x.role_keys ?? []);
+    setEmp(x.employment_type ?? "regular");
+    setTarget(
+      x.weekly_hours_target != null ? String(x.weekly_hours_target) : "",
+    );
+    setPhone(c?.phone ?? "");
+    setEmail(c?.email ?? "");
+    // Several locations are edited in the table's own picker.
+    setSiteId(ids.length === 1 ? ids[0] : ALL);
+  };
+
+  const contactOf = (id: string) =>
+    contacts.find((c) => c.staff_member_id === id);
+
   const addMember = () => {
     if (!name.trim()) return;
+    const editing = editingId
+      ? members.find((x) => x.id === editingId)
+      : undefined;
+    const editIds = editing ? (memberSiteIds(editing) ?? []) : [];
     m.saveMember.mutate(
       {
+        ...(editingId ? { id: editingId } : {}),
         name: name.trim(),
         role_keys: roleKeys,
         employment_type: emp,
         weekly_hours_target: target ? Number(target) : null,
-        is_active: true,
-        site_ids: siteId === ALL ? [] : [siteId],
+        ...(editing ? {} : { is_active: true }),
+        site_ids:
+          editing && editIds.length > 1 && siteId === ALL
+            ? editIds
+            : siteId === ALL
+              ? []
+              : [siteId],
         contact: { phone: phone.trim() || null, email: email.trim() || null },
       },
       {
         onSuccess: () => {
-          setName("");
-          setRoleKeys([]);
-          setPhone("");
-          setEmail("");
-          setTarget("");
+          resetForm();
           toast.success(L.saved);
         },
         onError: err,
@@ -142,9 +179,6 @@ export default function StaffRegisterDialog({
       err(e);
     }
   };
-
-  const contactOf = (id: string) =>
-    contacts.find((c) => c.staff_member_id === id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -203,7 +237,9 @@ export default function StaffRegisterDialog({
         </section>
 
         <section className="space-y-2 border-t border-border pt-3">
-          <h3 className="text-sm font-semibold">{L.add}</h3>
+          <h3 className="text-sm font-semibold">
+            {editingId ? `${L.editMember}: ${name}` : L.add}
+          </h3>
           <div className="grid gap-2 sm:grid-cols-3">
             <Input
               aria-label={L.name}
@@ -282,12 +318,19 @@ export default function StaffRegisterDialog({
             ))}
           </div>
           <p className="text-xs text-muted-foreground">{L.contactsHint}</p>
-          <Button
-            onClick={addMember}
-            disabled={!name.trim() || m.saveMember.isPending}
-          >
-            {L.add}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={addMember}
+              disabled={!name.trim() || m.saveMember.isPending}
+            >
+              {editingId ? L.save : L.add}
+            </Button>
+            {editingId && (
+              <Button variant="outline" onClick={resetForm}>
+                {L.cancelEdit}
+              </Button>
+            )}
+          </div>
         </section>
 
         <section className="border-t border-border pt-3">
@@ -311,7 +354,10 @@ export default function StaffRegisterDialog({
                 {members.map((x) => {
                   const c = contactOf(x.id);
                   return (
-                    <tr key={x.id} className="border-t border-border">
+                    <tr
+                      key={x.id}
+                      className={`border-t border-border ${editingId === x.id ? "bg-muted" : ""}`}
+                    >
                       <td className="py-1">{x.name}</td>
                       <td className="text-xs">
                         {x.role_keys
@@ -356,7 +402,14 @@ export default function StaffRegisterDialog({
                           }
                         />
                       </td>
-                      <td>
+                      <td className="whitespace-nowrap">
+                        <button
+                          aria-label={`${L.editMember}: ${x.name}`}
+                          className="mr-2"
+                          onClick={() => startEdit(x)}
+                        >
+                          <Pencil className="h-4 w-4 text-muted-foreground" />
+                        </button>
                         <button
                           aria-label={`${L.delete}: ${x.name}`}
                           onClick={() =>
