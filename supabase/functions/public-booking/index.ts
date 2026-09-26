@@ -1279,7 +1279,8 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
 
       const businessName = settings?.business_name || tenant.name || "Mimmobook";
       const lang = body.language || settings?.default_language || "en";
-      const findBookingUrl = `${(typeof body.origin === "string" && /^https:\/\/[a-zA-Z0-9.-]+$/.test(body.origin) ? body.origin : "https://mimmobook.com")}/find-booking`;
+      // Only MimmoBook's own hosts may appear in guest email links.
+      const findBookingUrl = `${(typeof body.origin === "string" && /^https:\/\/([a-z0-9-]+\.)*mimmobook\.com$/i.test(body.origin) ? body.origin : "https://mimmobook.com")}/find-booking`;
       const logoUrl = settings?.logo_url || "https://lsgznskkxadplwnxplhd.supabase.co/storage/v1/object/public/tenant-assets/email-assets%2Flogo-color.png";
 
       const ackTranslations: Record<string, { subject: string; title: string; greeting: string; body: string; footer: string; regards: string; manage: string; manageLink: string }> = {
@@ -1431,6 +1432,9 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
           )
           .eq("tenant_id", tenant_id)
           .eq("linked_group_id", linked_group_id)
+          // Only echo siblings booked by the same guest, so a caller who
+          // guesses or reuses someone else's group id sees nothing.
+          .eq("guest_email", guest_email)
           // "every OTHER sibling": never echo the row we just inserted.
           .neq("id", insertedRes.id)
           .neq("status", "cancelled");

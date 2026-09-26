@@ -329,7 +329,12 @@ export async function handleSendReminderRequest(req: Request): Promise<Response>
     const body = await req.json();
     const reservationId = body.reservationId;
     const emailType: string = body.emailType || "reminder";
-    const customMessage: string | undefined = body.customMessage;
+    // Only owners, admins and system admins may add free text to guest emails.
+    const canAddMessage = !!sysAdmin || callerRole?.role === "owner" || callerRole?.role === "admin";
+    const customMessage: string | undefined =
+      canAddMessage && typeof body.customMessage === "string"
+        ? body.customMessage.slice(0, 2000)
+        : undefined;
 
     if (!reservationId || typeof reservationId !== "string") throw new Error("reservationId is required");
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reservationId)) {
