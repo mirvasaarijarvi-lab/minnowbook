@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { StaffLang } from "@/lib/staffing/labels";
 import { memberSiteIds } from "@/lib/staffing/siteScope";
+import { useStaffingSettings } from "@/hooks/useShiftList";
+import { reviewDue } from "@/lib/staffing/accessReviewDue";
 import {
   buildSiteHistory,
   changeAffectsSite,
@@ -65,6 +67,11 @@ const LABELS = {
     reqDone: "done",
     reqDismissed: "dismissed",
     unknown: "Removed person",
+    reviewEvery: "Review each location every",
+    daysN: "{n} days",
+    overdueBy: "Review overdue by {days} days",
+    dueOn: "Next review due {date}",
+    reviewNeeded: "Review needed",
   },
   fi: {
     intro:
@@ -117,6 +124,11 @@ const LABELS = {
     reqDone: "tehty",
     reqDismissed: "hylätty",
     unknown: "Poistettu henkilö",
+    reviewEvery: "Tarkista jokainen toimipiste",
+    daysN: "{n} päivän välein",
+    overdueBy: "Tarkistus myöhässä {days} päivää",
+    dueOn: "Seuraava tarkistus {date}",
+    reviewNeeded: "Tarkistus tarvitaan",
   },
   sv: {
     intro:
@@ -168,6 +180,11 @@ const LABELS = {
     reqDone: "klar",
     reqDismissed: "avfärdad",
     unknown: "Borttagen person",
+    reviewEvery: "Granska varje plats var",
+    daysN: "{n}:e dag",
+    overdueBy: "Granskningen är {days} dagar försenad",
+    dueOn: "Nästa granskning {date}",
+    reviewNeeded: "Granskning behövs",
   },
 } as const;
 
@@ -187,6 +204,8 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
   const canEditSignIn = isOwner || isAdmin;
   const qc = useQueryClient();
   const key = ["access-review", tenantId];
+  const { settings, save: saveSettings } = useStaffingSettings();
+  const interval = settings.accessReviewDays;
 
   const { data } = useQuery({
     queryKey: key,
@@ -631,6 +650,28 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">{L.intro}</p>
+      <label className="flex flex-wrap items-center gap-2 text-sm">
+        {L.reviewEvery}
+        <select
+          className="h-8 rounded border border-input bg-background px-2 text-sm"
+          value={interval}
+          disabled={saveSettings.isPending}
+          onChange={(e) =>
+            saveSettings.mutate(
+              { ...settings, accessReviewDays: Number(e.target.value) },
+              { onSuccess: () => toast.success(L.ok) },
+            )
+          }
+        >
+          {Array.from(new Set([30, 60, 90, 180, 365, interval]))
+            .sort((a, b) => a - b)
+            .map((n) => (
+              <option key={n} value={n}>
+                {L.daysN.replace("{n}", String(n))}
+              </option>
+            ))}
+        </select>
+      </label>
       {unassigned.length > 0 && (
         <div className="flex gap-2 rounded-md border border-border bg-muted p-3 text-sm">
           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
@@ -658,6 +699,26 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
             ) : (
               <Badge variant="outline">{L.never}</Badge>
             )}
+            {(() => {
+              const d = reviewDue(s.last?.accepted_at, interval);
+              if (d.state === "ok")
+                return (
+                  <span className="text-xs text-muted-foreground">
+                    {L.dueOn.replace("{date}", fmt(d.dueAt!.toISOString()))}
+                  </span>
+                );
+              return (
+                <Badge
+                  variant={d.state === "dueSoon" ? "secondary" : "destructive"}
+                >
+                  {d.state === "overdue"
+                    ? L.overdueBy.replace("{days}", String(d.daysOverdue))
+                    : d.state === "never"
+                      ? L.reviewNeeded
+                      : L.dueOn.replace("{date}", fmt(d.dueAt!.toISOString()))}
+                </Badge>
+              );
+            })()}
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div>

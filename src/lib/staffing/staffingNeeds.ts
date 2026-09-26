@@ -69,6 +69,8 @@ export interface StaffingSettings {
   minStaff: number;
   hourlyCostEur: number;
   rules: ShiftRules;
+  /** Days between location access reviews before a reminder shows. */
+  accessReviewDays: number;
 }
 
 export const DEFAULT_STAFFING_SETTINGS: StaffingSettings = {
@@ -82,6 +84,7 @@ export const DEFAULT_STAFFING_SETTINGS: StaffingSettings = {
   minStaff: 1,
   hourlyCostEur: 20,
   rules: DEFAULT_SHIFT_RULES,
+  accessReviewDays: 90,
 };
 
 const clampNum = (v: unknown, min: number, max: number, fallback: number) => {
@@ -110,6 +113,7 @@ export function normalizeStaffingSettings(raw: unknown): StaffingSettings {
       finnishHolidays:
         typeof rr.finnishHolidays === "boolean" ? rr.finnishHolidays : true,
     },
+    accessReviewDays: clampNum(r.accessReviewDays, 7, 365, d.accessReviewDays),
   };
 }
 
