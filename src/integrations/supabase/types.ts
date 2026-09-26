@@ -1156,6 +1156,10 @@ export type Database = {
           accept_token_hash: string | null
           accepted_at: string | null
           archived_at: string | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          confirmed_by_name: string | null
+          confirmed_reservation_id: string | null
           created_at: string
           created_by: string | null
           declined_at: string | null
@@ -1177,6 +1181,7 @@ export type Database = {
           last_sent_at: string | null
           linked_reservations: Json | null
           menu: string | null
+          reservation_created_at: string | null
           reservation_ids: string[] | null
           source_reservation_id: string | null
           special_requests: string | null
@@ -1190,6 +1195,10 @@ export type Database = {
           accept_token_hash?: string | null
           accepted_at?: string | null
           archived_at?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          confirmed_by_name?: string | null
+          confirmed_reservation_id?: string | null
           created_at?: string
           created_by?: string | null
           declined_at?: string | null
@@ -1211,6 +1220,7 @@ export type Database = {
           last_sent_at?: string | null
           linked_reservations?: Json | null
           menu?: string | null
+          reservation_created_at?: string | null
           reservation_ids?: string[] | null
           source_reservation_id?: string | null
           special_requests?: string | null
@@ -1224,6 +1234,10 @@ export type Database = {
           accept_token_hash?: string | null
           accepted_at?: string | null
           archived_at?: string | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          confirmed_by_name?: string | null
+          confirmed_reservation_id?: string | null
           created_at?: string
           created_by?: string | null
           declined_at?: string | null
@@ -1245,6 +1259,7 @@ export type Database = {
           last_sent_at?: string | null
           linked_reservations?: Json | null
           menu?: string | null
+          reservation_created_at?: string | null
           reservation_ids?: string[] | null
           source_reservation_id?: string | null
           special_requests?: string | null
