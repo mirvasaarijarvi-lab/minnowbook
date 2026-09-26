@@ -305,7 +305,10 @@ if (blocking.length > 0) {
   vulnLines.push("");
 }
 const vulnPath = process.env.AUDIT_VULNS_PATH || "audit-vulns.md";
-fs.writeFileSync(vulnPath, vulnLines.join("\n") + (vulnLines.length ? "\n" : ""));
+fs.writeFileSync(
+  vulnPath,
+  vulnLines.join("\n") + (vulnLines.length ? "\n" : ""),
+);
 
 if (blocking.length > 0) {
   lines.push(`### Failing against \`AUDIT_LEVEL=${level}\``);
