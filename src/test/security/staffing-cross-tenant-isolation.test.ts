@@ -229,7 +229,8 @@ async function ensureStaffUser(
 
   const client = newClient();
   const { error } = await client.auth.signInWithPassword(spec);
-  if (error) throw new Error(`Sign-in for ${spec.email} failed: ${error.message}`);
+  if (error)
+    throw new Error(`Sign-in for ${spec.email} failed: ${error.message}`);
   return client;
 }
 
@@ -248,7 +249,9 @@ describe.runIf(tenantPairFixtureLikelyAvailable())(
     beforeAll(async () => {
       fixture = await createTenantPairFixture();
       if (!fixture.available || !fixture.a || !fixture.b) {
-        throw new Error(`Tenant pair fixture unavailable: ${fixture.skipReason}`);
+        throw new Error(
+          `Tenant pair fixture unavailable: ${fixture.skipReason}`,
+        );
       }
       ownerA = fixture.a.client;
       tenantA = fixture.a.tenantId;
@@ -270,7 +273,11 @@ describe.runIf(tenantPairFixtureLikelyAvailable())(
         "sites insert",
         ownerA
           .from("sites")
-          .insert({ tenant_id: tenantA, name: `${RUN_TAG} site`, slug: RUN_TAG })
+          .insert({
+            tenant_id: tenantA,
+            name: `${RUN_TAG} site`,
+            slug: RUN_TAG,
+          })
           .select("id")
           .single(),
       );
@@ -437,7 +444,10 @@ describe.runIf(tenantPairFixtureLikelyAvailable())(
       // service role when available, before the location they point to.
       if (SERVICE_KEY) {
         const admin = newClient(SERVICE_KEY);
-        await admin.from("site_access_reviews").delete().eq("id", seeded.reviewId);
+        await admin
+          .from("site_access_reviews")
+          .delete()
+          .eq("id", seeded.reviewId);
         await admin
           .from("site_access_change_log")
           .delete()
@@ -484,7 +494,9 @@ describe.runIf(tenantPairFixtureLikelyAvailable())(
     });
 
     const attackerCases = () =>
-      attackers.flatMap((a) => TARGETS.map((t) => [a.label, t.table, a, t] as const));
+      attackers.flatMap((a) =>
+        TARGETS.map((t) => [a.label, t.table, a, t] as const),
+      );
 
     it("covers both attacker roles when the service role is available", () => {
       expect(attackers.length).toBe(SERVICE_KEY ? 2 : 1);
@@ -492,7 +504,9 @@ describe.runIf(tenantPairFixtureLikelyAvailable())(
 
     it("every attacker is signed in to business B, not A", async () => {
       for (const a of attackers) {
-        const { data } = await a.client.from("tenant_users").select("tenant_id");
+        const { data } = await a.client
+          .from("tenant_users")
+          .select("tenant_id");
         const ids = (data ?? []).map((r) => r.tenant_id);
         expect(ids, a.label).toContain(tenantB);
         expect(ids, a.label).not.toContain(tenantA);
@@ -511,7 +525,9 @@ describe.runIf(tenantPairFixtureLikelyAvailable())(
           .select("tenant_id")
           .eq("tenant_id", tenantA)
           .limit(5);
-        expect(byTenant.data ?? [], `${label} read ${table} by tenant`).toEqual([]);
+        expect(byTenant.data ?? [], `${label} read ${table} by tenant`).toEqual(
+          [],
+        );
       }
       for (const a of attackers) {
         for (const table of LOG_TABLES) {
@@ -528,7 +544,10 @@ describe.runIf(tenantPairFixtureLikelyAvailable())(
     it("unfiltered reads never include business A's rows", async () => {
       for (const a of attackers) {
         for (const table of [...TARGETS.map((t) => t.table), ...LOG_TABLES]) {
-          const { data } = await a.client.from(table).select("tenant_id").limit(1000);
+          const { data } = await a.client
+            .from(table)
+            .select("tenant_id")
+            .limit(1000);
           const leaked = (data ?? []).filter(
             (r: { tenant_id: string }) => r.tenant_id === tenantA,
           );
@@ -621,7 +640,10 @@ describe.runIf(tenantPairFixtureLikelyAvailable())(
           .insert(t.forge(seeded, tenantA))
           .select("tenant_id");
         expect(data ?? [], `${label} insert ${table}`).toEqual([]);
-        expect(error, `${label} insert ${table} should be rejected`).not.toBeNull();
+        expect(
+          error,
+          `${label} insert ${table} should be rejected`,
+        ).not.toBeNull();
       }
       const forgedMembers = await ownerA
         .from("staff_members")
@@ -636,7 +658,11 @@ describe.runIf(tenantPairFixtureLikelyAvailable())(
         const { data: me } = await a.client.auth.getUser();
         const { data, error } = await a.client
           .from("site_users")
-          .insert({ tenant_id: tenantA, site_id: seeded.siteId, user_id: me.user!.id })
+          .insert({
+            tenant_id: tenantA,
+            site_id: seeded.siteId,
+            user_id: me.user!.id,
+          })
           .select("id");
         expect(data ?? [], a.label).toEqual([]);
         expect(error, a.label).not.toBeNull();
