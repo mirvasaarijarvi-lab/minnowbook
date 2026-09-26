@@ -140,14 +140,13 @@ const CellInput = ({
 
 export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   const L = STAFF_LABELS[lang];
-  const { isAdmin, tenant } = useTenant();
+  const { isAdmin, tenant, tenantId } = useTenant();
   const { isGated } = useTierGate();
   const proLocked = isGated("basic");
   const bizLocked = isGated("basic", "professional");
   const { data: roles = [] } = useStaffRoles();
   const { data: members = [] } = useStaffMembers();
   const { data: allPeriods = [], isLoading } = useShiftPeriods();
-  const { tenantId } = useTenant();
   const dashSiteId = useSiteContext().selectedSiteId;
   const { data: sites = [] } = useQuery({
     queryKey: ["staffing-sites", tenantId],
