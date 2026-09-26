@@ -23,6 +23,7 @@ import {
   filterForAuditPeriod,
   accessReviewFileName,
   renderAccessReviewPdf,
+  renderAccessReviewPdfs,
   type AccessReviewReport,
 } from "@/lib/staffing/accessReviewPdf";
 import {
@@ -102,6 +103,10 @@ const LABELS = {
     pdfPeriodText: "{from} to {to}",
     pdfStart: "start",
     pdfNow: "today",
+    pdfCombined: "Combined audit PDF",
+    pdfLocations: "Locations",
+    pdfAllLocations: "All locations",
+    pdfPickOne: "Choose at least one location",
     reviewEvery: "Review each location every",
     daysN: "{n} days",
     overdueBy: "Review overdue by {days} days",
@@ -180,6 +185,10 @@ const LABELS = {
     pdfPeriodText: "{from} ja {to} välillä",
     pdfStart: "alusta",
     pdfNow: "tähän päivään",
+    pdfCombined: "Yhdistetty tarkastus-PDF",
+    pdfLocations: "Kohteet",
+    pdfAllLocations: "Kaikki kohteet",
+    pdfPickOne: "Valitse vähintään yksi kohde",
     reviewEvery: "Tarkista jokainen toimipiste",
     daysN: "{n} päivän välein",
     overdueBy: "Tarkistus myöhässä {days} päivää",
@@ -257,6 +266,10 @@ const LABELS = {
     pdfPeriodText: "{from} till {to}",
     pdfStart: "början",
     pdfNow: "i dag",
+    pdfCombined: "Samlad gransknings-PDF",
+    pdfLocations: "Platser",
+    pdfAllLocations: "Alla platser",
+    pdfPickOne: "Välj minst en plats",
     reviewEvery: "Granska varje plats var",
     daysN: "{n}:e dag",
     overdueBy: "Granskningen är {days} dagar försenad",
@@ -634,16 +647,11 @@ export default function AccessReviewPanel({
         : L.dueOn.replace("{date}", fmt(d.dueAt!.toISOString()));
   };
 
-  const exportPdf = async (
+  const buildReport = (
     s: (typeof perSite)[number],
-    period: AuditPeriod = {},
-  ): Promise<boolean> => {
-    if (period.from && period.to && period.from > period.to) {
-      toast.error(L.pdfBadRange);
-      return false;
-    }
-    try {
-      const now = new Date();
+    period: AuditPeriod,
+    now: Date,
+  ): AccessReviewReport => {
       const hasPeriod = !!(period.from || period.to);
       const dayText = (d: string) => fmt(`${d}T12:00:00`);
       const scoped = filterForAuditPeriod(
@@ -651,7 +659,7 @@ export default function AccessReviewPanel({
         s.unreviewedChanges,
         period,
       );
-      const report: AccessReviewReport = {
+      return {
         title: L.pdfTitle,
         business: (tenant as any)?.name ?? "",
         location: s.site.name,
@@ -764,10 +772,58 @@ export default function AccessReviewPanel({
         ],
         footer: `${L.pdfFooter}, ${s.site.name}`,
       };
+  };
+
+  const badRange = (period: AuditPeriod) => {
+    if (period.from && period.to && period.from > period.to) {
+      toast.error(L.pdfBadRange);
+      return true;
+    }
+    return false;
+  };
+
+  const exportPdf = async (
+    s: (typeof perSite)[number],
+    period: AuditPeriod = {},
+  ): Promise<boolean> => {
+    if (badRange(period)) return false;
+    try {
+      const now = new Date();
       const { jsPDF } = await import("jspdf");
-      renderAccessReviewPdf(jsPDF, report).save(
+      renderAccessReviewPdf(jsPDF, buildReport(s, period, now)).save(
         accessReviewFileName((tenant as any)?.slug, s.site.name, now, period),
       );
+      return true;
+    } catch (e) {
+      console.error(e);
+      toast.error(L.pdfFailed);
+      return false;
+    }
+  };
+
+  const exportCombined = async (
+    siteIds: string[],
+    period: AuditPeriod = {},
+  ): Promise<boolean> => {
+    if (badRange(period)) return false;
+    const chosen = perSite.filter((x) => siteIds.includes(x.site.id));
+    if (chosen.length === 0) {
+      toast.error(L.pdfPickOne);
+      return false;
+    }
+    try {
+      const now = new Date();
+      const { jsPDF } = await import("jspdf");
+      const name =
+        chosen.length === perSite.length
+          ? "all-locations"
+          : chosen.length === 1
+            ? chosen[0].site.name
+            : `${chosen.length}-locations`;
+      renderAccessReviewPdfs(
+        jsPDF,
+        chosen.map((x) => buildReport(x, period, now)),
+      ).save(accessReviewFileName((tenant as any)?.slug, name, now, period));
       return true;
     } catch (e) {
       console.error(e);
