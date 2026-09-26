@@ -149,6 +149,8 @@ test.describe("Payroll Excel download follows the selected location", () => {
         ([key, session]) => {
           localStorage.setItem(key, session);
           localStorage.setItem("mimmobook-lang", "en");
+          localStorage.setItem("mimmobook-tour-completed", "true");
+          localStorage.setItem("cookie-consent", "declined");
         },
         [`sb-${ref}-auth-token`, JSON.stringify(signIn!.session)] as const,
       );
