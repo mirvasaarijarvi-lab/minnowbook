@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 // @ts-expect-error - plain JS CI helper without type declarations
 import {
   ALLOWED_REGISTRY_HOSTS,
+  collectBadBunLockUrls,
   collectBadRegistryUrls,
   collectProblems,
   collectSpecifierDrift,
+  rewritePrivateUrls,
 } from "./check-npm-lockfile-hygiene.mjs";
 
 const pkg = {
@@ -105,7 +107,49 @@ describe("npm lockfile hygiene: the committed repository files", () => {
     const result = collectProblems();
     expect(result.missingLockfile).toBe(false);
     expect(result.badRegistryUrls).toEqual([]);
+    expect(result.badBunLockUrls).toEqual([]);
     expect(result.specifierDrift).toEqual([]);
     expect(result.ok).toBe(true);
+  });
+});
+
+describe("bun.lock hygiene: registry URLs", () => {
+  const priv =
+    "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@adobe/css-tools/-/css-tools-4.5.0.tgz";
+  const bunLock = (url: string) =>
+    `{\n  "packages": {\n    "@adobe/css-tools": ["@adobe/css-tools@4.5.0", "${url}", {}, "sha512-x"],\n  }\n}\n`;
+
+  it("flags a private registry tarball URL", () => {
+    const bad = collectBadBunLockUrls(bunLock(priv));
+    expect(bad).toHaveLength(1);
+    expect(bad[0].reason).toContain("europe-west1-npm.pkg.dev");
+  });
+
+  it("accepts public registry URLs", () => {
+    expect(
+      collectBadBunLockUrls(
+        bunLock(
+          "https://registry.npmjs.org/@adobe/css-tools/-/css-tools-4.5.0.tgz",
+        ),
+      ),
+    ).toEqual([]);
+  });
+
+  it("fails the full check when bun.lock has a private URL", () => {
+    const result = collectProblems({
+      pkgJson: pkg,
+      npmLockJson: lock(),
+      bunLockText: bunLock(priv),
+    });
+    expect(result.ok).toBe(false);
+    expect(result.badBunLockUrls).toHaveLength(1);
+  });
+
+  it("rewrites private URLs to the matching npm registry path", () => {
+    const fixed = rewritePrivateUrls(bunLock(priv));
+    expect(fixed).toContain(
+      "https://registry.npmjs.org/@adobe/css-tools/-/css-tools-4.5.0.tgz",
+    );
+    expect(collectBadBunLockUrls(fixed)).toEqual([]);
   });
 });

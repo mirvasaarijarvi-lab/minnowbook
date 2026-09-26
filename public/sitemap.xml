@@ -271,16 +271,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://mimmobook.com/book/mimmin-testi</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://mimmobook.com/book/mimmin-testi" />
-    <xhtml:link rel="alternate" hreflang="fi" href="https://mimmobook.com/book/mimmin-testi?lang=fi" />
-    <xhtml:link rel="alternate" hreflang="sv" href="https://mimmobook.com/book/mimmin-testi?lang=sv" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://mimmobook.com/book/mimmin-testi" />
-    <lastmod>2026-09-26</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://mimmobook.com/book/lokal1</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://mimmobook.com/book/lokal1" />
     <xhtml:link rel="alternate" hreflang="fi" href="https://mimmobook.com/book/lokal1?lang=fi" />
@@ -556,6 +546,16 @@
     <xhtml:link rel="alternate" hreflang="fi" href="https://mimmobook.com/book/ci-0-counts-the-code-as-u-30db0a5e?lang=fi" />
     <xhtml:link rel="alternate" hreflang="sv" href="https://mimmobook.com/book/ci-0-counts-the-code-as-u-30db0a5e?lang=sv" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://mimmobook.com/book/ci-0-counts-the-code-as-u-30db0a5e" />
+    <lastmod>2026-09-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://mimmobook.com/book/mimmin-testi</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mimmobook.com/book/mimmin-testi" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://mimmobook.com/book/mimmin-testi?lang=fi" />
+    <xhtml:link rel="alternate" hreflang="sv" href="https://mimmobook.com/book/mimmin-testi?lang=sv" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mimmobook.com/book/mimmin-testi" />
     <lastmod>2026-09-26</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
