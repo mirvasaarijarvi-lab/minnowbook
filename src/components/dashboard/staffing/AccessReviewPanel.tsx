@@ -25,6 +25,7 @@ import {
   accessReviewFileName,
   renderAccessReviewPdf,
   renderAccessReviewPdfs,
+  type AccessReviewSummary,
   type AccessReviewReport,
 } from "@/lib/staffing/accessReviewPdf";
 import {
@@ -108,6 +109,14 @@ const LABELS = {
     pdfLocations: "Locations",
     pdfAllLocations: "All locations",
     pdfPickOne: "Choose at least one location",
+    sumTitle: "Access review summary",
+    sumLocation: "Location",
+    sumLatest: "Latest review",
+    sumStatus: "Review status",
+    sumOpen: "Open change requests",
+    sumCount: "Locations in this report",
+    sumOverdue: "Overdue or never reviewed",
+    sumDetails: "Each location's full report follows on its own pages.",
     reviewEvery: "Review each location every",
     daysN: "{n} days",
     overdueBy: "Review overdue by {days} days",
@@ -190,6 +199,14 @@ const LABELS = {
     pdfLocations: "Kohteet",
     pdfAllLocations: "Kaikki kohteet",
     pdfPickOne: "Valitse vähintään yksi kohde",
+    sumTitle: "Käyttöoikeuksien tarkastuksen yhteenveto",
+    sumLocation: "Kohde",
+    sumLatest: "Viimeisin tarkistus",
+    sumStatus: "Tarkistuksen tila",
+    sumOpen: "Avoimet muutospyynnöt",
+    sumCount: "Kohteita raportissa",
+    sumOverdue: "Myöhässä tai tarkistamatta",
+    sumDetails: "Jokaisen kohteen koko raportti on seuraavilla sivuilla.",
     reviewEvery: "Tarkista jokainen toimipiste",
     daysN: "{n} päivän välein",
     overdueBy: "Tarkistus myöhässä {days} päivää",
@@ -271,6 +288,15 @@ const LABELS = {
     pdfLocations: "Platser",
     pdfAllLocations: "Alla platser",
     pdfPickOne: "Välj minst en plats",
+    sumTitle: "Sammanfattning av behörighetsgranskning",
+    sumLocation: "Plats",
+    sumLatest: "Senaste granskning",
+    sumStatus: "Granskningsstatus",
+    sumOpen: "Öppna ändringsbegäranden",
+    sumCount: "Platser i rapporten",
+    sumOverdue: "Försenade eller aldrig granskade",
+    sumDetails:
+      "Den fullständiga rapporten för varje plats följer på egna sidor.",
     reviewEvery: "Granska varje plats var",
     daysN: "{n}:e dag",
     overdueBy: "Granskningen är {days} dagar försenad",
@@ -817,10 +843,36 @@ export default function AccessReviewPanel({
           : chosen.length === 1
             ? chosen[0].site.name
             : `${chosen.length}-locations`;
-      renderAccessReviewPdfs(
-        jsPDF,
-        chosen.map((x) => buildReport(x, period, now)),
-      ).save(accessReviewFileName((tenant as any)?.slug, name, now, period));
+      const reports = chosen.map((x) => buildReport(x, period, now));
+      const overdue = chosen.filter((x) => {
+        const st = reviewDue(x.last?.accepted_at, interval).state;
+        return st === "overdue" || st === "never";
+      }).length;
+      const summary: AccessReviewSummary = {
+        title: L.sumTitle,
+        business: (tenant as any)?.name ?? "",
+        meta: [
+          ...reports[0].meta.filter(([k]) => k !== L.pdfStatus),
+          [L.sumCount, String(chosen.length)],
+          [L.sumOverdue, String(overdue)],
+          ["", L.sumDetails],
+        ].map(([k, v]) => [k, v] as [string, string]),
+        columns: [L.sumLocation, L.sumLatest, L.sumStatus, L.sumOpen],
+        rows: chosen.map((x) => [
+          x.site.name,
+          x.last ? fmt(x.last.accepted_at) : L.never,
+          (x.changed ? L.changed + ", " : "") + dueText(x.last?.accepted_at),
+          x.requests.length
+            ? String(x.requests.length) +
+              ": " +
+              x.requests.map((q) => q.subject_name).join(", ")
+            : L.pdfNone,
+        ]),
+        footer: L.pdfFooter,
+      };
+      renderAccessReviewPdfs(jsPDF, reports, summary).save(
+        accessReviewFileName((tenant as any)?.slug, name, now, period),
+      );
       return true;
     } catch (e) {
       console.error(e);
