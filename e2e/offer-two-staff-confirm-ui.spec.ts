@@ -65,10 +65,16 @@ test.describe("Offers page: two staff confirm the same offer at once", () => {
     "Set SUPABASE_SERVICE_ROLE_KEY and the publishable key to run this spec.",
   );
 
-  test("pressing Confirm in two browsers at the same moment creates one reservation", async ({
-    browser,
-    baseURL,
-  }) => {
+  async function confirmTogether(
+    browser: Browser,
+    baseURL: string | undefined,
+    opts: {
+      label: string;
+      eventSpace: string;
+      /** Both staff must enter a price; each enters their own. */
+      prices?: [string, string];
+    },
+  ) {
     test.setTimeout(120_000);
     const [a, b] = await ensureOfferStaffAccounts({
       url: SUPABASE_URL,
@@ -78,7 +84,7 @@ test.describe("Offers page: two staff confirm the same offer at once", () => {
     });
     expect(a.userId).not.toBe(b.userId);
 
-    const guest = makeTestGuest("UiTwoStaff");
+    const guest = makeTestGuest(opts.label);
     const { data: offer, error } = await a.client
       .from("offers")
       .insert({
@@ -89,7 +95,7 @@ test.describe("Offers page: two staff confirm the same offer at once", () => {
         start_time: "18:00",
         end_time: "22:00",
         guests_count: 12,
-        event_space: "TEST space",
+        event_space: opts.eventSpace,
         language: "en",
         expires_on: futureDate(10),
       } as any)
@@ -130,17 +136,25 @@ test.describe("Offers page: two staff confirm the same offer at once", () => {
             .catch(() => false),
         ),
       );
+      if (opts.prices) {
+        expect(asked, "both staff must enter a price first").toEqual([
+          true,
+          true,
+        ]);
+      }
       if (asked.some(Boolean)) {
         expect(asked, "both staff get the same price check").toEqual([
           true,
           true,
         ]);
-        for (const p of pages) {
+        for (const [i, p] of pages.entries()) {
           const dialog = p.getByRole("dialog");
           const inputs = dialog.locator("input[id^='price-']");
-          for (let i = 0; i < (await inputs.count()); i++) {
-            const input = inputs.nth(i);
-            if (await input.isEnabled()) await input.fill("100");
+          expect(await inputs.count()).toBeGreaterThan(0);
+          for (let j = 0; j < (await inputs.count()); j++) {
+            const input = inputs.nth(j);
+            if (await input.isEnabled())
+              await input.fill(opts.prices?.[i] ?? "100");
           }
         }
         for (const btn of priceButtons) await expect(btn).toBeEnabled();
@@ -168,7 +182,7 @@ test.describe("Offers page: two staff confirm the same offer at once", () => {
         .toBe("confirmed");
       const { data: rows, error: resErr } = await b.client
         .from("reservations")
-        .select("id,status,guests_count")
+        .select("id,status,guests_count,price_eur")
         .eq("tenant_id", TEST_TENANT_ID)
         .eq("guest_email", guest.guest_email);
       expect(resErr, resErr?.message).toBeNull();
@@ -181,6 +195,18 @@ test.describe("Offers page: two staff confirm the same offer at once", () => {
         .eq("id", offerId)
         .single();
       expect(saved?.reservation_ids).toEqual([rows![0].id]);
+      if (opts.prices) {
+        // The one reservation carries one of the two entered prices.
+        expect(opts.prices.map(Number)).toContain(Number(rows![0].price_eur));
+      }
+      // The audit names exactly one of the two staff members.
+      const { data: audit } = await a.client
+        .from("offers")
+        .select("confirmed_by,confirmed_reservation_id")
+        .eq("id", offerId)
+        .single();
+      expect([a.userId, b.userId]).toContain(audit?.confirmed_by);
+      expect(audit?.confirmed_reservation_id).toBe(rows![0].id);
 
       // After reloading, neither staff member can confirm it again.
       for (const p of pages) {
@@ -213,5 +239,28 @@ test.describe("Offers page: two staff confirm the same offer at once", () => {
           );
       await a.client.from("offers").delete().eq("id", offerId);
     }
+  }
+
+  test("pressing Confirm in two browsers at the same moment creates one reservation", async ({
+    browser,
+    baseURL,
+  }) => {
+    await confirmTogether(browser, baseURL, {
+      label: "UiTwoStaff",
+      eventSpace: "TEST space",
+    });
+  });
+
+  // "MimmiSpa" has several priced options and none matches the offer, so
+  // the page cannot pick a price: each staff member must enter one.
+  test("both staff must enter a price, then confirm at the same moment: one reservation", async ({
+    browser,
+    baseURL,
+  }) => {
+    await confirmTogether(browser, baseURL, {
+      label: "UiTwoStaffPrice",
+      eventSpace: "MimmiSpa",
+      prices: ["111", "222"],
+    });
   });
 });
