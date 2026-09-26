@@ -9,6 +9,7 @@ import {
   Mail,
   ArrowRight,
   Link2,
+  CalendarClock,
 } from "lucide-react";
 import MarketingHeader from "@/components/MarketingHeader";
 import MarketingFooter from "@/components/MarketingFooter";
