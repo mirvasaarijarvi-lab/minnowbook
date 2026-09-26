@@ -165,6 +165,7 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
         requests,
         allStaff,
         handled,
+        changes,
       ] = await Promise.all([
         supabase
           .from("sites")
