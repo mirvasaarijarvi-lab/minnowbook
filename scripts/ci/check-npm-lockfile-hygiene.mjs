@@ -87,16 +87,54 @@ export function collectSpecifierDrift(pkgJson, npmLockJson) {
   return drifts;
 }
 
+const BUN_URL_RE = /"(https?:\/\/[^"\s]+\.tgz)"/g;
+
+/** Collect every tarball URL in bun.lock that is not on a public allowed host. */
+export function collectBadBunLockUrls(bunLockText) {
+  const bad = [];
+  for (const m of String(bunLockText ?? "").matchAll(BUN_URL_RE)) {
+    const url = m[1];
+    const host = hostOf(url);
+    if (host === null || !ALLOWED_REGISTRY_HOSTS.includes(host)) {
+      bad.push({
+        path: "bun.lock",
+        url,
+        reason: `host "${host}" is not a public registry`,
+      });
+    }
+  }
+  return bad;
+}
+
+/**
+ * Rewrite sandbox-cache tarball URLs to registry.npmjs.org. The cache
+ * mirrors npm's path layout after ".../sandbox-npm-cache/", and the
+ * integrity hashes stay valid because the tarballs are identical.
+ */
+export function rewritePrivateUrls(text) {
+  return String(text).replace(
+    /https?:\/\/[a-z0-9-]+-npm\.pkg\.dev\/[^/"\s]+\/[^/"\s]+\//g,
+    "https://registry.npmjs.org/",
+  );
+}
+
 /** Full check over the repository files (or the supplied contents). */
-export function collectProblems({ pkgJson, npmLockJson } = {}) {
+export function collectProblems({ pkgJson, npmLockJson, bunLockText } = {}) {
   const pkgPath = resolve(REPO_ROOT, "package.json");
   const lockPath = resolve(REPO_ROOT, "package-lock.json");
+  const bunPath = resolve(REPO_ROOT, "bun.lock");
+  const bunText =
+    bunLockText ??
+    (npmLockJson === undefined && existsSync(bunPath)
+      ? readFileSync(bunPath, "utf8")
+      : "");
 
   if (!npmLockJson && !existsSync(lockPath)) {
     return {
       missingLockfile: true,
       specifierDrift: [],
       badRegistryUrls: [],
+      badBunLockUrls: [],
       ok: false,
     };
   }
@@ -106,12 +144,17 @@ export function collectProblems({ pkgJson, npmLockJson } = {}) {
 
   const specifierDrift = collectSpecifierDrift(pkg, lock);
   const badRegistryUrls = collectBadRegistryUrls(lock);
+  const badBunLockUrls = collectBadBunLockUrls(bunText);
 
   return {
     missingLockfile: false,
     specifierDrift,
     badRegistryUrls,
-    ok: specifierDrift.length === 0 && badRegistryUrls.length === 0,
+    badBunLockUrls,
+    ok:
+      specifierDrift.length === 0 &&
+      badRegistryUrls.length === 0 &&
+      badBunLockUrls.length === 0,
   };
 }
 
@@ -120,6 +163,15 @@ const FIX =
 
 function main() {
   const asJson = process.argv.includes("--json");
+  if (process.argv.includes("--fix-urls")) {
+    for (const name of ["package-lock.json", "bun.lock"]) {
+      const p = resolve(REPO_ROOT, name);
+      if (!existsSync(p)) continue;
+      const before = readFileSync(p, "utf8");
+      const after = rewritePrivateUrls(before);
+      if (after !== before) writeFileSync(p, after);
+    }
+  }
   const result = collectProblems();
 
   if (asJson) {
@@ -149,6 +201,15 @@ function main() {
     );
   }
 
+  // Only print the first 20 bun.lock records; the count says the rest.
+  for (const b of result.badBunLockUrls.slice(0, 20)) {
+    console.error(`::error file=bun.lock::${b.reason} (${b.url})`);
+  }
+  if (result.badBunLockUrls.length > 20)
+    console.error(
+      `...and ${result.badBunLockUrls.length - 20} more private URLs in bun.lock.`,
+    );
+
   if (!result.ok) {
     console.error("");
     console.error("package-lock.json is not publishable as committed.");
@@ -159,11 +220,14 @@ function main() {
     console.error(
       `Fix: run \`${FIX}\` on a machine using the public registry, then commit.`,
     );
+    console.error(
+      "Private URLs only: `node scripts/ci/check-npm-lockfile-hygiene.mjs --fix-urls` rewrites them in both lockfiles.",
+    );
     process.exit(1);
   }
 
   console.log(
-    `package-lock.json hygiene OK (specifiers in sync, all resolved URLs on ${ALLOWED_REGISTRY_HOSTS.join(", ")}).`,
+    `package-lock.json + bun.lock hygiene OK (specifiers in sync, all resolved URLs on ${ALLOWED_REGISTRY_HOSTS.join(", ")}).`,
   );
 }
 
