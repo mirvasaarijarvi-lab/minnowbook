@@ -49,7 +49,7 @@ import {
   composeOfferStatusMessage,
 } from "@/lib/offer-status-announcer";
 import { focusOfferStatusPanel } from "@/lib/offer-status-focus";
-import { OfferSourceBooking } from "./OfferTraceability";
+import { OfferConfirmedReservation, OfferSourceBooking } from "./OfferTraceability";
 import {
   offerHasStaffActions,
   writeOfferMainReservation,
@@ -801,31 +801,15 @@ const OffersManager = () => {
                           />
                         )}
                         {offer.status === "confirmed" && (
-                          <p
-                            className="text-[11px] text-muted-foreground mt-0.5"
-                            data-testid="offer-confirmation-audit"
-                          >
-                            {offer.confirmed_at
-                              ? t("offers.confirmedByAudit")
-                                  .replace(
-                                    "{name}",
-                                    offer.confirmed_by_name ||
-                                      t("offers.confirmedByUnknown"),
-                                  )
-                                  .replace(
-                                    "{date}",
-                                    format(
-                                      parseISO(offer.confirmed_at),
-                                      "d.M.yyyy HH:mm",
-                                    ),
-                                  )
-                              : t("offers.confirmedNotRecorded")}
-                            {offer.reservation_created_at &&
-                              ` • ${t("offers.reservationCreatedAudit")}: ${format(
-                                parseISO(offer.reservation_created_at),
-                                "d.M.yyyy HH:mm",
-                              )}`}
-                          </p>
+                          <OfferConfirmedReservation
+                            reservationId={
+                              offer.confirmed_reservation_id ??
+                              offer.reservation_ids?.[0] ??
+                              null
+                            }
+                            confirmedByName={offer.confirmed_by_name}
+                            confirmedAt={offer.confirmed_at}
+                          />
                         )}
                         {offer.expires_on && (
                           <p className="text-[11px] text-muted-foreground mt-0.5">
