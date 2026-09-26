@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { StaffLang } from "@/lib/staffing/labels";
 import { memberSiteIds } from "@/lib/staffing/siteScope";
+import { accessSnapshot } from "@/lib/staffing/accessSnapshot";
 import { useStaffingSettings } from "@/hooks/useShiftList";
 import { reviewDue } from "@/lib/staffing/accessReviewDue";
 import {
@@ -374,10 +375,12 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
                     .join(", ")
                 : "",
         }));
-      const snapshot = {
-        users: signIn.map((p) => p.id).sort(),
-        staff: shift.map((p) => p.id).sort(),
-      };
+      const snapshot = accessSnapshot(
+        s.id,
+        data.users,
+        data.siteUsers,
+        data.staff,
+      );
       const last = data.reviews.find((r) => r.site_id === s.id);
       const changed =
         !!last && JSON.stringify(last.snapshot) !== JSON.stringify(snapshot);
