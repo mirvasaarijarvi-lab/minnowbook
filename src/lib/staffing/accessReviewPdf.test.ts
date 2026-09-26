@@ -79,3 +79,34 @@ describe("audit period", () => {
     );
   });
 });
+
+describe("combined report", () => {
+  it("starts each location on a new page and keeps its own footer", async () => {
+    const { renderAccessReviewPdfs } = await import("./accessReviewPdf");
+    const mk = (loc: string, n: number) => ({
+      title: "Access review report",
+      business: "Biz",
+      location: loc,
+      meta: [],
+      sections: [
+        {
+          heading: "History",
+          blocks: [{ lines: Array.from({ length: n }, (_, i) => `line ${i}`) }],
+        },
+      ],
+      footer: `Footer ${loc}`,
+    });
+    const doc = renderAccessReviewPdfs(jsPDF, [
+      mk("A", 3),
+      mk("B", 120),
+      mk("C", 1),
+    ]);
+    const pages = doc.getNumberOfPages();
+    expect(pages).toBeGreaterThanOrEqual(4);
+    const text = doc.output() as string;
+    expect(text).toContain("Footer A");
+    expect(text).toContain("Footer C");
+    expect(text).toContain(`1 / ${pages}`);
+    expect(text).toContain(`${pages} / ${pages}`);
+  });
+});
