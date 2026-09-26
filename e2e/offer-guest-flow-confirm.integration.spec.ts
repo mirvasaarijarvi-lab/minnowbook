@@ -196,6 +196,134 @@ test.describe("Guest accepts offer online, staff confirm: exactly one reservatio
     }
   });
 
+  test("confirming three times in a row keeps exactly one reservation", async ({
+    page,
+    tenant,
+  }) => {
+    const sb = await staffClient();
+    const guest = makeTestGuest("GuestFlowThrice");
+    let offerId: string | undefined;
+    try {
+      const { offer, token } = await sentOffer(sb, tenant.id, guest);
+      offerId = offer.id;
+      await acceptAsGuest(page, token);
+      const ids: string[] = [];
+      for (let i = 0; i < 3; i++)
+        ids.push((await staffConfirm(sb, offer.id, tenant.resources.venue)).id);
+      expect(new Set(ids).size).toBe(1);
+      const rows = await reservationsFor(sb, tenant.id, guest.guest_email);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].id).toBe(ids[0]);
+    } finally {
+      await cleanup(sb, tenant.id, offerId, guest.guest_email);
+    }
+  });
+
+  test("simultaneous confirms from a stale list create only one reservation", async ({
+    page,
+    tenant,
+  }) => {
+    const sb = await staffClient();
+    const sb2 = await staffClient();
+    const guest = makeTestGuest("GuestFlowRace");
+    let offerId: string | undefined;
+    try {
+      const { offer, token } = await sentOffer(sb, tenant.id, guest);
+      offerId = offer.id;
+      await acceptAsGuest(page, token);
+      // Two tabs hold the same not-yet-confirmed offer and press Confirm at once.
+      const { data: stale } = await sb
+        .from("offers")
+        .select("*")
+        .eq("id", offer.id)
+        .single();
+      const confirmOnce = (c: SupabaseClient) =>
+        writeOfferMainReservation(c as any, stale as any, {
+          mainType: "venue",
+          resourceId: tenant.resources.venue,
+          price: null,
+          linkedGroupId: crypto.randomUUID(),
+        });
+      const results = await Promise.all([
+        confirmOnce(sb),
+        confirmOnce(sb2),
+        confirmOnce(sb),
+        confirmOnce(sb2),
+      ]);
+      expect(new Set(results.map((r) => r.id)).size).toBe(1);
+      expect(results.filter((r) => !r.alreadyConfirmed)).toHaveLength(1);
+
+      const rows = await reservationsFor(sb, tenant.id, guest.guest_email);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].status).toBe("confirmed");
+
+      // A late Confirm after the offer is saved as confirmed still reuses it.
+      const late = await staffConfirm(sb, offer.id, tenant.resources.venue);
+      expect(late.id).toBe(rows[0].id);
+      expect(
+        await reservationsFor(sb, tenant.id, guest.guest_email),
+      ).toHaveLength(1);
+    } finally {
+      await cleanup(sb, tenant.id, offerId, guest.guest_email);
+    }
+  });
+
+  test("repeated confirms of an offer made from a booking never add a second one", async ({
+    page,
+    tenant,
+  }) => {
+    const sb = await staffClient();
+    const guest = makeTestGuest("GuestFlowSourceRepeat");
+    let offerId: string | undefined;
+    try {
+      const { data: source, error: srcErr } = await sb
+        .from("reservations")
+        .insert({
+          tenant_id: tenant.id,
+          reservation_type: "venue",
+          status: "pending",
+          date: futureDate(55),
+          start_time: "18:00:00",
+          end_time: "20:00:00",
+          guests_count: 6,
+          resource_id: tenant.resources.venue,
+          language: "en",
+          ...guest,
+        } as any)
+        .select("id")
+        .single();
+      expect(srcErr, srcErr?.message).toBeNull();
+      const { offer, token } = await sentOffer(sb, tenant.id, guest, {
+        source_reservation_id: source!.id,
+      });
+      offerId = offer.id;
+      await acceptAsGuest(page, token);
+      const { data: stale } = await sb
+        .from("offers")
+        .select("*")
+        .eq("id", offer.id)
+        .single();
+      const results = await Promise.all(
+        [0, 1, 2].map(() =>
+          writeOfferMainReservation(sb as any, stale as any, {
+            mainType: "venue",
+            resourceId: tenant.resources.venue,
+            price: null,
+            linkedGroupId: crypto.randomUUID(),
+          }),
+        ),
+      );
+      expect(results.every((r) => r.id === source!.id)).toBe(true);
+      const again = await staffConfirm(sb, offer.id, tenant.resources.venue);
+      expect(again.id).toBe(source!.id);
+      const rows = await reservationsFor(sb, tenant.id, guest.guest_email);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].id).toBe(source!.id);
+    } finally {
+      await cleanup(sb, tenant.id, offerId, guest.guest_email);
+    }
+  });
+
   test("updates the originating booking instead of adding a second one", async ({
     page,
     tenant,
