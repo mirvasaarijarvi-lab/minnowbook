@@ -11,6 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { memberSiteIds } from "@/lib/staffing/siteScope";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -83,7 +89,7 @@ export default function StaffRegisterDialog({
         employment_type: emp,
         weekly_hours_target: target ? Number(target) : null,
         is_active: true,
-        site_id: siteId === ALL ? null : siteId,
+        site_ids: siteId === ALL ? [] : [siteId],
         contact: { phone: phone.trim() || null, email: email.trim() || null },
       },
       {
@@ -329,7 +335,7 @@ export default function StaffRegisterDialog({
                             allLabel={L.allLocations}
                             onChange={(v) =>
                               m.saveMember.mutate(
-                                { id: x.id, name: x.name, site_id: v },
+                                { id: x.id, name: x.name, site_ids: v },
                                 { onError: err },
                               )
                             }
@@ -373,7 +379,10 @@ export default function StaffRegisterDialog({
   );
 }
 
-/** Per-person location picker; null means all locations. */
+/**
+ * Per-person location picker. A person can work at several locations;
+ * choosing none means they work at all locations.
+ */
 export function StaffSiteSelect({
   member,
   sites,
@@ -385,24 +394,49 @@ export function StaffSiteSelect({
   sites: { id: string; name: string }[];
   label: string;
   allLabel: string;
-  onChange: (siteId: string | null) => void;
+  onChange: (siteIds: string[]) => void;
 }) {
+  const chosen = memberSiteIds(member) ?? [];
+  const names = sites.filter((s) => chosen.includes(s.id)).map((s) => s.name);
+  const toggle = (id: string, on: boolean) =>
+    onChange(
+      on ? [...new Set([...chosen, id])] : chosen.filter((x) => x !== id),
+    );
   return (
-    <Select
-      value={member.site_id ?? ALL}
-      onValueChange={(v) => onChange(v === ALL ? null : v)}
-    >
-      <SelectTrigger aria-label={label} className="h-8 w-40 text-xs">
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={ALL}>{allLabel}</SelectItem>
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label={label}
+          className="h-8 w-40 justify-start truncate text-xs font-normal"
+        >
+          <span className="truncate">
+            {names.length ? names.join(", ") : allLabel}
+          </span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-56 space-y-1 p-2" align="start">
+        <label className="flex items-center gap-2 rounded p-1 text-sm">
+          <Checkbox
+            checked={chosen.length === 0}
+            onCheckedChange={(v) => v && onChange([])}
+          />
+          {allLabel}
+        </label>
         {sites.map((s) => (
-          <SelectItem key={s.id} value={s.id}>
+          <label
+            key={s.id}
+            className="flex items-center gap-2 rounded p-1 text-sm"
+          >
+            <Checkbox
+              checked={chosen.includes(s.id)}
+              onCheckedChange={(v) => toggle(s.id, v === true)}
+            />
             {s.name}
-          </SelectItem>
+          </label>
         ))}
-      </SelectContent>
-    </Select>
+      </PopoverContent>
+    </Popover>
   );
 }

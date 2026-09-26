@@ -25,6 +25,8 @@ export interface StaffMember {
   is_active: boolean;
   /** null = works at all locations */
   site_id?: string | null;
+  /** Locations this person works at; empty = all locations. */
+  site_ids?: string[];
 }
 export interface StaffContact {
   staff_member_id: string;
@@ -86,7 +88,7 @@ export const useStaffMembers = () => {
       const { data, error } = await sb
         .from("staff_members")
         .select(
-          "id,name,role_keys,employment_type,weekly_hours_target,is_active,site_id",
+          "id,name,role_keys,employment_type,weekly_hours_target,is_active,site_id,site_ids",
         )
         .eq("tenant_id", tenantId)
         .order("name");
@@ -182,6 +184,46 @@ export async function fetchPayrollRange(
     groups.set(key, g);
   }
   return [...groups.values()];
+}
+
+/**
+ * One person's planned shifts across every shift list (every location) in a
+ * date range, for their personal timesheet.
+ */
+export async function fetchWorkerShifts(
+  tenantId: string,
+  memberId: string,
+  from: string,
+  to: string,
+): Promise<
+  {
+    date: string;
+    start_time: string | null;
+    end_time: string | null;
+    role_key: string | null;
+    notes: string | null;
+    site_id: string | null;
+  }[]
+> {
+  const { data, error } = await sb
+    .from("shifts")
+    .select(
+      "date,start_time,end_time,shift_slots!inner(staff_member_id,role_key,notes,shift_periods!inner(site_id))",
+    )
+    .eq("tenant_id", tenantId)
+    .eq("shift_slots.staff_member_id", memberId)
+    .gte("date", from)
+    .lte("date", to)
+    .order("date");
+  if (error) throw error;
+  return ((data ?? []) as any[]).map((r) => ({
+    date: r.date,
+    start_time: r.start_time,
+    end_time: r.end_time,
+    role_key: r.shift_slots.role_key ?? null,
+    notes: r.shift_slots.notes ?? null,
+    site_id: r.shift_slots.shift_periods?.site_id ?? null,
+  }));
 }
 
 export const usePeriodData = (periodId: string | null) => {

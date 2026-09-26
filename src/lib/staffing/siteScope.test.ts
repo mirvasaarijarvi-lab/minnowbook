@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { memberInListScope } from "./siteScope";
+import { memberInListScope, memberSiteIds } from "./siteScope";
 
 /**
  * Regression: staffing needs (and payroll by date) count only shift lists for
@@ -157,5 +157,23 @@ describe("memberInListScope", () => {
   it("offers an all-locations list everyone", () => {
     expect(memberInListScope(null, "a")).toBe(true);
     expect(memberInListScope(null, null)).toBe(true);
+  });
+});
+
+describe("staff at several locations", () => {
+  it("offers a location's list to anyone who works there", () => {
+    expect(memberInListScope("a", ["b", "a"])).toBe(true);
+    expect(memberInListScope("c", ["a", "b"])).toBe(false);
+    expect(memberInListScope("a", [])).toBe(true);
+    expect(memberInListScope(null, ["b"])).toBe(true);
+  });
+  it("reads locations from site_ids, falling back to site_id", () => {
+    expect(memberSiteIds({ site_ids: ["a", "b"], site_id: "a" })).toEqual([
+      "a",
+      "b",
+    ]);
+    expect(memberSiteIds({ site_ids: [], site_id: "a" })).toEqual(["a"]);
+    expect(memberSiteIds({ site_ids: [], site_id: null })).toBeNull();
+    expect(memberSiteIds({})).toBeNull();
   });
 });

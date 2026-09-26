@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { StaffLang } from "@/lib/staffing/labels";
+import { memberSiteIds } from "@/lib/staffing/siteScope";
 import {
   buildSiteHistory,
   changeAffectsSite,
@@ -42,6 +43,7 @@ const LABELS = {
     ok: "Saved",
     noSites: "Add a location first.",
     worksAt: "Works at",
+    severalLoc: "several locations",
     removeHere: "Remove from this location",
     giveAccess: "Give sign-in access to this location",
     changesLog: "Location changes",
@@ -93,6 +95,7 @@ const LABELS = {
     ok: "Tallennettu",
     noSites: "Lisää ensin toimipiste.",
     worksAt: "Työpaikka",
+    severalLoc: "useita toimipisteitä",
     removeHere: "Poista tästä toimipisteestä",
     giveAccess: "Anna kirjautumisoikeus tähän toimipisteeseen",
     changesLog: "Toimipistemuutokset",
@@ -143,6 +146,7 @@ const LABELS = {
     ok: "Sparat",
     noSites: "Lägg till en plats först.",
     worksAt: "Arbetar på",
+    severalLoc: "flera platser",
     removeHere: "Ta bort från den här platsen",
     giveAccess: "Ge inloggning till den här platsen",
     changesLog: "Platsändringar",
@@ -174,7 +178,7 @@ type Person = {
   tag: string;
   muted?: boolean;
   role?: string;
-  siteId?: string | null;
+  siteIds?: string[] | null;
 };
 
 export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
@@ -216,7 +220,7 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
           .eq("tenant_id", t),
         supabase
           .from("staff_members")
-          .select("id,name,site_id,is_active")
+          .select("id,name,site_id,site_ids,is_active")
           .eq("tenant_id", t)
           .eq("is_active", true)
           .order("name"),
@@ -240,7 +244,7 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
         supabase
           .from("site_access_change_log")
           .select(
-            "id,action,subject_id,subject_name,old_site_id,new_site_id,changed_by,changed_at",
+            "id,action,subject_id,subject_name,old_site_id,new_site_id,old_site_ids,new_site_ids,changed_by,changed_at",
           )
           .eq("tenant_id", t)
           .order("changed_at", { ascending: false })
@@ -297,13 +301,24 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
           muted: !u.is_approved,
         }));
       const shift: Person[] = data.staff
-        .filter((m) => m.site_id === s.id || m.site_id == null)
+        .filter((m) => {
+          const ids = memberSiteIds(m);
+          return ids === null || ids.includes(s.id);
+        })
         .map((m) => ({
           kind: "staff",
-          siteId: m.site_id,
+          siteIds: memberSiteIds(m),
           id: m.id,
           name: m.name,
-          tag: m.site_id == null ? L.allLoc : "",
+          tag:
+            memberSiteIds(m) === null
+              ? L.allLoc
+              : (memberSiteIds(m) ?? []).length > 1
+                ? (memberSiteIds(m) ?? [])
+                    .map((id) => data.sites.find((x) => x.id === id)?.name)
+                    .filter(Boolean)
+                    .join(", ")
+                : "",
         }));
       const snapshot = {
         users: signIn.map((p) => p.id).sort(),
@@ -406,10 +421,10 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
   });
 
   const moveStaff = useMutation({
-    mutationFn: async (v: { id: string; siteId: string | null }) => {
+    mutationFn: async (v: { id: string; siteIds: string[] }) => {
       const { error } = await supabase
         .from("staff_members")
-        .update({ site_id: v.siteId })
+        .update({ site_ids: v.siteIds })
         .eq("id", v.id)
         .eq("tenant_id", tenantId!);
       if (error) throw error;
@@ -468,16 +483,24 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
     subject_name: string;
     old_site_id: string | null;
     new_site_id: string | null;
+    old_site_ids?: string[] | null;
+    new_site_ids?: string[] | null;
     changed_by: string | null;
     changed_at: string;
   }) => {
+    const places = (ids: string[] | null | undefined, one: string | null) =>
+      ids
+        ? ids.length
+          ? ids.map(siteName).join(", ")
+          : L.allLoc
+        : siteName(one);
     const name = c.subject_name || L.unknown;
     const text =
       c.action === "staff_moved"
         ? L.changeMoved
             .replace("{name}", name)
-            .replace("{from}", siteName(c.old_site_id))
-            .replace("{to}", siteName(c.new_site_id))
+            .replace("{from}", places(c.old_site_ids, c.old_site_id))
+            .replace("{to}", places(c.new_site_ids, c.new_site_id))
         : (c.action === "signin_added"
             ? L.changeAdded
             : L.changeRemoved
@@ -516,15 +539,25 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
                   <select
                     aria-label={`${L.worksAt}: ${p.name}`}
                     className="h-7 rounded border border-input bg-background px-1 text-xs"
-                    value={p.siteId ?? ""}
+                    value={
+                      (p.siteIds?.length ?? 0) > 1
+                        ? "__many"
+                        : (p.siteIds?.[0] ?? "")
+                    }
                     disabled={moveStaff.isPending}
                     onChange={(e) =>
+                      e.target.value !== "__many" &&
                       moveStaff.mutate({
                         id: p.id,
-                        siteId: e.target.value || null,
+                        siteIds: e.target.value ? [e.target.value] : [],
                       })
                     }
                   >
+                    {(p.siteIds?.length ?? 0) > 1 && (
+                      <option value="__many" disabled>
+                        {L.severalLoc}
+                      </option>
+                    )}
                     <option value="">{L.allLoc}</option>
                     {(data?.sites ?? []).map((o) => (
                       <option key={o.id} value={o.id}>

@@ -284,7 +284,7 @@ export default function StaffingSetupGuide({
                     allLabel={L.allLocations}
                     onChange={(v) =>
                       m.saveMember.mutate(
-                        { id: x.id, name: x.name, site_id: v },
+                        { id: x.id, name: x.name, site_ids: v },
                         {
                           onError: (e) =>
                             toast.error(

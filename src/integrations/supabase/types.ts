@@ -2509,7 +2509,9 @@ export type Database = {
           changed_by: string | null
           id: string
           new_site_id: string | null
+          new_site_ids: string[] | null
           old_site_id: string | null
+          old_site_ids: string[] | null
           subject_id: string
           subject_name: string
           tenant_id: string
@@ -2520,7 +2522,9 @@ export type Database = {
           changed_by?: string | null
           id?: string
           new_site_id?: string | null
+          new_site_ids?: string[] | null
           old_site_id?: string | null
+          old_site_ids?: string[] | null
           subject_id: string
           subject_name?: string
           tenant_id: string
@@ -2531,7 +2535,9 @@ export type Database = {
           changed_by?: string | null
           id?: string
           new_site_id?: string | null
+          new_site_ids?: string[] | null
           old_site_id?: string | null
+          old_site_ids?: string[] | null
           subject_id?: string
           subject_name?: string
           tenant_id?: string
@@ -2970,6 +2976,7 @@ export type Database = {
           name: string
           role_keys: string[]
           site_id: string | null
+          site_ids: string[]
           tenant_id: string
           updated_at: string
           weekly_hours_target: number | null
@@ -2983,6 +2990,7 @@ export type Database = {
           name: string
           role_keys?: string[]
           site_id?: string | null
+          site_ids?: string[]
           tenant_id: string
           updated_at?: string
           weekly_hours_target?: number | null
@@ -2996,6 +3004,7 @@ export type Database = {
           name?: string
           role_keys?: string[]
           site_id?: string | null
+          site_ids?: string[]
           tenant_id?: string
           updated_at?: string
           weekly_hours_target?: number | null
