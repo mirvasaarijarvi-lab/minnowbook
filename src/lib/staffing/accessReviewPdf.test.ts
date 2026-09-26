@@ -9,7 +9,11 @@ import {
 describe("accessReviewPdf", () => {
   it("makes a safe file name", () => {
     expect(
-      accessReviewFileName("mimmin-testi", "Hotelli Ähtäri & Spa", new Date("2026-09-26T10:00:00Z")),
+      accessReviewFileName(
+        "mimmin-testi",
+        "Hotelli Ähtäri & Spa",
+        new Date("2026-09-26T10:00:00Z"),
+      ),
     ).toBe("mimmin-testi_access-review_hotelli-ahtari-spa_2026-09-26.pdf");
   });
   it("replaces characters the PDF font lacks", () => {
