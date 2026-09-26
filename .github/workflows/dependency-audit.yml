@@ -571,6 +571,13 @@ jobs:
               '| --- | ---: | ---: | :---: |',
               ...rows,
               '',
+              ...(() => {
+                if (conclusion !== 'failure') return [];
+                try {
+                  const t = require('fs').readFileSync('audit-vulns.md', 'utf8').trim();
+                  return t ? [t, ''] : [];
+                } catch { return []; }
+              })(),
               blocking > 0
                 ? 'Add a time-boxed entry in `.github/dependency-audit-allowlist.json` to waive a finding while a fix is in flight.'
                 : 'No findings at or above the configured threshold.',

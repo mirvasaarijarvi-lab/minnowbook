@@ -16,7 +16,34 @@
 //     title,         // short advisory title
 //     url,           // helpUri
 //     range,         // affected version range
+//     fixedIn,       // first fixed version(s), e.g. "7.26.10", or null
+//     fixVia,        // npm upgrade path, e.g. "vitest@4.0.0 (major)", or null
 //   }
+
+// First fixed version from an affected range. "<7.26.10" -> "7.26.10";
+// ">=1.0.0 <1.2.3 || >=2.0.0 <2.0.5" -> "1.2.3, 2.0.5". A "<=X" bound
+// has no known fixed release, so it is shown as "> X". Returns null
+// when the range has no upper bound (no fix published).
+export function fixedFromRange(range) {
+  if (!range || range === "unknown") return null;
+  const out = [];
+  for (const part of String(range).split("||")) {
+    const lt = /(?:^|\s)<\s*v?([0-9][^\s]*)/.exec(part);
+    const lte = /<=\s*v?([0-9][^\s]*)/.exec(part);
+    if (lte) out.push(`> ${lte[1]}`);
+    else if (lt) out.push(lt[1]);
+    else return null;
+  }
+  return out.length ? [...new Set(out)].join(", ") : null;
+}
+
+// Normalise a patched-versions spec (">=7.26.10") to a version list.
+function fixedFromPatched(patched) {
+  if (!patched || typeof patched !== "string") return null;
+  if (/^<\s*0\.0\.0|^none$/i.test(patched.trim())) return null;
+  const vs = [...patched.matchAll(/>=?\s*v?([0-9][^\s|]*)/g)].map((m) => m[1]);
+  return vs.length ? [...new Set(vs)].join(", ") : patched.trim();
+}
 
 const SEVERITY_ORDER = {
   info: 0,
@@ -33,7 +60,7 @@ export function severityRank(sev) {
 
 function pushAdvisory(
   out,
-  { ruleId, ghsaId, cves, pkg, severity, title, url, range },
+  { ruleId, ghsaId, cves, pkg, severity, title, url, range, fixedIn, fixVia },
 ) {
   const sev = String(severity || "info").toLowerCase();
   const finalRuleId = String(ruleId || `${pkg}:${title || "unknown"}`);
@@ -51,6 +78,8 @@ function pushAdvisory(
           : "https://github.com/advisories"),
     ),
     range: String(range || "unknown"),
+    fixedIn: fixedIn ?? fixedFromRange(range),
+    fixVia: fixVia ?? null,
   });
 }
 
@@ -81,6 +110,12 @@ function parseNpm(report, out) {
         title: v.title,
         url: v.url,
         range: v.range,
+        fixVia:
+          info.fixAvailable && typeof info.fixAvailable === "object"
+            ? `${info.fixAvailable.name}@${info.fixAvailable.version}${info.fixAvailable.isSemVerMajor ? " (major)" : ""}`
+            : info.fixAvailable === false
+              ? "no fix available"
+              : null,
       });
     }
   }
@@ -98,6 +133,9 @@ function parseAdvisoriesMap(report, out) {
       title: a.title,
       url: a.url,
       range: a.vulnerable_versions,
+      fixedIn:
+        fixedFromPatched(a.patched_versions) ??
+        fixedFromRange(a.vulnerable_versions),
     });
   }
 }
@@ -131,6 +169,9 @@ function parseYarnClassic(text, out) {
       title: a.title,
       url: a.url,
       range: a.vulnerable_versions,
+      fixedIn:
+        fixedFromPatched(a.patched_versions) ??
+        fixedFromRange(a.vulnerable_versions),
     });
   }
 }

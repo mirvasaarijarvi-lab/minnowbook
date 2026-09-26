@@ -278,13 +278,42 @@ lines.push(
 );
 lines.push("");
 
+const esc = (v) => String(v).replace(/\|/g, "\\|");
+const fixCell = (adv) =>
+  adv.fixedIn ? `\`${esc(adv.fixedIn)}\`` : "no fixed version yet";
+
+// Vulnerability list for the PR check summary: one row per failing
+// advisory with its severity and the first fixed version.
+const vulnLines = [];
+if (blocking.length > 0) {
+  const sorted = [...blocking].sort(
+    (a, b) =>
+      severityRank(b.severity) - severityRank(a.severity) ||
+      a.pkg.localeCompare(b.pkg),
+  );
+  vulnLines.push(`### Vulnerable packages (${sorted.length})`);
+  vulnLines.push("");
+  vulnLines.push(
+    "| Package | Severity | Affected versions | Fixed in | Upgrade | Advisory |",
+  );
+  vulnLines.push("| --- | --- | --- | --- | --- | --- |");
+  for (const adv of sorted) {
+    vulnLines.push(
+      `| \`${esc(adv.pkg)}\` | ${sevBadge(adv.severity)} | ${esc(adv.range)} | ${fixCell(adv)} | ${adv.fixVia ? esc(adv.fixVia) : "·"} | [${esc(adv.ghsaId || adv.ruleId)}](${adv.url}): ${esc(adv.title)} |`,
+    );
+  }
+  vulnLines.push("");
+}
+const vulnPath = process.env.AUDIT_VULNS_PATH || "audit-vulns.md";
+fs.writeFileSync(
+  vulnPath,
+  vulnLines.join("\n") + (vulnLines.length ? "\n" : ""),
+);
+
 if (blocking.length > 0) {
   lines.push(`### Failing against \`AUDIT_LEVEL=${level}\``);
   lines.push("");
-  lines.push("| Severity | Package | Advisory | Title | Affected range |");
-  lines.push("| --- | --- | --- | --- | --- |");
-  for (const adv of blocking) lines.push(row(adv));
-  lines.push("");
+  lines.push(...vulnLines.slice(2));
   lines.push(
     `Add an entry to \`.github/dependency-audit-allowlist.json\` with the advisory id, an \`expires\` date (YYYY-MM-DD, UTC), and a \`reason\` to temporarily waive the gate while a fix is in flight.`,
   );
