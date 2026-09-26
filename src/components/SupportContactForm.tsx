@@ -23,6 +23,17 @@ import {
   isChallengePassed,
   type AccessibleChallenge,
 } from "@/lib/accessibleChallenge";
+import { useLanguage } from "@/contexts/I18nContext";
+import {
+  getSupportCopy,
+  SUPPORT_COPY,
+  type SupportCopy,
+} from "@/i18n/support-copy";
+
+/** Every language's default subject, so a switch of language can still replace an untouched subject. */
+const DEFAULT_SUBJECTS = new Set(
+  Object.values(SUPPORT_COPY).map((c) => c.form.subjectDefault),
+);
 
 /**
  * The support address is never written as a complete string in the markup or
@@ -41,25 +52,26 @@ const RATE_STORAGE_KEY = "mimmobook-support-submits";
 // From this many recent messages onwards, a text challenge is required.
 const CHALLENGE_AFTER_SUBMITS = 2;
 
-const contactSchema = z.object({
-  name: z.string().trim().max(100, "Name must be under 100 characters."),
-  email: z
-    .string()
-    .trim()
-    .min(1, "Please add your email so we can reply.")
-    .email("Please check the email address.")
-    .max(255, "Email must be under 255 characters."),
-  subject: z
-    .string()
-    .trim()
-    .min(3, "Please add a short subject.")
-    .max(150, "Subject must be under 150 characters."),
-  message: z
-    .string()
-    .trim()
-    .min(15, "Please describe your question in a bit more detail.")
-    .max(4000, "Message must be under 4000 characters."),
-});
+const makeContactSchema = (f: SupportCopy["form"]) =>
+  z.object({
+    name: z.string().trim().max(100, f.errName),
+    email: z
+      .string()
+      .trim()
+      .min(1, f.errEmailMissing)
+      .email(f.errEmailInvalid)
+      .max(255, f.errEmailLong),
+    subject: z
+      .string()
+      .trim()
+      .min(3, f.errSubjectShort)
+      .max(150, f.errSubjectLong),
+    message: z
+      .string()
+      .trim()
+      .min(15, f.errMessageShort)
+      .max(4000, f.errMessageLong),
+  });
 
 const readSubmitTimes = (): number[] => {
   try {
@@ -84,12 +96,6 @@ const recordSubmit = (times: number[]) => {
   }
 };
 
-const AREA_LABELS: Record<string, string> = {
-  dashboard: "Dashboard",
-  superadmin: "Superadmin area",
-  generic: "General",
-};
-
 /**
  * Contact form rendered on the /support page. Reads `area`, `from`, and
  * `email` query params (set by NoTenantState) to prefill the form. When the
@@ -99,6 +105,9 @@ const AREA_LABELS: Record<string, string> = {
  */
 const SupportContactForm = () => {
   const [searchParams] = useSearchParams();
+  const { language } = useLanguage();
+  const f = getSupportCopy(language).form;
+  const contactSchema = useMemo(() => makeContactSchema(f), [f]);
   const { user } = useAuth();
   const { tenantId } = useTenant();
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -108,29 +117,29 @@ const SupportContactForm = () => {
   const fromPath = searchParams.get("from");
   const prefillEmail = searchParams.get("email");
   const shouldFocus = searchParams.get("contact") === "1";
-  const areaLabel = AREA_LABELS[area] ?? "General";
+  const areaLabel = f.areas[area as keyof typeof f.areas] ?? f.areas.generic;
 
   const defaultSubject = useMemo(() => {
-    if (area === "dashboard") return "Help accessing my dashboard";
-    if (area === "superadmin") return "Help accessing the superadmin area";
-    return "Support request";
-  }, [area]);
+    if (area === "dashboard") return f.subjectDashboard;
+    if (area === "superadmin") return f.subjectSuperadmin;
+    return f.subjectDefault;
+  }, [area, f]);
 
   const defaultMessage = useMemo(() => {
     const lines: string[] = [];
-    lines.push("Hi MimmoBook team,");
+    lines.push(f.greeting);
     lines.push("");
     if (fromPath) {
-      lines.push(`I was trying to reach: ${fromPath}`);
+      lines.push(`${f.tryingToReach} ${fromPath}`);
     }
     if (area !== "generic") {
-      lines.push(`Area: ${areaLabel}`);
+      lines.push(`${f.area} ${areaLabel}`);
     }
     lines.push("");
-    lines.push("Please describe what happened:");
+    lines.push(f.describe);
     lines.push("");
     return lines.join("\n");
-  }, [area, areaLabel, fromPath]);
+  }, [area, areaLabel, fromPath, f]);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -148,13 +157,13 @@ const SupportContactForm = () => {
   // messages in this window, so a real person sees it before they type.
   useEffect(() => {
     if (readSubmitTimes().length >= CHALLENGE_AFTER_SUBMITS) {
-      setChallenge((current) => current ?? createAccessibleChallenge());
+      setChallenge((current) => current ?? createAccessibleChallenge(language));
     }
-  }, []);
+  }, [language]);
 
   /** Shows a fresh challenge and moves focus to it. */
   const requireChallenge = (reason: string) => {
-    setChallenge(createAccessibleChallenge());
+    setChallenge(createAccessibleChallenge(language));
     setChallengeAnswer("");
     setChallengeError(reason);
     requestAnimationFrame(() => challengeInputRef.current?.focus());
@@ -175,7 +184,7 @@ const SupportContactForm = () => {
   // area without having edited the fields yet.
   useEffect(() => {
     setSubject((current) =>
-      current === "" || current === "Support request"
+      current === "" || DEFAULT_SUBJECTS.has(current)
         ? defaultSubject
         : current,
     );
@@ -195,7 +204,7 @@ const SupportContactForm = () => {
   const openMailto = () => {
     const address = supportAddress();
     setRevealedAddress(address);
-    const body = `${message}\n\n— Sent from ${window.location.origin}/support`;
+    const body = `${message}\n\n${f.sentFrom} ${window.location.origin}/support`;
     window.location.href = `mailto:${address}?subject=${encodeURIComponent(
       subject,
     )}&body=${encodeURIComponent(body)}`;
@@ -207,44 +216,36 @@ const SupportContactForm = () => {
     // Hidden field only bots fill in. Behave like a normal success so the bot
     // gets no signal, but send nothing.
     if (honeypot.trim() !== "") {
-      toast.success("Support request sent", {
-        description: "Our team will get back to you by email.",
-      });
+      toast.success(f.sentTitle, { description: f.sentDesc });
       return;
     }
 
     if ((Date.now() - mountedAtRef.current) / 1000 < MIN_FILL_SECONDS) {
-      requireChallenge(
-        "That was sent very quickly, so please answer this short question to confirm you are a person.",
-      );
+      requireChallenge(f.tooFast);
       return;
     }
 
     const parsed = contactSchema.safeParse({ name, email, subject, message });
     if (!parsed.success) {
-      toast.error(parsed.error.issues[0]?.message ?? "Please check the form.");
+      toast.error(parsed.error.issues[0]?.message ?? f.errCheckForm);
       return;
     }
 
     const recent = readSubmitTimes();
     if (recent.length >= RATE_MAX_SUBMITS) {
-      toast.error("You have sent several messages already", {
-        description: "Please wait a few minutes before sending another one.",
-      });
+      toast.error(f.rateTitle, { description: f.rateDesc });
       return;
     }
 
     // Repeated messages from this browser: require the challenge before sending.
     if (!challenge && recent.length >= CHALLENGE_AFTER_SUBMITS) {
-      requireChallenge(
-        "Please answer this short question to confirm you are a person.",
-      );
+      requireChallenge(f.confirmPerson);
       return;
     }
 
     if (challenge) {
       if (!isChallengePassed(challenge, challengeAnswer)) {
-        requireChallenge("That answer did not match. Here is a new question.");
+        requireChallenge(f.wrongAnswer);
         return;
       }
       setChallenge(null);
@@ -269,20 +270,16 @@ const SupportContactForm = () => {
         });
         if (error) throw error;
         recordSubmit(recent);
-        toast.success("Support request sent", {
-          description: "Our team will get back to you by email.",
-        });
+        toast.success(f.sentTitle, { description: f.sentDesc });
         setMessage(defaultMessage);
       } else {
         recordSubmit(recent);
         openMailto();
-        toast.info("Opening your email app…", {
-          description: "If nothing happens, use the show address button below.",
-        });
+        toast.info(f.openingMail, { description: f.openingMailDesc });
       }
     } catch (err: any) {
-      toast.error("Couldn't send the request", {
-        description: err?.message ?? "Please try again in a moment.",
+      toast.error(f.failTitle, {
+        description: err?.message ?? f.failDesc,
       });
     } finally {
       setSubmitting(false);
@@ -294,9 +291,7 @@ const SupportContactForm = () => {
       <Card className="max-w-2xl mx-auto border-primary/20">
         <CardHeader>
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <CardTitle className="font-serif text-xl">
-              Contact support
-            </CardTitle>
+            <CardTitle className="font-serif text-xl">{f.title}</CardTitle>
             {area !== "generic" && (
               <Badge variant="secondary" className="gap-1.5">
                 <MapPin className="h-3 w-3" />
@@ -304,18 +299,14 @@ const SupportContactForm = () => {
               </Badge>
             )}
           </div>
-          <CardDescription>
-            Send us a message and we'll reply by email. Response time is
-            typically within one business day. We use your details only to
-            answer your request.
-          </CardDescription>
+          <CardDescription>{f.description}</CardDescription>
         </CardHeader>
         <CardContent>
           {fromPath && (
             <div className="mb-4 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground flex items-start gap-2">
               <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary" />
               <div className="min-w-0">
-                <div>Reported route</div>
+                <div>{f.reportedRoute}</div>
                 <code className="block font-mono text-foreground break-all mt-0.5">
                   {fromPath}
                 </code>
@@ -343,18 +334,18 @@ const SupportContactForm = () => {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="support-name">Your name</Label>
+                <Label htmlFor="support-name">{f.name}</Label>
                 <Input
                   id="support-name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Optional"
+                  placeholder={f.optional}
                   autoComplete="name"
                   maxLength={100}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="support-email">Email *</Label>
+                <Label htmlFor="support-email">{f.email}</Label>
                 <Input
                   id="support-email"
                   type="email"
@@ -368,7 +359,7 @@ const SupportContactForm = () => {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="support-subject">Subject *</Label>
+              <Label htmlFor="support-subject">{f.subject}</Label>
               <Input
                 id="support-subject"
                 value={subject}
@@ -379,7 +370,7 @@ const SupportContactForm = () => {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="support-message">Message *</Label>
+              <Label htmlFor="support-message">{f.message}</Label>
               <Textarea
                 id="support-message"
                 value={message}
@@ -420,8 +411,7 @@ const SupportContactForm = () => {
                   id="support-challenge-hint"
                   className="text-xs text-muted-foreground"
                 >
-                  {challenge.hint} Prefer not to answer? Use "Email instead"
-                  below, your message still reaches us.
+                  {challenge.hint} {f.challengeOptOut}
                 </p>
               </div>
             )}
@@ -435,12 +425,12 @@ const SupportContactForm = () => {
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Sending…
+                    {f.sending}
                   </>
                 ) : (
                   <>
                     <Send className="h-4 w-4" />
-                    Send to support
+                    {f.send}
                   </>
                 )}
               </Button>
@@ -451,7 +441,7 @@ const SupportContactForm = () => {
                 onClick={openMailto}
               >
                 <Mail className="h-4 w-4" />
-                Email instead
+                {f.emailInstead}
               </Button>
             </div>
 
@@ -461,7 +451,7 @@ const SupportContactForm = () => {
                 aria-hidden="true"
               />
               <p>
-                Our support address is hidden from automated crawlers.{" "}
+                {f.addressHidden}{" "}
                 {revealedAddress ? (
                   <span className="text-foreground font-medium">
                     {revealedAddress}
@@ -472,7 +462,7 @@ const SupportContactForm = () => {
                     className="underline underline-offset-2 text-foreground hover:text-primary"
                     onClick={() => setRevealedAddress(supportAddress())}
                   >
-                    Show the address
+                    {f.showAddress}
                   </button>
                 )}
               </p>
