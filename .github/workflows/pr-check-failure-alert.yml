@@ -1,0 +1,110 @@
+name: PR check failure alert
+
+# Alerts the repository owner when the package registry gate or the
+# dependency (security) audit fails on a pull request. Posts one sticky
+# PR comment that @mentions the owner, so GitHub sends a notification
+# (email / app per the owner's notification settings). The comment is
+# updated, not duplicated, on repeat failures and marked resolved once
+# the check passes again.
+#
+# No checkout: this workflow runs no project code, it only reads the
+# finished run's metadata, so the stale-commit check does not apply.
+
+on:
+  workflow_run:
+    workflows:
+      - "Package registry and audit gate"
+      - "Dependency audit"
+    types: [completed]
+
+permissions:
+  pull-requests: write
+  issues: write
+  actions: read
+
+concurrency:
+  group: pr-check-failure-alert-${{ github.event.workflow_run.head_sha }}-${{ github.event.workflow_run.name }}
+  cancel-in-progress: false
+
+jobs:
+  alert:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      (github.event.workflow_run.conclusion == 'failure' ||
+       github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Post or update failure alert
+        # actions/github-script v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          ALERT_USER: ${{ vars.CHECK_ALERT_USER || github.repository_owner }}
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const { owner, repo } = context.repo;
+            const failed = run.conclusion === 'failure';
+
+            // Find the PR for this run. pull_requests is empty for
+            // fork PRs, so fall back to searching by head commit.
+            let prs = (run.pull_requests || []).map((p) => p.number);
+            if (prs.length === 0) {
+              const { data } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner, repo, commit_sha: run.head_sha,
+              });
+              prs = data.filter((p) => p.state === 'open').map((p) => p.number);
+            }
+            if (prs.length === 0) {
+              core.info('No open pull request for this run; nothing to alert.');
+              return;
+            }
+
+            // Failed job names for a quick pointer.
+            let failedJobs = [];
+            if (failed) {
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+                owner, repo, run_id: run.id, per_page: 100,
+              });
+              failedJobs = jobs.filter((j) => j.conclusion === 'failure').map((j) => `[${j.name}](${j.html_url})`);
+            }
+
+            const marker = `<!-- mimmobook:check-failure-alert:${run.name} -->`;
+            const user = process.env.ALERT_USER;
+            const sha = run.head_sha.slice(0, 7);
+            const body = failed
+              ? [
+                  marker,
+                  `### :rotating_light: ${run.name} failed`,
+                  '',
+                  `@${user} the **${run.name}** check failed on commit \`${sha}\`.`,
+                  '',
+                  failedJobs.length ? `Failed jobs: ${failedJobs.join(', ')}` : '',
+                  `Run: ${run.html_url}`,
+                  '',
+                  'The check summary lists each vulnerable package, its severity and the fixed version.',
+                ].filter((l) => l !== null).join('\n')
+              : [
+                  marker,
+                  `### :white_check_mark: ${run.name} passing again`,
+                  '',
+                  `Resolved on commit \`${sha}\`. Run: ${run.html_url}`,
+                ].join('\n');
+
+            for (const issue_number of prs) {
+              const comments = await github.paginate(github.rest.issues.listComments, {
+                owner, repo, issue_number, per_page: 100,
+              });
+              const existing = comments.find((c) => c.body && c.body.includes(marker));
+              if (!failed && !existing) continue; // never failed: stay quiet
+              if (existing) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+              }
+              // A fresh comment on each new failure so the @mention
+              // notifies again (edits do not re-send notifications).
+              if (failed) {
+                if (existing) await github.rest.issues.deleteComment({ owner, repo, comment_id: existing.id });
+                await github.rest.issues.createComment({ owner, repo, issue_number, body });
+              }
+              core.info(`${failed ? 'Alerted' : 'Resolved'} on PR #${issue_number}.`);
+            }
