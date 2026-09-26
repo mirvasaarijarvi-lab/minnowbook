@@ -1,0 +1,63 @@
+name: Stale result check
+
+# After each listed workflow finishes, checks whether it tested an older
+# commit than the current head of its branch. If so, it adds a
+# "Stale result" check to the tested commit and a STALE RESULT summary,
+# so a green or red result from an outdated commit is never mistaken
+# for the state of the latest code.
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+      - Lint
+      - Lockfile sync (npm)
+      - Package registry and audit gate
+      - Dependency audit
+      - E2E
+      - Security tests
+      - RLS/CORS gate
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  stale:
+    name: stale-result
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          HEAD_REF: ${{ github.event.workflow_run.head_branch }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: bash scripts/ci/stale-commit-check.sh
+      - name: Mark the tested commit's results as stale
+        if: steps.check.outputs.stale == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
+          TIP: ${{ steps.check.outputs.tip_sha }}
+          BEHIND: ${{ steps.check.outputs.behind_by }}
+          WF: ${{ github.event.workflow_run.name }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          gh api "repos/${REPO}/check-runs" --method POST \
+            -f name="Stale result: ${WF}" \
+            -f head_sha="${TESTED_SHA}" \
+            -f status=completed \
+            -f conclusion=neutral \
+            -f "output[title]=STALE: ${WF} (${CONCLUSION}) tested an older commit" \
+            -f "output[summary]=This ${CONCLUSION} result is for ${TESTED_SHA:0:7}. The branch head is now ${TIP:0:7} (${BEHIND} newer commit(s)), so it does not describe the latest code. Run: ${RUN_URL}"
