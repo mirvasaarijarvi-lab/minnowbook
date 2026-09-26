@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { memberInListScope } from "./siteScope";
 
 /**
  * Regression: staffing needs (and payroll by date) count only shift lists for
@@ -144,5 +145,17 @@ describe("periodInSiteScope (shift list picker)", () => {
     expect(periodInSiteScope("site-A", null)).toBe(true);
     expect(periodInSiteScope("site-A", "site-B")).toBe(false);
     expect(periodInSiteScope(null, "site-B")).toBe(true);
+  });
+});
+
+describe("memberInListScope", () => {
+  it("offers a location's list only its own and all-locations staff", () => {
+    expect(memberInListScope("a", "a")).toBe(true);
+    expect(memberInListScope("a", null)).toBe(true);
+    expect(memberInListScope("a", "b")).toBe(false);
+  });
+  it("offers an all-locations list everyone", () => {
+    expect(memberInListScope(null, "a")).toBe(true);
+    expect(memberInListScope(null, null)).toBe(true);
   });
 });
