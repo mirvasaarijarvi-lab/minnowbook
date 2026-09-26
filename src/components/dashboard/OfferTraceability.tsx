@@ -351,3 +351,89 @@ export function ReservationOffers({
     </section>
   );
 }
+
+/**
+ * Confirmed offers: a clear "Confirmed" status with who confirmed it, and
+ * the reservation it created (or reused), which staff can open.
+ */
+export function OfferConfirmedReservation({
+  reservationId,
+  confirmedByName,
+  confirmedAt,
+}: {
+  reservationId: string | null;
+  confirmedByName?: string | null;
+  confirmedAt?: string | null;
+}) {
+  const t = useT();
+  const { tenantId } = useTenant();
+  const [openFull, setOpenFull] = useState<any | null>(null);
+  const { data: r, isLoading } = useQuery({
+    queryKey: ["offer-confirmed-reservation", tenantId, reservationId],
+    enabled: !!tenantId && !!reservationId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reservations")
+        .select("*")
+        .eq("tenant_id", tenantId!)
+        .eq("id", reservationId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const who = confirmedByName || t("offers.confirmedByUnknown");
+  return (
+    <div
+      className="mt-2 rounded-md border border-primary/40 bg-primary/5 p-2 text-xs"
+      data-testid="offer-confirmed-reservation"
+      role="status"
+    >
+      <p className="flex items-center gap-1 font-medium text-foreground">
+        <Badge className="text-[10px]">{t("offers.statusConfirmed")}</Badge>
+        {confirmedAt
+          ? t("offers.confirmedByAudit")
+              .replace("{name}", who)
+              .replace("{date}", fmtTs(confirmedAt))
+          : t("offers.confirmedNotRecorded")}
+      </p>
+      <p className="mt-1 flex flex-wrap items-center gap-1 text-muted-foreground">
+        <Link2 className="h-3 w-3" aria-hidden />
+        {t("offers.linkedReservation")}:{" "}
+        {!reservationId ? (
+          t("offers.linkedReservationNone")
+        ) : isLoading ? null : r ? (
+          <>
+            <span className="text-foreground">
+              #{r.id.slice(0, 8).toUpperCase()}, {fmt(r.date)}
+              {r.start_time ? ` ${String(r.start_time).slice(0, 5)}` : ""},{" "}
+              {r.status}
+            </span>
+            <span>
+              {" "}
+              ({t("offers.reservationCreatedAudit")}: {fmtTs(r.created_at)})
+            </span>
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-xs"
+              onClick={() => setOpenFull(r)}
+            >
+              <ExternalLink className="h-3 w-3 mr-0.5" aria-hidden />
+              {t("offers.openReservation")}
+            </Button>
+          </>
+        ) : (
+          t("offers.trace.missing")
+        )}
+      </p>
+      <ReservationDetailDialog
+        reservation={openFull}
+        open={!!openFull}
+        onOpenChange={(o) => !o && setOpenFull(null)}
+        canEdit={false}
+      />
+    </div>
+  );
+}

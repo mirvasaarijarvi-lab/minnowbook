@@ -2159,6 +2159,10 @@ type TranslationKeys = {
   "offers.statusDraft": string;
   "offers.statusSent": string;
   "offers.statusConfirmed": string;
+  "offers.alreadyConfirmedBy": string;
+  "offers.linkedReservation": string;
+  "offers.linkedReservationNone": string;
+  "offers.openReservation": string;
   "offers.confirmedByAudit": string;
   "offers.confirmedByUnknown": string;
   "offers.confirmedNotRecorded": string;
@@ -5093,6 +5097,10 @@ const en: TranslationKeys = {
   "offers.statusDraft": "Draft",
   "offers.statusSent": "Sent",
   "offers.statusConfirmed": "Confirmed",
+  "offers.alreadyConfirmedBy": "Already confirmed by {name}",
+  "offers.linkedReservation": "Linked reservation",
+  "offers.linkedReservationNone": "None",
+  "offers.openReservation": "Open reservation",
   "offers.confirmedByAudit": "Confirmed by {name} on {date}",
   "offers.confirmedByUnknown": "a staff member",
   "offers.confirmedNotRecorded":
@@ -8092,6 +8100,10 @@ const fi: TranslationKeys = {
   "offers.statusDraft": "Luonnos",
   "offers.statusSent": "Lähetetty",
   "offers.statusConfirmed": "Vahvistettu",
+  "offers.alreadyConfirmedBy": "{name} on jo vahvistanut tämän",
+  "offers.linkedReservation": "Linkitetty varaus",
+  "offers.linkedReservationNone": "Ei ole",
+  "offers.openReservation": "Avaa varaus",
   "offers.confirmedByAudit": "Vahvisti {name} {date}",
   "offers.confirmedByUnknown": "henkilökunnan jäsen",
   "offers.confirmedNotRecorded":
@@ -11106,6 +11118,10 @@ const sv: TranslationKeys = {
   "offers.statusDraft": "Utkast",
   "offers.statusSent": "Skickad",
   "offers.statusConfirmed": "Bekräftad",
+  "offers.alreadyConfirmedBy": "Redan bekräftad av {name}",
+  "offers.linkedReservation": "Kopplad bokning",
+  "offers.linkedReservationNone": "Ingen",
+  "offers.openReservation": "Öppna bokning",
   "offers.confirmedByAudit": "Bekräftad av {name} {date}",
   "offers.confirmedByUnknown": "en medarbetare",
   "offers.confirmedNotRecorded":
