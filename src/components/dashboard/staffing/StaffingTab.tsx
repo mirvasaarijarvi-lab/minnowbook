@@ -8,6 +8,9 @@ import ShiftListTab from "./ShiftListTab";
 import StaffingNeedsPanel from "./StaffingNeedsPanel";
 import StaffingSetupGuide from "./StaffingSetupGuide";
 import AccessReviewPanel from "./AccessReviewPanel";
+import AccessReviewReminder, {
+  useAccessReviewReminders,
+} from "./AccessReviewReminder";
 
 const REVIEW_TAB = {
   en: "Access review",
@@ -23,15 +26,28 @@ export default function StaffingTab() {
   const { isOwner, isAdmin } = useTenant();
   const canReview = isOwner || isAdmin;
   const [tab, setTab] = useState("shifts");
+  const urgentReviews = useAccessReviewReminders().filter(
+    (r) => r.due.state !== "dueSoon",
+  ).length;
   return (
     <div className="space-y-3">
       <StaffingSetupGuide lang={lang} onGoToShifts={() => setTab("shifts")} />
+      {canReview && tab !== "access" && (
+        <AccessReviewReminder lang={lang} onOpen={() => setTab("access")} />
+      )}
       <Tabs value={tab} onValueChange={setTab} className="space-y-3">
         <TabsList className="no-print">
           <TabsTrigger value="shifts">{L.tabShifts}</TabsTrigger>
           <TabsTrigger value="needs">{L.tabNeeds}</TabsTrigger>
           {canReview && (
-            <TabsTrigger value="access">{REVIEW_TAB[lang]}</TabsTrigger>
+            <TabsTrigger value="access" className="gap-1.5">
+              {REVIEW_TAB[lang]}
+              {urgentReviews > 0 && (
+                <span className="rounded-full bg-destructive px-1.5 text-xs leading-5 text-destructive-foreground">
+                  {urgentReviews}
+                </span>
+              )}
+            </TabsTrigger>
           )}
         </TabsList>
         <TabsContent value="shifts">
