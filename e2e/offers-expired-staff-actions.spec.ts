@@ -58,6 +58,7 @@ test.describe("Offers page: expired draft/sent offers keep staff actions", () =>
     const base = {
       tenant_id: tenant.id,
       guest_email: `test-offer-expired-${stamp}@example.com`,
+      guest_phone: "+358 40 0000000",
       event_date: futureDate(40),
       start_time: "18:00",
       end_time: "22:00",
