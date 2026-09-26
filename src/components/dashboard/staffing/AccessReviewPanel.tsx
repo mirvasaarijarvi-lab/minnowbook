@@ -295,7 +295,8 @@ const LABELS = {
     sumOpen: "Öppna ändringsbegäranden",
     sumCount: "Platser i rapporten",
     sumOverdue: "Försenade eller aldrig granskade",
-    sumDetails: "Varje plats fullständiga rapport följer på egna sidor.",
+    sumDetails:
+      "Den fullständiga rapporten för varje plats följer på egna sidor.",
     reviewEvery: "Granska varje plats var",
     daysN: "{n}:e dag",
     overdueBy: "Granskningen är {days} dagar försenad",
@@ -869,7 +870,9 @@ export default function AccessReviewPanel({
         ]),
         footer: L.pdfFooter,
       };
-      renderAccessReviewPdfs(jsPDF, reports, summary).save(accessReviewFileName((tenant as any)?.slug, name, now, period));
+      renderAccessReviewPdfs(jsPDF, reports, summary).save(
+        accessReviewFileName((tenant as any)?.slug, name, now, period),
+      );
       return true;
     } catch (e) {
       console.error(e);

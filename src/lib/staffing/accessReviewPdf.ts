@@ -141,7 +141,8 @@ export function renderAccessReviewPdfs(
     footers.push(summary.footer);
     write(summary.title, 16, "bold", 0, 1);
     write(summary.business, 12, "normal", 0, 3);
-    for (const [k, v] of summary.meta) write(`${k}: ${v}`, 9.5, "normal", 0, 0.5);
+    for (const [k, v] of summary.meta)
+      write(k ? `${k}: ${v}` : v, 9.5, "normal", 0, 0.5);
     y += 6;
     row(summary.columns, true);
     for (const r of summary.rows) row(r, false, summary.columns);
