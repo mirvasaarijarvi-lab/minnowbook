@@ -8,6 +8,10 @@ import type { Language } from "@/i18n/translations";
 export type FaqSection = { group: string; items: [string, string][] };
 
 export interface SupportCopy {
+  seoTitle: string;
+  seoDescription: string;
+  crumbHome: string;
+  crumbSupport: string;
   faqHeading: string;
   faqIntro: string;
   faq: FaqSection[];
@@ -59,6 +63,11 @@ export interface SupportCopy {
 }
 
 const en: SupportCopy = {
+  seoTitle: "MimmoBook Support: Help Center & Knowledge Base",
+  seoDescription:
+    "Find answers to common questions about MimmoBook reservation management. Browse help articles on setup, bookings, email templates, team management and billing.",
+  crumbHome: "Home",
+  crumbSupport: "Support",
   faqHeading: "FAQ: Hotels, Multi-site overrides, and Kitchen Orders",
   faqIntro: "Quick answers about the newest MimmoBook features.",
   faq: [
@@ -202,6 +211,11 @@ const en: SupportCopy = {
 };
 
 const fi: SupportCopy = {
+  seoTitle: "MimmoBook-tuki: Ohjekeskus ja tietopankki",
+  seoDescription:
+    "Löydä vastaukset yleisiin kysymyksiin MimmoBookin varausten hallinnasta. Selaa ohjeita käyttöönotosta, varauksista, sähköpostipohjista, tiimin hallinnasta ja laskutuksesta.",
+  crumbHome: "Etusivu",
+  crumbSupport: "Tuki",
   faqHeading:
     "UKK: Hotellit, toimipisteiden omat asetukset ja keittiötilaukset",
   faqIntro: "Nopeat vastaukset MimmoBookin uusimmista ominaisuuksista.",
@@ -347,6 +361,11 @@ const fi: SupportCopy = {
 };
 
 const sv: SupportCopy = {
+  seoTitle: "MimmoBook support: Hjälpcenter och kunskapsbas",
+  seoDescription:
+    "Hitta svar på vanliga frågor om bokningshantering i MimmoBook. Bläddra bland hjälpartiklar om kom igång, bokningar, e-postmallar, teamhantering och fakturering.",
+  crumbHome: "Hem",
+  crumbSupport: "Support",
   faqHeading:
     "Vanliga frågor: Hotell, egna inställningar per plats och köksbeställningar",
   faqIntro: "Snabba svar om MimmoBooks nyaste funktioner.",
