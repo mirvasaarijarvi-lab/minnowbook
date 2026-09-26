@@ -118,7 +118,9 @@ test.describe("Offers page: two staff confirm the same offer at once", () => {
       await Promise.all(confirmButtons.map((btn) => btn.click()));
 
       // If the page asks for prices first, fill them in and confirm together.
-      const priceButtons = pages.map((p) => p.getByTestId("offer-price-confirm"));
+      const priceButtons = pages.map((p) =>
+        p.getByTestId("offer-price-confirm"),
+      );
       const asked = await Promise.all(
         priceButtons.map((btn) =>
           btn
@@ -149,7 +151,7 @@ test.describe("Offers page: two staff confirm the same offer at once", () => {
         await expect(p.getByText("Offer confirmed").first()).toBeVisible({
           timeout: 30_000,
         });
-        await expect(p.getByText(/could not confirm/i)).toHaveCount(0);
+        await expect(p.getByText("Error confirming offer")).toHaveCount(0);
       }
 
       // Exactly one reservation exists for the guest, and the offer points at it.
