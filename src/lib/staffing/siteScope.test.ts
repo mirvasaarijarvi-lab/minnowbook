@@ -146,3 +146,15 @@ describe("periodInSiteScope (shift list picker)", () => {
     expect(periodInSiteScope(null, "site-B")).toBe(true);
   });
 });
+
+describe("memberInListScope", () => {
+  it("offers a location's list only its own and all-locations staff", () => {
+    expect(memberInListScope("a", "a")).toBe(true);
+    expect(memberInListScope("a", null)).toBe(true);
+    expect(memberInListScope("a", "b")).toBe(false);
+  });
+  it("offers an all-locations list everyone", () => {
+    expect(memberInListScope(null, "a")).toBe(true);
+    expect(memberInListScope(null, null)).toBe(true);
+  });
+});

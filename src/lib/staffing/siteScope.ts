@@ -15,3 +15,14 @@ export const periodInSiteScope = (
   periodSiteId: string | null,
 ) =>
   !selectedSiteId || periodSiteId === null || periodSiteId === selectedSiteId;
+
+/**
+ * Whether a staff member can be put on a shift list: the list covers all
+ * locations, the person works at all locations, or both share a location.
+ */
+export function memberInListScope(
+  listSiteId: string | null | undefined,
+  memberSiteId: string | null | undefined,
+): boolean {
+  return !listSiteId || !memberSiteId || listSiteId === memberSiteId;
+}

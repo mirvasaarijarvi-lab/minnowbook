@@ -227,6 +227,12 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
     );
   }, [period]);
   const roleMap = useMemo(() => new Map(roles.map((r) => [r.key, r])), [roles]);
+  // Staff the open list may use: those at its location plus all-locations
+  // staff. An all-locations list may use everyone.
+  const siteMembers = useMemo(
+    () => members.filter((x) => memberInListScope(period?.site_id, x.site_id)),
+    [members, period?.site_id],
+  );
   const memberMap = useMemo(
     () => new Map(members.map((x) => [x.id, x])),
     [members],
@@ -693,7 +699,7 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value={NONE}>{L.allWorkers}</SelectItem>
-              {members.map((x) => (
+              {siteMembers.map((x) => (
                 <SelectItem key={x.id} value={x.id}>
                   {x.name}
                 </SelectItem>
@@ -797,7 +803,7 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
                     days.map((d, i) => ({ date: d, cell: basis[i] })),
                     settings.rules,
                   );
-                  const eligible = members.filter(
+                  const eligible = siteMembers.filter(
                     (x) =>
                       x.is_active &&
                       (!s.role_key || x.role_keys.includes(s.role_key)),
