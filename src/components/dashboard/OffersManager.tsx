@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useT } from "@/contexts/I18nContext";
 import { useOffers, useUpdateOffer, type Offer } from "@/hooks/useOffers";
 import { useTenant } from "@/hooks/useTenant";
@@ -86,6 +86,7 @@ const OffersManager = () => {
   const [showArchived, setShowArchived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { data: offers = [], isLoading } = useOffers(showArchived);
+  const queryClient = useQueryClient();
   const updateOffer = useUpdateOffer();
   const [createOpen, setCreateOpen] = useState(false);
   const [emailOffer, setEmailOffer] = useState<Offer | null>(null);
@@ -396,6 +397,7 @@ const OffersManager = () => {
       if (mainRes.alreadyConfirmed) {
         // Already confirmed elsewhere: keep the one reservation, add nothing.
         toast.success(t("offers.confirmedSuccess"));
+        queryClient.invalidateQueries({ queryKey: ["offers"] });
         return;
       }
       const resIds = [mainRes.id];
@@ -534,6 +536,22 @@ const OffersManager = () => {
     // Remember where focus was, so the status panel only takes focus when the
     // user has not moved on to something else in the meantime.
     confirmTriggerRef.current = document.activeElement;
+    // The list may be a few seconds old: stop if a colleague confirmed it.
+    const { data: fresh } = await supabase
+      .from("offers")
+      .select("status,confirmed_by_name")
+      .eq("id", offer.id)
+      .maybeSingle();
+    if (fresh?.status === "confirmed") {
+      const msg = t("offers.alreadyConfirmedBy").replace(
+        "{name}",
+        fresh.confirmed_by_name || t("offers.confirmedByUnknown"),
+      );
+      toast.info(msg);
+      publishConfirmStatus(msg, false);
+      queryClient.invalidateQueries({ queryKey: ["offers"] });
+      return;
+    }
     let plan: ConfirmPlan;
     try {
       plan = await buildConfirmPlan(offer);
@@ -865,6 +883,21 @@ const OffersManager = () => {
                           >
                             <Check className="h-3.5 w-3.5 mr-1" />
                             {t("offers.confirm")}
+                          </Button>
+                        )}
+                        {offer.status === "confirmed" && !isArchived && (
+                          <Button
+                            size="sm"
+                            disabled
+                            aria-disabled="true"
+                            title={t("offers.alreadyConfirmedBy").replace(
+                              "{name}",
+                              offer.confirmed_by_name ||
+                                t("offers.confirmedByUnknown"),
+                            )}
+                          >
+                            <Check className="h-3.5 w-3.5 mr-1" />
+                            {t("offers.statusConfirmed")}
                           </Button>
                         )}
                         {isOpen && !isArchived && (
