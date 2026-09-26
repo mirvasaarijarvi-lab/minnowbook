@@ -693,6 +693,30 @@ jobs:
             WHERE table_schema = 'public' ORDER BY table_name;" 2>&1 || true
           exit 1
 
+      # Newer schema changes (Staffing, location access, offer audit, ...)
+      # live in drizzle/migrations, which `supabase start` does not apply.
+      # Apply them in journal order so the local stack matches the real
+      # database; the next step reloads PostgREST's schema cache.
+      - name: Apply drizzle migrations
+        id: drizzle-migrations
+        if: steps.migrations-ready.outcome == 'success'
+        env:
+          PGPASSWORD: postgres
+        run: |
+          set -euo pipefail
+          tags=$(node -e 'for (const e of require("./drizzle/migrations/meta/_journal.json").entries) console.log(e.tag)')
+          count=0
+          for tag in $tags; do
+            file="drizzle/migrations/${tag}.sql"
+            echo "::group::${tag}"
+            psql -h 127.0.0.1 -p 54322 -U postgres -d postgres \
+              -v ON_ERROR_STOP=1 --single-transaction -q -f "$file"
+            echo "::endgroup::"
+            count=$((count + 1))
+          done
+          echo "Applied ${count} drizzle migration(s)."
+          psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -c "NOTIFY pgrst, 'reload schema';"
+
       - name: Reload and verify PostgREST RPC grants
         if: steps.supabase-ready.outcome == 'success' && steps.migrations-ready.outcome == 'success'
         env:
