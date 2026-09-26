@@ -250,8 +250,6 @@ test.describe("Guest accepts offer online, staff confirm: exactly one reservatio
     }
   });
 
-
-
   test("confirming three times in a row keeps exactly one reservation", async ({
     page,
     tenant,
