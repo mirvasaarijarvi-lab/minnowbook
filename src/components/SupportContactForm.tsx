@@ -159,7 +159,7 @@ const SupportContactForm = () => {
     if (readSubmitTimes().length >= CHALLENGE_AFTER_SUBMITS) {
       setChallenge((current) => current ?? createAccessibleChallenge(language));
     }
-  }, []);
+  }, [language]);
 
   /** Shows a fresh challenge and moves focus to it. */
   const requireChallenge = (reason: string) => {
