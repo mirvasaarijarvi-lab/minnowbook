@@ -39,7 +39,11 @@ async function staffClient(): Promise<SupabaseClient> {
   return sb;
 }
 
-async function reservationsFor(sb: SupabaseClient, tenantId: string, email: string) {
+async function reservationsFor(
+  sb: SupabaseClient,
+  tenantId: string,
+  email: string,
+) {
   const { data, error } = await sb
     .from("reservations")
     .select("id,status,date,guests_count,linked_group_id,staff_notes")
@@ -104,7 +108,9 @@ test.describe("Confirming a guest-accepted offer: exactly one reservation", () =
     const guest = makeTestGuest("AcceptNew");
     const offer = await acceptedOffer(sb, tenant.id, guest);
     try {
-      expect(await reservationsFor(sb, tenant.id, guest.guest_email)).toHaveLength(0);
+      expect(
+        await reservationsFor(sb, tenant.id, guest.guest_email),
+      ).toHaveLength(0);
       const res = await confirm(sb, offer, tenant.resources.venue);
 
       const rows = await reservationsFor(sb, tenant.id, guest.guest_email);
@@ -115,7 +121,14 @@ test.describe("Confirming a guest-accepted offer: exactly one reservation", () =
       expect(rows[0].guests_count).toBe(20);
     } finally {
       const rows = await reservationsFor(sb, tenant.id, guest.guest_email);
-      if (rows.length) await sb.from("reservations").delete().in("id", rows.map((r) => r.id));
+      if (rows.length)
+        await sb
+          .from("reservations")
+          .delete()
+          .in(
+            "id",
+            rows.map((r) => r.id),
+          );
       await sb.from("offers").delete().eq("id", offer.id);
     }
   });
@@ -158,7 +171,14 @@ test.describe("Confirming a guest-accepted offer: exactly one reservation", () =
     } finally {
       await sb.from("offers").delete().eq("id", offer.id);
       const rows = await reservationsFor(sb, tenant.id, guest.guest_email);
-      if (rows.length) await sb.from("reservations").delete().in("id", rows.map((r) => r.id));
+      if (rows.length)
+        await sb
+          .from("reservations")
+          .delete()
+          .in(
+            "id",
+            rows.map((r) => r.id),
+          );
     }
   });
 });
