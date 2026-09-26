@@ -9,7 +9,11 @@ import StaffingNeedsPanel from "./StaffingNeedsPanel";
 import StaffingSetupGuide from "./StaffingSetupGuide";
 import AccessReviewPanel from "./AccessReviewPanel";
 
-const REVIEW_TAB = { en: "Access review", fi: "Käyttöoikeudet", sv: "Behörighetsgranskning" };
+const REVIEW_TAB = {
+  en: "Access review",
+  fi: "Käyttöoikeudet",
+  sv: "Behörighetsgranskning",
+};
 
 export default function StaffingTab() {
   const { language } = useLanguage();

@@ -79,8 +79,7 @@ const LABELS = {
     superadmin: "Superadmin",
     notApproved: "inte godkänd",
     none: "Ingen",
-    unassigned:
-      "Personalkonton utan plats, så de ser inga bokningar:",
+    unassigned: "Personalkonton utan plats, så de ser inga bokningar:",
     request: "Begär ändring",
     notePh: "Vad ska ändras?",
     add: "Lägg till",
@@ -164,8 +163,7 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
     },
   });
 
-  const roleLabel = (r: string) =>
-    (L as Record<string, string>)[r] ?? r;
+  const roleLabel = (r: string) => (L as Record<string, string>)[r] ?? r;
 
   const perSite = useMemo(() => {
     if (!data) return [];
@@ -230,11 +228,7 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
   };
 
   const addReq = useMutation({
-    mutationFn: async (v: {
-      siteId: string;
-      p: Person;
-      note: string;
-    }) => {
+    mutationFn: async (v: { siteId: string; p: Person; note: string }) => {
       const { error } = await supabase
         .from("site_access_change_requests")
         .insert({
