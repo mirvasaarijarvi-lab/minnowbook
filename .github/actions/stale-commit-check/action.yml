@@ -1,0 +1,33 @@
+name: Stale commit check
+description: >
+  Marks the job's results as STALE (warning + job summary) when the
+  commit being tested is older than the current head of its branch.
+  Run it right after actions/checkout.
+inputs:
+  fail-on-stale:
+    description: "Fail the step when the tested commit is stale."
+    required: false
+    default: "false"
+  token:
+    description: "Token used to read the branch head."
+    required: false
+    default: ${{ github.token }}
+outputs:
+  stale:
+    description: "true, false or unknown"
+    value: ${{ steps.check.outputs.stale }}
+runs:
+  using: composite
+  steps:
+    - id: check
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        FAIL_ON_STALE: ${{ inputs.fail-on-stale }}
+        WORKFLOW_NAME: ${{ github.workflow }} / ${{ github.job }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        # PRs: compare the PR head commit (not the merge commit) with the PR branch.
+        TESTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+        HEAD_REF: ${{ github.event.pull_request.head.ref || (github.ref_type == 'branch' && github.ref_name) || '' }}
+      run: bash "$GITHUB_WORKSPACE/scripts/ci/stale-commit-check.sh"
