@@ -207,10 +207,55 @@ test.describe("Two staff members confirm the same offer: one reservation", () =>
           .single();
         expect(saved?.status).toBe("confirmed");
         expect(saved?.reservation_ids).toEqual([ra.id]);
+        await expectConfirmationAudit(b.client, offer.id, ra, [ra, rb]);
       } finally {
         await cleanup(a.client, tenant.id, offerId, guest.guest_email);
       }
     });
+  }
+
+  /** The offer records exactly the staff member whose confirm won, once. */
+  async function expectConfirmationAudit(
+    client: any,
+    offerId: string,
+    reservation: { id: string },
+    results: { id: string; alreadyConfirmed?: boolean }[],
+  ) {
+    const winner = results.findIndex((r) => !r.alreadyConfirmed);
+    const { data: audit, error } = await client
+      .from("offers")
+      .select(
+        "confirmed_by,confirmed_by_name,confirmed_at,confirmed_reservation_id,reservation_created_at",
+      )
+      .eq("id", offerId)
+      .single();
+    expect(error, error?.message).toBeNull();
+    const { data: res } = await client
+      .from("reservations")
+      .select("created_at")
+      .eq("id", reservation.id)
+      .single();
+    expect(audit.confirmed_by).toBe(staff[winner].userId);
+    expect(audit.confirmed_reservation_id).toBe(reservation.id);
+    expect(audit.confirmed_at).toBeTruthy();
+    expect(new Date(audit.reservation_created_at).getTime()).toBe(
+      new Date(res.created_at).getTime(),
+    );
+    // Staff cannot rewrite the audit afterwards.
+    await client
+      .from("offers")
+      .update({
+        confirmed_by: staff[1 - winner].userId,
+        confirmed_at: null,
+      } as any)
+      .eq("id", offerId);
+    const { data: after } = await client
+      .from("offers")
+      .select("confirmed_by,confirmed_at")
+      .eq("id", offerId)
+      .single();
+    expect(after.confirmed_by).toBe(audit.confirmed_by);
+    expect(after.confirmed_at).toBe(audit.confirmed_at);
   }
 
   test("two staff confirm an offer made from a booking at once: that booking is reused", async ({
@@ -261,6 +306,7 @@ test.describe("Two staff members confirm the same offer: one reservation", () =>
       expect(rows[0].id).toBe(source!.id);
       expect(rows[0].status).toBe("confirmed");
       expect(rows[0].guests_count).toBe(14);
+      await expectConfirmationAudit(b.client, offer.id, ra, [ra, rb]);
     } finally {
       await cleanup(a.client, tenant.id, offerId, guest.guest_email);
     }

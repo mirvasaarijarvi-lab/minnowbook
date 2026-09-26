@@ -2159,6 +2159,10 @@ type TranslationKeys = {
   "offers.statusDraft": string;
   "offers.statusSent": string;
   "offers.statusConfirmed": string;
+  "offers.confirmedByAudit": string;
+  "offers.confirmedByUnknown": string;
+  "offers.confirmedNotRecorded": string;
+  "offers.reservationCreatedAudit": string;
   "offers.statusExpired": string;
   "offers.validity": string;
   "offers.validityPlaceholder": string;
@@ -5089,6 +5093,11 @@ const en: TranslationKeys = {
   "offers.statusDraft": "Draft",
   "offers.statusSent": "Sent",
   "offers.statusConfirmed": "Confirmed",
+  "offers.confirmedByAudit": "Confirmed by {name} on {date}",
+  "offers.confirmedByUnknown": "a staff member",
+  "offers.confirmedNotRecorded":
+    "Confirmer not recorded (confirmed before tracking started)",
+  "offers.reservationCreatedAudit": "Reservation created",
   "offers.statusExpired": "Expired",
   "offers.validity": "Validity",
   "offers.validityPlaceholder": "e.g. Valid until 31.12.2026",
@@ -8083,6 +8092,11 @@ const fi: TranslationKeys = {
   "offers.statusDraft": "Luonnos",
   "offers.statusSent": "Lähetetty",
   "offers.statusConfirmed": "Vahvistettu",
+  "offers.confirmedByAudit": "Vahvisti {name} {date}",
+  "offers.confirmedByUnknown": "henkilökunnan jäsen",
+  "offers.confirmedNotRecorded":
+    "Vahvistajaa ei tallennettu (vahvistettu ennen seurannan alkua)",
+  "offers.reservationCreatedAudit": "Varaus luotu",
   "offers.statusExpired": "Vanhentunut",
   "offers.validity": "Voimassaolo",
   "offers.validityPlaceholder": "esim. Voimassa 31.12.2026 asti",
@@ -11092,6 +11106,11 @@ const sv: TranslationKeys = {
   "offers.statusDraft": "Utkast",
   "offers.statusSent": "Skickad",
   "offers.statusConfirmed": "Bekräftad",
+  "offers.confirmedByAudit": "Bekräftad av {name} {date}",
+  "offers.confirmedByUnknown": "en medarbetare",
+  "offers.confirmedNotRecorded":
+    "Bekräftare inte registrerad (bekräftad innan spårningen startade)",
+  "offers.reservationCreatedAudit": "Bokning skapad",
   "offers.statusExpired": "Utgången",
   "offers.validity": "Giltighet",
   "offers.validityPlaceholder": "t.ex. Giltig till 31.12.2026",
