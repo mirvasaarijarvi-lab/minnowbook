@@ -7,8 +7,11 @@
  * - Role "admin": offers can only be changed by owners and admins.
  * - No two-factor sign-in: any authenticator a login has is removed on
  *   every run, so the test signs in with the password alone.
- * - A fresh random password is set on every run and never stored, so there
- *   is nothing to leak from the repository or CI logs.
+ * - Passwords are never used to sign in and never changed between runs.
+ *   Each run signs in with a one-time sign-in link made with the service
+ *   role key (nothing is emailed), so any number of runs, one after another
+ *   or at the same time, can share the logins. A random password is only
+ *   set once when a login is first created, and is never stored.
  *
  * Needs the service role key (SUPABASE_SERVICE_ROLE_KEY), which the GitHub
  * security checks already have.
@@ -48,6 +51,28 @@ async function findUserId(
   return data.user?.id;
 }
 
+/** Sign in with a one-time link token; no password, nothing emailed. */
+async function signInWithoutPassword(
+  admin: SupabaseClient,
+  client: SupabaseClient,
+  email: string,
+) {
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+  });
+  const tokenHash = data?.properties?.hashed_token;
+  if (error || !tokenHash)
+    throw new Error(
+      `sign-in link for ${email} failed: ${error?.message ?? "no token"}`,
+    );
+  const { error: otpErr } = await client.auth.verifyOtp({
+    type: "magiclink",
+    token_hash: tokenHash,
+  });
+  if (otpErr) throw new Error(`Sign-in for ${email} failed: ${otpErr.message}`);
+}
+
 /** Remove every two-factor method from a login. */
 async function removeTwoFactor(admin: SupabaseClient, userId: string) {
   const { data, error } = await admin.auth.admin.mfa.listFactors({ userId });
@@ -69,27 +94,20 @@ async function ensureAccount(
   index: number,
   tenantId: string,
 ): Promise<OfferStaffAccount> {
-  const password = randomPassword();
-  let userId: string | undefined;
-  const created = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { display_name: `E2E offer staff ${index}` },
-  });
-  if (created.data.user) {
-    userId = created.data.user.id;
-  } else {
-    userId = await findUserId(admin, email);
+  let userId: string | undefined = await findUserId(admin, email);
+  if (!userId) {
+    const created = await admin.auth.admin.createUser({
+      email,
+      password: randomPassword(),
+      email_confirm: true,
+      user_metadata: { display_name: `E2E offer staff ${index}` },
+    });
+    // Another run may have created it at the same moment.
+    userId = created.data.user?.id ?? (await findUserId(admin, email));
     if (!userId)
       throw new Error(
         `createUser(${email}) failed: ${created.error?.message ?? "unknown"}`,
       );
-    const { error } = await admin.auth.admin.updateUserById(userId, {
-      password,
-      email_confirm: true,
-    });
-    if (error) throw new Error(`updateUser(${email}) failed: ${error.message}`);
   }
   await removeTwoFactor(admin, userId);
 
@@ -125,12 +143,7 @@ async function ensureAccount(
   const client = createClient(url, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
-  const { error: signInErr } = await client.auth.signInWithPassword({
-    email,
-    password,
-  });
-  if (signInErr)
-    throw new Error(`Sign-in for ${email} failed: ${signInErr.message}`);
+  await signInWithoutPassword(admin, client, email);
   return { email, userId, client };
 }
 
