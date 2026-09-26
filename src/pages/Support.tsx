@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/accordion";
 
 /** FAQ structured data in the page's language. */
-export const faqPageSchema = (faq: FaqSection[]) => ({
+const faqPageSchema = (faq: FaqSection[]) => ({
   "@context": "https://schema.org",
   "@type": "FAQPage",
   mainEntity: faq.flatMap((section) =>
