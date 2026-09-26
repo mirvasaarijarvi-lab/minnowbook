@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { StaffLang } from "@/lib/staffing/labels";
+import { buildSiteHistory } from "@/lib/staffing/accessReviewHistory";
 
 const LABELS = {
   en: {
@@ -37,6 +38,19 @@ const LABELS = {
     changed: "Access changed since last review",
     ok: "Saved",
     noSites: "Add a location first.",
+    history: "Review history",
+    acceptedBy: "Accepted {date} by {name}",
+    untilNext: "Changes before the next review on {date}",
+    untilNow: "Changes since then, up to now",
+    noChanges: "No access changes",
+    gainedSignIn: "Got sign-in access",
+    lostSignIn: "Lost sign-in access",
+    addedShift: "Added to shift lists",
+    removedShift: "Removed from shift lists",
+    handled: "Handled change requests",
+    reqDone: "done",
+    reqDismissed: "dismissed",
+    unknown: "Removed person",
   },
   fi: {
     intro:
@@ -66,6 +80,19 @@ const LABELS = {
     changed: "Käyttöoikeudet muuttuneet edellisen tarkistuksen jälkeen",
     ok: "Tallennettu",
     noSites: "Lisää ensin toimipiste.",
+    history: "Tarkistushistoria",
+    acceptedBy: "Hyväksynyt {name}, {date}",
+    untilNext: "Muutokset ennen seuraavaa tarkistusta {date}",
+    untilNow: "Muutokset sen jälkeen tähän päivään",
+    noChanges: "Ei muutoksia käyttöoikeuksiin",
+    gainedSignIn: "Sai kirjautumisoikeuden",
+    lostSignIn: "Menetti kirjautumisoikeuden",
+    addedShift: "Lisätty työvuorolistoille",
+    removedShift: "Poistettu työvuorolistoilta",
+    handled: "Käsitellyt muutospyynnöt",
+    reqDone: "tehty",
+    reqDismissed: "hylätty",
+    unknown: "Poistettu henkilö",
   },
   sv: {
     intro:
@@ -94,6 +121,19 @@ const LABELS = {
     changed: "Behörigheterna har ändrats sedan senaste granskningen",
     ok: "Sparat",
     noSites: "Lägg till en plats först.",
+    history: "Granskningshistorik",
+    acceptedBy: "Godkänd {date} av {name}",
+    untilNext: "Ändringar före nästa granskning {date}",
+    untilNow: "Ändringar sedan dess, fram till nu",
+    noChanges: "Inga ändringar i behörigheter",
+    gainedSignIn: "Fick inloggning",
+    lostSignIn: "Förlorade inloggning",
+    addedShift: "Tillagd på arbetsscheman",
+    removedShift: "Borttagen från arbetsscheman",
+    handled: "Hanterade ändringsbegäranden",
+    reqDone: "klar",
+    reqDismissed: "avfärdad",
+    unknown: "Borttagen person",
   },
 } as const;
 
@@ -116,41 +156,64 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
     enabled: !!tenantId,
     queryFn: async () => {
       const t = tenantId!;
-      const [sites, users, siteUsers, staff, reviews, requests] =
-        await Promise.all([
-          supabase
-            .from("sites")
-            .select("id,name")
-            .eq("tenant_id", t)
-            .eq("is_active", true)
-            .order("name"),
-          supabase
-            .from("tenant_users")
-            .select("user_id,display_name,role,is_approved")
-            .eq("tenant_id", t),
-          supabase
-            .from("site_users")
-            .select("site_id,user_id")
-            .eq("tenant_id", t),
-          supabase
-            .from("staff_members")
-            .select("id,name,site_id,is_active")
-            .eq("tenant_id", t)
-            .eq("is_active", true)
-            .order("name"),
-          supabase
-            .from("site_access_reviews")
-            .select("site_id,snapshot,accepted_at")
-            .eq("tenant_id", t)
-            .order("accepted_at", { ascending: false }),
-          supabase
-            .from("site_access_change_requests")
-            .select("id,site_id,subject_name,note,created_at")
-            .eq("tenant_id", t)
-            .eq("status", "open")
-            .order("created_at"),
-        ]);
-      for (const r of [sites, users, siteUsers, staff, reviews, requests])
+      const [
+        sites,
+        users,
+        siteUsers,
+        staff,
+        reviews,
+        requests,
+        allStaff,
+        handled,
+      ] = await Promise.all([
+        supabase
+          .from("sites")
+          .select("id,name")
+          .eq("tenant_id", t)
+          .eq("is_active", true)
+          .order("name"),
+        supabase
+          .from("tenant_users")
+          .select("user_id,display_name,role,is_approved")
+          .eq("tenant_id", t),
+        supabase
+          .from("site_users")
+          .select("site_id,user_id")
+          .eq("tenant_id", t),
+        supabase
+          .from("staff_members")
+          .select("id,name,site_id,is_active")
+          .eq("tenant_id", t)
+          .eq("is_active", true)
+          .order("name"),
+        supabase
+          .from("site_access_reviews")
+          .select("id,site_id,snapshot,accepted_by,accepted_at")
+          .eq("tenant_id", t)
+          .order("accepted_at", { ascending: false }),
+        supabase
+          .from("site_access_change_requests")
+          .select("id,site_id,subject_name,note,created_at")
+          .eq("tenant_id", t)
+          .eq("status", "open")
+          .order("created_at"),
+        supabase.from("staff_members").select("id,name").eq("tenant_id", t),
+        supabase
+          .from("site_access_change_requests")
+          .select("id,site_id,subject_name,note,status,resolved_at")
+          .eq("tenant_id", t)
+          .neq("status", "open"),
+      ]);
+      for (const r of [
+        sites,
+        users,
+        siteUsers,
+        staff,
+        reviews,
+        requests,
+        allStaff,
+        handled,
+      ])
         if (r.error) throw r.error;
       return {
         sites: sites.data ?? [],
@@ -159,6 +222,8 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
         staff: staff.data ?? [],
         reviews: reviews.data ?? [],
         requests: requests.data ?? [],
+        allStaff: allStaff.data ?? [],
+        handled: handled.data ?? [],
       };
     },
   });
@@ -209,6 +274,7 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
         last,
         changed,
         requests: data.requests.filter((r) => r.site_id === s.id),
+        history: buildSiteHistory(s.id, data.reviews, snapshot, data.handled),
       };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -290,6 +356,13 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
     new Date(d).toLocaleString(
       lang === "fi" ? "fi-FI" : lang === "sv" ? "sv-SE" : "en-GB",
     );
+
+  const userName = (id: string) => {
+    const u = data?.users.find((x) => x.user_id === id);
+    return u ? u.display_name || id.slice(0, 8) : L.unknown;
+  };
+  const staffName = (id: string) =>
+    data?.allStaff.find((x) => x.id === id)?.name ?? L.unknown;
 
   const PersonList = ({
     siteId,
@@ -442,6 +515,70 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
                 ))}
               </ul>
             </div>
+          )}
+          {s.history.length > 0 && (
+            <details className="rounded border border-border p-2 text-sm">
+              <summary className="cursor-pointer font-medium">
+                {L.history} ({s.history.length})
+              </summary>
+              <ol className="mt-2 space-y-3">
+                {s.history.map((h) => {
+                  const lines: [string, string[]][] = [
+                    [L.gainedSignIn, h.usersAdded.map(userName)],
+                    [L.lostSignIn, h.usersRemoved.map(userName)],
+                    [L.addedShift, h.staffAdded.map(staffName)],
+                    [L.removedShift, h.staffRemoved.map(staffName)],
+                  ];
+                  const any = lines.some(([, n]) => n.length > 0);
+                  return (
+                    <li
+                      key={h.review.id}
+                      className="space-y-1 border-l-2 border-border pl-3"
+                    >
+                      <p className="font-medium">
+                        {L.acceptedBy
+                          .replace("{date}", fmt(h.review.accepted_at))
+                          .replace("{name}", userName(h.review.accepted_by))}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {h.untilAt
+                          ? L.untilNext.replace("{date}", fmt(h.untilAt))
+                          : L.untilNow}
+                      </p>
+                      {any ? (
+                        <ul className="space-y-0.5">
+                          {lines
+                            .filter(([, n]) => n.length > 0)
+                            .map(([label, names]) => (
+                              <li key={label}>
+                                {label}: {names.join(", ")}
+                              </li>
+                            ))}
+                        </ul>
+                      ) : (
+                        <p className="text-muted-foreground">{L.noChanges}</p>
+                      )}
+                      {h.requests.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium">{L.handled}</p>
+                          <ul className="space-y-0.5">
+                            {h.requests.map((q) => (
+                              <li key={q.id} className="break-words">
+                                {q.subject_name}: {q.note} (
+                                {q.status === "done"
+                                  ? L.reqDone
+                                  : L.reqDismissed}
+                                )
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </details>
           )}
           <div className="flex flex-wrap items-center gap-2">
             <Button
