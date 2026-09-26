@@ -13,6 +13,9 @@ let memberships: { user_id: string; tenant_id: string }[] = [];
 
 const TENANT = "tenant-1";
 
+/** Let other in-flight setups run, like a real network round trip. */
+const tick = () => new Promise((r) => setTimeout(r, 5));
+
 function fakeAdmin() {
   const record = (fn: string, args: any) => calls.push({ fn, args });
   const table = () => {
@@ -22,10 +25,21 @@ function fakeAdmin() {
         q._user = q._user ?? v;
         return q;
       },
-      insert: (row: any) => {
+      insert: async (row: any) => {
         record("tenant_users.insert", row);
+        await tick();
+        if (
+          memberships.some(
+            (m) => m.user_id === row.user_id && m.tenant_id === row.tenant_id,
+          )
+        )
+          return {
+            error: {
+              message: "duplicate key value violates unique constraint",
+            },
+          };
         memberships.push(row);
-        return Promise.resolve({ error: null });
+        return { error: null };
       },
       update: (row: any) => {
         record("tenant_users.update", row);
@@ -47,6 +61,7 @@ function fakeAdmin() {
       admin: {
         generateLink: async ({ email }: { email: string }) => {
           record("generateLink", { email });
+          await tick();
           const u = users.get(email);
           if (!u) return { data: null, error: { message: "User not found" } };
           return {
@@ -56,6 +71,15 @@ function fakeAdmin() {
         },
         createUser: async (args: any) => {
           record("createUser", args);
+          await tick();
+          if (users.has(args.email))
+            return {
+              data: { user: null },
+              error: {
+                message:
+                  "A user with this email address has already been registered",
+              },
+            };
           const id = `user-${users.size + 1}`;
           users.set(args.email, { id, password: args.password });
           return { data: { user: { id } }, error: null };
@@ -133,5 +157,19 @@ describe("E2E staff logins keep their passwords between runs", () => {
     const fs = await import("node:fs");
     const src = fs.readFileSync("e2e/fixtures/offer-staff-accounts.ts", "utf8");
     expect(src).not.toMatch(/updateUserById|signInWithPassword/);
+  });
+
+  it("two setups at once with no login yet both succeed without duplicates", async () => {
+    const [a, b] = await Promise.all([run(), run()]);
+    // Both setups really raced: each tried to create both logins.
+    expect(calls.filter((c) => c.fn === "createUser").length).toBeGreaterThan(
+      2,
+    );
+    expect(users.size).toBe(2);
+    expect(a.map((x) => x.userId)).toEqual(b.map((x) => x.userId));
+    expect(new Set(a.map((x) => x.userId)).size).toBe(2);
+    expect(memberships).toHaveLength(2);
+    expect(new Set(memberships.map((m) => m.user_id)).size).toBe(2);
+    expect(memberships.every((m) => m.tenant_id === TENANT)).toBe(true);
   });
 });
