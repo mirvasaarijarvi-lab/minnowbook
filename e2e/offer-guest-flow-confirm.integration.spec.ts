@@ -273,6 +273,43 @@ test.describe("Guest accepts offer online, staff confirm: exactly one reservatio
     }
   });
 
+  test("two staff confirming the same offer at once create only one reservation", async ({
+    page,
+    tenant,
+  }) => {
+    const staffA = await staffClient();
+    const staffB = await staffClient();
+    const guest = makeTestGuest("GuestFlowTwoStaff");
+    let offerId: string | undefined;
+    try {
+      const { offer, token } = await sentOffer(staffA, tenant.id, guest);
+      offerId = offer.id;
+      await acceptAsGuest(page, token);
+
+      const [a, b] = await Promise.all([
+        staffConfirm(staffA, offer.id, tenant.resources.venue),
+        staffConfirm(staffB, offer.id, tenant.resources.venue),
+      ]);
+      expect(b.id).toBe(a.id);
+      expect([a, b].filter((r) => !r.alreadyConfirmed)).toHaveLength(1);
+
+      const rows = await reservationsFor(staffA, tenant.id, guest.guest_email);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].id).toBe(a.id);
+      expect(rows[0].status).toBe("confirmed");
+
+      const { data: saved } = await staffA
+        .from("offers")
+        .select("status,reservation_ids")
+        .eq("id", offer.id)
+        .single();
+      expect(saved?.status).toBe("confirmed");
+      expect(saved?.reservation_ids).toEqual([a.id]);
+    } finally {
+      await cleanup(staffA, tenant.id, offerId, guest.guest_email);
+    }
+  });
+
   test("simultaneous confirms from a stale list create only one reservation", async ({
     page,
     tenant,
