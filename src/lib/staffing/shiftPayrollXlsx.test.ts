@@ -24,7 +24,13 @@ async function load(lang: "en" | "fi" | "sv", worker = "Anna") {
           actual_start_time: "10:00:00",
           actual_end_time: "20:00:00",
         },
-        { ...base, date: "2026-09-29", start_time: null, end_time: null, code: "V" },
+        {
+          ...base,
+          date: "2026-09-29",
+          start_time: null,
+          end_time: null,
+          code: "V",
+        },
       ],
     } as any,
   ]);
@@ -61,7 +67,7 @@ describe("buildPayrollWorkbook", () => {
   });
 
   it("neutralizes formula injection in text cells", async () => {
-    const wb = await load("en", "=HYPERLINK(\"x\")");
+    const wb = await load("en", '=HYPERLINK("x")');
     const v = wb.worksheets[0].getRow(2).getCell(2).value;
     expect(typeof v).toBe("string");
     expect(String(v).startsWith("=")).toBe(false);
