@@ -582,7 +582,12 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
         business: (tenant as any)?.name ?? "",
         location: s.site.name,
         meta: [
-          [L.pdfGenerated, now.toLocaleString(lang === "en" ? "en-GB" : lang === "fi" ? "fi-FI" : "sv-SE")],
+          [
+            L.pdfGenerated,
+            now.toLocaleString(
+              lang === "en" ? "en-GB" : lang === "fi" ? "fi-FI" : "sv-SE",
+            ),
+          ],
           [
             L.pdfStatus,
             (s.last
