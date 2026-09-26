@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildSiteHistory, readSnapshot } from "./accessReviewHistory";
+import {
+  buildSiteHistory,
+  changeAffectsSite,
+  readSnapshot,
+} from "./accessReviewHistory";
 
 const r = (id: string, at: string, users: string[], staff: string[]) => ({
   id,
@@ -63,5 +67,53 @@ describe("buildSiteHistory", () => {
       users: ["a"],
       staff: [],
     });
+  });
+});
+
+describe("location changes in history", () => {
+  const c = (
+    id: string,
+    at: string,
+    old: string | null,
+    nw: string | null,
+    action = "staff_moved",
+  ) => ({
+    id,
+    action,
+    subject_id: "p",
+    subject_name: "P",
+    old_site_id: old,
+    new_site_id: nw,
+    changed_by: "boss",
+    changed_at: at,
+  });
+  it("matches changes touching the location or all locations", () => {
+    expect(changeAffectsSite(c("1", "", "S", "T"), "S")).toBe(true);
+    expect(changeAffectsSite(c("2", "", "T", null), "S")).toBe(true);
+    expect(changeAffectsSite(c("3", "", "T", "U"), "S")).toBe(false);
+    expect(changeAffectsSite(c("4", "", null, "T", "signin_added"), "S")).toBe(
+      false,
+    );
+    expect(
+      changeAffectsSite(c("5", "", "S", null, "signin_removed"), "S"),
+    ).toBe(true);
+  });
+  it("puts each change under the review it follows", () => {
+    const h = buildSiteHistory(
+      "S",
+      [
+        r("old", "2026-01-01T00:00:00Z", [], []),
+        r("new", "2026-02-01T00:00:00Z", [], []),
+      ],
+      { users: [], staff: [] },
+      [],
+      [
+        c("b", "2026-02-05T00:00:00Z", "S", "T"),
+        c("a", "2026-01-05T00:00:00Z", "T", "S"),
+        c("x", "2025-12-01T00:00:00Z", "S", "T"),
+      ],
+    );
+    expect(h[0].changes.map((x) => x.id)).toEqual(["b"]);
+    expect(h[1].changes.map((x) => x.id)).toEqual(["a"]);
   });
 });

@@ -84,6 +84,7 @@ const COVERED_TABLES = new Set<string>([
   "staffing_settings",
   "site_access_change_requests",
   "site_access_reviews",
+  "site_access_change_log",
 ]);
 
 /**

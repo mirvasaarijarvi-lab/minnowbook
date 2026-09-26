@@ -274,6 +274,13 @@
       "when": 1790428044474,
       "tag": "0038_reservations_source_offer_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1790429482342,
+      "tag": "0039_site_access_change_log",
+      "breakpoints": true
     }
   ]
 }

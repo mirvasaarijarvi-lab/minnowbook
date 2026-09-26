@@ -2502,6 +2502,57 @@ export type Database = {
           },
         ]
       }
+      site_access_change_log: {
+        Row: {
+          action: string
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_site_id: string | null
+          old_site_id: string | null
+          subject_id: string
+          subject_name: string
+          tenant_id: string
+        }
+        Insert: {
+          action: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_site_id?: string | null
+          old_site_id?: string | null
+          subject_id: string
+          subject_name?: string
+          tenant_id: string
+        }
+        Update: {
+          action?: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_site_id?: string | null
+          old_site_id?: string | null
+          subject_id?: string
+          subject_name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_access_change_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_access_change_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_access_change_requests: {
         Row: {
           created_at: string

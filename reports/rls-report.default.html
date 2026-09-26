@@ -58,10 +58,10 @@
 </head>
 <body>
   <h1>Cross-Tenant RLS Test Report <span class="title-flavor">· default</span></h1>
-  <div class="meta">Generated 2026-09-26T13:28:04.977Z · Flavor <code>default</code> · Total duration 20357 ms</div>
+  <div class="meta">Generated 2026-09-26T13:34:20.213Z · Flavor <code>default</code> · Total duration 16833 ms</div>
   <div class="summary">
-    <div class="card"><div class="label">Total</div><div class="value">262</div></div>
-    <div class="card ok"><div class="label">Passed</div><div class="value">259</div></div>
+    <div class="card"><div class="label">Total</div><div class="value">269</div></div>
+    <div class="card ok"><div class="label">Passed</div><div class="value">266</div></div>
     <div class="card fail"><div class="label">Failed</div><div class="value">0</div></div>
     <div class="card skip"><div class="label">Skipped</div><div class="value">3</div></div>
   </div>
@@ -81,7 +81,7 @@
           <td><span class="badge ok">probe ✓</span></td>
           <td><span class="guard-time">—</span></td>
           <td><span class="guard-time">—</span></td>
-          <td><span class="guard-time">2026-09-26T13:27:47.620Z</span></td>
+          <td><span class="guard-time">2026-09-26T13:34:05.091Z</span></td>
         </tr>
     </tbody>
   </table>
@@ -94,237 +94,244 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Test manifest sanity</td>
           <td>lists every known tenant-scoped table</td>
-          <td class="num">0 ms</td>
+          <td class="num">1 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Test manifest sanity</td>
           <td>table names follow naming conventions</td>
-          <td class="num">3 ms</td>
+          <td class="num">1 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
           <td>anon SELECT * FROM access_code_redemptions returns no rows (RLS enforced)</td>
-          <td class="num">194 ms</td>
+          <td class="num">215 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
           <td>anon SELECT * FROM archived_reservations returns no rows (RLS enforced)</td>
-          <td class="num">206 ms</td>
+          <td class="num">182 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
           <td>anon SELECT * FROM audit_log returns no rows (RLS enforced)</td>
-          <td class="num">1271 ms</td>
+          <td class="num">1229 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
           <td>anon SELECT * FROM beta_feedback returns no rows (RLS enforced)</td>
-          <td class="num">168 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM blocked_slots returns no rows (RLS enforced)</td>
-          <td class="num">176 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM booking_tokens returns no rows (RLS enforced)</td>
-          <td class="num">127 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM booking_validation_log returns no rows (RLS enforced)</td>
-          <td class="num">68 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM discount_codes returns no rows (RLS enforced)</td>
-          <td class="num">85 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM email_send_log returns no rows (RLS enforced)</td>
-          <td class="num">220 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM guest_reviews returns no rows (RLS enforced)</td>
-          <td class="num">131 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM kitchen_menu_items returns no rows (RLS enforced)</td>
-          <td class="num">185 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM kitchen_orders returns no rows (RLS enforced)</td>
-          <td class="num">69 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM login_history returns no rows (RLS enforced)</td>
-          <td class="num">251 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM notifications returns no rows (RLS enforced)</td>
-          <td class="num">101 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM offers returns no rows (RLS enforced)</td>
-          <td class="num">100 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM recurring_blocked_slots returns no rows (RLS enforced)</td>
-          <td class="num">138 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM reservations returns no rows (RLS enforced)</td>
-          <td class="num">74 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM resource_images returns no rows (RLS enforced)</td>
-          <td class="num">105 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM resource_opening_hours returns no rows (RLS enforced)</td>
-          <td class="num">80 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM resource_availability_slots returns no rows (RLS enforced)</td>
-          <td class="num">124 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM resources returns no rows (RLS enforced)</td>
-          <td class="num">48 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM special_occasions returns no rows (RLS enforced)</td>
-          <td class="num">86 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM shift_change_log returns no rows (RLS enforced)</td>
-          <td class="num">55 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM shift_periods returns no rows (RLS enforced)</td>
-          <td class="num">54 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM shift_slots returns no rows (RLS enforced)</td>
-          <td class="num">53 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM shifts returns no rows (RLS enforced)</td>
-          <td class="num">49 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM staff_member_contacts returns no rows (RLS enforced)</td>
           <td class="num">84 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM staff_members returns no rows (RLS enforced)</td>
-          <td class="num">51 ms</td>
+          <td>anon SELECT * FROM blocked_slots returns no rows (RLS enforced)</td>
+          <td class="num">162 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM staff_roles returns no rows (RLS enforced)</td>
-          <td class="num">88 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM staffing_settings returns no rows (RLS enforced)</td>
-          <td class="num">159 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
-          <td>anon SELECT * FROM site_access_change_requests returns no rows (RLS enforced)</td>
+          <td>anon SELECT * FROM booking_tokens returns no rows (RLS enforced)</td>
           <td class="num">216 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM booking_validation_log returns no rows (RLS enforced)</td>
+          <td class="num">70 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM discount_codes returns no rows (RLS enforced)</td>
+          <td class="num">58 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM email_send_log returns no rows (RLS enforced)</td>
+          <td class="num">153 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM guest_reviews returns no rows (RLS enforced)</td>
+          <td class="num">174 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM kitchen_menu_items returns no rows (RLS enforced)</td>
+          <td class="num">105 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM kitchen_orders returns no rows (RLS enforced)</td>
+          <td class="num">130 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM login_history returns no rows (RLS enforced)</td>
+          <td class="num">249 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM notifications returns no rows (RLS enforced)</td>
+          <td class="num">91 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM offers returns no rows (RLS enforced)</td>
+          <td class="num">157 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM recurring_blocked_slots returns no rows (RLS enforced)</td>
+          <td class="num">124 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM reservations returns no rows (RLS enforced)</td>
+          <td class="num">50 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM resource_images returns no rows (RLS enforced)</td>
+          <td class="num">87 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM resource_opening_hours returns no rows (RLS enforced)</td>
+          <td class="num">99 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM resource_availability_slots returns no rows (RLS enforced)</td>
+          <td class="num">69 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM resources returns no rows (RLS enforced)</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM special_occasions returns no rows (RLS enforced)</td>
+          <td class="num">77 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM shift_change_log returns no rows (RLS enforced)</td>
+          <td class="num">160 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM shift_periods returns no rows (RLS enforced)</td>
+          <td class="num">171 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM shift_slots returns no rows (RLS enforced)</td>
+          <td class="num">76 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM shifts returns no rows (RLS enforced)</td>
+          <td class="num">89 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM staff_member_contacts returns no rows (RLS enforced)</td>
+          <td class="num">59 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM staff_members returns no rows (RLS enforced)</td>
+          <td class="num">99 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM staff_roles returns no rows (RLS enforced)</td>
+          <td class="num">79 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM staffing_settings returns no rows (RLS enforced)</td>
+          <td class="num">79 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM site_access_change_requests returns no rows (RLS enforced)</td>
+          <td class="num">149 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
           <td>anon SELECT * FROM site_access_reviews returns no rows (RLS enforced)</td>
+          <td class="num">70 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
+          <td>anon SELECT * FROM site_access_change_log returns no rows (RLS enforced)</td>
           <td class="num">109 ms</td>
           <td></td>
         </tr>
@@ -332,448 +339,455 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
           <td>anon INSERT into private tenant tables is denied</td>
-          <td class="num">58 ms</td>
+          <td class="num">64 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Anonymous client RLS enforcement</td>
           <td>anon UPDATE on private tenant tables is denied</td>
-          <td class="num">72 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot SELECT tenant B reservations</td>
-          <td class="num">132 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot SELECT tenant A reservations</td>
-          <td class="num">74 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot INSERT into tenant B audit_log</td>
-          <td class="num">71 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B notifications</td>
-          <td class="num">108 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from access_code_redemptions</td>
-          <td class="num">82 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from archived_reservations</td>
-          <td class="num">112 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from audit_log</td>
-          <td class="num">379 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from beta_feedback</td>
-          <td class="num">58 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from blocked_slots</td>
-          <td class="num">55 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from booking_tokens</td>
-          <td class="num">62 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from booking_validation_log</td>
-          <td class="num">96 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from discount_codes</td>
-          <td class="num">66 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from email_send_log</td>
-          <td class="num">82 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from guest_reviews</td>
-          <td class="num">52 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from kitchen_menu_items</td>
-          <td class="num">82 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from kitchen_orders</td>
-          <td class="num">124 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from login_history</td>
-          <td class="num">103 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from notifications</td>
-          <td class="num">76 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from offers</td>
-          <td class="num">242 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from recurring_blocked_slots</td>
-          <td class="num">235 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from reservations</td>
-          <td class="num">47 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from resource_images</td>
-          <td class="num">158 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from resource_opening_hours</td>
-          <td class="num">53 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from resource_availability_slots</td>
-          <td class="num">133 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from resources</td>
-          <td class="num">87 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from special_occasions</td>
-          <td class="num">77 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from shift_change_log</td>
-          <td class="num">121 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from shift_periods</td>
-          <td class="num">80 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from shift_slots</td>
-          <td class="num">163 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from shifts</td>
-          <td class="num">91 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from staff_member_contacts</td>
-          <td class="num">94 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from staff_members</td>
-          <td class="num">120 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from staff_roles</td>
-          <td class="num">47 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from staffing_settings</td>
-          <td class="num">52 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from site_access_change_requests</td>
-          <td class="num">76 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot read tenant B rows from site_access_reviews</td>
-          <td class="num">53 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from access_code_redemptions</td>
-          <td class="num">52 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from archived_reservations</td>
-          <td class="num">66 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from audit_log</td>
-          <td class="num">67 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from beta_feedback</td>
-          <td class="num">76 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from blocked_slots</td>
-          <td class="num">48 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from booking_tokens</td>
-          <td class="num">122 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from booking_validation_log</td>
-          <td class="num">202 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from discount_codes</td>
-          <td class="num">93 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from email_send_log</td>
-          <td class="num">67 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from guest_reviews</td>
-          <td class="num">52 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from kitchen_menu_items</td>
-          <td class="num">51 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from kitchen_orders</td>
-          <td class="num">53 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from login_history</td>
-          <td class="num">48 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from notifications</td>
-          <td class="num">51 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from offers</td>
-          <td class="num">68 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from recurring_blocked_slots</td>
-          <td class="num">54 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from reservations</td>
-          <td class="num">62 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from resource_images</td>
-          <td class="num">57 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from resource_opening_hours</td>
-          <td class="num">54 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from resource_availability_slots</td>
-          <td class="num">51 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from resources</td>
-          <td class="num">52 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from special_occasions</td>
-          <td class="num">71 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from shift_change_log</td>
-          <td class="num">56 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from shift_periods</td>
           <td class="num">78 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from shift_slots</td>
+          <td>user A cannot SELECT tenant B reservations</td>
+          <td class="num">78 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot SELECT tenant A reservations</td>
+          <td class="num">59 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT into tenant B audit_log</td>
+          <td class="num">68 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B notifications</td>
+          <td class="num">59 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from access_code_redemptions</td>
+          <td class="num">52 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from archived_reservations</td>
+          <td class="num">49 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from audit_log</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from beta_feedback</td>
+          <td class="num">53 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from blocked_slots</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from booking_tokens</td>
+          <td class="num">74 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from booking_validation_log</td>
           <td class="num">50 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from shifts</td>
+          <td>user A cannot read tenant B rows from discount_codes</td>
+          <td class="num">57 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from email_send_log</td>
+          <td class="num">77 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from guest_reviews</td>
+          <td class="num">44 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from kitchen_menu_items</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from kitchen_orders</td>
+          <td class="num">54 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from login_history</td>
+          <td class="num">84 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from notifications</td>
+          <td class="num">48 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from offers</td>
+          <td class="num">68 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from recurring_blocked_slots</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from reservations</td>
+          <td class="num">50 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from resource_images</td>
+          <td class="num">49 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from resource_opening_hours</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from resource_availability_slots</td>
+          <td class="num">58 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from resources</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from special_occasions</td>
+          <td class="num">65 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from shift_change_log</td>
+          <td class="num">84 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from shift_periods</td>
           <td class="num">60 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from shift_slots</td>
+          <td class="num">64 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from shifts</td>
+          <td class="num">64 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from staff_member_contacts</td>
+          <td class="num">48 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from staff_members</td>
+          <td class="num">57 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from staff_roles</td>
+          <td class="num">44 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from staffing_settings</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from site_access_change_requests</td>
+          <td class="num">45 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from site_access_reviews</td>
+          <td class="num">49 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot read tenant B rows from site_access_change_log</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from access_code_redemptions</td>
+          <td class="num">57 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from archived_reservations</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from audit_log</td>
+          <td class="num">60 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from beta_feedback</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from blocked_slots</td>
+          <td class="num">55 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from booking_tokens</td>
+          <td class="num">50 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from booking_validation_log</td>
+          <td class="num">309 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from discount_codes</td>
+          <td class="num">55 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from email_send_log</td>
+          <td class="num">61 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from guest_reviews</td>
+          <td class="num">54 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from kitchen_menu_items</td>
+          <td class="num">39 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from kitchen_orders</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from login_history</td>
+          <td class="num">60 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from notifications</td>
+          <td class="num">44 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from offers</td>
+          <td class="num">45 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from recurring_blocked_slots</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from reservations</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from resource_images</td>
+          <td class="num">45 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from resource_opening_hours</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from resource_availability_slots</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from resources</td>
+          <td class="num">50 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from special_occasions</td>
+          <td class="num">41 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from shift_change_log</td>
+          <td class="num">41 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from shift_periods</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from shift_slots</td>
+          <td class="num">60 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from shifts</td>
+          <td class="num">41 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -787,231 +801,238 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot read tenant A rows from staff_members</td>
-          <td class="num">47 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from staff_roles</td>
-          <td class="num">46 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from staffing_settings</td>
-          <td class="num">53 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from site_access_change_requests</td>
-          <td class="num">50 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot read tenant A rows from site_access_reviews</td>
-          <td class="num">49 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot INSERT a forged tenant B row into &#39;notifications&#39;</td>
-          <td class="num">67 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot INSERT a forged tenant B row into &#39;booking_validation_log&#39;</td>
-          <td class="num">59 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot INSERT a forged tenant B row into &#39;kitchen_menu_items&#39;</td>
-          <td class="num">55 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot INSERT a forged tenant B row into &#39;kitchen_orders&#39;</td>
-          <td class="num">58 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot INSERT a forged tenant B row into &#39;discount_codes&#39;</td>
-          <td class="num">65 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot INSERT a forged tenant B row into &#39;offers&#39;</td>
-          <td class="num">60 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot INSERT a forged tenant B row into &#39;blocked_slots&#39;</td>
-          <td class="num">56 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot INSERT a forged tenant B row into &#39;special_occasions&#39;</td>
-          <td class="num">59 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot INSERT a forged tenant A row into &#39;notifications&#39;</td>
-          <td class="num">66 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot INSERT a forged tenant A row into &#39;booking_validation_log&#39;</td>
-          <td class="num">81 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot INSERT a forged tenant A row into &#39;kitchen_menu_items&#39;</td>
-          <td class="num">96 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot INSERT a forged tenant A row into &#39;kitchen_orders&#39;</td>
-          <td class="num">60 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot INSERT a forged tenant A row into &#39;discount_codes&#39;</td>
-          <td class="num">46 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot INSERT a forged tenant A row into &#39;offers&#39;</td>
-          <td class="num">46 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot INSERT a forged tenant A row into &#39;blocked_slots&#39;</td>
-          <td class="num">46 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot INSERT a forged tenant A row into &#39;special_occasions&#39;</td>
-          <td class="num">54 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B notifications via cross-tenant filter</td>
           <td class="num">48 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B reservations via cross-tenant filter</td>
-          <td class="num">108 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in access_code_redemptions (cross-tenant filter)</td>
+          <td>user B cannot read tenant A rows from staff_roles</td>
           <td class="num">59 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in archived_reservations (cross-tenant filter)</td>
-          <td class="num">61 ms</td>
+          <td>user B cannot read tenant A rows from staffing_settings</td>
+          <td class="num">45 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in audit_log (cross-tenant filter)</td>
-          <td class="num">47 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in beta_feedback (cross-tenant filter)</td>
-          <td class="num">52 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in blocked_slots (cross-tenant filter)</td>
-          <td class="num">56 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in booking_tokens (cross-tenant filter)</td>
-          <td class="num">62 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in booking_validation_log (cross-tenant filter)</td>
-          <td class="num">77 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in discount_codes (cross-tenant filter)</td>
-          <td class="num">52 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in email_send_log (cross-tenant filter)</td>
+          <td>user B cannot read tenant A rows from site_access_change_requests</td>
           <td class="num">65 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from site_access_reviews</td>
+          <td class="num">48 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot read tenant A rows from site_access_change_log</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;notifications&#39;</td>
+          <td class="num">49 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;booking_validation_log&#39;</td>
+          <td class="num">44 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;kitchen_menu_items&#39;</td>
+          <td class="num">41 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;kitchen_orders&#39;</td>
+          <td class="num">50 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;discount_codes&#39;</td>
+          <td class="num">49 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;offers&#39;</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;blocked_slots&#39;</td>
+          <td class="num">45 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot INSERT a forged tenant B row into &#39;special_occasions&#39;</td>
+          <td class="num">62 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;notifications&#39;</td>
+          <td class="num">54 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;booking_validation_log&#39;</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;kitchen_menu_items&#39;</td>
+          <td class="num">48 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;kitchen_orders&#39;</td>
+          <td class="num">51 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;discount_codes&#39;</td>
+          <td class="num">57 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;offers&#39;</td>
+          <td class="num">57 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;blocked_slots&#39;</td>
+          <td class="num">49 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot INSERT a forged tenant A row into &#39;special_occasions&#39;</td>
+          <td class="num">50 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B notifications via cross-tenant filter</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B reservations via cross-tenant filter</td>
+          <td class="num">55 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in access_code_redemptions (cross-tenant filter)</td>
+          <td class="num">58 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in archived_reservations (cross-tenant filter)</td>
+          <td class="num">52 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in audit_log (cross-tenant filter)</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in beta_feedback (cross-tenant filter)</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in blocked_slots (cross-tenant filter)</td>
+          <td class="num">52 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in booking_tokens (cross-tenant filter)</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in booking_validation_log (cross-tenant filter)</td>
+          <td class="num">56 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in discount_codes (cross-tenant filter)</td>
+          <td class="num">44 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in email_send_log (cross-tenant filter)</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot UPDATE tenant B rows in guest_reviews (cross-tenant filter)</td>
-          <td class="num">63 ms</td>
+          <td class="num">46 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1025,146 +1046,153 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot UPDATE tenant B rows in kitchen_orders (cross-tenant filter)</td>
-          <td class="num">60 ms</td>
+          <td class="num">45 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot UPDATE tenant B rows in login_history (cross-tenant filter)</td>
-          <td class="num">157 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in notifications (cross-tenant filter)</td>
-          <td class="num">116 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in offers (cross-tenant filter)</td>
-          <td class="num">79 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in recurring_blocked_slots (cross-tenant filter)</td>
-          <td class="num">81 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in reservations (cross-tenant filter)</td>
-          <td class="num">108 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in resource_images (cross-tenant filter)</td>
-          <td class="num">113 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in resource_opening_hours (cross-tenant filter)</td>
-          <td class="num">119 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in resource_availability_slots (cross-tenant filter)</td>
-          <td class="num">99 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in resources (cross-tenant filter)</td>
-          <td class="num">108 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in special_occasions (cross-tenant filter)</td>
-          <td class="num">99 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in shift_change_log (cross-tenant filter)</td>
-          <td class="num">48 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in shift_periods (cross-tenant filter)</td>
-          <td class="num">65 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in shift_slots (cross-tenant filter)</td>
-          <td class="num">54 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in shifts (cross-tenant filter)</td>
-          <td class="num">46 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in staff_member_contacts (cross-tenant filter)</td>
           <td class="num">55 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in staff_members (cross-tenant filter)</td>
-          <td class="num">52 ms</td>
+          <td>user A cannot UPDATE tenant B rows in notifications (cross-tenant filter)</td>
+          <td class="num">39 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in staff_roles (cross-tenant filter)</td>
-          <td class="num">48 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot UPDATE tenant B rows in staffing_settings (cross-tenant filter)</td>
+          <td>user A cannot UPDATE tenant B rows in offers (cross-tenant filter)</td>
           <td class="num">44 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in recurring_blocked_slots (cross-tenant filter)</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in reservations (cross-tenant filter)</td>
+          <td class="num">48 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in resource_images (cross-tenant filter)</td>
+          <td class="num">45 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in resource_opening_hours (cross-tenant filter)</td>
+          <td class="num">44 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in resource_availability_slots (cross-tenant filter)</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in resources (cross-tenant filter)</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in special_occasions (cross-tenant filter)</td>
+          <td class="num">52 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in shift_change_log (cross-tenant filter)</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in shift_periods (cross-tenant filter)</td>
+          <td class="num">41 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in shift_slots (cross-tenant filter)</td>
+          <td class="num">45 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in shifts (cross-tenant filter)</td>
+          <td class="num">44 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in staff_member_contacts (cross-tenant filter)</td>
+          <td class="num">94 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in staff_members (cross-tenant filter)</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in staff_roles (cross-tenant filter)</td>
+          <td class="num">40 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in staffing_settings (cross-tenant filter)</td>
+          <td class="num">38 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot UPDATE tenant B rows in site_access_change_requests (cross-tenant filter)</td>
-          <td class="num">58 ms</td>
+          <td class="num">63 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot UPDATE tenant B rows in site_access_reviews (cross-tenant filter)</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot UPDATE tenant B rows in site_access_change_log (cross-tenant filter)</td>
           <td class="num">44 ms</td>
           <td></td>
         </tr>
@@ -1172,42 +1200,42 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in access_code_redemptions (cross-tenant filter)</td>
-          <td class="num">45 ms</td>
+          <td class="num">44 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in archived_reservations (cross-tenant filter)</td>
-          <td class="num">55 ms</td>
+          <td class="num">64 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in audit_log (cross-tenant filter)</td>
-          <td class="num">76 ms</td>
+          <td class="num">42 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in beta_feedback (cross-tenant filter)</td>
-          <td class="num">48 ms</td>
+          <td class="num">51 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in blocked_slots (cross-tenant filter)</td>
-          <td class="num">57 ms</td>
+          <td class="num">41 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in booking_tokens (cross-tenant filter)</td>
-          <td class="num">50 ms</td>
+          <td class="num">51 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1221,56 +1249,56 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in discount_codes (cross-tenant filter)</td>
-          <td class="num">68 ms</td>
+          <td class="num">49 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in email_send_log (cross-tenant filter)</td>
-          <td class="num">51 ms</td>
+          <td class="num">46 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in guest_reviews (cross-tenant filter)</td>
-          <td class="num">50 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in kitchen_menu_items (cross-tenant filter)</td>
-          <td class="num">47 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in kitchen_orders (cross-tenant filter)</td>
-          <td class="num">89 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in login_history (cross-tenant filter)</td>
-          <td class="num">50 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in notifications (cross-tenant filter)</td>
           <td class="num">51 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot UPDATE tenant A rows in kitchen_menu_items (cross-tenant filter)</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot UPDATE tenant A rows in kitchen_orders (cross-tenant filter)</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot UPDATE tenant A rows in login_history (cross-tenant filter)</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot UPDATE tenant A rows in notifications (cross-tenant filter)</td>
+          <td class="num">55 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in offers (cross-tenant filter)</td>
-          <td class="num">54 ms</td>
+          <td class="num">51 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1284,105 +1312,105 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in reservations (cross-tenant filter)</td>
-          <td class="num">87 ms</td>
+          <td class="num">55 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in resource_images (cross-tenant filter)</td>
-          <td class="num">60 ms</td>
+          <td class="num">46 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in resource_opening_hours (cross-tenant filter)</td>
-          <td class="num">41 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in resource_availability_slots (cross-tenant filter)</td>
-          <td class="num">49 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in resources (cross-tenant filter)</td>
           <td class="num">42 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in special_occasions (cross-tenant filter)</td>
+          <td>user B cannot UPDATE tenant A rows in resource_availability_slots (cross-tenant filter)</td>
+          <td class="num">53 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot UPDATE tenant A rows in resources (cross-tenant filter)</td>
           <td class="num">47 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot UPDATE tenant A rows in special_occasions (cross-tenant filter)</td>
+          <td class="num">53 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in shift_change_log (cross-tenant filter)</td>
-          <td class="num">55 ms</td>
+          <td class="num">48 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in shift_periods (cross-tenant filter)</td>
-          <td class="num">49 ms</td>
+          <td class="num">47 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in shift_slots (cross-tenant filter)</td>
-          <td class="num">58 ms</td>
+          <td class="num">41 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in shifts (cross-tenant filter)</td>
-          <td class="num">55 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in staff_member_contacts (cross-tenant filter)</td>
-          <td class="num">51 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in staff_members (cross-tenant filter)</td>
-          <td class="num">50 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in staff_roles (cross-tenant filter)</td>
-          <td class="num">54 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot UPDATE tenant A rows in staffing_settings (cross-tenant filter)</td>
           <td class="num">45 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot UPDATE tenant A rows in staff_member_contacts (cross-tenant filter)</td>
+          <td class="num">44 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot UPDATE tenant A rows in staff_members (cross-tenant filter)</td>
+          <td class="num">45 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot UPDATE tenant A rows in staff_roles (cross-tenant filter)</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot UPDATE tenant A rows in staffing_settings (cross-tenant filter)</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot UPDATE tenant A rows in site_access_change_requests (cross-tenant filter)</td>
-          <td class="num">53 ms</td>
+          <td class="num">43 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1395,92 +1423,99 @@
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in access_code_redemptions (cross-tenant filter)</td>
-          <td class="num">58 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in archived_reservations (cross-tenant filter)</td>
-          <td class="num">54 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in audit_log (cross-tenant filter)</td>
+          <td>user B cannot UPDATE tenant A rows in site_access_change_log (cross-tenant filter)</td>
           <td class="num">46 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in access_code_redemptions (cross-tenant filter)</td>
+          <td class="num">44 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in archived_reservations (cross-tenant filter)</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in audit_log (cross-tenant filter)</td>
+          <td class="num">55 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in beta_feedback (cross-tenant filter)</td>
-          <td class="num">48 ms</td>
+          <td class="num">49 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in blocked_slots (cross-tenant filter)</td>
-          <td class="num">54 ms</td>
+          <td class="num">47 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in booking_tokens (cross-tenant filter)</td>
-          <td class="num">51 ms</td>
+          <td class="num">46 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in booking_validation_log (cross-tenant filter)</td>
-          <td class="num">52 ms</td>
+          <td class="num">51 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in discount_codes (cross-tenant filter)</td>
-          <td class="num">48 ms</td>
+          <td class="num">53 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in email_send_log (cross-tenant filter)</td>
-          <td class="num">59 ms</td>
+          <td class="num">132 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in guest_reviews (cross-tenant filter)</td>
-          <td class="num">56 ms</td>
+          <td class="num">47 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in kitchen_menu_items (cross-tenant filter)</td>
-          <td class="num">58 ms</td>
+          <td class="num">40 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in kitchen_orders (cross-tenant filter)</td>
-          <td class="num">48 ms</td>
+          <td class="num">42 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in login_history (cross-tenant filter)</td>
-          <td class="num">53 ms</td>
+          <td class="num">48 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1494,14 +1529,14 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in offers (cross-tenant filter)</td>
-          <td class="num">52 ms</td>
+          <td class="num">40 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in recurring_blocked_slots (cross-tenant filter)</td>
-          <td class="num">45 ms</td>
+          <td class="num">46 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1515,154 +1550,161 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in resource_images (cross-tenant filter)</td>
-          <td class="num">60 ms</td>
+          <td class="num">44 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in resource_opening_hours (cross-tenant filter)</td>
-          <td class="num">49 ms</td>
+          <td class="num">43 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A cannot DELETE tenant B rows in resource_availability_slots (cross-tenant filter)</td>
-          <td class="num">45 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in resources (cross-tenant filter)</td>
-          <td class="num">51 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in special_occasions (cross-tenant filter)</td>
-          <td class="num">54 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in shift_change_log (cross-tenant filter)</td>
-          <td class="num">44 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in shift_periods (cross-tenant filter)</td>
-          <td class="num">46 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in shift_slots (cross-tenant filter)</td>
-          <td class="num">44 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in shifts (cross-tenant filter)</td>
-          <td class="num">47 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in staff_member_contacts (cross-tenant filter)</td>
-          <td class="num">50 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in staff_members (cross-tenant filter)</td>
-          <td class="num">58 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in staff_roles (cross-tenant filter)</td>
-          <td class="num">59 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in staffing_settings (cross-tenant filter)</td>
-          <td class="num">58 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in site_access_change_requests (cross-tenant filter)</td>
-          <td class="num">57 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user A cannot DELETE tenant B rows in site_access_reviews (cross-tenant filter)</td>
-          <td class="num">62 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot DELETE tenant A rows in access_code_redemptions (cross-tenant filter)</td>
-          <td class="num">76 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot DELETE tenant A rows in archived_reservations (cross-tenant filter)</td>
-          <td class="num">98 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot DELETE tenant A rows in audit_log (cross-tenant filter)</td>
-          <td class="num">62 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot DELETE tenant A rows in beta_feedback (cross-tenant filter)</td>
-          <td class="num">68 ms</td>
-          <td></td>
-        </tr>
-<tr class="ok">
-          <td><span class="badge ok">passed</span></td>
-          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
-          <td>user B cannot DELETE tenant A rows in blocked_slots (cross-tenant filter)</td>
           <td class="num">48 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in resources (cross-tenant filter)</td>
+          <td class="num">49 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in special_occasions (cross-tenant filter)</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in shift_change_log (cross-tenant filter)</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in shift_periods (cross-tenant filter)</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in shift_slots (cross-tenant filter)</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in shifts (cross-tenant filter)</td>
+          <td class="num">40 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in staff_member_contacts (cross-tenant filter)</td>
+          <td class="num">61 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in staff_members (cross-tenant filter)</td>
+          <td class="num">44 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in staff_roles (cross-tenant filter)</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in staffing_settings (cross-tenant filter)</td>
+          <td class="num">43 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in site_access_change_requests (cross-tenant filter)</td>
+          <td class="num">52 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in site_access_reviews (cross-tenant filter)</td>
+          <td class="num">41 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user A cannot DELETE tenant B rows in site_access_change_log (cross-tenant filter)</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot DELETE tenant A rows in access_code_redemptions (cross-tenant filter)</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot DELETE tenant A rows in archived_reservations (cross-tenant filter)</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot DELETE tenant A rows in audit_log (cross-tenant filter)</td>
+          <td class="num">42 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot DELETE tenant A rows in beta_feedback (cross-tenant filter)</td>
+          <td class="num">58 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot DELETE tenant A rows in blocked_slots (cross-tenant filter)</td>
+          <td class="num">47 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in booking_tokens (cross-tenant filter)</td>
-          <td class="num">53 ms</td>
+          <td class="num">44 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in booking_validation_log (cross-tenant filter)</td>
-          <td class="num">56 ms</td>
+          <td class="num">48 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1676,35 +1718,35 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in email_send_log (cross-tenant filter)</td>
-          <td class="num">59 ms</td>
+          <td class="num">43 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in guest_reviews (cross-tenant filter)</td>
-          <td class="num">57 ms</td>
+          <td class="num">43 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in kitchen_menu_items (cross-tenant filter)</td>
-          <td class="num">71 ms</td>
+          <td class="num">43 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in kitchen_orders (cross-tenant filter)</td>
-          <td class="num">59 ms</td>
+          <td class="num">45 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in login_history (cross-tenant filter)</td>
-          <td class="num">69 ms</td>
+          <td class="num">39 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1718,77 +1760,77 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in offers (cross-tenant filter)</td>
-          <td class="num">59 ms</td>
+          <td class="num">41 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in recurring_blocked_slots (cross-tenant filter)</td>
-          <td class="num">48 ms</td>
+          <td class="num">42 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in reservations (cross-tenant filter)</td>
-          <td class="num">61 ms</td>
+          <td class="num">41 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in resource_images (cross-tenant filter)</td>
-          <td class="num">50 ms</td>
+          <td class="num">40 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in resource_opening_hours (cross-tenant filter)</td>
-          <td class="num">107 ms</td>
+          <td class="num">44 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in resource_availability_slots (cross-tenant filter)</td>
-          <td class="num">72 ms</td>
+          <td class="num">48 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in resources (cross-tenant filter)</td>
-          <td class="num">49 ms</td>
+          <td class="num">44 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in special_occasions (cross-tenant filter)</td>
-          <td class="num">58 ms</td>
+          <td class="num">40 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in shift_change_log (cross-tenant filter)</td>
-          <td class="num">56 ms</td>
+          <td class="num">41 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in shift_periods (cross-tenant filter)</td>
-          <td class="num">45 ms</td>
+          <td class="num">43 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in shift_slots (cross-tenant filter)</td>
-          <td class="num">47 ms</td>
+          <td class="num">46 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1802,21 +1844,21 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in staff_member_contacts (cross-tenant filter)</td>
-          <td class="num">50 ms</td>
+          <td class="num">47 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in staff_members (cross-tenant filter)</td>
-          <td class="num">74 ms</td>
+          <td class="num">59 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in staff_roles (cross-tenant filter)</td>
-          <td class="num">70 ms</td>
+          <td class="num">40 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1830,42 +1872,49 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in site_access_change_requests (cross-tenant filter)</td>
-          <td class="num">58 ms</td>
+          <td class="num">43 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B cannot DELETE tenant A rows in site_access_reviews (cross-tenant filter)</td>
-          <td class="num">55 ms</td>
+          <td class="num">46 ms</td>
+          <td></td>
+        </tr>
+<tr class="ok">
+          <td><span class="badge ok">passed</span></td>
+          <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
+          <td>user B cannot DELETE tenant A rows in site_access_change_log (cross-tenant filter)</td>
+          <td class="num">40 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A CAN read their own tenant_users row (sanity check)</td>
-          <td class="num">98 ms</td>
+          <td class="num">43 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B CAN read their own tenant_users row (sanity check)</td>
-          <td class="num">60 ms</td>
+          <td class="num">48 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user A reservations query never leaks tenant B rows (unfiltered)</td>
-          <td class="num">338 ms</td>
+          <td class="num">285 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/cross-tenant-rls.test.ts &gt; Cross-Tenant RLS Regression Tests &gt; Live cross-tenant access denial</td>
           <td>user B reservations query never leaks tenant A rows (unfiltered)</td>
-          <td class="num">203 ms</td>
+          <td class="num">202 ms</td>
           <td></td>
         </tr>
 <tr class="skip">
@@ -1886,14 +1935,14 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/tenant-table-manifest.test.ts &gt; Tenant Table Manifest — Coverage Guard &gt; Live schema introspection</td>
           <td>RPC returns at least one tenant-scoped table (sanity)</td>
-          <td class="num">3 ms</td>
+          <td class="num">0 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/tenant-table-manifest.test.ts &gt; Tenant Table Manifest — Coverage Guard &gt; Live schema introspection</td>
           <td>every live tenant-scoped table is covered or explicitly excluded</td>
-          <td class="num">1 ms</td>
+          <td class="num">0 ms</td>
           <td></td>
         </tr>
 <tr class="ok">
@@ -1914,7 +1963,7 @@
           <td><span class="badge ok">passed</span></td>
           <td>src/test/security/tenant-table-manifest.test.ts &gt; Tenant Table Manifest — Coverage Guard &gt; Live schema introspection</td>
           <td>every EXCLUDED_TABLES entry has a non-empty justification</td>
-          <td class="num">0 ms</td>
+          <td class="num">1 ms</td>
           <td></td>
         </tr>
 <tr class="skip">
