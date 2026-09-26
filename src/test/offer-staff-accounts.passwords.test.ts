@@ -45,13 +45,15 @@ function fakeAdmin() {
         record("tenant_users.update", row);
         return q;
       },
-      then: (res: any) =>
-        res({
-          data: memberships
-            .filter((m) => m.user_id === q._user)
-            .map((m) => ({ ...m, role: "admin", is_approved: true })),
-          error: null,
-        }),
+      then: (res: any, rej: any) =>
+        tick()
+          .then(() => ({
+            data: memberships
+              .filter((m) => m.user_id === q._user)
+              .map((m) => ({ ...m, role: "admin", is_approved: true })),
+            error: null,
+          }))
+          .then(res, rej),
     };
     return q;
   };
@@ -170,6 +172,25 @@ describe("E2E staff logins keep their passwords between runs", () => {
     expect(new Set(a.map((x) => x.userId)).size).toBe(2);
     expect(memberships).toHaveLength(2);
     expect(new Set(memberships.map((m) => m.user_id)).size).toBe(2);
+    expect(memberships.every((m) => m.tenant_id === TENANT)).toBe(true);
+  });
+
+  it("two setups adding the same existing login to the business at once leave one assignment each", async () => {
+    users.set("e2e-offer-staff-1@mimmobook.local", {
+      id: "u-1",
+      password: "p1",
+    });
+    users.set("e2e-offer-staff-2@mimmobook.local", {
+      id: "u-2",
+      password: "p2",
+    });
+    const [a, b] = await Promise.all([run(), run()]);
+    // Both setups really raced: each tried to add both logins.
+    expect(calls.filter((c) => c.fn === "tenant_users.insert")).toHaveLength(4);
+    expect(calls.filter((c) => c.fn === "createUser")).toEqual([]);
+    expect(a.map((x) => x.userId)).toEqual(["u-1", "u-2"]);
+    expect(b.map((x) => x.userId)).toEqual(["u-1", "u-2"]);
+    expect(memberships.map((m) => m.user_id).sort()).toEqual(["u-1", "u-2"]);
     expect(memberships.every((m) => m.tenant_id === TENANT)).toBe(true);
   });
 });
