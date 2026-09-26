@@ -135,6 +135,7 @@ jobs:
             --reporter=verbose \
             --reporter=json --outputFile=test-reports/vitest/rls-gate.json \
             src/test/security/cross-tenant-rls.test.ts \
+            src/test/security/staffing-cross-tenant-isolation.test.ts \
             src/test/security/cross-tenant-log-isolation.test.ts \
             src/test/security/cross-tenant-storage.test.ts \
             src/test/security/pagination-negative-rls.test.ts \

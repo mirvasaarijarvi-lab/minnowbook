@@ -70,6 +70,7 @@ const REQUIRED_ADVISOR_SECRETS = [
  */
 const REQUIRED_TESTS = [
   "src/test/security/cross-tenant-rls.test.ts",
+  "src/test/security/staffing-cross-tenant-isolation.test.ts",
   "src/test/security/cross-tenant-log-isolation.test.ts",
   "src/test/security/cross-tenant-storage.test.ts",
   "src/test/security/tenant-table-manifest.test.ts",
