@@ -2264,6 +2264,231 @@ export type Database = {
           },
         ]
       }
+      shift_change_log: {
+        Row: {
+          action: string
+          changed_by: string | null
+          changed_by_name: string | null
+          changed_fields: string[] | null
+          created_at: string
+          entity: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          period_id: string
+          shift_date: string | null
+          slot_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          action: string
+          changed_by?: string | null
+          changed_by_name?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          entity: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          period_id: string
+          shift_date?: string | null
+          slot_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          action?: string
+          changed_by?: string | null
+          changed_by_name?: string | null
+          changed_fields?: string[] | null
+          created_at?: string
+          entity?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          period_id?: string
+          shift_date?: string | null
+          slot_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_change_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_change_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_periods: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          site_id: string | null
+          start_date: string
+          tenant_id: string
+          title: string | null
+          updated_at: string
+          weeks: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          site_id?: string | null
+          start_date: string
+          tenant_id: string
+          title?: string | null
+          updated_at?: string
+          weeks?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          site_id?: string | null
+          start_date?: string
+          tenant_id?: string
+          title?: string | null
+          updated_at?: string
+          weeks?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_periods_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_periods_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_periods_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_slots: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          period_id: string
+          role_key: string | null
+          slot_order: number
+          staff_member_id: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_id: string
+          role_key?: string | null
+          slot_order?: number
+          staff_member_id?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          period_id?: string
+          role_key?: string | null
+          slot_order?: number
+          staff_member_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_slots_period_id_tenant_id_fkey"
+            columns: ["period_id", "tenant_id"]
+            isOneToOne: false
+            referencedRelation: "shift_periods"
+            referencedColumns: ["id", "tenant_id"]
+          },
+          {
+            foreignKeyName: "shift_slots_staff_member_id_tenant_id_fkey"
+            columns: ["staff_member_id", "tenant_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id", "tenant_id"]
+          },
+        ]
+      }
+      shifts: {
+        Row: {
+          actual_end_time: string | null
+          actual_note: string | null
+          actual_start_time: string | null
+          code: string | null
+          created_at: string
+          date: string
+          end_time: string | null
+          id: string
+          slot_id: string
+          start_time: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          actual_end_time?: string | null
+          actual_note?: string | null
+          actual_start_time?: string | null
+          code?: string | null
+          created_at?: string
+          date: string
+          end_time?: string | null
+          id?: string
+          slot_id: string
+          start_time?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          actual_end_time?: string | null
+          actual_note?: string | null
+          actual_start_time?: string | null
+          code?: string | null
+          created_at?: string
+          date?: string
+          end_time?: string | null
+          id?: string
+          slot_id?: string
+          start_time?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shifts_slot_id_tenant_id_fkey"
+            columns: ["slot_id", "tenant_id"]
+            isOneToOne: false
+            referencedRelation: "shift_slots"
+            referencedColumns: ["id", "tenant_id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           accent_color: string | null
@@ -2518,6 +2743,186 @@ export type Database = {
             foreignKeyName: "special_occasions_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_member_contacts: {
+        Row: {
+          email: string | null
+          phone: string | null
+          staff_member_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          email?: string | null
+          phone?: string | null
+          staff_member_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          email?: string | null
+          phone?: string | null
+          staff_member_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_member_contacts_staff_member_id_tenant_id_fkey"
+            columns: ["staff_member_id", "tenant_id"]
+            isOneToOne: false
+            referencedRelation: "staff_members"
+            referencedColumns: ["id", "tenant_id"]
+          },
+        ]
+      }
+      staff_members: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          employment_type: string
+          id: string
+          is_active: boolean
+          name: string
+          role_keys: string[]
+          site_id: string | null
+          tenant_id: string
+          updated_at: string
+          weekly_hours_target: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          employment_type?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          role_keys?: string[]
+          site_id?: string | null
+          tenant_id: string
+          updated_at?: string
+          weekly_hours_target?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          employment_type?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          role_keys?: string[]
+          site_id?: string | null
+          tenant_id?: string
+          updated_at?: string
+          weekly_hours_target?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_members_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_members_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_roles: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          name_en: string
+          name_fi: string
+          name_sv: string
+          sort_order: number
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          name_en: string
+          name_fi: string
+          name_sv: string
+          sort_order?: number
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          name_en?: string
+          name_fi?: string
+          name_sv?: string
+          sort_order?: number
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_roles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staffing_settings: {
+        Row: {
+          settings: Json
+          tenant_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          settings?: Json
+          tenant_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          settings?: Json
+          tenant_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staffing_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staffing_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
             referencedRelation: "tenants_safe"
             referencedColumns: ["id"]
           },
@@ -3714,6 +4119,10 @@ export type Database = {
       }
       is_system_admin: { Args: { p_user_id: string }; Returns: boolean }
       is_tenant_active: { Args: { p_tenant_id: string }; Returns: boolean }
+      is_tenant_manager: {
+        Args: { p_tenant_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_user_tenant_member: {
         Args: { p_tenant_id: string; p_user_id: string }
         Returns: boolean

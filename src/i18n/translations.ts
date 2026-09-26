@@ -2010,6 +2010,7 @@ type TranslationKeys = {
   "nav.whatIs": string;
   "nav.offers": string;
   "nav.kitchen": string;
+  "nav.staffing": string;
   "nav.bookingLog": string;
 
   // Booking validation log
@@ -4910,6 +4911,7 @@ const en: TranslationKeys = {
   "nav.whatIs": "What Is MimmoBook?",
   "nav.offers": "Offers",
   "nav.kitchen": "Kitchen",
+  "nav.staffing": "Staffing",
   "nav.bookingLog": "Booking log",
   "bookingLog.title": "Booking validation log",
   "bookingLog.tooltip":
@@ -7887,6 +7889,7 @@ const fi: TranslationKeys = {
   "nav.whatIs": "Mikä on MimmoBook?",
   "nav.offers": "Tarjoukset",
   "nav.kitchen": "Keittiö",
+  "nav.staffing": "Työvuorot",
   "nav.bookingLog": "Varausloki",
   "bookingLog.title": "Varausten validointiloki",
   "bookingLog.tooltip":
@@ -10883,6 +10886,7 @@ const sv: TranslationKeys = {
   "nav.whatIs": "Vad är MimmoBook?",
   "nav.offers": "Erbjudanden",
   "nav.kitchen": "Kök",
+  "nav.staffing": "Personal",
   "nav.bookingLog": "Bokningslogg",
   "bookingLog.title": "Bokningsvalideringslogg",
   "bookingLog.tooltip":

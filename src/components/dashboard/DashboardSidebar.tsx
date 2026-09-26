@@ -16,6 +16,7 @@ import {
   UserCircle,
   FileText,
   ChefHat,
+  CalendarClock,
   ScrollText,
 } from "lucide-react";
 import Logo from "@/components/Logo";
@@ -54,6 +55,7 @@ export type DashboardView =
   | "resources"
   | "offers"
   | "kitchen"
+  | "staffing"
   | "reports"
   | "settings"
   | "admin"
@@ -112,6 +114,12 @@ const navItems: {
     icon: ChefHat,
     permission: PERM_RESERVATIONS_VIEW,
     requiresKitchenResources: true,
+  },
+  {
+    view: "staffing",
+    labelKey: "nav.staffing" as TranslationKey,
+    icon: CalendarClock,
+    permission: PERM_RESERVATIONS_VIEW,
   },
   {
     view: "reports",
