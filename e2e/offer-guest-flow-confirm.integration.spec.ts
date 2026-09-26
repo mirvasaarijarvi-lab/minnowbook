@@ -99,7 +99,11 @@ async function acceptAsGuest(page: Page, token: string) {
   });
 }
 
-async function staffConfirm(sb: SupabaseClient, offerId: string, venue: string) {
+async function staffConfirm(
+  sb: SupabaseClient,
+  offerId: string,
+  venue: string,
+) {
   const { data: offer, error } = await sb
     .from("offers")
     .select("*")
