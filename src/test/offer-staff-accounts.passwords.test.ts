@@ -1,0 +1,196 @@
+/**
+ * Repeated end-to-end runs must keep the same passwords for both staff
+ * logins. A fake backend records every call the login setup makes across
+ * several runs, and the test fails if a password is ever set on an existing
+ * login, or if a login is created again once it exists.
+ */
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+type Call = { fn: string; args: any };
+const calls: Call[] = [];
+const users = new Map<string, { id: string; password: string }>();
+let memberships: { user_id: string; tenant_id: string }[] = [];
+
+const TENANT = "tenant-1";
+
+/** Let other in-flight setups run, like a real network round trip. */
+const tick = () => new Promise((r) => setTimeout(r, 5));
+
+function fakeAdmin() {
+  const record = (fn: string, args: any) => calls.push({ fn, args });
+  const table = () => {
+    const q: any = {
+      select: () => q,
+      eq: (_c: string, v: string) => {
+        q._user = q._user ?? v;
+        return q;
+      },
+      insert: async (row: any) => {
+        record("tenant_users.insert", row);
+        await tick();
+        if (
+          memberships.some(
+            (m) => m.user_id === row.user_id && m.tenant_id === row.tenant_id,
+          )
+        )
+          return {
+            error: {
+              message: "duplicate key value violates unique constraint",
+            },
+          };
+        memberships.push(row);
+        return { error: null };
+      },
+      update: (row: any) => {
+        record("tenant_users.update", row);
+        return q;
+      },
+      then: (res: any, rej: any) =>
+        tick()
+          .then(() => ({
+            data: memberships
+              .filter((m) => m.user_id === q._user)
+              .map((m) => ({ ...m, role: "admin", is_approved: true })),
+            error: null,
+          }))
+          .then(res, rej),
+    };
+    return q;
+  };
+  return {
+    from: table,
+    auth: {
+      admin: {
+        generateLink: async ({ email }: { email: string }) => {
+          record("generateLink", { email });
+          await tick();
+          const u = users.get(email);
+          if (!u) return { data: null, error: { message: "User not found" } };
+          return {
+            data: { user: { id: u.id }, properties: { hashed_token: "t" } },
+            error: null,
+          };
+        },
+        createUser: async (args: any) => {
+          record("createUser", args);
+          await tick();
+          if (users.has(args.email))
+            return {
+              data: { user: null },
+              error: {
+                message:
+                  "A user with this email address has already been registered",
+              },
+            };
+          const id = `user-${users.size + 1}`;
+          users.set(args.email, { id, password: args.password });
+          return { data: { user: { id } }, error: null };
+        },
+        updateUserById: async (id: string, attrs: any) => {
+          record("updateUserById", { id, ...attrs });
+          for (const u of users.values())
+            if (u.id === id && attrs.password) u.password = attrs.password;
+          return { data: {}, error: null };
+        },
+        mfa: {
+          listFactors: async () => ({ data: { factors: [] }, error: null }),
+          deleteFactor: async () => ({ error: null }),
+        },
+      },
+      verifyOtp: async () => ({ error: null }),
+      signInWithPassword: async (args: any) => {
+        record("signInWithPassword", args);
+        return { error: null };
+      },
+    },
+  };
+}
+
+vi.mock("@supabase/supabase-js", () => ({
+  createClient: () => fakeAdmin(),
+}));
+
+const run = async () => {
+  const { ensureOfferStaffAccounts } =
+    await import("../../e2e/fixtures/offer-staff-accounts");
+  return ensureOfferStaffAccounts({
+    url: "http://fake",
+    anonKey: "anon",
+    serviceKey: "service",
+    tenantId: TENANT,
+  });
+};
+
+describe("E2E staff logins keep their passwords between runs", () => {
+  beforeEach(() => {
+    calls.length = 0;
+    users.clear();
+    memberships = [];
+  });
+
+  it("creates each login once, then reuses it with the same password", async () => {
+    await run();
+    const created = calls.filter((c) => c.fn === "createUser");
+    expect(created.map((c) => c.args.email).sort()).toEqual([
+      "e2e-offer-staff-1@mimmobook.local",
+      "e2e-offer-staff-2@mimmobook.local",
+    ]);
+    const firstPasswords = [...users.values()].map((u) => u.password);
+
+    await run();
+    await run();
+
+    expect(calls.filter((c) => c.fn === "createUser")).toHaveLength(2);
+    expect([...users.values()].map((u) => u.password)).toEqual(firstPasswords);
+  });
+
+  it("never changes or uses a password on any run", async () => {
+    await run();
+    await run();
+    expect(
+      calls.filter(
+        (c) => c.fn === "updateUserById" && c.args.password !== undefined,
+      ),
+    ).toEqual([]);
+    expect(calls.filter((c) => c.fn === "signInWithPassword")).toEqual([]);
+  });
+
+  it("the setup code has no way to set a password on an existing login", async () => {
+    const fs = await import("node:fs");
+    const src = fs.readFileSync("e2e/fixtures/offer-staff-accounts.ts", "utf8");
+    expect(src).not.toMatch(/updateUserById|signInWithPassword/);
+  });
+
+  it("two setups at once with no login yet both succeed without duplicates", async () => {
+    const [a, b] = await Promise.all([run(), run()]);
+    // Both setups really raced: each tried to create both logins.
+    expect(calls.filter((c) => c.fn === "createUser").length).toBeGreaterThan(
+      2,
+    );
+    expect(users.size).toBe(2);
+    expect(a.map((x) => x.userId)).toEqual(b.map((x) => x.userId));
+    expect(new Set(a.map((x) => x.userId)).size).toBe(2);
+    expect(memberships).toHaveLength(2);
+    expect(new Set(memberships.map((m) => m.user_id)).size).toBe(2);
+    expect(memberships.every((m) => m.tenant_id === TENANT)).toBe(true);
+  });
+
+  it("two setups adding the same existing login to the business at once leave one assignment each", async () => {
+    users.set("e2e-offer-staff-1@mimmobook.local", {
+      id: "u-1",
+      password: "p1",
+    });
+    users.set("e2e-offer-staff-2@mimmobook.local", {
+      id: "u-2",
+      password: "p2",
+    });
+    const [a, b] = await Promise.all([run(), run()]);
+    // Both setups really raced: each tried to add both logins.
+    expect(calls.filter((c) => c.fn === "tenant_users.insert")).toHaveLength(4);
+    expect(calls.filter((c) => c.fn === "createUser")).toEqual([]);
+    expect(a.map((x) => x.userId)).toEqual(["u-1", "u-2"]);
+    expect(b.map((x) => x.userId)).toEqual(["u-1", "u-2"]);
+    expect(memberships.map((m) => m.user_id).sort()).toEqual(["u-1", "u-2"]);
+    expect(memberships.every((m) => m.tenant_id === TENANT)).toBe(true);
+  });
+});
