@@ -5,6 +5,7 @@ import {
   SUPABASE_ANON_KEY,
   futureDate,
   makeTestGuest,
+  TEST_TENANT_ID,
 } from "./fixtures/test-tenant";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Page } from "@playwright/test";
@@ -36,12 +37,12 @@ test.describe("Two staff members confirm the same offer: one reservation", () =>
 
   let staff: [OfferStaffAccount, OfferStaffAccount];
 
-  test.beforeAll(async ({ tenant }) => {
+  test.beforeAll(async () => {
     staff = await ensureOfferStaffAccounts({
       url: SUPABASE_URL,
       anonKey: SUPABASE_ANON_KEY,
       serviceKey: SERVICE_KEY!,
-      tenantId: tenant.id,
+      tenantId: TEST_TENANT_ID,
     });
   });
 
@@ -251,7 +252,11 @@ test.describe("Two staff members confirm the same offer: one reservation", () =>
       expect(rb.id).toBe(source!.id);
       expect([ra, rb].filter((r) => !r.alreadyConfirmed)).toHaveLength(1);
 
-      const rows = await reservationsFor(b.client, tenant.id, guest.guest_email);
+      const rows = await reservationsFor(
+        b.client,
+        tenant.id,
+        guest.guest_email,
+      );
       expect(rows).toHaveLength(1);
       expect(rows[0].id).toBe(source!.id);
       expect(rows[0].status).toBe("confirmed");
