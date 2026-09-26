@@ -15,6 +15,7 @@ const LABELS = {
     never: "{name}: never reviewed",
     dueSoon: "{name}: due {date}",
     open: "Open access review",
+    view: "Review {name} staff and permissions",
     mark: "Mark reviewed",
     marked: "{name}: review marked complete",
     openRequests:
@@ -26,6 +27,7 @@ const LABELS = {
     never: "{name}: ei koskaan tarkistettu",
     dueSoon: "{name}: erääntyy {date}",
     open: "Avaa käyttöoikeudet",
+    view: "Tarkista kohteen {name} henkilöstö ja oikeudet",
     mark: "Merkitse tarkistetuksi",
     marked: "{name}: tarkistus merkitty tehdyksi",
     openRequests:
@@ -37,6 +39,7 @@ const LABELS = {
     never: "{name}: aldrig granskad",
     dueSoon: "{name}: förfaller {date}",
     open: "Öppna behörighetsgranskning",
+    view: "Granska personal och behörigheter för {name}",
     mark: "Markera som granskad",
     marked: "{name}: granskningen markerad som klar",
     openRequests:
@@ -49,7 +52,7 @@ export default function AccessReviewReminder({
   onOpen,
 }: {
   lang: StaffLang;
-  onOpen: () => void;
+  onOpen: (siteId?: string) => void;
 }) {
   const L = LABELS[lang];
   const reminders = useAccessReviewReminders();
@@ -111,7 +114,7 @@ export default function AccessReviewReminder({
           ))}
         </ul>
       </div>
-      <Button size="sm" variant="outline" onClick={onOpen}>
+      <Button size="sm" variant="outline" onClick={() => onOpen()}>
         {L.open}
       </Button>
     </div>

@@ -25,6 +25,14 @@ export default function StaffingTab() {
   const { isOwner, isAdmin } = useTenant();
   const canReview = isOwner || isAdmin;
   const [tab, setTab] = useState("shifts");
+  const [accessFocus, setAccessFocus] = useState<{
+    siteId: string;
+    n: number;
+  } | null>(null);
+  const openAccess = (siteId?: string) => {
+    setTab("access");
+    setAccessFocus(siteId ? { siteId, n: Date.now() } : null);
+  };
   const urgentReviews = useAccessReviewReminders().filter(
     (r) => r.due.state !== "dueSoon",
   ).length;
@@ -32,7 +40,7 @@ export default function StaffingTab() {
     <div className="space-y-3">
       <StaffingSetupGuide lang={lang} onGoToShifts={() => setTab("shifts")} />
       {canReview && tab !== "access" && (
-        <AccessReviewReminder lang={lang} onOpen={() => setTab("access")} />
+        <AccessReviewReminder lang={lang} onOpen={openAccess} />
       )}
       <Tabs value={tab} onValueChange={setTab} className="space-y-3">
         <TabsList className="no-print">
@@ -61,7 +69,7 @@ export default function StaffingTab() {
         </TabsContent>
         {canReview && (
           <TabsContent value="access">
-            <AccessReviewPanel lang={lang} />
+            <AccessReviewPanel lang={lang} focus={accessFocus} />
           </TabsContent>
         )}
       </Tabs>
