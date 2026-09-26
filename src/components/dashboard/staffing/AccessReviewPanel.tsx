@@ -1375,6 +1375,7 @@ export default function AccessReviewPanel({
 function PdfExportButton({
   L,
   onExport,
+  onExportCsv,
   sites,
 }: {
   /** When given, the panel also lets you pick which locations to include. */
