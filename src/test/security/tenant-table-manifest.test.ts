@@ -82,6 +82,8 @@ const COVERED_TABLES = new Set<string>([
   "staff_members",
   "staff_roles",
   "staffing_settings",
+  "site_access_change_requests",
+  "site_access_reviews",
 ]);
 
 /**
