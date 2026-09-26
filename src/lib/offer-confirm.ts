@@ -108,6 +108,21 @@ export async function writeOfferMainReservation(
     ...(opts.price != null ? { price_eur: opts.price } : {}),
   };
 
+  // The database allows one reservation per offer (unique source_offer_id),
+  // so simultaneous confirms cannot both insert. Reuse the winner's row.
+  const claimed = async () => {
+    if (!offer.id) return null;
+    const { data, error } = await db
+      .from("reservations")
+      .select()
+      .eq("source_offer_id", offer.id)
+      .eq("tenant_id", offer.tenant_id)
+      .maybeSingle();
+    if (error) throw error;
+    return data ? { ...data, alreadyConfirmed: true } : null;
+  };
+  const withOffer = offer.id ? { source_offer_id: offer.id } : {};
+
   // An offer made from a public booking turns that same booking into the
   // full reservation, so the guest never ends up with two bookings.
   if (offer.source_reservation_id) {
@@ -116,6 +131,7 @@ export async function writeOfferMainReservation(
       .from("reservations")
       .update({
         ...updateRow,
+        ...withOffer,
         staff_notes: "Public booking, confirmed via offer",
       })
       .eq("id", offer.source_reservation_id)
@@ -125,11 +141,19 @@ export async function writeOfferMainReservation(
     if (error) throw error;
     if (data) return data;
   }
+  const existing = await claimed();
+  if (existing) return existing;
   const { data, error } = await db
     .from("reservations")
-    .insert(mainRow)
+    .insert({ ...mainRow, ...withOffer })
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    if (error.code === "23505") {
+      const winner = await claimed();
+      if (winner) return winner;
+    }
+    throw error;
+  }
   return data;
 }
