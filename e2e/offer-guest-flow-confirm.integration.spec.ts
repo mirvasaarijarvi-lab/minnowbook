@@ -196,6 +196,62 @@ test.describe("Guest accepts offer online, staff confirm: exactly one reservatio
     }
   });
 
+  test("retrying staff confirmation after it succeeded returns the same reservation", async ({
+    page,
+    tenant,
+  }) => {
+    const sb = await staffClient();
+    const guest = makeTestGuest("GuestFlowRetry");
+    let offerId: string | undefined;
+    try {
+      const { offer, token } = await sentOffer(sb, tenant.id, guest);
+      offerId = offer.id;
+      await acceptAsGuest(page, token);
+
+      // Staff screen still holds the offer as it was before confirming.
+      const { data: stale } = await sb
+        .from("offers")
+        .select("*")
+        .eq("id", offer.id)
+        .single();
+
+      const first = await staffConfirm(sb, offer.id, tenant.resources.venue);
+      expect(first.alreadyConfirmed ?? false).toBe(false);
+      const before = await sb
+        .from("reservations")
+        .select("id,created_at,updated_at,status,guests_count")
+        .eq("id", first.id)
+        .single();
+      expect(before.error, before.error?.message).toBeNull();
+
+      // Retry, as if the first answer never reached the browser.
+      const retry = await writeOfferMainReservation(sb as any, stale as any, {
+        mainType: "venue",
+        resourceId: tenant.resources.venue,
+        price: null,
+        linkedGroupId: crypto.randomUUID(),
+      });
+      expect(retry.id).toBe(first.id);
+      expect(retry.alreadyConfirmed).toBe(true);
+
+      const rows = await reservationsFor(sb, tenant.id, guest.guest_email);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].id).toBe(first.id);
+      expect(rows[0].status).toBe("confirmed");
+
+      const after = await sb
+        .from("reservations")
+        .select("id,created_at,updated_at,status,guests_count")
+        .eq("id", first.id)
+        .single();
+      expect(after.data).toEqual(before.data);
+    } finally {
+      await cleanup(sb, tenant.id, offerId, guest.guest_email);
+    }
+  });
+
+
+
   test("confirming three times in a row keeps exactly one reservation", async ({
     page,
     tenant,
