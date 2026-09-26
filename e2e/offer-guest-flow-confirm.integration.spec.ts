@@ -172,6 +172,30 @@ test.describe("Guest accepts offer online, staff confirm: exactly one reservatio
     }
   });
 
+  test("confirming the same accepted offer twice leaves exactly one reservation", async ({
+    page,
+    tenant,
+  }) => {
+    const sb = await staffClient();
+    const guest = makeTestGuest("GuestFlowTwice");
+    let offerId: string | undefined;
+    try {
+      const { offer, token } = await sentOffer(sb, tenant.id, guest);
+      offerId = offer.id;
+      await acceptAsGuest(page, token);
+      const first = await staffConfirm(sb, offer.id, tenant.resources.venue);
+      const second = await staffConfirm(sb, offer.id, tenant.resources.venue);
+      expect(second.id).toBe(first.id);
+
+      const rows = await reservationsFor(sb, tenant.id, guest.guest_email);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].id).toBe(first.id);
+      expect(rows[0].status).toBe("confirmed");
+    } finally {
+      await cleanup(sb, tenant.id, offerId, guest.guest_email);
+    }
+  });
+
   test("updates the originating booking instead of adding a second one", async ({
     page,
     tenant,

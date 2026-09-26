@@ -64,7 +64,9 @@ export async function writeOfferMainReservation(
     price: number | null;
     linkedGroupId: string;
   },
-): Promise<{ id: string; alreadyConfirmed?: boolean } & Record<string, unknown>> {
+): Promise<
+  { id: string; alreadyConfirmed?: boolean } & Record<string, unknown>
+> {
   // Confirming twice (double click, two tabs, stale list) must not create a
   // second reservation: reuse the one already recorded on the offer.
   if (offer.id) {
