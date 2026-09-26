@@ -38,9 +38,19 @@ const SITE_B = {
   name: "Second hotel",
 };
 
-async function pickLocation(page: Page, current: RegExp, name: string) {
-  await page.getByRole("button", { name: current }).first().click();
-  await page.getByRole("button", { name, exact: true }).first().click();
+async function pickLocation(page: Page, name: string, listTitle: string) {
+  await page
+    .getByRole("combobox")
+    .filter({ hasText: /locations|Hotel|hotel|site|Mimmi/ })
+    .first()
+    .click();
+  await page.getByRole("option", { name, exact: true }).click();
+  // Open one of the test's shift lists so the Payroll Excel controls show.
+  await page.getByRole("combobox").nth(1).click();
+  await page
+    .getByRole("option", { name: new RegExp(`${listTitle} · ${name}$`) })
+    .first()
+    .click();
 }
 
 /** Press Payroll Excel and return every cell text in the downloaded file. */
@@ -88,6 +98,7 @@ test.describe("Payroll Excel download follows the selected location", () => {
     expect(signInErr, signInErr?.message).toBeNull();
 
     const day = futureDate(430);
+    const listLabel = "\\(3 wk\\)";
     const stamp = Date.now();
     const names = {
       a: `TEST Payroll A ${stamp}`,
@@ -149,6 +160,8 @@ test.describe("Payroll Excel download follows the selected location", () => {
         ([key, session]) => {
           localStorage.setItem(key, session);
           localStorage.setItem("mimmobook-lang", "en");
+          localStorage.setItem("mimmobook-tour-completed", "true");
+          localStorage.setItem("cookie-consent", "rejected");
         },
         [`sb-${ref}-auth-token`, JSON.stringify(signIn!.session)] as const,
       );
@@ -160,18 +173,19 @@ test.describe("Payroll Excel download follows the selected location", () => {
         .click({ timeout: 20_000 });
 
       // Location A: A's worker and the all-locations worker only.
-      await pickLocation(
-        page,
-        /All sites|Hotel Mimmi|Second hotel|Restaurante|Eventos|Another site/,
-        SITE_A.name,
-      );
+      const reject = page.getByRole("button", { name: "Reject all" });
+      if (await reject.isVisible().catch(() => false)) await reject.click();
+      const hideGuide = page.getByRole("button", { name: "Hide guide" });
+      if (await hideGuide.isVisible().catch(() => false))
+        await hideGuide.click();
+      await pickLocation(page, SITE_A.name, listLabel);
       let text = await downloadWorkbookText(page, day);
       expect(text).toContain(names.a);
       expect(text).toContain(names.all);
       expect(text).not.toContain(names.b);
 
       // Location B: B's worker and the all-locations worker only.
-      await pickLocation(page, new RegExp(SITE_A.name), SITE_B.name);
+      await pickLocation(page, SITE_B.name, listLabel);
       text = await downloadWorkbookText(page, day);
       expect(text).toContain(names.b);
       expect(text).toContain(names.all);
