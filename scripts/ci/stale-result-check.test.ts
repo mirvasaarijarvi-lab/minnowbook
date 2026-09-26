@@ -255,9 +255,7 @@ describe("stale-commit-check.sh (a finished run vs the branch head)", () => {
       [`repos/${REPO}/commits/feature`]: { sha: NEW },
       [`repos/${REPO}/compare/${OLD}...${NEW}`]: { ahead_by: 1 },
     });
-    expect(run(CHECK_SCRIPT, { ...env, FAIL_ON_STALE: "true" }).status).toBe(
-      1,
-    );
+    expect(run(CHECK_SCRIPT, { ...env, FAIL_ON_STALE: "true" }).status).toBe(1);
   });
 
   it("skips without failing when the branch head cannot be read", () => {
