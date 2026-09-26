@@ -110,14 +110,18 @@ const en = {
   estCost: "Estimated staff cost",
   hour: "Hour",
   noList: "No shift list covers this day, so nobody counts as on shift.",
-  historyNone: "No changes yet.",  setupTitle: "Set up staffing",
-  setupIntro: "A few steps before your first shift list. You can come back to this guide at any time.",
+  historyNone: "No changes yet.",
+  setupTitle: "Set up staffing",
+  setupIntro:
+    "A few steps before your first shift list. You can come back to this guide at any time.",
   setupStep1: "Add your locations",
-  setupStep1Hint: "One location is enough. Add more only if you plan shifts separately for different places.",
+  setupStep1Hint:
+    "One location is enough. Add more only if you plan shifts separately for different places.",
   setupStep2: "Add roles and staff",
   setupStep2Hint: "Add the roles you use, then the people who work for you.",
   setupStep3: "Assign staff to locations",
-  setupStep3Hint: "Pick where each person works. All locations means they can work anywhere.",
+  setupStep3Hint:
+    "Pick where each person works. All locations means they can work anywhere.",
   setupStep4: "Create your first shift list",
   setupStep4Hint: "Pick the location for the list and press New shift list.",
   setupLocationName: "New location name",
@@ -131,7 +135,8 @@ const en = {
   setupShow: "Setup guide",
   setupAllDone: "Staffing is set up. You can hide this guide.",
   setupCounts: "{roles} roles, {staff} active staff",
-  setupSingleSite: "You have one location, so everyone works there. Nothing to assign.",
+  setupSingleSite:
+    "You have one location, so everyone works there. Nothing to assign.",
   setupNoStaffYet: "Add staff first.",
   staffLocation: "Works at",
 };
@@ -248,14 +253,18 @@ const fi: Labels = {
   hour: "Tunti",
   noList:
     "Mikään vuorolista ei kata tätä päivää, joten ketään ei lasketa vuoroon.",
-  historyNone: "Ei vielä muutoksia.",  setupTitle: "Henkilöstön käyttöönotto",
-  setupIntro: "Muutama vaihe ennen ensimmäistä vuorolistaa. Voit palata tähän oppaaseen milloin tahansa.",
+  historyNone: "Ei vielä muutoksia.",
+  setupTitle: "Henkilöstön käyttöönotto",
+  setupIntro:
+    "Muutama vaihe ennen ensimmäistä vuorolistaa. Voit palata tähän oppaaseen milloin tahansa.",
   setupStep1: "Lisää toimipisteet",
-  setupStep1Hint: "Yksi toimipiste riittää. Lisää muita vain, jos suunnittelet vuorot eri paikoille erikseen.",
+  setupStep1Hint:
+    "Yksi toimipiste riittää. Lisää muita vain, jos suunnittelet vuorot eri paikoille erikseen.",
   setupStep2: "Lisää roolit ja henkilöstö",
   setupStep2Hint: "Lisää käyttämäsi roolit ja sitten työntekijät.",
   setupStep3: "Liitä henkilöstö toimipisteisiin",
-  setupStep3Hint: "Valitse, missä kukin työskentelee. Kaikki toimipisteet tarkoittaa, että henkilö voi työskennellä missä tahansa.",
+  setupStep3Hint:
+    "Valitse, missä kukin työskentelee. Kaikki toimipisteet tarkoittaa, että henkilö voi työskennellä missä tahansa.",
   setupStep4: "Luo ensimmäinen vuorolista",
   setupStep4Hint: "Valitse listan toimipiste ja paina Uusi vuorolista.",
   setupLocationName: "Uuden toimipisteen nimi",
@@ -269,7 +278,8 @@ const fi: Labels = {
   setupShow: "Käyttöönotto-opas",
   setupAllDone: "Henkilöstö on otettu käyttöön. Voit piilottaa tämän oppaan.",
   setupCounts: "{roles} roolia, {staff} aktiivista työntekijää",
-  setupSingleSite: "Sinulla on yksi toimipiste, joten kaikki työskentelevät siellä. Ei liitettävää.",
+  setupSingleSite:
+    "Sinulla on yksi toimipiste, joten kaikki työskentelevät siellä. Ei liitettävää.",
   setupNoStaffYet: "Lisää ensin henkilöstöä.",
   staffLocation: "Toimipiste",
 };
@@ -381,14 +391,19 @@ const sv: Labels = {
   estCost: "Beräknad personalkostnad",
   hour: "Timme",
   noList: "Ingen turlista täcker denna dag, så ingen räknas som i tjänst.",
-  historyNone: "Inga ändringar ännu.",  setupTitle: "Kom igång med personal",
-  setupIntro: "Några steg före din första turlista. Du kan återvända till guiden när som helst.",
+  historyNone: "Inga ändringar ännu.",
+  setupTitle: "Kom igång med personal",
+  setupIntro:
+    "Några steg före din första turlista. Du kan återvända till guiden när som helst.",
   setupStep1: "Lägg till dina platser",
-  setupStep1Hint: "En plats räcker. Lägg till fler bara om du planerar turer separat för olika ställen.",
+  setupStep1Hint:
+    "En plats räcker. Lägg till fler bara om du planerar turer separat för olika ställen.",
   setupStep2: "Lägg till roller och personal",
-  setupStep2Hint: "Lägg till rollerna du använder och sedan de som arbetar hos dig.",
+  setupStep2Hint:
+    "Lägg till rollerna du använder och sedan de som arbetar hos dig.",
   setupStep3: "Koppla personal till platser",
-  setupStep3Hint: "Välj var var och en arbetar. Alla platser betyder att personen kan arbeta var som helst.",
+  setupStep3Hint:
+    "Välj var var och en arbetar. Alla platser betyder att personen kan arbeta var som helst.",
   setupStep4: "Skapa din första turlista",
   setupStep4Hint: "Välj plats för listan och tryck på Ny turlista.",
   setupLocationName: "Namn på ny plats",

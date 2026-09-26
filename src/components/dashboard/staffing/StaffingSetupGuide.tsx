@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Circle, ListChecks } from "lucide-react";
 import { toast } from "sonner";
@@ -25,6 +25,56 @@ const siteSlug = (s: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 50) || "location";
+
+function Step({
+  n,
+  done,
+  optional,
+  title,
+  hint,
+  children,
+  doneLabel,
+  optionalLabel,
+}: {
+  n: number;
+  done: boolean;
+  optional?: boolean;
+  title: string;
+  hint: string;
+  children?: ReactNode;
+  doneLabel: string;
+  optionalLabel: string;
+}) {
+  return (
+    <li className="flex gap-3 border-t border-border pt-3 first:border-0 first:pt-0">
+      {done ? (
+        <CheckCircle2
+          className="mt-0.5 h-5 w-5 shrink-0 text-primary"
+          aria-hidden
+        />
+      ) : (
+        <Circle
+          className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground"
+          aria-hidden
+        />
+      )}
+      <div className="min-w-0 flex-1 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-sm font-semibold">
+            {n}. {title}
+          </h3>
+          {done ? (
+            <Badge variant="secondary">{doneLabel}</Badge>
+          ) : optional ? (
+            <Badge variant="outline">{optionalLabel}</Badge>
+          ) : null}
+        </div>
+        <p className="text-xs text-muted-foreground">{hint}</p>
+        {children}
+      </div>
+    </li>
+  );
+}
 
 /**
  * Owner/admin setup flow on the Staffing page: locations, roles and staff,
@@ -124,44 +174,6 @@ export default function StaffingSetupGuide({
       </div>
     );
 
-  const Step = ({
-    n,
-    done,
-    optional,
-    title,
-    hint,
-    children,
-  }: {
-    n: number;
-    done: boolean;
-    optional?: boolean;
-    title: string;
-    hint: string;
-    children?: React.ReactNode;
-  }) => (
-    <li className="flex gap-3 border-t border-border pt-3 first:border-0 first:pt-0">
-      {done ? (
-        <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
-      ) : (
-        <Circle className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
-      )}
-      <div className="min-w-0 flex-1 space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-semibold">
-            {n}. {title}
-          </h3>
-          {done ? (
-            <Badge variant="secondary">{L.setupDone}</Badge>
-          ) : optional ? (
-            <Badge variant="outline">{L.setupOptional}</Badge>
-          ) : null}
-        </div>
-        <p className="text-xs text-muted-foreground">{hint}</p>
-        {children}
-      </div>
-    </li>
-  );
-
   return (
     <section
       aria-labelledby="staffing-setup-title"
@@ -181,7 +193,14 @@ export default function StaffingSetupGuide({
         </Button>
       </div>
       <ol className="space-y-3">
-        <Step n={1} done={step1} title={L.setupStep1} hint={L.setupStep1Hint}>
+        <Step
+          doneLabel={L.setupDone}
+          optionalLabel={L.setupOptional}
+          n={1}
+          done={step1}
+          title={L.setupStep1}
+          hint={L.setupStep1Hint}
+        >
           {sites.length > 0 && (
             <p className="text-xs">{sites.map((s) => s.name).join(", ")}</p>
           )}
@@ -211,14 +230,25 @@ export default function StaffingSetupGuide({
           </form>
         </Step>
 
-        <Step n={2} done={step2} title={L.setupStep2} hint={L.setupStep2Hint}>
+        <Step
+          doneLabel={L.setupDone}
+          optionalLabel={L.setupOptional}
+          n={2}
+          done={step2}
+          title={L.setupStep2}
+          hint={L.setupStep2Hint}
+        >
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-xs">
               {L.setupCounts
                 .replace("{roles}", String(roles.length))
                 .replace("{staff}", String(active.length))}
             </span>
-            <Button variant="outline" size="sm" onClick={() => setStaffOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setStaffOpen(true)}
+            >
               {L.setupOpenStaff}
             </Button>
           </div>
@@ -238,7 +268,10 @@ export default function StaffingSetupGuide({
           ) : (
             <ul className="grid gap-2 sm:grid-cols-2">
               {active.map((x) => (
-                <li key={x.id} className="flex items-center justify-between gap-2 text-sm">
+                <li
+                  key={x.id}
+                  className="flex items-center justify-between gap-2 text-sm"
+                >
                   <span className="truncate">{x.name}</span>
                   <StaffSiteSelect
                     member={x}
@@ -250,7 +283,9 @@ export default function StaffingSetupGuide({
                         { id: x.id, name: x.name, site_id: v },
                         {
                           onError: (e) =>
-                            toast.error(`${L.error}: ${(e as Error)?.message ?? ""}`),
+                            toast.error(
+                              `${L.error}: ${(e as Error)?.message ?? ""}`,
+                            ),
                         },
                       )
                     }
@@ -261,7 +296,14 @@ export default function StaffingSetupGuide({
           )}
         </Step>
 
-        <Step n={4} done={step4} title={L.setupStep4} hint={L.setupStep4Hint}>
+        <Step
+          doneLabel={L.setupDone}
+          optionalLabel={L.setupOptional}
+          n={4}
+          done={step4}
+          title={L.setupStep4}
+          hint={L.setupStep4Hint}
+        >
           <Button
             size="sm"
             disabled={!step2}
