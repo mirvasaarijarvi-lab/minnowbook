@@ -302,6 +302,13 @@
       "when": 1790433912741,
       "tag": "0042_offers_realtime",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1790435254379,
+      "tag": "0043_faster_list_tenant_scoped_tables",
+      "breakpoints": true
     }
   ]
 }
