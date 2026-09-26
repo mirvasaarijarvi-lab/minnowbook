@@ -1,0 +1,467 @@
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useTenant } from "@/hooks/useTenant";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import type { StaffLang } from "@/lib/staffing/labels";
+
+const LABELS = {
+  en: {
+    intro:
+      "Check who can use each location. Add a change request for anything that looks wrong, then accept the location once all requests are handled.",
+    signIn: "Can sign in and see this location",
+    shiftStaff: "Works here on shift lists",
+    allLoc: "all locations",
+    owner: "Owner",
+    admin: "Admin",
+    staff: "Staff",
+    superadmin: "Superadmin",
+    notApproved: "not approved",
+    none: "Nobody",
+    unassigned: "Staff accounts with no location, so they see no bookings:",
+    request: "Request change",
+    notePh: "What should change?",
+    add: "Add",
+    openReq: "Change requests",
+    done: "Done",
+    dismiss: "Dismiss",
+    accept: "Accept access",
+    acceptBlocked: "Handle all change requests before accepting.",
+    accepted: "Accepted",
+    lastAccepted: "Last accepted {date}",
+    never: "Not reviewed yet",
+    changed: "Access changed since last review",
+    ok: "Saved",
+    noSites: "Add a location first.",
+  },
+  fi: {
+    intro:
+      "Tarkista, kuka voi käyttää kutakin toimipistettä. Lisää muutospyyntö kaikesta, mikä näyttää väärältä, ja hyväksy toimipiste, kun pyynnöt on käsitelty.",
+    signIn: "Voi kirjautua ja nähdä tämän toimipisteen",
+    shiftStaff: "Työskentelee täällä työvuorolistoilla",
+    allLoc: "kaikki toimipisteet",
+    owner: "Omistaja",
+    admin: "Ylläpitäjä",
+    staff: "Henkilökunta",
+    superadmin: "Pääkäyttäjä",
+    notApproved: "ei hyväksytty",
+    none: "Ei ketään",
+    unassigned:
+      "Henkilökunnan tilit ilman toimipistettä, joten ne eivät näe varauksia:",
+    request: "Pyydä muutosta",
+    notePh: "Mitä pitäisi muuttaa?",
+    add: "Lisää",
+    openReq: "Muutospyynnöt",
+    done: "Tehty",
+    dismiss: "Hylkää",
+    accept: "Hyväksy käyttöoikeudet",
+    acceptBlocked: "Käsittele kaikki muutospyynnöt ennen hyväksymistä.",
+    accepted: "Hyväksytty",
+    lastAccepted: "Hyväksytty viimeksi {date}",
+    never: "Ei vielä tarkistettu",
+    changed: "Käyttöoikeudet muuttuneet edellisen tarkistuksen jälkeen",
+    ok: "Tallennettu",
+    noSites: "Lisää ensin toimipiste.",
+  },
+  sv: {
+    intro:
+      "Kontrollera vem som kan använda varje plats. Lägg till en ändringsbegäran för det som ser fel ut och godkänn platsen när alla begäranden är hanterade.",
+    signIn: "Kan logga in och se den här platsen",
+    shiftStaff: "Arbetar här på arbetsscheman",
+    allLoc: "alla platser",
+    owner: "Ägare",
+    admin: "Administratör",
+    staff: "Personal",
+    superadmin: "Superadmin",
+    notApproved: "inte godkänd",
+    none: "Ingen",
+    unassigned: "Personalkonton utan plats, så de ser inga bokningar:",
+    request: "Begär ändring",
+    notePh: "Vad ska ändras?",
+    add: "Lägg till",
+    openReq: "Ändringsbegäranden",
+    done: "Klar",
+    dismiss: "Avfärda",
+    accept: "Godkänn behörigheter",
+    acceptBlocked: "Hantera alla ändringsbegäranden innan du godkänner.",
+    accepted: "Godkänd",
+    lastAccepted: "Senast godkänd {date}",
+    never: "Inte granskad än",
+    changed: "Behörigheterna har ändrats sedan senaste granskningen",
+    ok: "Sparat",
+    noSites: "Lägg till en plats först.",
+  },
+} as const;
+
+type Person = {
+  kind: "user" | "staff";
+  id: string;
+  name: string;
+  tag: string;
+  muted?: boolean;
+};
+
+export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
+  const L = LABELS[lang];
+  const { tenantId } = useTenant();
+  const qc = useQueryClient();
+  const key = ["access-review", tenantId];
+
+  const { data } = useQuery({
+    queryKey: key,
+    enabled: !!tenantId,
+    queryFn: async () => {
+      const t = tenantId!;
+      const [sites, users, siteUsers, staff, reviews, requests] =
+        await Promise.all([
+          supabase
+            .from("sites")
+            .select("id,name")
+            .eq("tenant_id", t)
+            .eq("is_active", true)
+            .order("name"),
+          supabase
+            .from("tenant_users")
+            .select("user_id,display_name,role,is_approved")
+            .eq("tenant_id", t),
+          supabase
+            .from("site_users")
+            .select("site_id,user_id")
+            .eq("tenant_id", t),
+          supabase
+            .from("staff_members")
+            .select("id,name,site_id,is_active")
+            .eq("tenant_id", t)
+            .eq("is_active", true)
+            .order("name"),
+          supabase
+            .from("site_access_reviews")
+            .select("site_id,snapshot,accepted_at")
+            .eq("tenant_id", t)
+            .order("accepted_at", { ascending: false }),
+          supabase
+            .from("site_access_change_requests")
+            .select("id,site_id,subject_name,note,created_at")
+            .eq("tenant_id", t)
+            .eq("status", "open")
+            .order("created_at"),
+        ]);
+      for (const r of [sites, users, siteUsers, staff, reviews, requests])
+        if (r.error) throw r.error;
+      return {
+        sites: sites.data ?? [],
+        users: users.data ?? [],
+        siteUsers: siteUsers.data ?? [],
+        staff: staff.data ?? [],
+        reviews: reviews.data ?? [],
+        requests: requests.data ?? [],
+      };
+    },
+  });
+
+  const roleLabel = (r: string) => (L as Record<string, string>)[r] ?? r;
+
+  const perSite = useMemo(() => {
+    if (!data) return [];
+    return data.sites.map((s) => {
+      const signIn: Person[] = data.users
+        .filter(
+          (u) =>
+            u.role !== "staff" ||
+            data.siteUsers.some(
+              (su) => su.site_id === s.id && su.user_id === u.user_id,
+            ),
+        )
+        .map((u) => ({
+          kind: "user",
+          id: u.user_id,
+          name: u.display_name || u.user_id.slice(0, 8),
+          tag:
+            u.role === "staff"
+              ? roleLabel(u.role)
+              : `${roleLabel(u.role)}, ${L.allLoc}`,
+          muted: !u.is_approved,
+        }));
+      const shift: Person[] = data.staff
+        .filter((m) => m.site_id === s.id || m.site_id == null)
+        .map((m) => ({
+          kind: "staff",
+          id: m.id,
+          name: m.name,
+          tag: m.site_id == null ? L.allLoc : "",
+        }));
+      const snapshot = {
+        users: signIn.map((p) => p.id).sort(),
+        staff: shift.map((p) => p.id).sort(),
+      };
+      const last = data.reviews.find((r) => r.site_id === s.id);
+      const changed =
+        !!last && JSON.stringify(last.snapshot) !== JSON.stringify(snapshot);
+      return {
+        site: s,
+        signIn,
+        shift,
+        snapshot,
+        last,
+        changed,
+        requests: data.requests.filter((r) => r.site_id === s.id),
+      };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, lang]);
+
+  const unassigned = (data?.users ?? []).filter(
+    (u) =>
+      u.role === "staff" &&
+      !(data?.siteUsers ?? []).some((su) => su.user_id === u.user_id),
+  );
+
+  const onErr = (e: unknown) =>
+    toast.error(e instanceof Error ? e.message : String(e));
+  const refresh = () => {
+    toast.success(L.ok);
+    qc.invalidateQueries({ queryKey: key });
+  };
+
+  const addReq = useMutation({
+    mutationFn: async (v: { siteId: string; p: Person; note: string }) => {
+      const { error } = await supabase
+        .from("site_access_change_requests")
+        .insert({
+          tenant_id: tenantId!,
+          site_id: v.siteId,
+          subject_kind: v.p.kind,
+          subject_id: v.p.id,
+          subject_name: v.p.name,
+          note: v.note,
+        });
+      if (error) throw error;
+    },
+    onSuccess: refresh,
+    onError: onErr,
+  });
+
+  const resolve = useMutation({
+    mutationFn: async (v: { id: string; status: "done" | "dismissed" }) => {
+      const { data: u } = await supabase.auth.getUser();
+      const { error } = await supabase
+        .from("site_access_change_requests")
+        .update({
+          status: v.status,
+          resolved_by: u.user?.id ?? null,
+          resolved_at: new Date().toISOString(),
+        })
+        .eq("id", v.id);
+      if (error) throw error;
+    },
+    onSuccess: refresh,
+    onError: onErr,
+  });
+
+  const accept = useMutation({
+    mutationFn: async (v: { siteId: string; snapshot: object }) => {
+      const { data: u } = await supabase.auth.getUser();
+      const { error } = await supabase.from("site_access_reviews").insert({
+        tenant_id: tenantId!,
+        site_id: v.siteId,
+        snapshot: v.snapshot as never,
+        accepted_by: u.user!.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: refresh,
+    onError: onErr,
+  });
+
+  const [draft, setDraft] = useState<{
+    siteId: string;
+    p: Person;
+    note: string;
+  } | null>(null);
+
+  if (data && data.sites.length === 0)
+    return <p className="text-sm text-muted-foreground">{L.noSites}</p>;
+
+  const fmt = (d: string) =>
+    new Date(d).toLocaleString(
+      lang === "fi" ? "fi-FI" : lang === "sv" ? "sv-SE" : "en-GB",
+    );
+
+  const PersonList = ({
+    siteId,
+    people,
+  }: {
+    siteId: string;
+    people: Person[];
+  }) =>
+    people.length === 0 ? (
+      <p className="text-sm text-muted-foreground">{L.none}</p>
+    ) : (
+      <ul className="divide-y divide-border">
+        {people.map((p) => {
+          const open =
+            draft?.siteId === siteId &&
+            draft.p.id === p.id &&
+            draft.p.kind === p.kind;
+          return (
+            <li key={p.kind + p.id} className="py-1.5 text-sm">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={p.muted ? "text-muted-foreground" : ""}>
+                  {p.name}
+                </span>
+                {p.tag && <Badge variant="outline">{p.tag}</Badge>}
+                {p.muted && <Badge variant="secondary">{L.notApproved}</Badge>}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="ml-auto h-7"
+                  onClick={() =>
+                    setDraft(open ? null : { siteId, p, note: "" })
+                  }
+                >
+                  {L.request}
+                </Button>
+              </div>
+              {open && (
+                <form
+                  className="mt-1 flex gap-2"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const note = draft.note.trim();
+                    if (!note) return;
+                    addReq.mutate(
+                      { siteId, p, note: note.slice(0, 1000) },
+                      { onSuccess: () => setDraft(null) },
+                    );
+                  }}
+                >
+                  <Input
+                    autoFocus
+                    aria-label={L.notePh}
+                    placeholder={L.notePh}
+                    value={draft.note}
+                    maxLength={1000}
+                    onChange={(e) =>
+                      setDraft({ ...draft, note: e.target.value })
+                    }
+                  />
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={addReq.isPending || !draft.note.trim()}
+                  >
+                    {L.add}
+                  </Button>
+                </form>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    );
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">{L.intro}</p>
+      {unassigned.length > 0 && (
+        <div className="flex gap-2 rounded-md border border-border bg-muted p-3 text-sm">
+          <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+          <span>
+            {L.unassigned}{" "}
+            {unassigned
+              .map((u) => u.display_name || u.user_id.slice(0, 8))
+              .join(", ")}
+          </span>
+        </div>
+      )}
+      {perSite.map((s) => (
+        <section
+          key={s.site.id}
+          className="space-y-3 rounded-lg border border-border bg-card p-4"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-base font-semibold">{s.site.name}</h3>
+            {s.last ? (
+              <Badge variant={s.changed ? "destructive" : "secondary"}>
+                {s.changed
+                  ? L.changed
+                  : L.lastAccepted.replace("{date}", fmt(s.last.accepted_at))}
+              </Badge>
+            ) : (
+              <Badge variant="outline">{L.never}</Badge>
+            )}
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <h4 className="mb-1 text-sm font-medium">{L.signIn}</h4>
+              <PersonList siteId={s.site.id} people={s.signIn} />
+            </div>
+            <div>
+              <h4 className="mb-1 text-sm font-medium">{L.shiftStaff}</h4>
+              <PersonList siteId={s.site.id} people={s.shift} />
+            </div>
+          </div>
+          {s.requests.length > 0 && (
+            <div>
+              <h4 className="mb-1 text-sm font-medium">{L.openReq}</h4>
+              <ul className="space-y-1">
+                {s.requests.map((r) => (
+                  <li
+                    key={r.id}
+                    className="flex flex-wrap items-center gap-2 rounded border border-border p-2 text-sm"
+                  >
+                    <span className="font-medium">{r.subject_name}:</span>
+                    <span className="min-w-0 flex-1 break-words">{r.note}</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7"
+                      disabled={resolve.isPending}
+                      onClick={() =>
+                        resolve.mutate({ id: r.id, status: "done" })
+                      }
+                    >
+                      {L.done}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7"
+                      disabled={resolve.isPending}
+                      onClick={() =>
+                        resolve.mutate({ id: r.id, status: "dismissed" })
+                      }
+                    >
+                      {L.dismiss}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              size="sm"
+              disabled={s.requests.length > 0 || accept.isPending}
+              onClick={() =>
+                accept.mutate({ siteId: s.site.id, snapshot: s.snapshot })
+              }
+            >
+              <CheckCircle2 className="mr-1 h-4 w-4" aria-hidden />
+              {L.accept}
+            </Button>
+            {s.requests.length > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {L.acceptBlocked}
+              </span>
+            )}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
