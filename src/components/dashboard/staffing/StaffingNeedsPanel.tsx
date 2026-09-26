@@ -16,7 +16,7 @@ export default function StaffingNeedsPanel({ lang }: { lang: StaffLang }) {
   const siteId = useSiteContext().selectedSiteId;
   const [date, setDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const { settings } = useStaffingSettings();
-  const { data: roster = [] } = useShiftsOnDate(date);
+  const { data: roster = [] } = useShiftsOnDate(date, siteId);
 
   const { data: bookings = [] } = useQuery({
     queryKey: ["staffing-bookings", tenantId, siteId, date],
