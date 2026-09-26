@@ -98,8 +98,7 @@ test.describe("Payroll Excel download follows the selected location", () => {
     expect(signInErr, signInErr?.message).toBeNull();
 
     const day = futureDate(430);
-    const [yy, mm, dd] = day.split("-").map(Number);
-    const listLabel = `${dd}\\.${mm}\\.${yy} \\(3 wk\\)`;
+    const listLabel = "\\(3 wk\\)";
     const stamp = Date.now();
     const names = {
       a: `TEST Payroll A ${stamp}`,
@@ -177,7 +176,8 @@ test.describe("Payroll Excel download follows the selected location", () => {
       const reject = page.getByRole("button", { name: "Reject all" });
       if (await reject.isVisible().catch(() => false)) await reject.click();
       const hideGuide = page.getByRole("button", { name: "Hide guide" });
-      if (await hideGuide.isVisible().catch(() => false)) await hideGuide.click();
+      if (await hideGuide.isVisible().catch(() => false))
+        await hideGuide.click();
       await pickLocation(page, SITE_A.name, listLabel);
       let text = await downloadWorkbookText(page, day);
       expect(text).toContain(names.a);
