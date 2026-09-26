@@ -58,7 +58,10 @@ export function useMarkAccessReviewed() {
       const t = tenantId!;
       const [users, siteUsers, staff, open, me] = await Promise.all([
         supabase.from("tenant_users").select("user_id,role").eq("tenant_id", t),
-        supabase.from("site_users").select("site_id,user_id").eq("tenant_id", t),
+        supabase
+          .from("site_users")
+          .select("site_id,user_id")
+          .eq("tenant_id", t),
         supabase
           .from("staff_members")
           .select("id,site_id,site_ids")
@@ -72,7 +75,8 @@ export function useMarkAccessReviewed() {
           .eq("status", "open"),
         supabase.auth.getUser(),
       ]);
-      for (const r of [users, siteUsers, staff, open]) if (r.error) throw r.error;
+      for (const r of [users, siteUsers, staff, open])
+        if (r.error) throw r.error;
       if ((open.count ?? 0) > 0) throw new OpenRequestsError();
       const snapshot = accessSnapshot(
         siteId,
