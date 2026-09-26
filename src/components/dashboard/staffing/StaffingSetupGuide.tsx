@@ -196,6 +196,8 @@ export default function StaffingSetupGuide({
         <Step
           doneLabel={L.setupDone}
           optionalLabel={L.setupOptional}
+          doneLabel={L.setupDone}
+          optionalLabel={L.setupOptional}
           n={1}
           done={step1}
           title={L.setupStep1}
@@ -233,6 +235,8 @@ export default function StaffingSetupGuide({
         <Step
           doneLabel={L.setupDone}
           optionalLabel={L.setupOptional}
+          doneLabel={L.setupDone}
+          optionalLabel={L.setupOptional}
           n={2}
           done={step2}
           title={L.setupStep2}
@@ -255,6 +259,8 @@ export default function StaffingSetupGuide({
         </Step>
 
         <Step
+          doneLabel={L.setupDone}
+          optionalLabel={L.setupOptional}
           n={3}
           done={step3}
           optional={!step3}
@@ -297,6 +303,8 @@ export default function StaffingSetupGuide({
         </Step>
 
         <Step
+          doneLabel={L.setupDone}
+          optionalLabel={L.setupOptional}
           doneLabel={L.setupDone}
           optionalLabel={L.setupOptional}
           n={4}
