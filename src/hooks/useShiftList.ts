@@ -33,6 +33,7 @@ export interface ShiftPeriod {
   start_date: string;
   weeks: number;
   title: string | null;
+  site_id: string | null;
 }
 export interface ShiftSlot {
   id: string;
@@ -117,7 +118,7 @@ export const useShiftPeriods = () => {
     queryFn: async () => {
       const { data, error } = await sb
         .from("shift_periods")
-        .select("id,start_date,weeks,title")
+        .select("id,start_date,weeks,title,site_id")
         .eq("tenant_id", tenantId)
         .order("start_date", { ascending: false });
       if (error) throw error;
@@ -156,17 +157,27 @@ export const usePeriodData = (periodId: string | null) => {
 };
 
 /** Shifts with times on one date, across every list (for staffing needs). */
-export const useShiftsOnDate = (date: string) => {
+export const useShiftsOnDate = (date: string, siteId: string | null = null) => {
   const { tenantId } = useTenant();
   return useQuery({
-    queryKey: ["shifts_on_date", tenantId, date],
+    queryKey: ["shifts_on_date", tenantId, date, siteId],
     enabled: !!tenantId,
     queryFn: async () => {
-      const { data, error } = await sb
+      // Location view: count lists for that location plus lists covering all locations.
+      let q = sb
         .from("shifts")
-        .select("start_time,end_time,actual_start_time,actual_end_time,code")
+        .select(
+          siteId
+            ? "start_time,end_time,actual_start_time,actual_end_time,code,shift_slots!inner(shift_periods!inner(site_id))"
+            : "start_time,end_time,actual_start_time,actual_end_time,code",
+        )
         .eq("tenant_id", tenantId)
         .eq("date", date);
+      if (siteId)
+        q = q.or(`site_id.eq.${siteId},site_id.is.null`, {
+          referencedTable: "shift_slots.shift_periods",
+        });
+      const { data, error } = await q;
       if (error) throw error;
       return data as Pick<
         ShiftRow,
@@ -334,12 +345,18 @@ export const useShiftMutations = (periodId: string | null) => {
         start_date: string;
         weeks: number;
         roles: string[];
+        site_id?: string | null;
       }) => {
         const t = need();
         const { data, error } = await sb
           .from("shift_periods")
-          .insert({ tenant_id: t, start_date: p.start_date, weeks: p.weeks })
-          .select("id,start_date,weeks,title")
+          .insert({
+            tenant_id: t,
+            start_date: p.start_date,
+            weeks: p.weeks,
+            site_id: p.site_id ?? null,
+          })
+          .select("id,start_date,weeks,title,site_id")
           .single();
         if (error) throw error;
         if (p.roles.length) {
@@ -353,6 +370,17 @@ export const useShiftMutations = (periodId: string | null) => {
           if (e2) throw e2;
         }
         return data as ShiftPeriod;
+      },
+      onSuccess: inv,
+    }),
+    setPeriodSite: useMutation({
+      mutationFn: async (p: { id: string; site_id: string | null }) => {
+        const { error } = await sb
+          .from("shift_periods")
+          .update({ site_id: p.site_id })
+          .eq("id", p.id)
+          .eq("tenant_id", need());
+        if (error) throw error;
       },
       onSuccess: inv,
     }),

@@ -25,6 +25,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTenant } from "@/hooks/useTenant";
 import { useTierGate } from "@/hooks/useTierGate";
+import { useSiteContext } from "@/hooks/useSiteContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   useStaffRoles,
   useStaffMembers,
@@ -143,7 +146,41 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   const bizLocked = isGated("basic", "professional");
   const { data: roles = [] } = useStaffRoles();
   const { data: members = [] } = useStaffMembers();
-  const { data: periods = [], isLoading } = useShiftPeriods();
+  const { data: allPeriods = [], isLoading } = useShiftPeriods();
+  const { tenantId } = useTenant();
+  const dashSiteId = useSiteContext().selectedSiteId;
+  const { data: sites = [] } = useQuery({
+    queryKey: ["staffing-sites", tenantId],
+    enabled: !!tenantId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sites")
+        .select("id,name")
+        .eq("tenant_id", tenantId!)
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const multiSite = sites.length > 1;
+  const siteName = (id: string | null) =>
+    id ? (sites.find((x) => x.id === id)?.name ?? L.location) : L.allLocations;
+  const [siteFilter, setSiteFilter] = useState<string>(dashSiteId ?? NONE);
+  const [newSite, setNewSite] = useState<string>(dashSiteId ?? NONE);
+  useEffect(() => {
+    setSiteFilter(dashSiteId ?? NONE);
+    setNewSite(dashSiteId ?? NONE);
+  }, [dashSiteId]);
+  const periods = useMemo(
+    () =>
+      siteFilter === NONE
+        ? allPeriods
+        : allPeriods.filter(
+            (p) => p.site_id === siteFilter || p.site_id === null,
+          ),
+    [allPeriods, siteFilter],
+  );
   const { settings } = useStaffingSettings();
   const [periodId, setPeriodId] = useState<string | null>(null);
   const [newStart, setNewStart] = useState(() =>
@@ -159,7 +196,8 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   const [onlyMember, setOnlyMember] = useState(NONE);
 
   useEffect(() => {
-    if (!periodId && periods.length) setPeriodId(periods[0].id);
+    if (periodId && periods.some((p) => p.id === periodId)) return;
+    setPeriodId(periods[0]?.id ?? null);
   }, [periods, periodId]);
   useEffect(() => {
     if (proLocked) setMode("planned");
@@ -209,7 +247,12 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   const createPeriod = () => {
     const weeks = Number(newWeeks);
     m.createPeriod.mutate(
-      { start_date: newStart, weeks, roles: roles.map((r) => r.key) },
+      {
+        start_date: newStart,
+        weeks,
+        roles: roles.map((r) => r.key),
+        site_id: newSite === NONE ? null : newSite,
+      },
       { onSuccess: (p) => setPeriodId(p.id), onError: err },
     );
   };
@@ -367,6 +410,24 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
       <style>{`@media print { @page { size: A3 landscape; margin: 8mm; } body * { visibility: hidden; } #shift-print, #shift-print * { visibility: visible; } #shift-print { position: absolute; left: 0; top: 0; width: 100%; } .no-print { display: none !important; } }`}</style>
 
       <div className="no-print flex flex-wrap items-end gap-2">
+        {multiSite && (
+          <div className="space-y-1">
+            <span className="text-xs text-muted-foreground">{L.location}</span>
+            <Select value={siteFilter} onValueChange={setSiteFilter}>
+              <SelectTrigger className="w-48" aria-label={L.location}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NONE}>{L.allLocations}</SelectItem>
+                {sites.map((x) => (
+                  <SelectItem key={x.id} value={x.id}>
+                    {x.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <div className="space-y-1">
           <span className="text-xs text-muted-foreground">{L.period}</span>
           <Select
@@ -386,6 +447,7 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
                 <SelectItem key={p.id} value={p.id}>
                   {format(parseISO(p.start_date), "d.M.yyyy")} ({p.weeks}{" "}
                   {lang === "fi" ? "vk" : lang === "sv" ? "v" : "wk"})
+                  {multiSite && ` · ${siteName(p.site_id)}`}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -421,6 +483,54 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
                 </SelectContent>
               </Select>
             </div>
+            {multiSite && (
+              <div className="space-y-1">
+                <span className="text-xs text-muted-foreground">
+                  {L.newLocation}
+                </span>
+                <Select value={newSite} onValueChange={setNewSite}>
+                  <SelectTrigger className="w-48" aria-label={L.newLocation}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>{L.allLocations}</SelectItem>
+                    {sites.map((x) => (
+                      <SelectItem key={x.id} value={x.id}>
+                        {x.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            {multiSite && period && (
+              <div className="space-y-1">
+                <span className="text-xs text-muted-foreground">
+                  {L.listLocation}
+                </span>
+                <Select
+                  value={period.site_id ?? NONE}
+                  onValueChange={(v) =>
+                    m.setPeriodSite.mutate(
+                      { id: period.id, site_id: v === NONE ? null : v },
+                      { onError: err },
+                    )
+                  }
+                >
+                  <SelectTrigger className="w-48" aria-label={L.listLocation}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE}>{L.allLocations}</SelectItem>
+                    {sites.map((x) => (
+                      <SelectItem key={x.id} value={x.id}>
+                        {x.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <Button onClick={createPeriod} disabled={m.createPeriod.isPending}>
               <Plus className="mr-1 h-4 w-4" />
               {L.newPeriod}
