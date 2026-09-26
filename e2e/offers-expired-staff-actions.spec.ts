@@ -1,4 +1,10 @@
-import { test, expect, SUPABASE_URL, SUPABASE_ANON_KEY, futureDate } from "./fixtures/test-tenant";
+import {
+  test,
+  expect,
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  futureDate,
+} from "./fixtures/test-tenant";
 import { createClient } from "@supabase/supabase-js";
 import type { Page, Locator } from "@playwright/test";
 
@@ -37,10 +43,12 @@ test.describe("Offers page: expired draft/sent offers keep staff actions", () =>
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: signIn, error: signInErr } = await sb.auth.signInWithPassword({
-      email: STAFF_EMAIL!,
-      password: STAFF_PASSWORD!,
-    });
+    const { data: signIn, error: signInErr } = await sb.auth.signInWithPassword(
+      {
+        email: STAFF_EMAIL!,
+        password: STAFF_PASSWORD!,
+      },
+    );
     expect(signInErr, signInErr?.message).toBeNull();
 
     const stamp = Date.now();
