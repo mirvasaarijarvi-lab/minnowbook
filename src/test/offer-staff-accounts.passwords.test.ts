@@ -85,9 +85,8 @@ vi.mock("@supabase/supabase-js", () => ({
 }));
 
 const run = async () => {
-  const { ensureOfferStaffAccounts } = await import(
-    "../../e2e/fixtures/offer-staff-accounts"
-  );
+  const { ensureOfferStaffAccounts } =
+    await import("../../e2e/fixtures/offer-staff-accounts");
   return ensureOfferStaffAccounts({
     url: "http://fake",
     anonKey: "anon",
