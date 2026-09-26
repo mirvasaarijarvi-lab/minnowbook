@@ -24,6 +24,9 @@ permissions: {}
 jobs:
   stale:
     name: stale-result
+    # Runs cancelled because a newer commit arrived have no result to
+    # mark; the newer run reports instead. Completed runs are still checked.
+    if: github.event.workflow_run.conclusion != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
