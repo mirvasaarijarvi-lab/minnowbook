@@ -2489,6 +2489,122 @@ export type Database = {
           },
         ]
       }
+      site_access_change_requests: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          note: string
+          resolved_at: string | null
+          resolved_by: string | null
+          site_id: string
+          status: string
+          subject_id: string
+          subject_kind: string
+          subject_name: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          note: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          site_id: string
+          status?: string
+          subject_id: string
+          subject_kind: string
+          subject_name?: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          note?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          site_id?: string
+          status?: string
+          subject_id?: string
+          subject_kind?: string
+          subject_name?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_access_change_requests_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_access_change_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_access_change_requests_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_access_reviews: {
+        Row: {
+          accepted_at: string
+          accepted_by: string
+          id: string
+          site_id: string
+          snapshot: Json
+          tenant_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          accepted_by?: string
+          id?: string
+          site_id: string
+          snapshot?: Json
+          tenant_id: string
+        }
+        Update: {
+          accepted_at?: string
+          accepted_by?: string
+          id?: string
+          site_id?: string
+          snapshot?: Json
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_access_reviews_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_access_reviews_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "site_access_reviews_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants_safe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       site_settings: {
         Row: {
           accent_color: string | null
