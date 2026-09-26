@@ -24,6 +24,29 @@ export type ResolvedRequest = {
   resolved_at: string | null;
 };
 
+export type AccessChange = {
+  id: string;
+  action: string;
+  subject_id: string;
+  subject_name: string;
+  old_site_id: string | null;
+  new_site_id: string | null;
+  changed_by: string | null;
+  changed_at: string;
+};
+
+/** A change matters to a location when it touches it or "all locations". */
+export function changeAffectsSite(c: AccessChange, siteId: string): boolean {
+  if (c.action === "staff_moved")
+    return (
+      c.old_site_id === siteId ||
+      c.new_site_id === siteId ||
+      c.old_site_id === null ||
+      c.new_site_id === null
+    );
+  return c.old_site_id === siteId || c.new_site_id === siteId;
+}
+
 export type HistoryEntry = {
   review: ReviewRow;
   /** Accepted time of the next review, or null when compared with now. */
@@ -33,6 +56,8 @@ export type HistoryEntry = {
   staffAdded: string[];
   staffRemoved: string[];
   requests: ResolvedRequest[];
+  /** Recorded location assignment changes in this period, oldest first. */
+  changes: AccessChange[];
 };
 
 export function readSnapshot(raw: unknown): AccessSnapshot {
@@ -55,6 +80,7 @@ export function buildSiteHistory(
   reviews: ReviewRow[],
   current: AccessSnapshot,
   requests: ResolvedRequest[],
+  changes: AccessChange[] = [],
 ): HistoryEntry[] {
   const mine = reviews
     .filter((r) => r.site_id === siteId)
@@ -79,6 +105,14 @@ export function buildSiteHistory(
           r.resolved_at > from &&
           (until === null || r.resolved_at <= until),
       ),
+      changes: changes
+        .filter(
+          (c) =>
+            changeAffectsSite(c, siteId) &&
+            c.changed_at > from &&
+            (until === null || c.changed_at <= until),
+        )
+        .sort((a, b) => a.changed_at.localeCompare(b.changed_at)),
     };
   });
 }
