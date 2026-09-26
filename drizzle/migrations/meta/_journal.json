@@ -239,6 +239,13 @@
       "when": 1790343753673,
       "tag": "0033_offer_guest_acceptance",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1790424981685,
+      "tag": "0034_staffing_shift_lists",
+      "breakpoints": true
     }
   ]
 }
