@@ -1,0 +1,81 @@
+name: Dependabot lockfile refresh
+
+# Dependabot runs in Bun mode, so its pull requests only update bun.lock.
+# This workflow regenerates package-lock.json on those pull requests and
+# pushes it back to the Dependabot branch, so "Lockfile sync (npm)" can pass.
+#
+# Token: a push made with the default GITHUB_TOKEN does not start other
+# workflows, so the required checks would never run on the new commit.
+# The push therefore uses the Dependabot secret DEPENDABOT_LOCKFILE_TOKEN
+# (a fine-grained token for this repository with "Contents: read and
+# write"). Without that secret the job stops with a clear error and does
+# not push anything.
+#
+# Safety: runs only for pull requests opened by Dependabot from this
+# repository. npm runs with --package-lock-only --ignore-scripts, so no
+# package code is executed.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize]
+
+permissions: {}
+
+concurrency:
+  group: dependabot-lockfile-refresh-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    name: refresh-package-lock
+    if: >-
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - name: Require the push token
+        env:
+          PUSH_TOKEN: ${{ secrets.DEPENDABOT_LOCKFILE_TOKEN }}
+        run: |
+          if [ -z "$PUSH_TOKEN" ]; then
+            echo "::error title=Missing DEPENDABOT_LOCKFILE_TOKEN::Add a Dependabot secret named DEPENDABOT_LOCKFILE_TOKEN (fine-grained token, this repository, Contents: read and write) so package-lock.json can be refreshed on Dependabot pull requests."
+            exit 1
+          fi
+
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.DEPENDABOT_LOCKFILE_TOKEN }}
+          persist-credentials: true
+
+      - uses: ./.github/actions/stale-commit-check
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Regenerate package-lock.json
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          node scripts/ci/check-npm-lockfile-hygiene.mjs --fix-urls
+          node scripts/ci/check-npm-lockfile-hygiene.mjs
+
+      - name: Commit and push if it changed
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "package-lock.json is already in sync; nothing to push."
+            exit 0
+          fi
+          git config user.name "dependabot-lockfile-refresh"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore(deps): refresh package-lock.json"
+          git push origin "HEAD:${BRANCH}"
+          echo "Pushed refreshed package-lock.json to ${BRANCH}."
