@@ -123,7 +123,7 @@ export function renderAccessReviewPdfs(
       doc.setFontSize(9);
     }
     if (bold) {
-      doc.setFillColor(235);
+      doc.setFillColor(235, 235, 235);
       doc.rect(MARGIN_X, y - lh - 0.5, WIDTH, h, "F");
     }
     let x = MARGIN_X;
