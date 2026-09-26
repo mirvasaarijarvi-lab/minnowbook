@@ -12,6 +12,7 @@ import { memberSiteIds } from "@/lib/staffing/siteScope";
 import { accessSnapshot } from "@/lib/staffing/accessSnapshot";
 import { useStaffingSettings } from "@/hooks/useShiftList";
 import { reviewDue } from "@/lib/staffing/accessReviewDue";
+import { downloadCsv, isoDay, toCsv } from "@/lib/staffing/accessReviewCsv";
 import {
   Popover,
   PopoverContent,
@@ -110,6 +111,17 @@ const LABELS = {
     pdfAllLocations: "All locations",
     pdfPickOne: "Choose at least one location",
     sumTitle: "Access review summary",
+    csvDownload: "Download summary CSV",
+    csvDue: "Next review due",
+    csvDaysOverdue: "Days overdue",
+    csvChanged: "Access changed since review",
+    csvAbout: "Change requests about",
+    csvYes: "Yes",
+    csvNo: "No",
+    csvOverdue: "Overdue",
+    csvNever: "Never reviewed",
+    csvDueSoon: "Due soon",
+    csvOk: "Up to date",
     sumLocation: "Location",
     sumLatest: "Latest review",
     sumStatus: "Review status",
@@ -200,6 +212,17 @@ const LABELS = {
     pdfAllLocations: "Kaikki kohteet",
     pdfPickOne: "Valitse vähintään yksi kohde",
     sumTitle: "Käyttöoikeuksien tarkastuksen yhteenveto",
+    csvDownload: "Lataa yhteenveto CSV",
+    csvDue: "Seuraava tarkistus",
+    csvDaysOverdue: "Päiviä myöhässä",
+    csvChanged: "Oikeuksia muutettu tarkistuksen jälkeen",
+    csvAbout: "Muutospyynnöt koskevat",
+    csvYes: "Kyllä",
+    csvNo: "Ei",
+    csvOverdue: "Myöhässä",
+    csvNever: "Ei koskaan tarkistettu",
+    csvDueSoon: "Erääntyy pian",
+    csvOk: "Ajan tasalla",
     sumLocation: "Kohde",
     sumLatest: "Viimeisin tarkistus",
     sumStatus: "Tarkistuksen tila",
@@ -289,6 +312,17 @@ const LABELS = {
     pdfAllLocations: "Alla platser",
     pdfPickOne: "Välj minst en plats",
     sumTitle: "Sammanfattning av behörighetsgranskning",
+    csvDownload: "Ladda ner sammanfattning CSV",
+    csvDue: "Nästa granskning",
+    csvDaysOverdue: "Dagar försenad",
+    csvChanged: "Behörighet ändrad sedan granskning",
+    csvAbout: "Ändringsbegäran gäller",
+    csvYes: "Ja",
+    csvNo: "Nej",
+    csvOverdue: "Försenad",
+    csvNever: "Aldrig granskad",
+    csvDueSoon: "Snart dags",
+    csvOk: "Aktuell",
     sumLocation: "Plats",
     sumLatest: "Senaste granskning",
     sumStatus: "Granskningsstatus",
@@ -881,6 +915,66 @@ export default function AccessReviewPanel({
     }
   };
 
+  const exportSummaryCsv = (siteIds: string[]): boolean => {
+    const chosen = perSite.filter((x) => siteIds.includes(x.site.id));
+    if (chosen.length === 0) {
+      toast.error(L.pdfPickOne);
+      return false;
+    }
+    try {
+      const now = new Date();
+      const name =
+        chosen.length === perSite.length
+          ? "all-locations"
+          : chosen.length === 1
+            ? chosen[0].site.name
+            : `${chosen.length}-locations`;
+      const state = {
+        overdue: L.csvOverdue,
+        never: L.csvNever,
+        dueSoon: L.csvDueSoon,
+        ok: L.csvOk,
+      };
+      const rows = chosen.map((x) => {
+        const d = reviewDue(x.last?.accepted_at, interval, now);
+        return [
+          x.site.name,
+          isoDay(x.last?.accepted_at),
+          state[d.state],
+          isoDay(d.dueAt),
+          d.daysOverdue,
+          x.changed ? L.csvYes : L.csvNo,
+          x.requests.length,
+          x.requests.map((q) => q.subject_name).join(", "),
+        ];
+      });
+      downloadCsv(
+        accessReviewFileName((tenant as any)?.slug, name, now).replace(
+          /\.pdf$/,
+          "_summary.csv",
+        ),
+        toCsv(
+          [
+            L.sumLocation,
+            L.sumLatest,
+            L.sumStatus,
+            L.csvDue,
+            L.csvDaysOverdue,
+            L.csvChanged,
+            L.sumOpen,
+            L.csvAbout,
+          ],
+          rows,
+        ),
+      );
+      return true;
+    } catch (e) {
+      console.error(e);
+      toast.error(L.pdfFailed);
+      return false;
+    }
+  };
+
   const PersonList = ({
     siteId,
     people,
@@ -1042,6 +1136,7 @@ export default function AccessReviewPanel({
             onExport={(period, ids) =>
               exportCombined(ids ?? perSite.map((x) => x.site.id), period)
             }
+            onExportCsv={(ids) => exportSummaryCsv(ids)}
           />
         </div>
       )}
@@ -1293,8 +1388,11 @@ function PdfExportButton({
     pdfTo: string;
     pdfPeriodHint: string;
     pdfDownload: string;
+    csvDownload?: string;
   };
   onExport: (period: AuditPeriod, siteIds?: string[]) => Promise<boolean>;
+  /** Combined only: the summary table as a spreadsheet file. */
+  onExportCsv?: (siteIds: string[]) => boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<string[] | null>(null);
@@ -1381,6 +1479,20 @@ function PdfExportButton({
           <FileDown className="mr-1 h-4 w-4" aria-hidden />
           {L.pdfDownload}
         </Button>
+        {onExportCsv && sites && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full"
+            disabled={busy || chosen.length === 0}
+            onClick={() => {
+              if (onExportCsv(chosen)) setOpen(false);
+            }}
+          >
+            <FileDown className="mr-1 h-4 w-4" aria-hidden />
+            {L.csvDownload}
+          </Button>
+        )}
       </PopoverContent>
     </Popover>
   );
