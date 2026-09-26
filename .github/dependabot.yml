@@ -1,7 +1,10 @@
 version: 2
 updates:
-  # npm dependencies (includes js-yaml and any transitive YAML parsers like yaml, @stoplight/yaml, etc.)
-  - package-ecosystem: "npm"
+  # JavaScript dependencies (includes js-yaml and any transitive YAML parsers
+  # like yaml, @stoplight/yaml, etc.). The project is managed by Bun
+  # (bun.lock is the source of truth), and Dependabot's npm ecosystem refuses
+  # to run on Bun projects, so this must stay "bun".
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: "daily"
@@ -96,8 +99,8 @@ updates:
       - dependency-name: "tailwind-merge"
         update-types: ["version-update:semver-major"]
       # Recharts major upgrades replace a large transitive graph and
-      # Dependabot only refreshes package-lock.json, while CI also requires
-      # bun.lock. Upgrade Recharts majors deliberately with both lockfiles.
+      # Dependabot only refreshes bun.lock, while CI also requires
+      # package-lock.json. Upgrade Recharts majors deliberately with both lockfiles.
       - dependency-name: "recharts"
         update-types: ["version-update:semver-major"]
       - dependency-name: "vaul"
