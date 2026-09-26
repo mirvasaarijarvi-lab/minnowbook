@@ -127,6 +127,11 @@ const featureGroups = [
         titleKey: "features.f12Title" as const,
         descKey: "features.f12Desc" as const,
       },
+      {
+        icon: CalendarClock,
+        titleKey: "features.staffing" as const,
+        descKey: "features.staffingDesc" as const,
+      },
     ],
   },
   {

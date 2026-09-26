@@ -142,6 +142,7 @@ const Pricing = () => {
     [t("pricing.staffShifts"), "✓", "✓", "✓", "✓"],
     [t("pricing.staffRealized"), "—", "✓", "✓", "✓"],
     [t("pricing.staffPayroll"), "—", "—", "✓", "✓"],
+    [t("pricing.staffLocations"), "✓", "✓", "✓", "✓"],
     [t("pricing.crossReservations"), "✓", "✓", "✓", "✓"],
     [
       t("pricing.analyticsReports"),
