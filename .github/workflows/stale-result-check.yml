@@ -18,6 +18,10 @@ on:
       - Security Regression Tests (Unit)
       - RLS / CORS Security Gate
     types: [completed]
+  # A push makes the previous commit outdated. Checks that already finished
+  # on it are marked stale by the stale-after-push job below.
+  push:
+    branches: ["**"]
 
 permissions: {}
 
@@ -26,7 +30,7 @@ jobs:
     name: stale-result
     # Runs cancelled because a newer commit arrived have no result to
     # mark; the newer run reports instead. Completed runs are still checked.
-    if: github.event.workflow_run.conclusion != 'cancelled'
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -64,3 +68,31 @@ jobs:
             -f conclusion=neutral \
             -f "output[title]=STALE: ${WF} (${CONCLUSION}) tested an older commit" \
             -f "output[summary]=This ${CONCLUSION} result is for ${TESTED_SHA:0:7}. The branch head is now ${TIP:0:7} (${BEHIND} newer commit(s)), so it does not describe the latest code. Run: ${RUN_URL}"
+
+  stale-after-push:
+    name: stale-after-push
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - name: Mark finished checks on the previous commit as stale
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          # The watched workflows are the ones listed under on.workflow_run,
+          # so both jobs always cover the same checks.
+          WORKFLOWS=$(sed -n '/^  workflow_run:/,/^    types:/p' .github/workflows/stale-result-check.yml \
+            | sed -n 's/^      - //p')
+          export WORKFLOWS
+          bash scripts/ci/mark-stale-on-push.sh
