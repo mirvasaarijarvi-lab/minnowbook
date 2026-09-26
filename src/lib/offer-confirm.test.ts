@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { offerHasStaffActions, writeOfferMainReservation } from "./offer-confirm";
+import {
+  offerHasStaffActions,
+  writeOfferMainReservation,
+} from "./offer-confirm";
 
 const TODAY = "2026-09-26";
 const PAST = "2026-09-20";
@@ -8,9 +11,9 @@ describe("offerHasStaffActions (regression: expired offers keep actions)", () =>
   it.each(["draft", "sent"])(
     "keeps Send, Confirm and Mark declined for an expired %s offer",
     (status) => {
-      expect(
-        offerHasStaffActions({ status, expires_on: PAST }, TODAY),
-      ).toBe(true);
+      expect(offerHasStaffActions({ status, expires_on: PAST }, TODAY)).toBe(
+        true,
+      );
     },
   );
 
@@ -24,14 +27,18 @@ describe("offerHasStaffActions (regression: expired offers keep actions)", () =>
   });
 
   it("keeps actions for open offers that have not expired", () => {
-    expect(offerHasStaffActions({ status: "sent", expires_on: "2026-10-01" }, TODAY)).toBe(true);
+    expect(
+      offerHasStaffActions({ status: "sent", expires_on: "2026-10-01" }, TODAY),
+    ).toBe(true);
     expect(offerHasStaffActions({ status: "draft" }, TODAY)).toBe(true);
   });
 
   it.each(["confirmed", "declined", "expired"])(
     "hides actions for a closed %s offer",
     (status) => {
-      expect(offerHasStaffActions({ status, expires_on: PAST }, TODAY)).toBe(false);
+      expect(offerHasStaffActions({ status, expires_on: PAST }, TODAY)).toBe(
+        false,
+      );
     },
   );
 
@@ -51,7 +58,10 @@ function fakeDb(existing: Record<string, any> | null = null) {
         inserts.push(row);
         return {
           select: () => ({
-            single: async () => ({ data: { id: "res-new", ...row }, error: null }),
+            single: async () => ({
+              data: { id: "res-new", ...row },
+              error: null,
+            }),
           }),
         };
       },
