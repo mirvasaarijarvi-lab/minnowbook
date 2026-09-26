@@ -30,6 +30,7 @@ export function offerHasStaffActions(
 }
 
 export interface ConfirmOfferInput {
+  id?: string;
   tenant_id: string;
   event_date: string;
   start_time?: string | null;
@@ -47,7 +48,7 @@ export interface ConfirmOfferInput {
 
 /** Minimal slice of the database client used to write the main reservation. */
 export interface ReservationWriter {
-  from(table: "reservations"): any;
+  from(table: "reservations" | "offers"): any;
 }
 
 /**
@@ -63,7 +64,29 @@ export async function writeOfferMainReservation(
     price: number | null;
     linkedGroupId: string;
   },
-): Promise<{ id: string } & Record<string, unknown>> {
+): Promise<
+  { id: string; alreadyConfirmed?: boolean } & Record<string, unknown>
+> {
+  // Confirming twice (double click, two tabs, stale list) must not create a
+  // second reservation: reuse the one already recorded on the offer.
+  if (offer.id) {
+    const { data: current, error: curErr } = await db
+      .from("offers")
+      .select("status,reservation_ids")
+      .eq("id", offer.id)
+      .maybeSingle();
+    if (curErr) throw curErr;
+    const existingId = current?.reservation_ids?.[0];
+    if (current?.status === "confirmed" && existingId) {
+      const { data: existing, error: exErr } = await db
+        .from("reservations")
+        .select()
+        .eq("id", existingId)
+        .maybeSingle();
+      if (exErr) throw exErr;
+      if (existing) return { ...existing, alreadyConfirmed: true };
+    }
+  }
   const mainRow = {
     tenant_id: offer.tenant_id,
     reservation_type: opts.mainType,

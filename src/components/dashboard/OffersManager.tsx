@@ -393,6 +393,11 @@ const OffersManager = () => {
           linkedGroupId,
         },
       );
+      if (mainRes.alreadyConfirmed) {
+        // Already confirmed elsewhere: keep the one reservation, add nothing.
+        toast.success(t("offers.confirmedSuccess"));
+        return;
+      }
       const resIds = [mainRes.id];
 
       // Legs whose menu text becomes kitchen order lines.
