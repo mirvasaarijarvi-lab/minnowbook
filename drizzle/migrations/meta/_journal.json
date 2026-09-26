@@ -281,6 +281,13 @@
       "when": 1790429482342,
       "tag": "0039_site_access_change_log",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790429781557,
+      "tag": "0040_staff_members_multiple_sites",
+      "breakpoints": true
     }
   ]
 }
