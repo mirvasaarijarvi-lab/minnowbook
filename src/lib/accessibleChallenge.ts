@@ -18,9 +18,51 @@ export interface AccessibleChallenge {
 type ChallengeLang = "en" | "fi" | "sv";
 
 const NUMBER_WORDS: Record<ChallengeLang, readonly string[]> = {
-  en: ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"],
-  fi: ["nolla", "yksi", "kaksi", "kolme", "neljä", "viisi", "kuusi", "seitsemän", "kahdeksan", "yhdeksän", "kymmenen", "yksitoista", "kaksitoista"],
-  sv: ["noll", "ett", "två", "tre", "fyra", "fem", "sex", "sju", "åtta", "nio", "tio", "elva", "tolv"],
+  en: [
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+  ],
+  fi: [
+    "nolla",
+    "yksi",
+    "kaksi",
+    "kolme",
+    "neljä",
+    "viisi",
+    "kuusi",
+    "seitsemän",
+    "kahdeksan",
+    "yhdeksän",
+    "kymmenen",
+    "yksitoista",
+    "kaksitoista",
+  ],
+  sv: [
+    "noll",
+    "ett",
+    "två",
+    "tre",
+    "fyra",
+    "fem",
+    "sex",
+    "sju",
+    "åtta",
+    "nio",
+    "tio",
+    "elva",
+    "tolv",
+  ],
 };
 
 const COLOURS: Record<ChallengeLang, readonly string[]> = {
@@ -49,21 +91,24 @@ const TEXT: Record<
     plus: (a, b) => `What is ${a} plus ${b}?`,
     nth: (o, l) => `Which word is ${o} in this list: ${l}?`,
     count: (w, l) => `How many times does the word "${w}" appear here: ${l}?`,
-    numberHint: (n, w) => `Answer with a number or the word for it, for example ${n} or ${w}.`,
+    numberHint: (n, w) =>
+      `Answer with a number or the word for it, for example ${n} or ${w}.`,
     wordHint: "Answer with one word from the list.",
   },
   fi: {
     plus: (a, b) => `Paljonko on ${a} plus ${b}?`,
     nth: (o, l) => `Mikä sana on ${o} tässä luettelossa: ${l}?`,
     count: (w, l) => `Montako kertaa sana "${w}" esiintyy tässä: ${l}?`,
-    numberHint: (n, w) => `Vastaa numerolla tai sanalla, esimerkiksi ${n} tai ${w}.`,
+    numberHint: (n, w) =>
+      `Vastaa numerolla tai sanalla, esimerkiksi ${n} tai ${w}.`,
     wordHint: "Vastaa yhdellä luettelon sanalla.",
   },
   sv: {
     plus: (a, b) => `Vad är ${a} plus ${b}?`,
     nth: (o, l) => `Vilket ord är ${o} i den här listan: ${l}?`,
     count: (w, l) => `Hur många gånger förekommer ordet "${w}" här: ${l}?`,
-    numberHint: (n, w) => `Svara med en siffra eller ett ord, till exempel ${n} eller ${w}.`,
+    numberHint: (n, w) =>
+      `Svara med en siffra eller ett ord, till exempel ${n} eller ${w}.`,
     wordHint: "Svara med ett ord från listan.",
   },
 };
@@ -109,7 +154,11 @@ export const createAccessibleChallenge = (
   }
 
   if (kind === 1) {
-    const list = [pick(COLOURS[lang]), pick(COLOURS[lang]), pick(COLOURS[lang])];
+    const list = [
+      pick(COLOURS[lang]),
+      pick(COLOURS[lang]),
+      pick(COLOURS[lang]),
+    ];
     const index = Math.floor(Math.random() * 3);
     return {
       question: text.nth(ORDINALS[lang][index], list.join(", ")),

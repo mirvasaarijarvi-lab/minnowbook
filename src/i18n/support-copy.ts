@@ -202,7 +202,8 @@ const en: SupportCopy = {
 };
 
 const fi: SupportCopy = {
-  faqHeading: "UKK: Hotellit, toimipisteiden omat asetukset ja keittiötilaukset",
+  faqHeading:
+    "UKK: Hotellit, toimipisteiden omat asetukset ja keittiötilaukset",
   faqIntro: "Nopeat vastaukset MimmoBookin uusimmista ominaisuuksista.",
   faq: [
     {
@@ -483,8 +484,7 @@ const sv: SupportCopy = {
     sentTitle: "Supportärendet har skickats",
     sentDesc: "Vårt team svarar dig via e-post.",
     openingMail: "Öppnar ditt e-postprogram…",
-    openingMailDesc:
-      "Om inget händer, använd knappen Visa adressen nedan.",
+    openingMailDesc: "Om inget händer, använd knappen Visa adressen nedan.",
     failTitle: "Ärendet kunde inte skickas",
     failDesc: "Försök igen om en stund.",
   },

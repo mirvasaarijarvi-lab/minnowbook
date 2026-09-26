@@ -292,9 +292,7 @@ const Support = () => {
             >
               {copy.faqHeading}
             </h2>
-            <p className="text-muted-foreground">
-              {copy.faqIntro}
-            </p>
+            <p className="text-muted-foreground">{copy.faqIntro}</p>
           </div>
 
           {copy.faq.map((section, sIdx) => {
