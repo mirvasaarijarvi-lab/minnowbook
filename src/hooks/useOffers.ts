@@ -47,6 +47,12 @@ export interface Offer {
   last_send_provider_id: string | null;
   /** Public booking this offer was made from, if any. */
   source_reservation_id?: string | null;
+  /** Audit (write-once, set by the database): who confirmed and when. */
+  confirmed_by?: string | null;
+  confirmed_by_name?: string | null;
+  confirmed_at?: string | null;
+  confirmed_reservation_id?: string | null;
+  reservation_created_at?: string | null;
 }
 
 export const useOffers = (showArchived = false) => {
