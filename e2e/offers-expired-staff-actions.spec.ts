@@ -20,6 +20,9 @@ import type { Page, Locator } from "@playwright/test";
  */
 const STAFF_EMAIL = process.env.E2E_STAFF_EMAIL;
 const STAFF_PASSWORD = process.env.E2E_STAFF_PASSWORD;
+// Alternative to a password: an already signed-in staff session (JSON with
+// access_token and refresh_token) for the shared test business.
+const STAFF_SESSION = process.env.E2E_STAFF_SESSION_JSON;
 
 const yesterday = () => {
   const d = new Date();
@@ -32,8 +35,8 @@ const card = (page: Page, guest: string): Locator =>
 
 test.describe("Offers page: expired draft/sent offers keep staff actions", () => {
   test.skip(
-    !STAFF_EMAIL || !STAFF_PASSWORD,
-    "Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.",
+    !STAFF_SESSION && (!STAFF_EMAIL || !STAFF_PASSWORD),
+    "Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD (or E2E_STAFF_SESSION_JSON) to run this spec.",
   );
 
   test("shows Send, Confirm and Mark declined for expired draft and sent offers", async ({
@@ -43,18 +46,19 @@ test.describe("Offers page: expired draft/sent offers keep staff actions", () =>
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const { data: signIn, error: signInErr } = await sb.auth.signInWithPassword(
-      {
-        email: STAFF_EMAIL!,
-        password: STAFF_PASSWORD!,
-      },
-    );
+    const { data: signIn, error: signInErr } = STAFF_SESSION
+      ? await sb.auth.setSession(JSON.parse(STAFF_SESSION))
+      : await sb.auth.signInWithPassword({
+          email: STAFF_EMAIL!,
+          password: STAFF_PASSWORD!,
+        });
     expect(signInErr, signInErr?.message).toBeNull();
 
     const stamp = Date.now();
     const base = {
       tenant_id: tenant.id,
       guest_email: `test-offer-expired-${stamp}@example.com`,
+      guest_phone: "+358 40 0000000",
       event_date: futureDate(40),
       start_time: "18:00",
       end_time: "22:00",
