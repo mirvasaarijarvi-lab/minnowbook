@@ -66,10 +66,14 @@ export function toSafeEvents<T extends Record<string, unknown>>(
   });
 }
 
-/** Escape a value for RFC 4180 CSV. */
+/**
+ * Escape a value for RFC 4180 CSV and neutralise spreadsheet formulas:
+ * strings starting with = + - @ tab or CR get a leading apostrophe.
+ */
 function csvCell(value: unknown): string {
   if (value === null || value === undefined) return "";
-  const s = typeof value === "string" ? value : String(value);
+  let s = typeof value === "string" ? value : String(value);
+  if (typeof value === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   if (/[",\r\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
   return s;
 }

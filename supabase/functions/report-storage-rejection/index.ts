@@ -271,29 +271,39 @@ export async function handleReportStorageRejectionRequest(req: Request): Promise
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // SECURITY: a tenant attribution is only kept when the caller proves
-  // membership. Anonymous or non-member callers are recorded without a
-  // tenant, so nobody can raise tenant-scoped alerts for another business.
+  // SECURITY: only signed-in callers may write telemetry. Anonymous
+  // requests are refused so nobody can flood events or trip alerts.
+  const bearer = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "").trim();
+  let uid: string | null = null;
+  if (bearer) {
+    try {
+      const { data: userData } = await sb.auth.getUser(bearer);
+      uid = userData?.user?.id ?? null;
+    } catch {
+      uid = null;
+    }
+  }
+  if (!uid) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // A tenant attribution is only kept when the caller proves membership.
   if (ev.tenant_id) {
     let member = false;
-    const bearer = req.headers.get("Authorization")?.replace(/^Bearer\s+/i, "").trim();
-    if (bearer) {
-      try {
-        const { data: userData } = await sb.auth.getUser(bearer);
-        const uid = userData?.user?.id;
-        if (uid) {
-          const { data: tu } = await sb
-            .from("tenant_users")
-            .select("tenant_id")
-            .eq("user_id", uid)
-            .eq("tenant_id", ev.tenant_id)
-            .eq("is_approved", true)
-            .maybeSingle();
-          member = !!tu;
-        }
-      } catch {
-        member = false;
-      }
+    try {
+      const { data: tu } = await sb
+        .from("tenant_users")
+        .select("tenant_id")
+        .eq("user_id", uid)
+        .eq("tenant_id", ev.tenant_id)
+        .eq("is_approved", true)
+        .maybeSingle();
+      member = !!tu;
+    } catch {
+      member = false;
     }
     if (!member) ev.tenant_id = null;
   }

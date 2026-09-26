@@ -60,16 +60,18 @@ function forward(event: RejectedStoragePathEvent): void {
   // Tenant-attributed events must prove membership with the user's
   // session token, which sendBeacon cannot carry, so they use fetch.
   void (async () => {
+    // The endpoint only accepts signed-in callers, so anonymous events
+    // are kept in the local console line only.
     let token: string | null = null;
-    if (event.tenantId) {
-      try {
-        const { supabase } = await import("@/integrations/supabase/client");
-        const { data } = await supabase.auth.getSession();
-        token = data.session?.access_token ?? null;
-      } catch {
-        token = null;
-      }
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data } = await supabase.auth.getSession();
+      token = data.session?.access_token ?? null;
+    } catch {
+      token = null;
     }
+    if (!token) return;
+
 
     if (!token) {
       try {
