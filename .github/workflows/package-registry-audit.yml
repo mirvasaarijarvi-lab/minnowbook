@@ -1,0 +1,74 @@
+name: Package registry and audit gate
+
+# Fails when any npm package record (package-lock.json or bun.lock)
+# points at a private or sandbox-internal registry URL, or when the
+# security audit finds a vulnerability at or above AUDIT_LEVEL in the
+# packages that ship with the app. Runs on every pull request and push
+# (no path filter) so it can be a required check.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: package-registry-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AUDIT_LEVEL: ${{ vars.AUDIT_LEVEL || 'moderate' }}
+
+jobs:
+  registry-urls:
+    name: public-registry-urls
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - name: Package records use public registry URLs only
+        run: node scripts/ci/check-npm-lockfile-hygiene.mjs
+
+  audit:
+    name: security-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+      - name: Validate AUDIT_LEVEL
+        run: |
+          case "$AUDIT_LEVEL" in
+            low|moderate|high|critical) echo "Threshold: $AUDIT_LEVEL" ;;
+            *) echo "::error::AUDIT_LEVEL='$AUDIT_LEVEL' must be low, moderate, high or critical."; exit 1 ;;
+          esac
+      - name: npm audit (production dependencies)
+        run: |
+          set -o pipefail
+          if ! npm audit --omit=dev --audit-level="$AUDIT_LEVEL" | tee audit.txt; then
+            {
+              echo "### Security audit failed"
+              echo ""
+              echo "Vulnerabilities at or above \`$AUDIT_LEVEL\` were found in app dependencies."
+              echo '```'
+              tail -n 60 audit.txt
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::npm audit found vulnerabilities at or above $AUDIT_LEVEL. Update the package or add an override in package.json."
+            exit 1
+          fi
