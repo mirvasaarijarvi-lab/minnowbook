@@ -25,6 +25,19 @@ export const pdfSafe = (t: string) =>
     .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u201C\u201D]/g, '"');
 
+/** First page of a combined report: one row per location. */
+export interface AccessReviewSummary {
+  title: string;
+  business: string;
+  meta: [string, string][];
+  /** Column headers: location, latest review, status, open change requests. */
+  columns: [string, string, string, string];
+  rows: [string, string, string, string][];
+  footer: string;
+}
+
+const SUMMARY_COLS = [52, 34, 50, 38] as const;
+
 const PAGE_H = 297;
 const MARGIN_X = 18;
 const TOP = 20;
@@ -45,6 +58,7 @@ export function renderAccessReviewPdf(
 export function renderAccessReviewPdfs(
   JsPDFCtor: typeof JsPDF,
   reports: AccessReviewReport[],
+  summary?: AccessReviewSummary,
 ): JsPDF {
   const doc = new JsPDFCtor({ unit: "mm", format: "a4" });
   const footers: string[] = [];
@@ -90,9 +104,53 @@ export function renderAccessReviewPdfs(
   };
 
   let current = "";
+
+  /** One table row; cells wrap and the row keeps together across pages. */
+  const row = (cells: string[], bold: boolean, header?: string[]) => {
+    doc.setFont("helvetica", bold ? "bold" : "normal");
+    doc.setFontSize(9);
+    const lh = 9 * 0.42;
+    const wrapped = cells.map((c, i) =>
+      doc.splitTextToSize(pdfSafe(c), SUMMARY_COLS[i] - 3),
+    );
+    const h = Math.max(...wrapped.map((w: string[]) => w.length)) * lh + 3;
+    if (y + h > BOTTOM) {
+      doc.addPage();
+      footers.push(current);
+      y = TOP;
+      if (header) row(header, true);
+      doc.setFont("helvetica", bold ? "bold" : "normal");
+      doc.setFontSize(9);
+    }
+    if (bold) {
+      doc.setFillColor(235, 235, 235);
+      doc.rect(MARGIN_X, y - lh - 0.5, WIDTH, h, "F");
+    }
+    let x = MARGIN_X;
+    wrapped.forEach((w: string[], i: number) => {
+      w.forEach((line, j) => doc.text(line, x + 1.5, y + j * lh));
+      x += SUMMARY_COLS[i];
+    });
+    y += h;
+    doc.setDrawColor(200);
+    doc.line(MARGIN_X, y - lh - 0.5, MARGIN_X + WIDTH, y - lh - 0.5);
+  };
+
+  if (summary) {
+    current = summary.footer;
+    footers.push(summary.footer);
+    write(summary.title, 16, "bold", 0, 1);
+    write(summary.business, 12, "normal", 0, 3);
+    for (const [k, v] of summary.meta)
+      write(k ? `${k}: ${v}` : v, 9.5, "normal", 0, 0.5);
+    y += 6;
+    row(summary.columns, true);
+    for (const r of summary.rows) row(r, false, summary.columns);
+  }
+
   reports.forEach((r, idx) => {
     current = r.footer;
-    if (idx > 0) doc.addPage();
+    if (idx > 0 || summary) doc.addPage();
     footers.push(r.footer);
     y = TOP;
     write(r.title, 16, "bold", 0, 1);
