@@ -47,14 +47,7 @@ import {
   focusAdjacentShiftField,
   focusShiftFieldByArrow,
 } from "@/lib/staffing/shiftFieldNavigation";
-import {
-  buildPayroll,
-  payrollDayHeaders,
-  payrollDayValues,
-  payrollSummaryHeaders,
-  payrollSummaryValues,
-  toCsv,
-} from "@/lib/staffing/shiftPayroll";
+import { buildPayroll, toCsv } from "@/lib/staffing/shiftPayroll";
 import { sanitizePathSegment } from "@/lib/sanitize-path";
 import { STAFF_LABELS, type StaffLang } from "@/lib/staffing/labels";
 import StaffRegisterDialog from "./StaffRegisterDialog";
@@ -301,7 +294,7 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
     download(toCsv([head, ...rows]), `${fileBase}_shifts`);
   };
 
-  const payroll = (kind: "days" | "summary") => {
+  const payroll = async () => {
     if (!period || !data) return;
     const inDays = new Set(days);
     const { days: rows, summary } = buildPayroll(
@@ -314,22 +307,19 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
       })),
       settings.rules,
     );
-    if (kind === "days")
-      download(
-        toCsv([
-          payrollDayHeaders(lang),
-          ...rows.map((r) => payrollDayValues(r, lang)),
-        ]),
-        `${fileBase}_payroll`,
-      );
-    else
-      download(
-        toCsv([
-          payrollSummaryHeaders(lang),
-          ...summary.map(payrollSummaryValues),
-        ]),
-        `${fileBase}_payroll_summary`,
-      );
+    try {
+      const { buildPayrollWorkbook, XLSX_MIME } =
+        await import("@/lib/staffing/shiftPayrollXlsx");
+      const buf = await buildPayrollWorkbook(rows, summary, lang);
+      const url = URL.createObjectURL(new Blob([buf], { type: XLSX_MIME }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${sanitizePathSegment(`${fileBase}_payroll`)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(L.payrollError);
+    }
   };
 
   const workerSheet = async (memberId: string) => {
@@ -489,22 +479,12 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => payroll("days")}
+                onClick={() => void payroll()}
                 disabled={bizLocked}
                 title={bizLocked ? L.upgradePayroll : undefined}
               >
                 <FileSpreadsheet className="mr-1 h-4 w-4" />
-                {L.payrollCsv}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => payroll("summary")}
-                disabled={bizLocked}
-                title={bizLocked ? L.upgradePayroll : undefined}
-              >
-                <FileSpreadsheet className="mr-1 h-4 w-4" />
-                {L.payrollSummaryCsv}
+                {L.payrollExcel}
               </Button>
               <Button
                 size="sm"
