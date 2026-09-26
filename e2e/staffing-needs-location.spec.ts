@@ -72,6 +72,8 @@ test.describe("Staffing needs follow the selected location", () => {
     page,
     tenant,
   }) => {
+    // Leave room for cleanup even when a UI step times out.
+    test.setTimeout(90_000);
     const sb: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
@@ -169,7 +171,7 @@ test.describe("Staffing needs follow the selected location", () => {
         .getByRole("button", { name: /^Staffing/ })
         .or(page.getByRole("link", { name: /^Staffing/ }))
         .first()
-        .click();
+        .click({ timeout: 20_000 });
       await page.getByRole("tab", { name: "Staffing needs" }).click();
       await page.locator("#needs-date").fill(day);
 
@@ -195,15 +197,9 @@ test.describe("Staffing needs follow the selected location", () => {
       await expectRow(page, "10:00", 20, 1);
       await expectRow(page, "14:00", 30, 1);
     } finally {
-      if (periodIds.length) {
-        await sb
-          .from("shifts")
-          .delete()
-          .eq("date", day)
-          .eq("tenant_id", tenant.id);
-        await sb.from("shift_slots").delete().in("period_id", periodIds);
+      // Deleting a shift list also removes its rows and shifts.
+      if (periodIds.length)
         await sb.from("shift_periods").delete().in("id", periodIds);
-      }
       await sb
         .from("reservations")
         .delete()
