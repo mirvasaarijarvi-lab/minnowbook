@@ -73,6 +73,15 @@ const COVERED_TABLES = new Set<string>([
   "tenant_opening_hours",
   "tenant_settings",
   "tenant_users",
+  // Staffing tables, covered by the anon-denial sweep in cross-tenant-rls.test.ts.
+  "shift_change_log",
+  "shift_periods",
+  "shift_slots",
+  "shifts",
+  "staff_member_contacts",
+  "staff_members",
+  "staff_roles",
+  "staffing_settings",
 ]);
 
 /**
