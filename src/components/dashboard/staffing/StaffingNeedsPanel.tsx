@@ -13,8 +13,7 @@ import { STAFF_LABELS, type StaffLang } from "@/lib/staffing/labels";
 export default function StaffingNeedsPanel({ lang }: { lang: StaffLang }) {
   const L = STAFF_LABELS[lang];
   const { tenantId } = useTenant();
-  const siteCtx = useSiteContext() as any;
-  const siteId: string | null = siteCtx?.activeSiteId ?? siteCtx?.currentSiteId ?? null;
+  const siteId = useSiteContext().selectedSiteId;
   const [date, setDate] = useState(() => format(new Date(), "yyyy-MM-dd"));
   const { settings } = useStaffingSettings();
   const { data: roster = [] } = useShiftsOnDate(date);
@@ -80,7 +79,7 @@ export default function StaffingNeedsPanel({ lang }: { lang: StaffLang }) {
         </table>
       )}
       <ul className="text-xs text-muted-foreground">
-        {needBookings.map((b, i) => <li key={i}>{b.start_time}{b.end_time ? ` to ${b.end_time}` : ""}: {b.guests} {L.guests.toLowerCase()}, {L.needed.toLowerCase()} {suggestStaff(b.reservation_type, b.guests, settings)}</li>)}
+        {needBookings.map((b, i) => <li key={i}>{b.start_time}{b.end_time ? ` → ${b.end_time}` : ""}: {b.guests} {L.guests.toLowerCase()}, {L.needed.toLowerCase()} {suggestStaff(b.reservation_type, b.guests, settings)}</li>)}
       </ul>
     </div>
   );

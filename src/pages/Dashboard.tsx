@@ -61,6 +61,7 @@ import ProfileSettings from "@/components/dashboard/ProfileSettings";
 import GuidedTour, { TourStep } from "@/components/dashboard/GuidedTour";
 import OffersManager from "@/components/dashboard/OffersManager";
 import KitchenOrdersPanel from "@/components/dashboard/KitchenOrdersPanel";
+import StaffingTab from "@/components/dashboard/staffing/StaffingTab";
 import BookingValidationLogPanel from "@/components/dashboard/BookingValidationLogPanel";
 import SamplePeriodBanner from "@/components/dashboard/SamplePeriodBanner";
 import OnboardingChecklist from "@/components/dashboard/OnboardingChecklist";
@@ -350,6 +351,7 @@ const Dashboard = () => {
     resources: gatedView("resources", <ResourceManagement />),
     offers: gatedView("reservations", <OffersManager />),
     kitchen: gatedView("reservations", <KitchenOrdersPanel />),
+    staffing: gatedView("reservations", <StaffingTab />),
     reports: gatedView(
       "reports",
       <ReportsWorkspace>
