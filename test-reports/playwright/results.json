@@ -4,7 +4,7 @@
       "/nix/store/31sh8fzcbg4sjahp3zj002j0ca8sfvvr-nodejs-22.22.0/bin/node",
       "/dev-server/node_modules/.bin/playwright",
       "test",
-      "e2e/offer-from-public-booking-lifecycle.spec.ts",
+      "e2e/offers-expired-staff-actions.spec.ts",
       "--list"
     ],
     "configFile": "/dev-server/playwright.config.ts",
@@ -80,20 +80,20 @@
   },
   "suites": [
     {
-      "title": "offer-from-public-booking-lifecycle.spec.ts",
-      "file": "offer-from-public-booking-lifecycle.spec.ts",
+      "title": "offers-expired-staff-actions.spec.ts",
+      "file": "offers-expired-staff-actions.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Offer from a public booking: full lifecycle",
-          "file": "offer-from-public-booking-lifecycle.spec.ts",
-          "line": 93,
+          "title": "Offers page: expired draft/sent offers keep staff actions",
+          "file": "offers-expired-staff-actions.spec.ts",
+          "line": 33,
           "column": 6,
           "specs": [
             {
-              "title": "guest booking data flows into the offer, acceptance converts the same booking",
+              "title": "shows Send, Confirm and Mark declined for expired draft and sent offers",
               "ok": true,
               "tags": [],
               "tests": [
@@ -104,8 +104,8 @@
                       "type": "skip",
                       "description": "Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.",
                       "location": {
-                        "file": "/dev-server/e2e/offer-from-public-booking-lifecycle.spec.ts",
-                        "line": 94,
+                        "file": "/dev-server/e2e/offers-expired-staff-actions.spec.ts",
+                        "line": 34,
                         "column": 8
                       }
                     }
@@ -117,39 +117,9 @@
                   "status": "skipped"
                 }
               ],
-              "id": "72e173258a2719c70997-4355a9e7f57173b19e57",
-              "file": "offer-from-public-booking-lifecycle.spec.ts",
-              "line": 99,
-              "column": 3
-            },
-            {
-              "title": "declined and expired offers leave the guest booking untouched",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 30000,
-                  "annotations": [
-                    {
-                      "type": "skip",
-                      "description": "Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.",
-                      "location": {
-                        "file": "/dev-server/e2e/offer-from-public-booking-lifecycle.spec.ts",
-                        "line": 94,
-                        "column": 8
-                      }
-                    }
-                  ],
-                  "expectedStatus": "skipped",
-                  "projectId": "chromium",
-                  "projectName": "chromium",
-                  "results": [],
-                  "status": "skipped"
-                }
-              ],
-              "id": "72e173258a2719c70997-3187134d16222f17fdd3",
-              "file": "offer-from-public-booking-lifecycle.spec.ts",
-              "line": 245,
+              "id": "201d1ab32af183e89e64-e4dbb3c35fc900088851",
+              "file": "offers-expired-staff-actions.spec.ts",
+              "line": 39,
               "column": 3
             }
           ]
@@ -159,10 +129,10 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-25T13:41:02.756Z",
-    "duration": 415.672,
+    "startTime": "2026-09-26T12:36:53.595Z",
+    "duration": 275.34799999999996,
     "expected": 0,
-    "skipped": 2,
+    "skipped": 1,
     "unexpected": 0,
     "flaky": 0
   }

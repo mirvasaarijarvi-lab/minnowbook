@@ -1,14 +1,6 @@
-<testsuites id="" name="" tests="2" failures="0" skipped="2" errors="0" time="0.41567200000000004">
-<testsuite name="offer-from-public-booking-lifecycle.spec.ts" timestamp="2026-09-25T13:41:03.170Z" hostname="chromium" tests="2" failures="0" skipped="2" time="0" errors="0">
-<testcase name="Offer from a public booking: full lifecycle › guest booking data flows into the offer, acceptance converts the same booking" classname="offer-from-public-booking-lifecycle.spec.ts">
-<properties>
-<property name="skip" value="Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.">
-</property>
-</properties>
-<skipped>
-</skipped>
-</testcase>
-<testcase name="Offer from a public booking: full lifecycle › declined and expired offers leave the guest booking untouched" classname="offer-from-public-booking-lifecycle.spec.ts">
+<testsuites id="" name="" tests="1" failures="0" skipped="1" errors="0" time="0.275348">
+<testsuite name="offers-expired-staff-actions.spec.ts" timestamp="2026-09-26T12:36:53.869Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
+<testcase name="Offers page: expired draft/sent offers keep staff actions › shows Send, Confirm and Mark declined for expired draft and sent offers" classname="offers-expired-staff-actions.spec.ts">
 <properties>
 <property name="skip" value="Set E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD to run this spec.">
 </property>
