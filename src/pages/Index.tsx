@@ -66,6 +66,11 @@ const featureKeys: {
     titleKey: "features.offersAndCross",
     descKey: "features.offersAndCrossDesc",
   },
+  {
+    icon: CalendarClock,
+    titleKey: "features.staffing",
+    descKey: "features.staffingDesc",
+  },
 ];
 
 const stepKeys: {

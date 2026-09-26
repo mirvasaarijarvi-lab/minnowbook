@@ -241,6 +241,7 @@ const Support = () => {
           t("support.faqC5"),
           t("support.faqC6"),
           t("support.faqC7"),
+          t("support.faqC8"),
         ],
       },
     ],
