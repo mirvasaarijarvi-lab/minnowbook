@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:7cfb8d9a-51af-5351-910c-36601e890abf",
+  "serialNumber": "urn:uuid:dd91500b-4a57-5ed3-82d4-a9358eb34809",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "d2fa9f7c9489468c9a0dffc368a5a7932c871fdd03b68e0d16b5ec0cbe6c139c"
+          "value": "972a83f3194c13e120356ecb69c1af23b1ffb22edaf939b8c8430fb791544d12"
         }
       ]
     }
@@ -395,11 +395,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@types%2Fnode@26.6.1",
+      "bom-ref": "pkg:npm/@types%2Fnode@26.6.2",
       "type": "library",
       "name": "@types/node",
-      "version": "26.6.1",
-      "purl": "pkg:npm/@types%2Fnode@26.6.1",
+      "version": "26.6.2",
+      "purl": "pkg:npm/@types%2Fnode@26.6.2",
       "scope": "optional"
     },
     {
@@ -529,6 +529,14 @@
       "version": "0.5.7",
       "purl": "pkg:npm/eslint-plugin-react-refresh@0.5.7",
       "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/exceljs@4.4.0",
+      "type": "library",
+      "name": "exceljs",
+      "version": "4.4.0",
+      "purl": "pkg:npm/exceljs@4.4.0",
+      "scope": "required"
     },
     {
       "bom-ref": "pkg:npm/flatted@3.4.4",
