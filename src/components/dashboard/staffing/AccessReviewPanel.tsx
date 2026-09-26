@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, AlertTriangle } from "lucide-react";
+import { CheckCircle2, AlertTriangle, FileDown } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -11,6 +11,11 @@ import type { StaffLang } from "@/lib/staffing/labels";
 import { memberSiteIds } from "@/lib/staffing/siteScope";
 import { useStaffingSettings } from "@/hooks/useShiftList";
 import { reviewDue } from "@/lib/staffing/accessReviewDue";
+import {
+  accessReviewFileName,
+  renderAccessReviewPdf,
+  type AccessReviewReport,
+} from "@/lib/staffing/accessReviewPdf";
 import {
   buildSiteHistory,
   changeAffectsSite,
@@ -67,6 +72,16 @@ const LABELS = {
     reqDone: "done",
     reqDismissed: "dismissed",
     unknown: "Removed person",
+    pdf: "Download audit PDF",
+    pdfTitle: "Access review audit report",
+    pdfGenerated: "Generated",
+    pdfStatus: "Review status",
+    pdfInterval: "Review interval",
+    pdfCurrent: "Current access",
+    pdfOpen: "Open change requests",
+    pdfNone: "None",
+    pdfFooter: "MimmoBook access review report",
+    pdfFailed: "Could not create the PDF",
     reviewEvery: "Review each location every",
     daysN: "{n} days",
     overdueBy: "Review overdue by {days} days",
@@ -124,6 +139,16 @@ const LABELS = {
     reqDone: "tehty",
     reqDismissed: "hylätty",
     unknown: "Poistettu henkilö",
+    pdf: "Lataa tarkastusraportti (PDF)",
+    pdfTitle: "Käyttöoikeuksien tarkastusraportti",
+    pdfGenerated: "Luotu",
+    pdfStatus: "Tarkistuksen tila",
+    pdfInterval: "Tarkistusväli",
+    pdfCurrent: "Nykyiset käyttöoikeudet",
+    pdfOpen: "Avoimet muutospyynnöt",
+    pdfNone: "Ei yhtään",
+    pdfFooter: "MimmoBook käyttöoikeusraportti",
+    pdfFailed: "PDF:n luominen epäonnistui",
     reviewEvery: "Tarkista jokainen toimipiste",
     daysN: "{n} päivän välein",
     overdueBy: "Tarkistus myöhässä {days} päivää",
@@ -180,6 +205,16 @@ const LABELS = {
     reqDone: "klar",
     reqDismissed: "avfärdad",
     unknown: "Borttagen person",
+    pdf: "Ladda ner granskningsrapport (PDF)",
+    pdfTitle: "Granskningsrapport för behörigheter",
+    pdfGenerated: "Skapad",
+    pdfStatus: "Granskningsstatus",
+    pdfInterval: "Granskningsintervall",
+    pdfCurrent: "Nuvarande behörigheter",
+    pdfOpen: "Öppna ändringsbegäranden",
+    pdfNone: "Inga",
+    pdfFooter: "MimmoBook behörighetsrapport",
+    pdfFailed: "Det gick inte att skapa PDF-filen",
     reviewEvery: "Granska varje plats var",
     daysN: "{n}:e dag",
     overdueBy: "Granskningen är {days} dagar försenad",
@@ -200,7 +235,7 @@ type Person = {
 
 export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
   const L = LABELS[lang];
-  const { tenantId, isOwner, isAdmin } = useTenant();
+  const { tenantId, tenant, isOwner, isAdmin } = useTenant();
   const canEditSignIn = isOwner || isAdmin;
   const qc = useQueryClient();
   const key = ["access-review", tenantId];
@@ -528,6 +563,125 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
       ? ` ${L.byWho.replace("{name}", userName(c.changed_by))}`
       : "";
     return `${fmt(c.changed_at)}: ${text}${by}`;
+  };
+
+  const dueText = (last: string | null | undefined) => {
+    const d = reviewDue(last, interval);
+    return d.state === "overdue"
+      ? L.overdueBy.replace("{days}", String(d.daysOverdue))
+      : d.state === "never"
+        ? L.reviewNeeded
+        : L.dueOn.replace("{date}", fmt(d.dueAt!.toISOString()));
+  };
+
+  const exportPdf = async (s: (typeof perSite)[number]) => {
+    try {
+      const now = new Date();
+      const report: AccessReviewReport = {
+        title: L.pdfTitle,
+        business: (tenant as any)?.name ?? "",
+        location: s.site.name,
+        meta: [
+          [L.pdfGenerated, now.toLocaleString(lang === "en" ? "en-GB" : lang === "fi" ? "fi-FI" : "sv-SE")],
+          [
+            L.pdfStatus,
+            (s.last
+              ? L.lastAccepted.replace("{date}", fmt(s.last.accepted_at)) + ", "
+              : L.never + ", ") +
+              (s.changed ? L.changed + ", " : "") +
+              dueText(s.last?.accepted_at),
+          ],
+          [L.pdfInterval, L.daysN.replace("{n}", String(interval))],
+        ],
+        sections: [
+          {
+            heading: L.pdfCurrent,
+            blocks: [
+              {
+                title: L.signIn,
+                lines: s.signIn.length
+                  ? s.signIn.map(
+                      (p) =>
+                        p.name +
+                        (p.tag ? ` (${p.tag})` : "") +
+                        (p.muted ? `, ${L.notApproved}` : ""),
+                    )
+                  : [L.none],
+              },
+              {
+                title: L.shiftStaff,
+                lines: s.shift.length
+                  ? s.shift.map((p) => p.name + (p.tag ? ` (${p.tag})` : ""))
+                  : [L.none],
+              },
+            ],
+          },
+          {
+            heading: L.pdfOpen,
+            empty: L.pdfNone,
+            blocks: [
+              {
+                lines: s.requests.map(
+                  (q) => `${fmt(q.created_at)}: ${q.subject_name}: ${q.note}`,
+                ),
+              },
+            ],
+          },
+          {
+            heading: L.history,
+            empty: L.never,
+            blocks: s.history.map((h) => {
+              const lines: string[] = [
+                h.untilAt
+                  ? L.untilNext.replace("{date}", fmt(h.untilAt))
+                  : L.untilNow,
+              ];
+              const diffs: [string, string[]][] = [
+                [L.gainedSignIn, h.usersAdded.map(userName)],
+                [L.lostSignIn, h.usersRemoved.map(userName)],
+                [L.addedShift, h.staffAdded.map(staffName)],
+                [L.removedShift, h.staffRemoved.map(staffName)],
+              ];
+              const shown = diffs.filter(([, n]) => n.length);
+              if (shown.length)
+                for (const [label, n] of shown)
+                  lines.push(`${label}: ${n.join(", ")}`);
+              else lines.push(L.noChanges);
+              for (const c of h.changes)
+                lines.push(`${L.changesLog}: ${describeChange(c)}`);
+              for (const q of h.requests)
+                lines.push(
+                  `${L.handled}: ${q.subject_name}: ${q.note} (${
+                    q.status === "done" ? L.reqDone : L.reqDismissed
+                  })`,
+                );
+              return {
+                title: L.acceptedBy
+                  .replace("{date}", fmt(h.review.accepted_at))
+                  .replace("{name}", userName(h.review.accepted_by)),
+                lines,
+              };
+            }),
+          },
+          ...(s.unreviewedChanges.length
+            ? [
+                {
+                  heading: L.notReviewedChanges,
+                  blocks: [{ lines: s.unreviewedChanges.map(describeChange) }],
+                },
+              ]
+            : []),
+        ],
+        footer: `${L.pdfFooter}, ${s.site.name}`,
+      };
+      const { jsPDF } = await import("jspdf");
+      renderAccessReviewPdf(jsPDF, report).save(
+        accessReviewFileName((tenant as any)?.slug, s.site.name, now),
+      );
+    } catch (e) {
+      console.error(e);
+      toast.error(L.pdfFailed);
+    }
   };
 
   const PersonList = ({
@@ -897,6 +1051,15 @@ export default function AccessReviewPanel({ lang }: { lang: StaffLang }) {
                 {L.acceptBlocked}
               </span>
             )}
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-auto"
+              onClick={() => exportPdf(s)}
+            >
+              <FileDown className="mr-1 h-4 w-4" aria-hidden />
+              {L.pdf}
+            </Button>
           </div>
         </section>
       ))}
