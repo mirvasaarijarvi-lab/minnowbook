@@ -1,3 +1,4 @@
+import { SITE_SCOPE_TABLE, siteScopeFilter } from "@/lib/staffing/siteScope";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -153,8 +154,8 @@ export async function fetchPayrollRange(
     .lte("date", to)
     .order("date");
   if (siteId)
-    q = q.or(`site_id.eq.${siteId},site_id.is.null`, {
-      referencedTable: "shift_slots.shift_periods",
+    q = q.or(siteScopeFilter(siteId), {
+      referencedTable: SITE_SCOPE_TABLE,
     });
   const { data, error } = await q;
   if (error) throw error;
@@ -228,8 +229,8 @@ export const useShiftsOnDate = (date: string, siteId: string | null = null) => {
         .eq("tenant_id", tenantId)
         .eq("date", date);
       if (siteId)
-        q = q.or(`site_id.eq.${siteId},site_id.is.null`, {
-          referencedTable: "shift_slots.shift_periods",
+        q = q.or(siteScopeFilter(siteId), {
+          referencedTable: SITE_SCOPE_TABLE,
         });
       const { data, error } = await q;
       if (error) throw error;
