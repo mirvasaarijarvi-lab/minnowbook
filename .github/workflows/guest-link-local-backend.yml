@@ -30,6 +30,9 @@ jobs:
         uses: ./.github/actions/stale-commit-check
       - name: Inject fake credentials into every output path
         run: bash scripts/ci/guest-link-log-guard.test.sh
+      # Nested, oversized and zip-bomb uploads must stop the scan and fail.
+      - name: Uploaded file scan limits
+        run: bash scripts/ci/guest-link-archive-limits.test.sh
       # Flags any step whose logs or saved files skip the secret guard.
       - name: Every step goes through the secret guard
         run: |
