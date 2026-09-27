@@ -48,7 +48,6 @@ async function openOffersAs(
     ([key, session]) => {
       localStorage.setItem(key, session);
       localStorage.setItem("mimmobook-lang", "en");
-      localStorage.setItem("mimmobook-tour-completed", "true");
     },
     [`sb-${ref}-auth-token`, JSON.stringify(data.session)] as const,
   );

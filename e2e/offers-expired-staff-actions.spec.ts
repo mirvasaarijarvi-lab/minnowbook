@@ -7,6 +7,7 @@ import {
 } from "./fixtures/test-tenant";
 import { createClient } from "@supabase/supabase-js";
 import type { Page, Locator } from "@playwright/test";
+import { markWelcomeTourSeen } from "./fixtures/welcome-tour";
 
 /**
  * Browser-level regression: offers whose valid-until date has passed but
@@ -91,6 +92,7 @@ test.describe("Offers page: expired draft/sent offers keep staff actions", () =>
     try {
       // Restore the staff session in the browser, English UI.
       const ref = new URL(SUPABASE_URL).hostname.split(".")[0];
+      await markWelcomeTourSeen(page.context());
       await page.goto("/");
       await page.evaluate(
         ([key, session]) => {
