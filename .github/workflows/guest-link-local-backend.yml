@@ -120,3 +120,28 @@ jobs:
       - name: Function log on failure
         if: failure()
         run: grep -vE 'eyJ[A-Za-z0-9_-]{10,}' /tmp/functions-serve.log || true
+
+      # Delete the throwaway backend on EVERY exit: success, startup
+      # failure, test failure and cancellation. `always()` also runs after
+      # a cancel, so this step must stay last and never depend on earlier
+      # outputs. Keys are never printed: all output goes to /dev/null.
+      - name: Delete temporary backend
+        if: always()
+        timeout-minutes: 5
+        run: |
+          pkill -f "supabase functions serve" > /dev/null 2>&1 || true
+          supabase stop --no-backup > /dev/null 2>&1 || true
+          # Belt and braces: remove anything the CLI left behind.
+          ids=$(docker ps -aq --filter "label=com.supabase.cli.project" 2>/dev/null || true)
+          [ -n "$ids" ] && docker rm -f $ids > /dev/null 2>&1 || true
+          vols=$(docker volume ls -q --filter "label=com.supabase.cli.project" 2>/dev/null || true)
+          [ -n "$vols" ] && docker volume rm -f $vols > /dev/null 2>&1 || true
+          nets=$(docker network ls -q --filter "label=com.supabase.cli.project" 2>/dev/null || true)
+          [ -n "$nets" ] && docker network rm $nets > /dev/null 2>&1 || true
+          rm -f /tmp/supabase-start.log
+          left=$(docker ps -aq --filter "label=com.supabase.cli.project" 2>/dev/null | wc -l)
+          if [ "$left" -ne 0 ]; then
+            echo "::error::${left} temporary backend container(s) still running after cleanup"
+            exit 1
+          fi
+          echo "Temporary backend deleted."
