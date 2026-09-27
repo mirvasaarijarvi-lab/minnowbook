@@ -60,31 +60,22 @@ function stubCreateClient() {
   };
 }
 
+// Both wrappers restore SUPABASE_URL too: a stub address set here used to
+// stay behind for later test files when the real one was unset.
 function withServiceRoleKey<T>(fn: () => Promise<T>): () => Promise<T> {
-  return async () => {
-    const prev = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  return withRestoredEnv(() => {
     Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key");
     Deno.env.set("SUPABASE_URL", Deno.env.get("SUPABASE_URL") ?? "https://stub.supabase.co");
-    try {
-      return await fn();
-    } finally {
-      if (typeof prev === "string") Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", prev);
-      else Deno.env.delete("SUPABASE_SERVICE_ROLE_KEY");
-    }
-  };
+    return fn();
+  });
 }
 
 function withoutServiceRoleKey<T>(fn: () => Promise<T>): () => Promise<T> {
-  return async () => {
-    const prev = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  return withRestoredEnv(() => {
     Deno.env.delete("SUPABASE_SERVICE_ROLE_KEY");
     Deno.env.set("SUPABASE_URL", Deno.env.get("SUPABASE_URL") ?? "https://stub.supabase.co");
-    try {
-      return await fn();
-    } finally {
-      if (typeof prev === "string") Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", prev);
-    }
-  };
+    return fn();
+  });
 }
 
 Deno.test(

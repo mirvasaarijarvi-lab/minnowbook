@@ -17,6 +17,7 @@ import {
   stubSupabaseEnv,
   stubSupabaseEnvVar,
 } from "./stub-supabase-env.ts";
+import { withRestoredEnv } from "./test-env-guard.ts";
 
 
 Deno.test("coalesceEnv: undefined -> fallback", () => {
@@ -82,7 +83,7 @@ Deno.test({
 
 Deno.test({
   name: "stubSupabaseEnv: rehydrates all three Supabase vars from empty CI secrets",
-  fn: () => {
+  fn: withRestoredEnv(() => {
     Deno.env.set("SUPABASE_URL", "");
     Deno.env.set("SUPABASE_ANON_KEY", "");
     Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "");
@@ -96,12 +97,12 @@ Deno.test({
       __DEFAULT_STUBS_FOR_TEST.SUPABASE_SERVICE_ROLE_KEY,
     );
     assertEquals(Deno.env.get("SUPABASE_URL"), __DEFAULT_STUBS_FOR_TEST.SUPABASE_URL);
-  },
+  }),
 });
 
 Deno.test({
   name: "stubSupabaseEnv: per-key overrides win over defaults",
-  fn: () => {
+  fn: withRestoredEnv(() => {
     Deno.env.set("SUPABASE_URL", "");
     Deno.env.set("SUPABASE_ANON_KEY", "");
     Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "");
@@ -111,7 +112,7 @@ Deno.test({
     assertEquals(Deno.env.get("SUPABASE_URL"), "http://custom.local");
     // Untouched keys fall back to defaults.
     assertEquals(resolved.SUPABASE_ANON_KEY, __DEFAULT_STUBS_FOR_TEST.SUPABASE_ANON_KEY);
-  },
+  }),
 });
 
 // MUST sort last in this file. Deno runs all discovered test files in a
