@@ -22,6 +22,7 @@
 // (falls back to ADMIN_USERS_TEST_ACCESS_TOKEN). Self-skips otherwise.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { deleteAndVerifyLinks, maybeForcedFailure, type CleanupClient } from "./test-link-cleanup.ts";
+import { newTestToken, recoverStaleTestLinks, type RecoveryClient } from "./test-link-recovery.ts";
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 
 const URL_BASE = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("VITE_SUPABASE_URL");
@@ -41,10 +42,8 @@ if (Deno.env.get("GUEST_PORTAL_TEST_BACKEND") === "local" && URL_BASE) {
 }
 
 const COLS = "id, tenant_id, status, date, start_time, updated_at";
-const newToken = () =>
-  Array.from(crypto.getRandomValues(new Uint8Array(32)))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+// Marked throwaway link codes, so an interrupted run's leftovers can be found.
+const newToken = newTestToken;
 
 async function guestCall(body: Record<string, unknown>) {
   const res = await fetch(`${URL_BASE}/functions/v1/guest-booking-portal`, {
@@ -76,6 +75,12 @@ Deno.test({
       .limit(1)
       .maybeSingle();
     if (!membership) throw new Error("test login is not an owner/admin of any business");
+
+    // Remove marked test links left by an earlier run that stopped before its
+    // cleanup (test business only, older than 15 minutes).
+    await t.step("recover leftover test links from interrupted runs", async () => {
+      await recoverStaleTestLinks(staff as unknown as RecoveryClient, { tenantId: membership.tenant_id });
+    });
 
     const { data: bookings } = await staff
       .from("reservations")
