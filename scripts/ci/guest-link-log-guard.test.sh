@@ -161,7 +161,7 @@ for i in "${!ALL[@]}"; do
 done
 [ "$split_missed" = 0 ] && pass "scan, filter and artifact scan catch all $split_total split fake values"
 # Harmless neighbouring lines are not flagged or dropped.
-printf 'Starting database...\nError: container exited with code 1\neyJ\nnot a token\n' > "$WORK/split-clean.log"
+printf 'Starting database...\nError: container exited with code 1\neyJ\nplain words here\n' > "$WORK/split-clean.log"
 bash "$GUARD" scan "$WORK/split-clean.log" > /dev/null 2>&1 \
   && pass "scan passes harmless neighbouring lines" || bad "scan failed harmless neighbouring lines"
 printf 'test ok\n1 passed\n' > "$WORK/chunk-a.log"; printf '0 failed\n' > "$WORK/chunk-b.log"
