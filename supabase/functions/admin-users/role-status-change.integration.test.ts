@@ -43,7 +43,7 @@ Deno.test({
   fn: async () => {
     const admin = createClient(URL_BASE!, SERVICE!, { auth: { persistSession: false } });
     const email = `e2e-role-change-${crypto.randomUUID()}@mimmobook.local`;
-    const password = crypto.randomUUID() + "Aa1!" + crypto.randomUUID();
+    const password = crypto.randomUUID() + "Aa1!"; // 40 chars, under the 72 limit
     const { data: created, error: createErr } = await admin.auth.admin.createUser({
       email,
       password,
