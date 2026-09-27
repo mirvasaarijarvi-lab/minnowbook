@@ -204,6 +204,100 @@ ARGS=("$WORK/n3"); run "$WORK/diag.txt" ARTIFACT_SCAN_REPORT="$WORK/ok.json"
 python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["status"]=="ok" and d["limit"]=="" and int(d["files_scanned"])>0' "$WORK/ok.json" \
   && pass "clean scan writes an ok report" || bad "clean scan report"
 
+# Encrypted archives and links: content that cannot be scanned must FAIL, and
+# nothing may ever be written outside the temporary scan folder.
+OUT="$WORK/outside"; mkdir -p "$OUT"   # must stay empty for every case below
+outside_clean() { [ -z "$(ls -A "$OUT")" ] && [ ! -e /tmp/pwned-by-archive ]; }
+sec() { # $1 = label, $2 = expected limit code, $3 = dir, rest = env
+  expect_stop "$1" "limit=$2 " "$3" "${@:4}"
+  outside_clean || { bad "$1: something was written outside the scan folder"; ls -la "$OUT"; rm -rf "$OUT"/* /tmp/pwned-by-archive; }
+}
+mk() { local d="$WORK/sec-$1"; rm -rf "$d"; mkdir -p "$d"; echo "$d"; }
+echo "SECRET_CONTENT inside" > "$WORK/plain.log"
+# Password-protected zip (classic zip encryption) and 7z AES zip.
+d=$(mk enc); (cd "$WORK" && zip -q -P hunter2 "$d/locked.zip" plain.log)
+sec "password-protected zip fails closed" encrypted "$d"
+d=$(mk enc-aes); (cd "$WORK" && 7z a -tzip -mem=AES256 -phunter2 "$d/locked.zip" plain.log > /dev/null)
+sec "AES-encrypted zip fails closed" encrypted "$d"
+d=$(mk enc-nested); (cd "$WORK" && zip -q -P hunter2 "$WORK/inner-locked.zip" plain.log && python3 -c 'import zipfile,sys
+with zipfile.ZipFile(sys.argv[1],"w") as z: z.write(sys.argv[2],"deep/inner.zip")' "$d/outer.zip" "$WORK/inner-locked.zip")
+sec "password-protected zip inside a normal zip fails closed" encrypted "$d"
+# Symlink members pointing outside (tar and zip), hard links, and devices.
+d=$(mk tarlink); python3 -c 'import tarfile,sys
+with tarfile.open(sys.argv[1],"w") as t:
+  i=tarfile.TarInfo("escape"); i.type=tarfile.SYMTYPE; i.linkname=sys.argv[2]; t.addfile(i)' "$d/a.tar" "$OUT"
+sec "tar symlink to an outside folder fails closed" link "$d"
+d=$(mk tarlinkwrite); python3 -c 'import tarfile,sys,io
+with tarfile.open(sys.argv[1],"w") as t:
+  i=tarfile.TarInfo("escape"); i.type=tarfile.SYMTYPE; i.linkname=sys.argv[2]; t.addfile(i)
+  b=b"written through the link"; j=tarfile.TarInfo("escape/pwned.txt"); j.size=len(b); t.addfile(j,io.BytesIO(b))' "$d/a.tar.gz" "$OUT"
+mv "$d/a.tar.gz" "$d/a.tar"; sec "tar symlink followed by a write through it fails closed" link "$d"
+d=$(mk tarhard); python3 -c 'import tarfile,sys
+with tarfile.open(sys.argv[1],"w:gz") as t:
+  i=tarfile.TarInfo("hard"); i.type=tarfile.LNKTYPE; i.linkname="/etc/passwd"; t.addfile(i)' "$d/a.tar.gz"
+sec "tar hard link fails closed" link "$d"
+d=$(mk tardev); python3 -c 'import tarfile,sys
+with tarfile.open(sys.argv[1],"w") as t:
+  for n,ty in (("dev",tarfile.CHRTYPE),("fifo",tarfile.FIFOTYPE)):
+    i=tarfile.TarInfo(n); i.type=ty; t.addfile(i)' "$d/a.tar"
+sec "tar device or pipe fails closed" special "$d"
+d=$(mk ziplink); python3 -c 'import zipfile,sys,stat
+with zipfile.ZipFile(sys.argv[1],"w") as z:
+  i=zipfile.ZipInfo("escape"); i.external_attr=(stat.S_IFLNK|0o777)<<16; z.writestr(i, sys.argv[2])' "$d/a.zip" "$OUT"
+sec "zip symlink member fails closed" link "$d"
+# Path traversal: .., absolute paths and backslashes, in zip and tar.
+d=$(mk zipdotdot); python3 -c 'import zipfile,sys
+with zipfile.ZipFile(sys.argv[1],"w") as z: z.writestr("../../../../../../tmp/pwned-by-archive","x")' "$d/a.zip"
+sec "zip entry with ../ fails closed" unsafe_path "$d"
+d=$(mk zipabs); python3 -c 'import zipfile,sys
+with zipfile.ZipFile(sys.argv[1],"w") as z:
+  i=zipfile.ZipInfo("x"); z.writestr(i,"x")
+  i.filename=sys.argv[2]+"/abs.txt"
+with open(sys.argv[1],"r+b") as f: pass' "$d/a.zip" "$OUT"
+python3 - "$d/a.zip" "$OUT" <<'PY'
+import sys
+b=open(sys.argv[1],"rb").read(); n=(sys.argv[2]+"/p.txt").encode()
+# rewrite the one-char name "x" in both headers to an absolute path
+import struct
+out=bytearray(); i=0
+lh=b.find(b"PK\x03\x04"); cd=b.find(b"PK\x01\x02"); eo=b.find(b"PK\x05\x06")
+local=bytearray(b[lh:cd]); central=bytearray(b[cd:eo]); end=bytearray(b[eo:])
+local[26:28]=struct.pack("<H",len(n)); local=local[:30]+n+local[31:]
+central[28:30]=struct.pack("<H",len(n)); central=central[:46]+n+central[47:]
+end[12:16]=struct.pack("<I",len(central)); end[16:20]=struct.pack("<I",len(local))
+open(sys.argv[1],"wb").write(bytes(local+central+end))
+PY
+sec "zip entry with an absolute path fails closed" unsafe_path "$d"
+d=$(mk tardotdot); python3 -c 'import tarfile,sys,io
+with tarfile.open(sys.argv[1],"w") as t:
+  b=b"x"; i=tarfile.TarInfo("ok/../../../../tmp/pwned-by-archive"); i.size=1; t.addfile(i,io.BytesIO(b))' "$d/a.tar"
+sec "tar entry with ../ fails closed" unsafe_path "$d"
+d=$(mk tarabs); python3 -c 'import tarfile,sys,io
+with tarfile.open(sys.argv[1],"w") as t:
+  b=b"x"; i=tarfile.TarInfo(sys.argv[2]+"/abs.txt"); i.size=1; t.addfile(i,io.BytesIO(b))' "$d/a.tar" "$OUT"
+sec "tar entry with an absolute path fails closed" unsafe_path "$d"
+d=$(mk zipbs); python3 -c 'import zipfile,sys
+with zipfile.ZipFile(sys.argv[1],"w") as z: z.writestr("..\\..\\..\\tmp\\pwned-by-archive","x")' "$d/a.zip"
+ARGS=("$d"); run "$WORK/out.txt" || true
+outside_clean && pass "zip entry with backslash hops writes nothing outside" || bad "backslash hop wrote outside"
+# Links in the uploaded folder itself are not followed or skipped silently.
+d=$(mk dirlink); echo "SECRET_CONTENT" > "$OUT/../secret-target.log"; ln -s "$OUT/../secret-target.log" "$d/looks-harmless.log"
+sec "symlink file in the upload folder fails closed" link "$d"
+d=$(mk dirlink2); ln -s "$OUT" "$d/linked-folder"
+sec "symlink folder in the upload folder fails closed" link "$d"
+d=$(mk top); echo x > "$d/real.log"; ln -s "$d" "$WORK/top-link"
+ARGS=("$WORK/top-link"); run "$WORK/out.txt" && bad "upload path that is itself a link passed" \
+  || { grep -q "limit=link " "$WORK/out.txt" && pass "upload path that is itself a link fails closed" || { bad "top link reason"; cat "$WORK/out.txt"; }; }
+d=$(mk fifo); mkfifo "$d/pipe.log"
+sec "named pipe in the upload folder fails closed" special "$d"
+# Hidden password never printed; JSON report names the limit.
+grep -rq hunter2 "$WORK/out.txt" "$WORK/diag.txt" 2>/dev/null && bad "archive password printed" || pass "archive password never printed"
+d=$(mk enc-rep); (cd "$WORK" && zip -q -P hunter2 "$d/locked.zip" plain.log)
+ARGS=("$d"); run "$WORK/out.txt" ARTIFACT_SCAN_REPORT="$WORK/enc.json" || true
+python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["status"]=="limit" and d["limit"]=="encrypted" and d["file"]=="locked.zip!plain.log", d' "$WORK/enc.json" \
+  && pass "report names the encrypted file" || { bad "encrypted report"; cat "$WORK/enc.json"; }
+outside_clean && pass "nothing written outside the scan folder in any case" || bad "outside folder not empty"
+
 # Time limit.
 mkdir -p "$WORK/slow"; for i in 1 2 3; do echo x > "$WORK/slow/$i.log"; done
 expect_stop "time limit" "longer than" "$WORK/slow" ARTIFACT_MAX_SECONDS=-1
