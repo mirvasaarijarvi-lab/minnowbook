@@ -1,3 +1,4 @@
+import { classifyBookingResponse } from "@/lib/booking-response";
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { gtm } from "@/lib/gtm";
 import { useParams, useSearchParams } from "@/lib/router-compat";

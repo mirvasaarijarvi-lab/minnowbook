@@ -14,7 +14,11 @@ export function classifyBookingResponse(data: unknown): BookingOutcome {
   const d = data as Record<string, unknown>;
   if (d.duplicate === true) return "duplicate";
   const res = d.reservation;
-  if (res && typeof res === "object" && typeof (res as { id?: unknown }).id === "string") {
+  if (
+    res &&
+    typeof res === "object" &&
+    typeof (res as { id?: unknown }).id === "string"
+  ) {
     return (res as { id: string }).id.length > 0 ? "created" : "invalid";
   }
   return "invalid";
