@@ -20,15 +20,23 @@ vi.mock("@/integrations/supabase/client", () => ({
     },
   },
 }));
-vi.mock("@/hooks/useTenant", () => ({ useTenant: () => ({ tenantId: "t1", ...role }) }));
-vi.mock("@/contexts/I18nContext", () => ({ useI18n: () => ({ language: "en" }) }));
+vi.mock("@/hooks/useTenant", () => ({
+  useTenant: () => ({ tenantId: "t1", ...role }),
+}));
+vi.mock("@/contexts/I18nContext", () => ({
+  useI18n: () => ({ language: "en" }),
+}));
 vi.mock("@/hooks/useDateLocale", () => ({ useDateLocale: () => undefined }));
 
 import GuestLinkHistory from "./GuestLinkHistory";
 
 const renderIt = () =>
   render(
-    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <QueryClientProvider
+      client={
+        new QueryClient({ defaultOptions: { queries: { retry: false } } })
+      }
+    >
       <GuestLinkHistory reservationId="r1" />
     </QueryClientProvider>,
   );
@@ -38,9 +46,31 @@ beforeEach(() => {
   calls.select = undefined;
   role = { isOwner: true, isAdmin: true };
   rows = [
-    { id: "3", booking_token_id: "tokA", action: "deleted", actor_email: "anna@example.test", actor_kind: "staff", occurred_at: "2026-09-27T12:20:00Z", token: TOKEN },
-    { id: "2", booking_token_id: "tokB", action: "revoked", actor_email: null, actor_kind: "system", occurred_at: "2026-09-27T12:10:00Z" },
-    { id: "1", booking_token_id: "tokA", action: "revoked", actor_email: "anna@example.test", actor_kind: "staff", occurred_at: "2026-09-27T12:00:00Z" },
+    {
+      id: "3",
+      booking_token_id: "tokA",
+      action: "deleted",
+      actor_email: "anna@example.test",
+      actor_kind: "staff",
+      occurred_at: "2026-09-27T12:20:00Z",
+      token: TOKEN,
+    },
+    {
+      id: "2",
+      booking_token_id: "tokB",
+      action: "revoked",
+      actor_email: null,
+      actor_kind: "system",
+      occurred_at: "2026-09-27T12:10:00Z",
+    },
+    {
+      id: "1",
+      booking_token_id: "tokA",
+      action: "revoked",
+      actor_email: "anna@example.test",
+      actor_kind: "staff",
+      occurred_at: "2026-09-27T12:00:00Z",
+    },
   ];
 });
 
@@ -52,7 +82,9 @@ describe("GuestLinkHistory", () => {
     expect(items[2].textContent).toContain("Turned off");
     expect(items[2].textContent).toContain("Link 1");
     expect(items[2].textContent).toContain("by anna@example.test");
-    expect(items[2].querySelector("time")?.getAttribute("dateTime")).toBe("2026-09-27T12:00:00Z");
+    expect(items[2].querySelector("time")?.getAttribute("dateTime")).toBe(
+      "2026-09-27T12:00:00Z",
+    );
     expect(items[1].textContent).toContain("Link 2");
     expect(items[1].textContent).toContain("Automatic");
     expect(items[0].textContent).toContain("Deleted");
@@ -70,7 +102,10 @@ describe("GuestLinkHistory", () => {
   it("scopes the read to the business and booking", async () => {
     renderIt();
     await screen.findAllByTestId("guest-link-history-row");
-    expect(calls.eq).toEqual([["tenant_id", "t1"], ["reservation_id", "r1"]]);
+    expect(calls.eq).toEqual([
+      ["tenant_id", "t1"],
+      ["reservation_id", "r1"],
+    ]);
   });
 
   it("is hidden from staff who are not owners or admins", () => {
@@ -82,6 +117,8 @@ describe("GuestLinkHistory", () => {
   it("says so when no link has been turned off", async () => {
     rows = [];
     renderIt();
-    expect(await screen.findByText(/No guest link has been turned off/)).toBeTruthy();
+    expect(
+      await screen.findByText(/No guest link has been turned off/),
+    ).toBeTruthy();
   });
 });

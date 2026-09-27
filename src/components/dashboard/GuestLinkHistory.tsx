@@ -72,7 +72,8 @@ export function numberLinks(rows: LinkHistoryRow[]): Map<string, number> {
   [...rows]
     .sort((a, b) => a.occurred_at.localeCompare(b.occurred_at))
     .forEach((r) => {
-      if (!out.has(r.booking_token_id)) out.set(r.booking_token_id, out.size + 1);
+      if (!out.has(r.booking_token_id))
+        out.set(r.booking_token_id, out.size + 1);
     });
   return out;
 }
@@ -84,7 +85,11 @@ const GuestLinkHistory = ({ reservationId }: { reservationId: string }) => {
   const c = COPY[(language as Lang) in COPY ? (language as Lang) : "en"];
   const allowed = !!tenantId && (isOwner || isAdmin);
 
-  const { data = [], isLoading, isError } = useQuery({
+  const {
+    data = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["guest-link-history", tenantId, reservationId],
     enabled: allowed && !!reservationId,
     queryFn: async () => {
@@ -126,7 +131,9 @@ const GuestLinkHistory = ({ reservationId }: { reservationId: string }) => {
               className="flex flex-wrap items-center gap-x-2 gap-y-0.5"
               data-testid="guest-link-history-row"
             >
-              <Badge variant={r.action === "restored" ? "secondary" : "outline"}>
+              <Badge
+                variant={r.action === "restored" ? "secondary" : "outline"}
+              >
                 {c[r.action]}
               </Badge>
               <span>
