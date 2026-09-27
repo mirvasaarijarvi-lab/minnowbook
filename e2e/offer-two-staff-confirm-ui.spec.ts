@@ -12,6 +12,7 @@ import {
   ensureOfferStaffAccounts,
   type OfferStaffAccount,
 } from "./fixtures/offer-staff-accounts";
+import { markWelcomeTourSeen } from "./fixtures/welcome-tour";
 
 /**
  * Browser end-to-end: two DIFFERENT staff members (each in their own browser,
@@ -37,6 +38,7 @@ async function openOffersAs(
     baseURL,
     viewport: { width: 1280, height: 1800 },
   });
+  await markWelcomeTourSeen(context);
   const page = await context.newPage();
   const { data } = await staff.client.auth.getSession();
   expect(data.session, `${staff.email} has a session`).toBeTruthy();
