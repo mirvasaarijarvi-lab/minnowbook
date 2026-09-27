@@ -28,6 +28,16 @@ const STAFF_TOKEN =
   Deno.env.get("ADMIN_USERS_TEST_ACCESS_TOKEN");
 const ENABLED = !!URL_BASE && !!KEY && !!STAFF_TOKEN;
 
+// GUEST_PORTAL_TEST_BACKEND=local pins the test to a throwaway local backend
+// (supabase start). It refuses to run if the URL points anywhere else, so a
+// misconfigured CI job can never write test links to the live project.
+if (Deno.env.get("GUEST_PORTAL_TEST_BACKEND") === "local" && URL_BASE) {
+  const host = new URL(URL_BASE).hostname;
+  if (host !== "127.0.0.1" && host !== "localhost") {
+    throw new Error(`GUEST_PORTAL_TEST_BACKEND=local but SUPABASE_URL host is ${host}`);
+  }
+}
+
 async function guestCall(body: Record<string, unknown>) {
   const res = await fetch(`${URL_BASE}/functions/v1/guest-booking-portal`, {
     method: "POST",

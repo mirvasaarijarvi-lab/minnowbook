@@ -1,0 +1,93 @@
+name: Guest link test backend
+
+# Runs the revoked guest-link integration test against a throwaway local
+# backend (supabase start + functions serve), never the live project.
+# The backend is built from supabase/migrations, seeded with one owner and
+# one booking (scripts/ci/seed-guest-portal-local.sql), and discarded.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  revoked-link:
+    name: Revoked guest link (local backend)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: read
+    env:
+      DENO_DIR: ${{ github.workspace }}/.deno-cache
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - name: Stale commit check
+        uses: ./.github/actions/stale-commit-check
+      - uses: supabase/setup-cli@46f7f98c7f948ad727d22c1e67fab04c223a0520 # v3.0.0
+        with:
+          version: latest
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v1.x
+
+      - name: Write placeholder migrations
+        run: scripts/ci/write-placeholder-migrations.sh
+
+      - name: Free Supabase ports
+        continue-on-error: true
+        run: |
+          sudo systemctl stop postgresql 2>/dev/null || true
+          docker ps -aq --filter "name=supabase_" | xargs -r docker rm -f || true
+
+      - name: Start local backend
+        timeout-minutes: 20
+        run: |
+          for attempt in 1 2 3; do
+            supabase start --exclude=imgproxy,mailpit,studio,realtime && exit 0
+            echo "::warning::supabase start attempt ${attempt} failed, retrying"
+            supabase stop --no-backup || true
+            sleep 10
+          done
+          exit 1
+
+      - name: Seed test owner and booking
+        run: |
+          eval "$(supabase status -o env)"
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -f scripts/ci/seed-guest-portal-local.sql
+
+      - name: Serve guest-booking-portal
+        run: |
+          nohup supabase functions serve guest-booking-portal --no-verify-jwt > /tmp/functions-serve.log 2>&1 &
+          for i in $(seq 1 120); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -X OPTIONS http://127.0.0.1:54321/functions/v1/guest-booking-portal || true)
+            [ "$code" != "000" ] && [ "$code" != "502" ] && [ "$code" != "503" ] && { echo "function up (${code})"; exit 0; }
+            sleep 2
+          done
+          cat /tmp/functions-serve.log; exit 1
+
+      - name: Run revoked-link test
+        run: |
+          eval "$(supabase status -o env)"
+          TOKEN=$(curl -sf -X POST "$API_URL/auth/v1/token?grant_type=password" \
+            -H "apikey: $ANON_KEY" -H "Content-Type: application/json" \
+            -d '{"email":"ci-guest-portal-owner@example.invalid","password":"ci-guest-portal-password"}' \
+            | python3 -c 'import sys,json;print(json.load(sys.stdin)["access_token"])')
+          echo "::add-mask::$TOKEN"
+          GUEST_PORTAL_TEST_BACKEND=local \
+          SUPABASE_URL="$API_URL" SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" \
+          GUEST_PORTAL_TEST_ACCESS_TOKEN="$TOKEN" \
+          deno test --allow-net --allow-env --allow-read \
+            supabase/functions/guest-booking-portal/revoked-token.integration.test.ts \
+            2>&1 | tee /tmp/revoked-test.log
+          grep -q "1 passed" /tmp/revoked-test.log || { echo "::error::test did not run or failed"; exit 1; }
+
+      - name: Function log on failure
+        if: failure()
+        run: cat /tmp/functions-serve.log || true
