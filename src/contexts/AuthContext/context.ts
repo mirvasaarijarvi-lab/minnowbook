@@ -21,7 +21,14 @@ export interface SubscriptionInfo {
  * unexpected and surface in monitoring.
  */
 export type SignOutReason =
-  "user_logout" | "mfa_cancel" | "no_tenant" | "corrupted_session";
+  | "user_logout"
+  | "mfa_cancel"
+  | "no_tenant"
+  | "corrupted_session"
+  | "account_disabled";
+
+/** sessionStorage flag read by the login page to explain a forced sign-out. */
+export const ACCOUNT_DISABLED_FLAG = "mimmobook-account-disabled";
 
 export interface AuthContextType {
   session: Session | null;

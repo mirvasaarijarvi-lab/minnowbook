@@ -11,6 +11,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { recordAuthFailure } from "@/lib/reservationAccessLog";
 import { toast } from "sonner";
 import { useT } from "@/contexts/I18nContext";
+import { ACCOUNT_DISABLED_FLAG } from "@/contexts/AuthContext/context";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import PasswordInput from "@/components/PasswordInput";
 import MfaVerify from "@/components/MfaVerify";
@@ -111,6 +112,18 @@ const Login = () => {
   const [codeOpen, setCodeOpen] = useState(false);
   const [lockoutRemaining, setLockoutRemaining] = useState(0);
   const t = useT();
+
+  // Explain a forced sign-out after the account was turned off.
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(ACCOUNT_DISABLED_FLAG)) {
+        sessionStorage.removeItem(ACCOUNT_DISABLED_FLAG);
+        toast.error(t("login.accountDisabled"), { duration: 15_000 });
+      }
+    } catch {
+      /* storage unavailable */
+    }
+  }, [t]);
 
   // Rate limit countdown timer
   useEffect(() => {
