@@ -12,7 +12,10 @@ import { expect, type BrowserContext, type Page } from "@playwright/test";
  * clearly if the tour was not marked as seen or its overlay is on screen.
  */
 export async function expectWelcomeTourDismissed(page: Page) {
-  const seen = await page.evaluate((key) => window.localStorage.getItem(key), WELCOME_TOUR_KEY);
+  const seen = await page.evaluate(
+    (key) => window.localStorage.getItem(key),
+    WELCOME_TOUR_KEY,
+  );
   expect(seen, "welcome tour should be marked as seen").toBe("true");
   await expect(
     page.getByRole("button", { name: "Close tour" }),
