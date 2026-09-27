@@ -80,7 +80,11 @@ for line in sys.stdin.buffer.read().decode("utf-8", "replace").split("\n"):
 #                       files in order, holds a secret.
 MAX_SPLIT=8
 split_hits() {
-  GUARD_KNOWN="$(known_values)" GUARD_JWT_RE="$JWT_RE" GUARD_MAX="$MAX_SPLIT" python3 - "$@" <<'PY'
+  # The script goes in -c so the lines to check can come in on stdin.
+  GUARD_KNOWN="$(known_values)" GUARD_JWT_RE="$JWT_RE" GUARD_MAX="$MAX_SPLIT" \
+    python3 -c "$SPLIT_PY" "$@"
+}
+SPLIT_PY=$(cat <<'PY'
 import os, re, sys
 known = [v for v in os.environ["GUARD_KNOWN"].split("\n") if v]
 jwt = re.compile(os.environ["GUARD_JWT_RE"])
@@ -113,7 +117,7 @@ for f in files:
 joined = ["".join(pieces(t)) for t in texts]
 sys.exit(0 if any(hit(j) for j in joined) or hit("".join(joined)) else 1)
 PY
-}
+)
 
 # True if the text on stdin holds a known value or a JWT.
 holds_secret() {
