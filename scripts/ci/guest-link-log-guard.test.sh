@@ -93,6 +93,60 @@ done
 printf 'test ok | 1 passed | 0 failed\n' > "$WORK/clean.log"
 bash "$GUARD" scan "$WORK/clean.log" > /dev/null 2>&1 && pass "scan passes a clean log" || bad "scan failed a clean log"
 
+# 3b. Encoded and escaped copies of every fake value. Each form is planted
+#     in an unlabelled line, so only decoding can catch it. The filter must
+#     drop it (for every output path), and the scan must fail on it.
+encode_forms() { # $1 = value; prints "form<TAB>encoded" per line
+  python3 - "$1" <<'PY'
+import json, sys
+from urllib.parse import quote
+v = sys.argv[1]
+forms = {
+    "url-encoded": quote(v, safe=""),
+    "double url-encoded": quote(quote(v, safe=""), safe=""),
+    "every byte url-encoded": "".join("%%%02X" % b for b in v.encode()),
+    "every byte url-encoded, lowercase": "".join("%%%02x" % b for b in v.encode()),
+    "JSON-escaped": json.dumps(v)[1:-1].replace("/", "\\/"),
+    "JSON string in JSON": json.dumps(json.dumps({"v": v}))[1:-1],
+    "unicode-escaped": "".join("\\u%04x" % ord(c) for c in v),
+    "hex-escaped": "".join("\\x%02x" % ord(c) for c in v),
+    "backslash-escaped": "".join("\\" + c if not c.isalnum() else c for c in v),
+    "HTML-escaped": v.replace("&", "&amp;").replace("/", "&#x2F;").replace('"', "&quot;"),
+}
+for name, enc in forms.items():
+    print(f"{name}\t{enc}")
+PY
+}
+enc_missed=0; enc_total=0
+for i in "${!ALL[@]}"; do
+  while IFS=$'\t' read -r form enc; do
+    [ "$enc" = "${ALL[$i]}" ] && continue # form leaves this value unchanged
+    enc_total=$((enc_total + 1))
+    printf 'Error: container exited with code 1\nupstream said: %s (retrying)\n' "$enc" > "$WORK/enc.log"
+    for lines in 40 80 200; do
+      out="$WORK/enc-out.txt"
+      bash "$GUARD" filter "$WORK/enc.log" "$lines" > "$out" 2>&1
+      if grep -qF -- "$enc" "$out" || [ "$(leaks "$out")" != 0 ]; then
+        bad "filter ($lines lines) let a $form fake value #$i through"; enc_missed=1
+      fi
+      grep -q "Error: container exited with code 1" "$out" \
+        || { bad "filter dropped the error line next to a $form value"; enc_missed=1; }
+    done
+    if bash "$GUARD" scan "$WORK/enc.log" > "$WORK/enc-scan.txt" 2>&1; then
+      bad "scan missed a $form fake value #$i"; enc_missed=1
+    elif grep -qF -- "$enc" "$WORK/enc-scan.txt"; then
+      bad "scan message repeats a $form value"; enc_missed=1
+    fi
+  done < <(encode_forms "${ALL[$i]}")
+done
+[ "$enc_missed" = 0 ] && pass "filter and scan catch all $enc_total encoded and escaped fake values"
+# Encoded text that holds no secret is left alone.
+printf 'GET /search?q=caf%%C3%%A9%%20menu ok\n{"msg":"a\\/b \\u0041"}\n' > "$WORK/enc-clean.log"
+bash "$GUARD" scan "$WORK/enc-clean.log" > /dev/null 2>&1 \
+  && pass "scan passes harmless encoded text" || bad "scan failed harmless encoded text"
+[ "$(bash "$GUARD" filter "$WORK/enc-clean.log" 40 | wc -l)" = 2 ] \
+  && pass "filter keeps harmless encoded lines" || bad "filter dropped harmless encoded lines"
+
 # 4. Workflow structure: no artifacts, no unguarded log printing.
 grep -qE 'upload-artifact|actions/cache/save' "$WF" && bad "workflow uploads artifacts" || pass "workflow uploads no artifacts"
 unguarded=$(grep -nE '(cat|tail|head|less|more)[^|]*/tmp/(supabase-start|functions-serve|revoked-test)\.log' "$WF" | grep -v 'guest-link-log-guard' || true)
