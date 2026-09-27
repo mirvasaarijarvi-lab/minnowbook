@@ -55,7 +55,8 @@ jobs:
             supabase/functions/guest-booking-portal/booking-cancelled-deleted.test.ts \
             supabase/functions/guest-booking-portal/active-token-actions.test.ts \
             supabase/functions/guest-booking-portal/expired-token-states.test.ts \
-            supabase/functions/guest-booking-portal/revoked-token-states.test.ts
+            supabase/functions/guest-booking-portal/revoked-token-states.test.ts \
+            supabase/functions/guest-booking-portal/revoke-isolation.test.ts
 
   live:
     name: Access control (live backend)
