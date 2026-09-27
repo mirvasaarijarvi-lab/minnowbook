@@ -438,6 +438,19 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
         .single();
       if (!tu) throw new Error("User not in your tenant");
 
+      // Validate the new assignments BEFORE removing the old ones, so a
+      // rejected request (e.g. another business's location) changes nothing.
+      const rows =
+        Array.isArray(body.assignments) && body.assignments.length > 0
+          ? body.assignments.map((sa: any) => ({
+              tenant_id: tenantId,
+              site_id: validateUuid(sa.siteId, "siteId"),
+              user_id: userId,
+              role: VALID_SITE_ROLES.includes(sa.role) ? sa.role : "staff",
+            }))
+          : [];
+      await assertSitesInTenant(adminClient, tenantId, rows.map((r: any) => r.site_id));
+
       // Delete existing site assignments for this user in this tenant
       await adminClient
         .from("site_users")
@@ -445,15 +458,7 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
         .eq("user_id", userId)
         .eq("tenant_id", tenantId);
 
-      // Insert new assignments
-      if (Array.isArray(body.assignments) && body.assignments.length > 0) {
-        const rows = body.assignments.map((sa: any) => ({
-          tenant_id: tenantId,
-          site_id: validateUuid(sa.siteId, "siteId"),
-          user_id: userId,
-          role: VALID_SITE_ROLES.includes(sa.role) ? sa.role : "staff",
-        }));
-        await assertSitesInTenant(adminClient, tenantId, rows.map((r: any) => r.site_id));
+      if (rows.length > 0) {
         const { error: insertError } = await adminClient.from("site_users").insert(rows);
         if (insertError) throw insertError;
       }
