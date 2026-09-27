@@ -1,4 +1,9 @@
-import { test, expect, SUPABASE_URL, SUPABASE_ANON_KEY } from "./fixtures/test-tenant";
+import {
+  test,
+  expect,
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+} from "./fixtures/test-tenant";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
   expectWelcomeTourDismissed,
@@ -23,7 +28,10 @@ test.describe("Staff management: the last administrator cannot step down", () =>
     "Set SUPABASE_SERVICE_ROLE_KEY and the publishable key to run this spec.",
   );
 
-  test("shows the last-admin warning and keeps the owner role", async ({ browser, baseURL }) => {
+  test("shows the last-admin warning and keeps the owner role", async ({
+    browser,
+    baseURL,
+  }) => {
     const admin: SupabaseClient = createClient(SUPABASE_URL, SERVICE_KEY!, {
       auth: { persistSession: false },
     });
@@ -56,7 +64,12 @@ test.describe("Staff management: the last administrator cannot step down", () =>
 
       const { error: mErr } = await admin
         .from("tenant_users")
-        .insert({ user_id: userId, tenant_id: tenantId, role: "owner", is_approved: true });
+        .insert({
+          user_id: userId,
+          tenant_id: tenantId,
+          role: "owner",
+          is_approved: true,
+        });
       if (mErr) throw mErr;
 
       const roleInDb = async () => {
@@ -72,7 +85,10 @@ test.describe("Staff management: the last administrator cannot step down", () =>
       const anon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { persistSession: false },
       });
-      const { data: signIn, error: sErr } = await anon.auth.signInWithPassword({ email, password });
+      const { data: signIn, error: sErr } = await anon.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (sErr || !signIn.session) throw sErr ?? new Error("no session");
 
       const context = await browser.newContext({
@@ -103,7 +119,8 @@ test.describe("Staff management: the last administrator cannot step down", () =>
           body: await resp.body(),
           headers: {
             ...cors,
-            "content-type": resp.headers()["content-type"] ?? "application/json",
+            "content-type":
+              resp.headers()["content-type"] ?? "application/json",
           },
         });
       });
@@ -134,13 +151,19 @@ test.describe("Staff management: the last administrator cannot step down", () =>
       await page.getByRole("option", { name: /^Staff$/i }).click();
 
       // The warning appears on screen.
-      await expect(page.getByText(LAST_ADMIN).first()).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(LAST_ADMIN).first()).toBeVisible({
+        timeout: 15_000,
+      });
 
       // The screen still shows them as owner, after a reload as well.
       await expect(roleSelect).toHaveText(/Owner/i);
       await page.reload();
       await expect(
-        page.getByRole("row").filter({ hasText: email }).getByRole("combobox").first(),
+        page
+          .getByRole("row")
+          .filter({ hasText: email })
+          .getByRole("combobox")
+          .first(),
       ).toHaveText(/Owner/i, { timeout: 20_000 });
 
       // And the database is unchanged.
@@ -149,12 +172,25 @@ test.describe("Staff management: the last administrator cannot step down", () =>
       await context.close();
     } finally {
       if (tenantId) {
-        const { error } = await admin.from("tenants").delete().eq("id", tenantId);
-        if (error) console.error("cleanup: could not delete test business", tenantId, error.message);
+        const { error } = await admin
+          .from("tenants")
+          .delete()
+          .eq("id", tenantId);
+        if (error)
+          console.error(
+            "cleanup: could not delete test business",
+            tenantId,
+            error.message,
+          );
       }
       if (userId) {
         const { error } = await admin.auth.admin.deleteUser(userId);
-        if (error) console.error("cleanup: could not delete temporary user", userId, error.message);
+        if (error)
+          console.error(
+            "cleanup: could not delete temporary user",
+            userId,
+            error.message,
+          );
       }
     }
   });
