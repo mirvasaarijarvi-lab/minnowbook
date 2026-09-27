@@ -134,13 +134,13 @@ Deno.test("view: a valid link to a cancelled booking is treated as revoked", asy
 });
 
 for (const [name, row] of [["expired", EXPIRED], ["revoked", REVOKED]] as const) {
-  Deno.test(`reschedule: an ${name} link is refused and nothing is saved`, async () => {
+  Deno.test(`reschedule: a link that is ${name} is refused and nothing is saved`, async () => {
     const r = await call(RESCHEDULE, row());
     assert(r.status === 403, `expected 403, got ${r.status}`);
     noBookingAccess(r.seen, `reschedule ${name}`);
   });
 
-  Deno.test(`cancel: an ${name} link is refused and the booking is untouched`, async () => {
+  Deno.test(`cancel: a link that is ${name} is refused and the booking is untouched`, async () => {
     const r = await call(CANCEL, row());
     assert(r.status === 403, `expected 403, got ${r.status}`);
     noBookingAccess(r.seen, `cancel ${name}`);
