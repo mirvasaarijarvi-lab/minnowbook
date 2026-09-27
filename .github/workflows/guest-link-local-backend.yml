@@ -30,6 +30,11 @@ jobs:
         uses: ./.github/actions/stale-commit-check
       - name: Inject fake credentials into every output path
         run: bash scripts/ci/guest-link-log-guard.test.sh
+      # Flags any step whose logs or saved files skip the secret guard.
+      - name: Every step goes through the secret guard
+        run: |
+          node --test scripts/ci/guest-link-step-guard.test.mjs
+          node scripts/ci/guest-link-step-guard.mjs
 
   revoked-link:
     name: Revoked guest link (local backend)
@@ -112,12 +117,17 @@ jobs:
             | python3 -c 'import sys,json;print(json.load(sys.stdin)["access_token"])')
           echo "::add-mask::$TOKEN"
           echo "GUEST_LINK_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+          # Test output goes to a file first and reaches the log only
+          # through the guard's filter.
+          status=0
           GUEST_PORTAL_TEST_BACKEND=local \
           SUPABASE_URL="$API_URL" SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" \
           GUEST_PORTAL_TEST_ACCESS_TOKEN="$TOKEN" \
           deno test --allow-net --allow-env --allow-read \
             supabase/functions/guest-booking-portal/revoked-token.integration.test.ts \
-            2>&1 | tee /tmp/revoked-test.log
+            > /tmp/revoked-test.log 2>&1 || status=$?
+          scripts/ci/guest-link-log-guard.sh filter /tmp/revoked-test.log 200
+          [ "$status" -eq 0 ] || { echo "::error::test failed"; exit 1; }
           grep -q "1 passed" /tmp/revoked-test.log || { echo "::error::test did not run or failed"; exit 1; }
 
       - name: Check logs hold no credentials
