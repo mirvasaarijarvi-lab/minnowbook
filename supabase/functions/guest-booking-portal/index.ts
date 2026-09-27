@@ -246,7 +246,9 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
       const { data: reservations } = await admin
         .from("reservations")
         .select("id, tenant_id, date, start_time, reservation_type, guest_name, status")
-        .ilike("guest_email", email)
+        // Escape LIKE wildcards so the match is an exact, case-insensitive
+        // comparison and can never reach another guest's booking.
+        .ilike("guest_email", email.replace(/[\\%_]/g, (c) => `\\${c}`))
         .gte("date", today)
         .neq("status", "cancelled")
         .order("date", { ascending: true })
