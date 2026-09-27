@@ -323,6 +323,13 @@
       "when": 1790505077468,
       "tag": "0045_block_disabled_accounts_in_access_helpers",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1790505270127,
+      "tag": "0046_block_disabled_accounts_all_tables",
+      "breakpoints": true
     }
   ]
 }
