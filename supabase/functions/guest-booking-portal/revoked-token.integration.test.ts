@@ -49,12 +49,12 @@ Deno.test({
       .from("tenant_users")
       .select("tenant_id, role")
       .eq("user_id", userData.user.id)
-      .in("role", ["owner", "admin"])
+      .in("role", ["superadmin", "owner", "admin"])
       .limit(1)
       .maybeSingle();
+    // A token was supplied, so a missing setup is a failure, not a silent pass.
     if (!membership) {
-      console.warn("skipped: test login is not an owner/admin of any business");
-      return;
+      throw new Error("test login is not an owner/admin of any business");
     }
 
     const before = await staff
@@ -66,8 +66,7 @@ Deno.test({
       .limit(1)
       .maybeSingle();
     if (!before.data) {
-      console.warn("skipped: the test business has no active bookings");
-      return;
+      throw new Error("the test business has no active bookings to attach a link to");
     }
     const reservation = before.data;
 
