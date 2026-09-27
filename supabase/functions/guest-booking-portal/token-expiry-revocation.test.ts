@@ -94,7 +94,11 @@ function noBookingAccess(seen: Seen[], label: string) {
   );
 }
 
-const RESCHEDULE = { action: "reschedule", requested_date: "2099-02-01" };
+const RESCHEDULE = {
+  action: "reschedule",
+  // Within the portal's allowed window (future, under 400 days ahead).
+  requested_date: new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10),
+};
 const CANCEL = { action: "cancel", language: "en" };
 
 Deno.test("control: a valid link shows the booking", async () => {
