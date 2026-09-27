@@ -43,6 +43,7 @@ const COVERED_TABLES = new Set<string>([
   "beta_feedback",
   "blocked_slots",
   "booking_tokens",
+  "booking_token_revocation_audit",
   "booking_validation_log",
   "discount_codes",
   "email_send_log",

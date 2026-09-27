@@ -93,6 +93,7 @@ const TENANT_SCOPED_TABLES = [
   "site_access_change_requests",
   "site_access_reviews",
   "site_access_change_log",
+  "booking_token_revocation_audit",
 ] as const;
 
 const PRIVATE_ONLY_TABLES = new Set([
@@ -120,6 +121,7 @@ const PRIVATE_ONLY_TABLES = new Set([
   "site_access_change_requests",
   "site_access_reviews",
   "site_access_change_log",
+  "booking_token_revocation_audit",
 ]);
 
 const hasSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
