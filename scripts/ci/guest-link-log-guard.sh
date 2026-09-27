@@ -59,9 +59,9 @@ def dec(s):
     for _ in range(3):
         prev = s
         s = unquote(s)
-        s = re.sub(r"\\\\u([0-9a-fA-F]{4})", lambda m: chr(int(m.group(1), 16)), s)
-        s = re.sub(r"\\\\x([0-9a-fA-F]{2})", lambda m: chr(int(m.group(1), 16)), s)
-        s = re.sub(r"\\\\(.)", r"\\1", s)
+        s = re.sub(r"\\u([0-9a-fA-F]{4})", lambda m: chr(int(m.group(1), 16)), s)
+        s = re.sub(r"\\x([0-9a-fA-F]{2})", lambda m: chr(int(m.group(1), 16)), s)
+        s = re.sub(r"\\(.)", r"\1", s)
         s = s.replace("&quot;", "\"").replace("&amp;", "&").replace("&#x2F;", "/").replace("&#47;", "/")
         if s == prev:
             break
@@ -111,11 +111,10 @@ case "$cmd" in
           break
         fi
       done < <(known_values)
-      if [ "$leaked" = 0 ] || true; then
-        if decode_lines < "$f" | holds_secret; then
-          grep -qE "$JWT_RE" "$f" || { while IFS= read -r v; do grep -qF -- "$v" "$f" && break; done < <(known_values); } \
-            || { echo "::error::$(basename "$f") contains an encoded or escaped backend credential"; leaked=1; }
-        fi
+      # Encoded or escaped copies: only checked on the decoded text.
+      if decode_lines < "$f" | holds_secret && ! holds_secret < "$f"; then
+        echo "::error::$(basename "$f") contains an encoded or escaped backend credential"
+        leaked=1
       fi
       if grep -qE "$JWT_RE" "$f"; then
         echo "::error::$(basename "$f") contains a sign-in token"
