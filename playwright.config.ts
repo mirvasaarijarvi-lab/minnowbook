@@ -5,8 +5,11 @@ import { defineConfig } from "@playwright/test";
 // backend client throws during SSR and every page answers HTTP 500, which shows
 // up as dozens of misleading "real regressions" instead of one clear cause.
 import { assertNodeVersion } from "./scripts/ci/assert-node-version.mjs";
+import { welcomeTourSeenStorageState } from "./e2e/fixtures/welcome-tour";
 
 assertNodeVersion("e2e");
+
+const BASE_URL = process.env.E2E_BASE_URL ?? "http://localhost:4173";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -26,7 +29,10 @@ export default defineConfig({
   outputDir: "test-results",
   use: {
     // E2E_BASE_URL points a local run at an already running app (no preview build).
-    baseURL: process.env.E2E_BASE_URL ?? "http://localhost:4173",
+    baseURL: BASE_URL,
+    // Every test starts with the dashboard welcome tour marked as seen, so its
+    // overlay never blocks clicks (see e2e/fixtures/welcome-tour.ts).
+    storageState: welcomeTourSeenStorageState(BASE_URL),
     // Sandboxes and CI images occasionally ship a Chromium whose shared
     // libraries are incomplete. E2E_CHROMIUM_PATH lets a run point at a
     // working browser binary without touching the spec files.
