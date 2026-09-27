@@ -147,6 +147,66 @@ bash "$GUARD" scan "$WORK/enc-clean.log" > /dev/null 2>&1 \
 [ "$(bash "$GUARD" filter "$WORK/enc-clean.log" 40 | wc -l)" = 2 ] \
   && pass "filter keeps harmless encoded lines" || bad "filter dropped harmless encoded lines"
 
+# 3c. Uploaded artifacts. If the workflow ever uploads files, they must be
+#     scanned with "scan-artifacts". Every fake value is planted in each kind
+#     of artifact file: nested and hidden files, zip, tar.gz, gz, a zip
+#     inside a zip, and encoded forms. Each must fail the scan on its own,
+#     name the file, and never repeat the value.
+make_clean_artifact() { # $1 = dir
+  mkdir -p "$1/reports/.meta"
+  printf 'test run passed\nGET /search?q=caf%%C3%%A9 ok\n' > "$1/reports/summary.txt"
+  printf '{"tests":3,"failed":0}\n' > "$1/reports/.meta/result.json"
+}
+art_check() { # $1 = label, $2 = artifact dir, $3 = value, $4 = expected file name part
+  local out="$WORK/art-scan.txt"
+  if bash "$GUARD" scan-artifacts "$2" > "$out" 2>&1; then
+    bad "artifact scan missed $1"; art_missed=1; return
+  fi
+  grep -qF -- "$3" "$out" && { bad "artifact scan message repeats a value ($1)"; art_missed=1; }
+  grep -qF -- "$4" "$out" || { bad "artifact scan did not name $4 ($1)"; art_missed=1; }
+}
+art_missed=0; art_total=0
+C="$WORK/art-clean"; make_clean_artifact "$C"
+( cd "$C/reports" && python3 -c 'import zipfile;z=zipfile.ZipFile("bundle.zip","w");z.writestr("inner.txt","all good\n");z.close()' )
+bash "$GUARD" scan-artifacts "$C" > "$WORK/art-clean.txt" 2>&1 \
+  && pass "artifact scan passes a clean artifact folder (including a clean zip)" \
+  || bad "artifact scan failed a clean artifact folder"
+for i in "${!ALL[@]}"; do
+  v="${ALL[$i]}"
+  for kind in nested hidden zip targz gz zipinzip; do
+    D="$WORK/art-$i-$kind"; rm -rf "$D"; make_clean_artifact "$D"
+    printf 'step output\nupstream said: %s\n' "$v" > "$WORK/payload.txt"
+    case "$kind" in
+      nested) mkdir -p "$D/a/b"; cp "$WORK/payload.txt" "$D/a/b/deep.log"; want="deep.log" ;;
+      hidden) cp "$WORK/payload.txt" "$D/reports/.meta/.env.dump"; want=".env.dump" ;;
+      zip) python3 -c 'import sys,zipfile;z=zipfile.ZipFile(sys.argv[1],"w",zipfile.ZIP_DEFLATED);z.write(sys.argv[2],"logs/run.log");z.close()' "$D/logs.zip" "$WORK/payload.txt"; want="logs.zip!/logs/run.log" ;;
+      targz) mkdir -p "$WORK/tarsrc"; cp "$WORK/payload.txt" "$WORK/tarsrc/run.log"; tar -czf "$D/logs.tar.gz" -C "$WORK/tarsrc" run.log; want="logs.tar.gz!/run.log" ;;
+      gz) gzip -c "$WORK/payload.txt" > "$D/run.log.gz"; want="run.log.gz" ;;
+      zipinzip) python3 -c '
+import io,sys,zipfile
+inner=io.BytesIO(); z=zipfile.ZipFile(inner,"w",zipfile.ZIP_DEFLATED); z.write(sys.argv[2],"run.log"); z.close()
+o=zipfile.ZipFile(sys.argv[1],"w",zipfile.ZIP_DEFLATED); o.writestr("inner.zip",inner.getvalue()); o.close()' "$D/outer.zip" "$WORK/payload.txt"; want="outer.zip!/inner.zip!/run.log" ;;
+    esac
+    art_total=$((art_total + 1))
+    art_check "fake value #$i in a $kind artifact" "$D" "$v" "$want"
+  done
+  # Encoded copies inside an artifact file, and inside a zipped one.
+  while IFS=$'\t' read -r form enc; do
+    [ "$enc" = "$v" ] && continue
+    D="$WORK/art-enc"; rm -rf "$D"; make_clean_artifact "$D"
+    printf 'upstream said: %s (retrying)\n' "$enc" > "$D/reports/encoded.txt"
+    art_total=$((art_total + 1))
+    art_check "$form fake value #$i in an artifact" "$D" "$enc" "encoded.txt"
+  done < <(encode_forms "$v" | grep -E '^(url-encoded|JSON-escaped|unicode-escaped)	')
+done
+[ "$art_missed" = 0 ] && pass "artifact scan catches all $art_total planted fake values"
+# A single file path works too, and a missing artifact path fails loudly.
+printf 'x %s\n' "$PASSWORD" > "$WORK/single.log"
+bash "$GUARD" scan-artifacts "$WORK/single.log" > /dev/null 2>&1 \
+  && bad "artifact scan passed a single leaking file" || pass "artifact scan checks a single file"
+bash "$GUARD" scan-artifacts "$WORK/does-not-exist" > /dev/null 2>&1 \
+  && bad "artifact scan passed a missing artifact path" || pass "artifact scan fails on a missing artifact path"
+
 # 4. Workflow structure: no artifacts, no unguarded log printing.
 grep -qE 'upload-artifact|actions/cache/save' "$WF" && bad "workflow uploads artifacts" || pass "workflow uploads no artifacts"
 unguarded=$(grep -nE '(cat|tail|head|less|more)[^|]*/tmp/(supabase-start|functions-serve|revoked-test)\.log' "$WF" | grep -v 'guest-link-log-guard' || true)

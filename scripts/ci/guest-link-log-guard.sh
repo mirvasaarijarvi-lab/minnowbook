@@ -123,8 +123,74 @@ case "$cmd" in
     done
     exit $leaked
     ;;
+  scan-artifacts)
+    # Scan every file of an artifact folder (or single file), including hidden
+    # files, subfolders and .zip/.tar/.tar.gz/.tgz/.gz archives, unpacked up to
+    # 3 levels deep. Reports file names only, never contents.
+    [ "$#" -gt 0 ] || { echo "usage: $0 scan-artifacts <dir|file>..." >&2; exit 2; }
+    self="$0"
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    leaked=0
+    n=0
+    unpack() { # $1 = archive, $2 = dest; prints nothing on success
+      python3 - "$1" "$2" <<'PY' 2>/dev/null
+import gzip, os, shutil, sys, tarfile, zipfile
+src, dest = sys.argv[1], sys.argv[2]
+os.makedirs(dest, exist_ok=True)
+def safe(name):
+    p = os.path.normpath(os.path.join(dest, name))
+    return p if p.startswith(os.path.abspath(dest)) or p.startswith(dest) else None
+if zipfile.is_zipfile(src):
+    with zipfile.ZipFile(src) as z:
+        for m in z.infolist():
+            p = safe(m.filename)
+            if p and not m.is_dir():
+                os.makedirs(os.path.dirname(p), exist_ok=True)
+                with z.open(m) as i, open(p, "wb") as o: shutil.copyfileobj(i, o)
+elif tarfile.is_tarfile(src):
+    with tarfile.open(src) as t:
+        for m in t.getmembers():
+            p = safe(m.name)
+            if p and m.isfile():
+                os.makedirs(os.path.dirname(p), exist_ok=True)
+                with t.extractfile(m) as i, open(p, "wb") as o: shutil.copyfileobj(i, o)
+elif src.endswith(".gz"):
+    with gzip.open(src) as i, open(os.path.join(dest, os.path.basename(src)[:-3] or "data"), "wb") as o:
+        shutil.copyfileobj(i, o)
+else:
+    sys.exit(1)
+PY
+    }
+    walk() { # $1 = path, $2 = label prefix, $3 = depth
+      local path="$1" label="$2" depth="$3" f rel
+      while IFS= read -r -d '' f; do
+        rel="${label}${f#"$path"}"
+        [ -f "$path" ] && rel="$label$(basename "$f")"
+        n=$((n + 1))
+        if ! bash "$self" scan "$f" > /dev/null 2>&1; then
+          echo "::error::artifact file ${rel#/} contains a backend credential"
+          leaked=1
+        fi
+        case "$f" in
+          *.zip | *.tar | *.tar.gz | *.tgz | *.gz)
+            if [ "$depth" -lt 3 ]; then
+              local d="$tmp/u$n"
+              if unpack "$f" "$d"; then walk "$d" "${rel#/}!" $((depth + 1)); fi
+            fi
+            ;;
+        esac
+      done < <(find "$path" -type f -print0)
+    }
+    for p in "$@"; do
+      [ -e "$p" ] || { echo "::error::artifact path not found: $(basename "$p")"; leaked=1; continue; }
+      walk "$p" "" 0
+    done
+    [ "$leaked" = 0 ] && echo "Scanned $n artifact file(s): no backend credentials."
+    exit $leaked
+    ;;
   *)
-    echo "usage: $0 filter <file> [lines] | scan <file>..." >&2
+    echo "usage: $0 filter <file> [lines] | scan <file>... | scan-artifacts <dir|file>..." >&2
     exit 2
     ;;
 esac
