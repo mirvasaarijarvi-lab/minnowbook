@@ -125,10 +125,11 @@ jobs:
           GUEST_PORTAL_TEST_ACCESS_TOKEN="$TOKEN" \
           deno test --allow-net --allow-env --allow-read \
             supabase/functions/guest-booking-portal/revoked-token.integration.test.ts \
+            supabase/functions/guest-booking-portal/revoke-isolation.integration.test.ts \
             > /tmp/revoked-test.log 2>&1 || status=$?
           scripts/ci/guest-link-log-guard.sh filter /tmp/revoked-test.log 200
           [ "$status" -eq 0 ] || { echo "::error::test failed"; exit 1; }
-          grep -q "1 passed" /tmp/revoked-test.log || { echo "::error::test did not run or failed"; exit 1; }
+          grep -q "2 passed" /tmp/revoked-test.log || { echo "::error::tests did not run or failed"; exit 1; }
 
       - name: Check logs hold no credentials
         if: always()
