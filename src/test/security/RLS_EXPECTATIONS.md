@@ -126,6 +126,21 @@ RPC (SECURITY DEFINER), not direct SELECT.
 
 ---
 
+### `booking_token_revocation_audit`
+
+| Op | anon | own tenant | foreign tenant | system admin |
+|---|---|---|---|---|
+| SELECT | ❌ | 🔒 owner/admin | ❌ | ✅ |
+| INSERT | ❌ | ❌ | ❌ | ❌ |
+| UPDATE | ❌ | ❌ | ❌ | ❌ |
+| DELETE | ❌ | ❌ | ❌ | ❌ |
+
+Notes: append-only history of who revoked, restored or deleted a guest
+link. Rows are written only by the `record_booking_token_revocation`
+trigger on `booking_tokens`; nobody can change or delete them.
+
+---
+
 ### `booking_validation_log`
 
 | Op | anon | own tenant | foreign tenant | system admin |
