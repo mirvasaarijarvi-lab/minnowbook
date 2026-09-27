@@ -89,6 +89,7 @@ jobs:
           deno test --allow-net --allow-env --allow-read \
             supabase/functions/admin-users/access-control.live.test.ts \
             supabase/functions/admin-users/role-status-change.integration.test.ts \
+            supabase/functions/admin-users/role-status-isolation.integration.test.ts \
             supabase/functions/guest-booking-portal/access-control.live.test.ts
           # revoked-token.integration.test.ts runs against a throwaway local
           # backend in guest-link-local-backend.yml, never the live one.
