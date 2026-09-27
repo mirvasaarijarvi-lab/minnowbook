@@ -87,6 +87,9 @@ async function seedFakeSession(page: Page, ref: string, lang: Lang = "en") {
     ({ key, value, lang }) => {
       window.localStorage.setItem(key, JSON.stringify(value));
       window.localStorage.setItem("mimmobook-lang", lang);
+      // The first-visit guided tour covers the whole dashboard with an
+      // overlay that intercepts clicks on the sidebar; mark it as seen.
+      window.localStorage.setItem("mimmobook-tour-completed", "true");
     },
     { key: `sb-${ref}-auth-token`, value: session, lang },
   );
