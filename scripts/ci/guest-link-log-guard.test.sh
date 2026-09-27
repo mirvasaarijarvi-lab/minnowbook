@@ -93,6 +93,83 @@ done
 printf 'test ok | 1 passed | 0 failed\n' > "$WORK/clean.log"
 bash "$GUARD" scan "$WORK/clean.log" > /dev/null 2>&1 && pass "scan passes a clean log" || bad "scan failed a clean log"
 
+# 3a. Values split across adjacent lines or across output chunks (separate
+#     files the workflow writes in turn). Each piece looks harmless on its
+#     own; only joining neighbours reveals the value.
+split_forms() { # $1 = value; prints "form<TAB>text" with \n for line breaks
+  python3 - "$1" <<'PY'
+import sys
+v = sys.argv[1]
+h, a, b = len(v) // 2, len(v) // 3, 2 * len(v) // 3
+forms = {
+    "split in two lines": v[:h] + "\n" + v[h:],
+    "split in three lines": v[:a] + "\n" + v[a:b] + "\n" + v[b:],
+    "split with CRLF line ends": v[:h] + "\r\n" + v[h:],
+    "split with indentation": "  " + v[:h] + "\n    " + v[h:],
+    "split one character per line": "\n".join(v[:4]) + "\n" + v[4:],
+}
+for n, t in forms.items():
+    print(n + "\t" + t.replace("\\", "\\\\").replace("\n", "\\n").replace("\r", "\\r"))
+PY
+}
+joined_has() { # $1 = file, $2 = value: true if value appears once line breaks and indentation are removed
+  python3 - "$1" "$2" <<'PY'
+import re, sys
+t = open(sys.argv[1], encoding="utf-8", errors="replace").read()
+j = "".join(l.strip() for l in re.split(r"\r?\n", t))
+sys.exit(0 if sys.argv[2] in j else 1)
+PY
+}
+split_missed=0; split_total=0
+for i in "${!ALL[@]}"; do
+  v="${ALL[$i]}"
+  while IFS=$'\t' read -r form text; do
+    split_total=$((split_total + 1))
+    { printf 'Error: container exited with code 1\nupstream said:\n'; printf '%b\n' "$text"; printf 'retrying\n'; } > "$WORK/split.log"
+    # Scan must fail and not repeat any piece long enough to matter.
+    if bash "$GUARD" scan "$WORK/split.log" > "$WORK/split-scan.txt" 2>&1; then
+      bad "scan missed fake value #$i $form"; split_missed=1
+    elif joined_has "$WORK/split-scan.txt" "$v"; then
+      bad "scan message repeats fake value #$i ($form)"; split_missed=1
+    fi
+    # Every printing path must drop the pieces, but keep the error line.
+    for lines in 40 80 200; do
+      bash "$GUARD" filter "$WORK/split.log" "$lines" > "$WORK/split-out.txt" 2>&1
+      if joined_has "$WORK/split-out.txt" "$v"; then
+        bad "filter ($lines lines) leaked fake value #$i $form"; split_missed=1
+      fi
+      grep -q "Error: container exited with code 1" "$WORK/split-out.txt" \
+        || { bad "filter dropped the error line next to a $form value"; split_missed=1; }
+    done
+  done < <(split_forms "$v")
+  # Across output chunks: the end of one file and the start of the next.
+  h=$(( ${#v} / 2 ))
+  printf 'step 1 output\n%s' "${v:0:h}" > "$WORK/chunk-1.log"
+  printf '%s\nstep 2 output\n' "${v:h}" > "$WORK/chunk-2.log"
+  split_total=$((split_total + 1))
+  if bash "$GUARD" scan "$WORK/chunk-1.log" "$WORK/chunk-2.log" > "$WORK/chunk-scan.txt" 2>&1; then
+    bad "scan missed fake value #$i split across two output chunks"; split_missed=1
+  elif joined_has "$WORK/chunk-scan.txt" "$v"; then
+    bad "chunk scan message repeats fake value #$i"; split_missed=1
+  fi
+  # Also split across lines in an uploaded artifact file.
+  D="$WORK/art-split"; rm -rf "$D"; mkdir -p "$D/logs"
+  printf 'ok\n%s\n%s\n' "${v:0:h}" "${v:h}" > "$D/logs/run.log"
+  split_total=$((split_total + 1))
+  bash "$GUARD" scan-artifacts "$D" > /dev/null 2>&1 \
+    && { bad "artifact scan missed fake value #$i split across lines"; split_missed=1; }
+done
+[ "$split_missed" = 0 ] && pass "scan, filter and artifact scan catch all $split_total split fake values"
+# Harmless neighbouring lines are not flagged or dropped.
+printf 'Starting database...\nError: container exited with code 1\neyJ\nplain words here\n' > "$WORK/split-clean.log"
+bash "$GUARD" scan "$WORK/split-clean.log" > /dev/null 2>&1 \
+  && pass "scan passes harmless neighbouring lines" || bad "scan failed harmless neighbouring lines"
+printf 'test ok\n1 passed\n' > "$WORK/chunk-a.log"; printf '0 failed\n' > "$WORK/chunk-b.log"
+bash "$GUARD" scan "$WORK/chunk-a.log" "$WORK/chunk-b.log" > /dev/null 2>&1 \
+  && pass "scan passes clean output chunks" || bad "scan failed clean output chunks"
+[ "$(bash "$GUARD" filter "$WORK/split-clean.log" 40 | wc -l)" = 4 ] \
+  && pass "filter keeps harmless neighbouring lines" || bad "filter dropped harmless neighbouring lines"
+
 # 3b. Encoded and escaped copies of every fake value. Each form is planted
 #     in an unlabelled line, so only decoding can catch it. The filter must
 #     drop it (for every output path), and the scan must fail on it.

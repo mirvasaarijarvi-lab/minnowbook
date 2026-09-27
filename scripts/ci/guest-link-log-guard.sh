@@ -71,6 +71,54 @@ for line in sys.stdin.buffer.read().decode("utf-8", "replace").split("\n"):
 '
 }
 
+# Values split across adjacent lines (or output chunks). Pieces are joined
+# with line ends and surrounding spaces removed, up to MAX_SPLIT lines.
+#   split_hits drop   : stdin = decoded lines; prints the index of every line
+#                       that belongs to a smallest group of neighbours whose
+#                       joined text holds a secret.
+#   split_hits any F..: exit 0 if the joined text of each file, or of all
+#                       files in order, holds a secret.
+MAX_SPLIT=8
+split_hits() {
+  # The script goes in -c so the lines to check can come in on stdin.
+  GUARD_KNOWN="$(known_values)" GUARD_JWT_RE="$JWT_RE" GUARD_MAX="$MAX_SPLIT" \
+    python3 -c "$SPLIT_PY" "$@"
+}
+SPLIT_PY=$(cat <<'PY'
+import os, re, sys
+known = [v for v in os.environ["GUARD_KNOWN"].split("\n") if v]
+jwt = re.compile(os.environ["GUARD_JWT_RE"])
+mx = int(os.environ["GUARD_MAX"])
+def hit(t):
+    return any(v in t for v in known) or bool(jwt.search(t))
+def pieces(text):
+    return [l.strip() for l in re.split(r"\r?\n|\r", text)]
+mode, files = sys.argv[1], sys.argv[2:]
+if mode == "drop":
+    ls = pieces(sys.stdin.buffer.read().decode("utf-8", "replace"))
+    drop = set()
+    for i in range(len(ls)):
+        for j in range(i + 1, min(i + mx, len(ls))):
+            w = "".join(ls[i:j + 1])
+            if hit(w):
+                # Smallest group: neither end line can be left out.
+                if not hit("".join(ls[i + 1:j + 1])) and not hit("".join(ls[i:j])):
+                    drop.update(range(i, j + 1))
+                break
+    for k in sorted(drop):
+        print(k)
+    sys.exit(0)
+texts = []
+for f in files:
+    try:
+        texts.append(open(f, "rb").read().decode("utf-8", "replace"))
+    except OSError:
+        pass
+joined = ["".join(pieces(t)) for t in texts]
+sys.exit(0 if any(hit(j) for j in joined) or hit("".join(joined)) else 1)
+PY
+)
+
 # True if the text on stdin holds a known value or a JWT.
 holds_secret() {
   local text
@@ -92,7 +140,14 @@ case "$cmd" in
     [ -f "$file" ] || exit 0
     mapfile -t orig < <(tail -n "$lines" "$file")
     mapfile -t decoded < <(printf '%s\n' "${orig[@]}" | decode_lines)
+    # Lines that only hold a secret together with their neighbours.
+    declare -A split_drop=()
+    while IFS= read -r k; do [ -n "$k" ] && split_drop[$k]=1; done < <(
+      printf '%s\n' "${orig[@]}" | split_hits drop
+      printf '%s\n' "${decoded[@]}" | split_hits drop
+    )
     for i in "${!orig[@]}"; do
+      [ -n "${split_drop[$i]:-}" ] && continue
       d="${decoded[$i]:-}"
       printf '%s' "$d" | grep -qiE "$DROP_RE" && continue
       printf '%s' "$d" | holds_secret && continue
@@ -102,25 +157,45 @@ case "$cmd" in
     ;;
   scan)
     leaked=0
+    present=()
     for f in "$@"; do
       [ -f "$f" ] || continue
+      present+=("$f")
+      file_leaked=0
       while IFS= read -r v; do
         if grep -qF -- "$v" "$f"; then
           echo "::error::$(basename "$f") contains a backend credential"
-          leaked=1
+          file_leaked=1
           break
         fi
       done < <(known_values)
       # Encoded or escaped copies: only checked on the decoded text.
       if decode_lines < "$f" | holds_secret && ! holds_secret < "$f"; then
         echo "::error::$(basename "$f") contains an encoded or escaped backend credential"
-        leaked=1
+        file_leaked=1
       fi
       if grep -qE "$JWT_RE" "$f"; then
         echo "::error::$(basename "$f") contains a sign-in token"
-        leaked=1
+        file_leaked=1
       fi
+      # Split across adjacent lines (raw or decoded).
+      if [ "$file_leaked" = 0 ]; then
+        dec=$(mktemp)
+        decode_lines < "$f" > "$dec"
+        if split_hits any "$f" || split_hits any "$dec"; then
+          echo "::error::$(basename "$f") contains a backend credential split across lines"
+          file_leaked=1
+        fi
+        rm -f "$dec"
+      fi
+      [ "$file_leaked" = 1 ] && leaked=1
     done
+    # Split across output chunks: the files joined in the order given.
+    if [ "$leaked" = 0 ] && [ "${#present[@]}" -gt 1 ] && split_hits any "${present[@]}"; then
+      names=$(for f in "${present[@]}"; do basename "$f"; done | paste -sd, -)
+      echo "::error::a backend credential is split across output chunks ($names)"
+      leaked=1
+    fi
     exit $leaked
     ;;
   scan-artifacts)
