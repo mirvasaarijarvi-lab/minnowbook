@@ -156,6 +156,54 @@ ARGS=("$d"); run "$WORK/out.txt" && { bad "truncated zip with a secret passed"; 
 d="$WORK/good-all"; mkdir -p "$d"; cp "$WORK"/good.zip "$WORK"/good.tar "$WORK"/good.tar.gz "$WORK"/good.log.gz "$d"/
 expect_ok "undamaged copies of the same archives pass" "$d"
 
+# Sanitized diagnostics: every stop names the limit, measured value and
+# threshold in a fixed [limit=... observed=... threshold=... depth=... file=...]
+# form, never file contents, and hides file names that look like credentials.
+FAKE_JWT="eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.zzzzSECRETzzzzzzzzzz"
+diag() { # $1 = label, $2 = dir, $3 = regex the diagnostic line must match, rest = env
+  local label="$1" dir="$2" want="$3"; shift 3
+  local out="$WORK/diag.txt" rep="$WORK/diag.json"
+  rm -f "$rep"; ARGS=("$dir")
+  run "$out" ARTIFACT_SCAN_REPORT="$rep" "$@" && { bad "$label: scan passed"; return; }
+  local line; line=$(grep -m1 'artifact scan stopped' "$out")
+  [[ "$line" =~ \[limit=[a-z_]+\ observed=[^\ ]+\ threshold=[^\ ]+\ depth=[0-9]+\ file=[^]]* ]] \
+    || { bad "$label: diagnostic not in the fixed form: $line"; return; }
+  echo "$line" | grep -qE "$want" || { bad "$label: expected /$want/ in: $line"; return; }
+  grep -qE 'SECRET_CONTENT|zzzzSECRET|PLANTED_BODY' "$out" && { bad "$label: contents printed"; return; }
+  python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["status"]=="limit" and d["limit"], d' "$rep" 2>/dev/null \
+    || { bad "$label: JSON report missing or wrong"; return; }
+  grep -qE 'SECRET_CONTENT|zzzzSECRET|PLANTED_BODY' "$rep" && { bad "$label: contents in JSON report"; return; }
+  pass "$label"
+}
+diag "diagnostic: depth"          "$WORK/n4"       'limit=depth observed=4 threshold=3 depth=3 file=l4.zip!l3.zip!l2.zip!l1.zip'
+diag "diagnostic: declared size"  "$WORK/bomb"     'limit=file_bytes observed=419430400 threshold=52428800 depth=0 file=bomb.zip!zeros.log'
+diag "diagnostic: ratio"          "$WORK/bomb"     'limit=ratio observed=[0-9]+ threshold=200 depth=0 file=bomb.zip' ARTIFACT_MAX_FILE_BYTES=1000000000
+diag "diagnostic: total bytes"    "$WORK/total"    'limit=total_bytes observed=[0-9]+ threshold=8000000 ' ARTIFACT_MAX_TOTAL_BYTES=8000000
+diag "diagnostic: archive files"  "$WORK/many"     'limit=archive_files observed=20000 threshold=5000 depth=0 file=many.zip'
+diag "diagnostic: folder files"   "$WORK/manydir"  'limit=files observed=21 threshold=20 '  ARTIFACT_MAX_FILES=20
+diag "diagnostic: plain size"     "$WORK/huge"     'limit=file_bytes observed=2000000 threshold=1000000 depth=0 file=big.log' ARTIFACT_MAX_FILE_BYTES=1000000
+mkdir -p "$WORK/slow"; for i in 1 2 3; do echo x > "$WORK/slow/$i.log"; done
+diag "diagnostic: time"           "$WORK/slow"     'limit=seconds observed=[0-9-]+ threshold=-1 ' ARTIFACT_MAX_SECONDS=-1
+diag "diagnostic: damaged (type only)" "$WORK/broken2" 'limit=damaged observed=- threshold=- depth=0 file=big.log.gz|limit=damaged .* detail=[A-Za-z]+'
+# Names that look like credentials are hidden; the body is never printed.
+d="$WORK/diag-name"; mkdir -p "$d"
+python3 -c 'import zipfile,sys
+with zipfile.ZipFile(sys.argv[1],"w") as z:
+  z.writestr(sys.argv[2], b"PLANTED_BODY " + bytes(5_000_000), zipfile.ZIP_DEFLATED)' "$d/up.zip" "$FAKE_JWT.log"
+diag "credential-looking name inside an archive is hidden" "$d" 'file=up.zip!\[name hidden\]|file=\[name hidden\]' ARTIFACT_MAX_FILE_BYTES=1000000
+d="$WORK/diag-name2"; mkdir -p "$d"; head -c 5000 /dev/zero > "$d/password=hunter2.log"
+diag "credential-looking plain file name is hidden" "$d" 'file=\[name hidden\]' ARTIFACT_MAX_FILE_BYTES=100
+grep -q hunter2 "$WORK/diag.txt" && bad "hidden name still printed" || pass "hidden name never printed"
+# Control characters and very long names are cleaned and cut.
+d="$WORK/diag-ctl"; mkdir -p "$d"; long=$(printf 'a%.0s' $(seq 1 200))
+head -c 5000 /dev/zero > "$d/$(printf 'evil\033[31mname')$long.log"
+diag "control characters and long names are cleaned" "$d" 'file=evil31mnamea{100,120}\.\.\.' ARTIFACT_MAX_FILE_BYTES=100
+grep -q $'\033' "$WORK/diag.txt" && bad "escape character printed" || pass "escape character never printed"
+# A clean scan writes an ok report.
+ARGS=("$WORK/n3"); run "$WORK/diag.txt" ARTIFACT_SCAN_REPORT="$WORK/ok.json"
+python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["status"]=="ok" and d["limit"]=="" and int(d["files_scanned"])>0' "$WORK/ok.json" \
+  && pass "clean scan writes an ok report" || bad "clean scan report"
+
 # Time limit.
 mkdir -p "$WORK/slow"; for i in 1 2 3; do echo x > "$WORK/slow/$i.log"; done
 expect_stop "time limit" "longer than" "$WORK/slow" ARTIFACT_MAX_SECONDS=-1

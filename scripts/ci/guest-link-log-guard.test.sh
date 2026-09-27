@@ -256,13 +256,13 @@ for i in "${!ALL[@]}"; do
     case "$kind" in
       nested) mkdir -p "$D/a/b"; cp "$WORK/payload.txt" "$D/a/b/deep.log"; want="deep.log" ;;
       hidden) cp "$WORK/payload.txt" "$D/reports/.meta/.env.dump"; want=".env.dump" ;;
-      zip) python3 -c 'import sys,zipfile;z=zipfile.ZipFile(sys.argv[1],"w",zipfile.ZIP_DEFLATED);z.write(sys.argv[2],"logs/run.log");z.close()' "$D/logs.zip" "$WORK/payload.txt"; want="logs.zip!/logs/run.log" ;;
-      targz) mkdir -p "$WORK/tarsrc"; cp "$WORK/payload.txt" "$WORK/tarsrc/run.log"; tar -czf "$D/logs.tar.gz" -C "$WORK/tarsrc" run.log; want="logs.tar.gz!/run.log" ;;
+      zip) python3 -c 'import sys,zipfile;z=zipfile.ZipFile(sys.argv[1],"w",zipfile.ZIP_DEFLATED);z.write(sys.argv[2],"logs/run.log");z.close()' "$D/logs.zip" "$WORK/payload.txt"; want="logs.zip!logs/run.log" ;;
+      targz) mkdir -p "$WORK/tarsrc"; cp "$WORK/payload.txt" "$WORK/tarsrc/run.log"; tar -czf "$D/logs.tar.gz" -C "$WORK/tarsrc" run.log; want="logs.tar.gz!run.log" ;;
       gz) gzip -c "$WORK/payload.txt" > "$D/run.log.gz"; want="run.log.gz" ;;
       zipinzip) python3 -c '
 import io,sys,zipfile
 inner=io.BytesIO(); z=zipfile.ZipFile(inner,"w",zipfile.ZIP_DEFLATED); z.write(sys.argv[2],"run.log"); z.close()
-o=zipfile.ZipFile(sys.argv[1],"w",zipfile.ZIP_DEFLATED); o.writestr("inner.zip",inner.getvalue()); o.close()' "$D/outer.zip" "$WORK/payload.txt"; want="outer.zip!/inner.zip!/run.log" ;;
+o=zipfile.ZipFile(sys.argv[1],"w",zipfile.ZIP_DEFLATED); o.writestr("inner.zip",inner.getvalue()); o.close()' "$D/outer.zip" "$WORK/payload.txt"; want="outer.zip!inner.zip!run.log" ;;
     esac
     art_total=$((art_total + 1))
     art_check "fake value #$i in a $kind artifact" "$D" "$v" "$want"
