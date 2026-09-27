@@ -22,6 +22,7 @@ import {
 } from "./index.ts";
 import { SECURITY_HEADERS } from "../_shared/http-headers.ts";
 import { assertCspAndHsts } from "../_shared/test-security-headers.ts";
+import { withRestoredEnv } from "../_shared/test-env-guard.ts";
 
 /** Headers that MUST appear on every Response, success or error. */
 const REQUIRED_HEADER_ENTRIES = Object.entries(SECURITY_HEADERS);
