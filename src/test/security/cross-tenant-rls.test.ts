@@ -94,6 +94,22 @@ const TENANT_SCOPED_TABLES = [
   "site_access_reviews",
   "site_access_change_log",
   "booking_token_revocation_audit",
+  // Previously covered only by dedicated suites (or not at all); now also in
+  // the anon read and cross-business write sweeps. Not PRIVATE_ONLY: some
+  // have public reads filtered by active business.
+  "reschedule_requests",
+  "reservation_access_log",
+  "role_definitions",
+  "role_permissions",
+  "security_events",
+  "site_settings",
+  "site_users",
+  "sites",
+  "support_requests",
+  "tenant_email_templates",
+  "tenant_opening_hours",
+  "tenant_settings",
+  "tenant_users",
 ] as const;
 
 const PRIVATE_ONLY_TABLES = new Set([

@@ -37,7 +37,9 @@ function balancedBody(sql: string, open: number): string {
 
 const NAME = String.raw`(?:"?public"?\.)?"?([a-z_][a-z0-9_]*)"?`;
 const CREATE_RE = new RegExp(
-  String.raw`create\s+table\s+(?:if\s+not\s+exists\s+)?` + NAME + String.raw`\s*\(`,
+  String.raw`create\s+table\s+(?:if\s+not\s+exists\s+)?` +
+    NAME +
+    String.raw`\s*\(`,
   "gi",
 );
 const ALTER_ADD_RE = new RegExp(
@@ -60,13 +62,20 @@ export function tenantTablesFromSql(sqlTexts: string[]): Set<string> {
     // Only public-schema (or unqualified) tables.
     const events: Array<[number, "add" | "drop", string]> = [];
     for (const m of sql.matchAll(CREATE_RE)) {
-      if (/\b(?:auth|storage|realtime|vault|supabase_functions)\s*\.\s*$/i.test(sql.slice(0, m.index! + m[0].indexOf(m[1]))))
+      if (
+        /\b(?:auth|storage|realtime|vault|supabase_functions)\s*\.\s*$/i.test(
+          sql.slice(0, m.index! + m[0].indexOf(m[1])),
+        )
+      )
         continue;
       const body = balancedBody(sql, m.index! + m[0].length - 1);
-      if (/(^|[\s,(])"?tenant_id"?\s+\w/i.test(body)) events.push([m.index!, "add", m[1].toLowerCase()]);
+      if (/(^|[\s,(])"?tenant_id"?\s+\w/i.test(body))
+        events.push([m.index!, "add", m[1].toLowerCase()]);
     }
-    for (const m of sql.matchAll(ALTER_ADD_RE)) events.push([m.index!, "add", m[1].toLowerCase()]);
-    for (const m of sql.matchAll(DROP_RE)) events.push([m.index!, "drop", m[1].toLowerCase()]);
+    for (const m of sql.matchAll(ALTER_ADD_RE))
+      events.push([m.index!, "add", m[1].toLowerCase()]);
+    for (const m of sql.matchAll(DROP_RE))
+      events.push([m.index!, "drop", m[1].toLowerCase()]);
     for (const [, kind, name] of events.sort((a, b) => a[0] - b[0])) {
       if (kind === "add") tables.add(name);
       else tables.delete(name);
@@ -82,29 +91,42 @@ export function tenantTablesInMigrations(root = process.cwd()): Set<string> {
 
 /** Reads the string entries of `const NAME = [ ... ]` or `new Set([ ... ])` in a source file. */
 export function readStringList(source: string, constName: string): Set<string> {
-  const start = source.search(new RegExp(String.raw`const\s+${constName}\b[^=]*=`));
+  const start = source.search(
+    new RegExp(String.raw`const\s+${constName}\b[^=]*=`),
+  );
   if (start < 0) throw new Error(`${constName} not found`);
   const open = source.indexOf("[", start);
   const body = balancedSquare(source, open);
   const out = new Set<string>();
-  for (const m of stripJsComments(body).matchAll(/["'`]([a-z_][a-z0-9_]*)["'`]/g)) out.add(m[1]);
+  for (const m of stripJsComments(body).matchAll(
+    /["'`]([a-z_][a-z0-9_]*)["'`]/g,
+  ))
+    out.add(m[1]);
   return out;
 }
 
 /** Reads the keys of `const NAME: Record<...> = { key: "...", ... }`. */
 export function readRecordKeys(source: string, constName: string): Set<string> {
-  const start = source.search(new RegExp(String.raw`const\s+${constName}\b[^=]*=`));
+  const start = source.search(
+    new RegExp(String.raw`const\s+${constName}\b[^=]*=`),
+  );
   if (start < 0) throw new Error(`${constName} not found`);
   const open = source.indexOf("{", source.indexOf("=", start));
   let depth = 0;
   let end = open;
   for (let i = open; i < source.length; i++) {
     if (source[i] === "{") depth++;
-    else if (source[i] === "}" && --depth === 0) { end = i; break; }
+    else if (source[i] === "}" && --depth === 0) {
+      end = i;
+      break;
+    }
   }
   const body = stripJsComments(source.slice(open + 1, end));
   const out = new Set<string>();
-  for (const m of body.matchAll(/(?:^|[,{\s])["']?([a-z_][a-z0-9_]*)["']?\s*:/g)) out.add(m[1]);
+  for (const m of body.matchAll(
+    /(?:^|[,{\s])["']?([a-z_][a-z0-9_]*)["']?\s*:/g,
+  ))
+    out.add(m[1]);
   return out;
 }
 
@@ -127,6 +149,11 @@ export function coverageGaps(input: {
   excluded: Set<string>;
 }): string[] {
   return [...input.migrationTables]
-    .filter((t) => !input.rlsTestTables.has(t) && !input.otherSuiteTables.has(t) && !input.excluded.has(t))
+    .filter(
+      (t) =>
+        !input.rlsTestTables.has(t) &&
+        !input.otherSuiteTables.has(t) &&
+        !input.excluded.has(t),
+    )
     .sort();
 }
