@@ -65,6 +65,22 @@ function validateUuid(value: string, fieldName: string): string {
   return value;
 }
 
+/** Rejects any site id that does not belong to the caller's tenant. */
+async function assertSitesInTenant(adminClient: any, tenantId: string, siteIds: string[]): Promise<void> {
+  const unique = [...new Set(siteIds)];
+  if (unique.length === 0) return;
+  const { data, error } = await adminClient
+    .from("sites")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .in("id", unique);
+  if (error) throw new Error("Could not verify locations");
+  if ((data ?? []).length !== unique.length) {
+    throw new Error("One or more locations do not belong to your organization");
+  }
+}
+
+
 // --- Rate limiting ---
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 30;
