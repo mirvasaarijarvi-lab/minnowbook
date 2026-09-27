@@ -322,6 +322,8 @@ PY
             rc=0
             msg=$(unpack "$f" "$d") || rc=$?
             if [ "$rc" = 3 ]; then limit "$msg"; rm -rf "$d"; return; fi
+            # Any other failure (crash, killed for memory) is never a pass.
+            if [ "$rc" != 0 ]; then limit "${rel#/} is damaged and cannot be fully scanned"; rm -rf "$d"; return; fi
             if [ "$rc" = 0 ]; then
               if [ "$depth" -ge "$MAX_DEPTH" ]; then
                 limit "${rel#/} is nested more than $MAX_DEPTH archive levels deep"; rm -rf "$d"; return
