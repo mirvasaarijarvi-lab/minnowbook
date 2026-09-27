@@ -530,6 +530,7 @@ type TranslationKeys = {
   "login.subtitle": string;
   "login.welcomeBack": string;
   "login.welcomeBackSubtitle": string;
+  "login.accountDisabled": string;
   "login.forgotPassword": string;
   "login.noAccount": string;
   "login.loggingIn": string;
@@ -2998,6 +2999,8 @@ const en: TranslationKeys = {
   "login.subtitle": "Enter your credentials to access your dashboard.",
   "login.welcomeBack": "Welcome back",
   "login.welcomeBackSubtitle": "Log in to manage your reservations and team.",
+  "login.accountDisabled":
+    "Your account has been turned off, so you were signed out. Contact your business owner or administrator if this is a mistake.",
   "login.forgotPassword": "Forgot password?",
   "login.noAccount": "Don't have an account?",
   "login.loggingIn": "Logging in...",
@@ -5991,6 +5994,8 @@ const fi: TranslationKeys = {
   "login.subtitle": "Syötä tunnuksesi päästäksesi hallintapaneeliin.",
   "login.welcomeBack": "Tervetuloa takaisin",
   "login.welcomeBackSubtitle": "Kirjaudu hallitsemaan varauksiasi ja tiimiäsi.",
+  "login.accountDisabled":
+    "Tilisi on poistettu käytöstä, joten sinut kirjattiin ulos. Ota yhteyttä yrityksesi omistajaan tai ylläpitäjään, jos tämä on virhe.",
   "login.forgotPassword": "Unohditko salasanan?",
   "login.noAccount": "Eikö sinulla ole tiliä?",
   "login.loggingIn": "Kirjaudutaan...",
@@ -8997,6 +9002,8 @@ const sv: TranslationKeys = {
   "login.welcomeBack": "Välkommen tillbaka",
   "login.welcomeBackSubtitle":
     "Logga in för att hantera dina bokningar och ditt team.",
+  "login.accountDisabled":
+    "Ditt konto har stängts av, så du loggades ut. Kontakta företagets ägare eller administratör om detta är ett misstag.",
   "login.forgotPassword": "Glömt lösenord?",
   "login.noAccount": "Har du inget konto?",
   "login.loggingIn": "Loggar in...",

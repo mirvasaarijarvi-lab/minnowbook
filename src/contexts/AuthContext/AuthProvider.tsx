@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { invalidateIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 import { gtm } from "@/lib/gtm";
 import {
+  ACCOUNT_DISABLED_FLAG,
   AuthContext,
   defaultSubscription,
   type SignOutReason,
@@ -329,13 +330,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
       });
 
+    // Account-active check: the sign-in service refuses turned-off or
+    // deleted accounts on getUser(), even while the local token is still
+    // valid. When that happens, sign out right away so the app stops
+    // showing protected screens. Network errors (no status / 5xx) are
+    // ignored so a flaky connection never signs anyone out.
+    let checking = false;
+    const checkAccountActive = async () => {
+      if (checking) return;
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      checking = true;
+      try {
+        const { error } = await supabase.auth.getUser();
+        const status = (error as { status?: number } | null)?.status;
+        if (error && status && status >= 400 && status < 500) {
+          console.warn("[AuthContext] account no longer active, signing out", {
+            status,
+          });
+          try {
+            sessionStorage.setItem(ACCOUNT_DISABLED_FLAG, "1");
+          } catch {
+            /* storage unavailable */
+          }
+          await queryClient.cancelQueries();
+          queryClient.clear();
+          intentionalSignOutRef.current = "account_disabled";
+          await supabase.auth.signOut({ scope: "local" }).catch(() => {
+            intentionalSignOutRef.current = null;
+          });
+        }
+      } finally {
+        checking = false;
+      }
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void checkAccountActive();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+
     // Periodic sync every 60 seconds
     intervalRef.current = setInterval(() => {
       checkSubscription();
+      void checkAccountActive();
     }, 60_000);
 
     return () => {
       authSub.unsubscribe();
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [checkSubscription, queryClient]);
