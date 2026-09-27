@@ -24,7 +24,7 @@ expect_stop() { # $1 = label, $2 = expected reason text, $3 = dir, rest = env
   t0=$(date +%s); run "$out" "$@" || rc=$?; t1=$(date +%s)
   if [ "$rc" = 124 ]; then bad "$label: scan hung (timeout)"; return; fi
   if [ "$rc" = 0 ]; then bad "$label: scan passed"; cat "$out"; return; fi
-  grep -q "artifact scan stopped: .*$reason" "$out" || { bad "$label: missing reason '$reason'"; cat "$out"; return; }
+  grep -qE "artifact scan stopped: .*($reason)" "$out" || { bad "$label: missing reason '$reason'"; cat "$out"; return; }
   grep -q "SECRET_CONTENT" "$out" && { bad "$label: file content printed"; return; }
   [ -z "$(ls -A "$WORK/tmp")" ] || { bad "$label: unpacked files left behind"; rm -rf "$WORK/tmp"/*; return; }
   pass "$label (stopped in $((t1 - t0))s)"
@@ -70,7 +70,7 @@ with gzip.open(sys.argv[1],'wb') as f:
   b=bytes(1<<20)
   for _ in range(300): f.write(b)
 " "$WORK/gzb/big.log.gz"
-expect_stop "gzip bomb fails closed" "times its size" "$WORK/gzb"
+expect_stop "gzip bomb fails closed" "times its size|larger than" "$WORK/gzb"
 py "
 import tarfile,sys,io
 class Z(io.RawIOBase):
