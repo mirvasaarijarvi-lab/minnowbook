@@ -1,5 +1,8 @@
 import { test, expect, Page, Route } from "@playwright/test";
-import { markWelcomeTourSeen } from "./fixtures/welcome-tour";
+import {
+  expectWelcomeTourDismissed,
+  markWelcomeTourSeen,
+} from "./fixtures/welcome-tour";
 
 /**
  * End-to-end: the confirmation shown after accepting an offer must state the
@@ -296,6 +299,7 @@ async function mockBackend(page: Page, offer: Record<string, unknown>) {
 async function openOffers(page: Page, lang: Lang = "en") {
   await seedFakeSession(page, ref!, lang);
   await page.goto("/dashboard");
+  await expectWelcomeTourDismissed(page);
   await page
     .getByRole("button", { name: L[lang].offersNav, exact: true })
     .first()

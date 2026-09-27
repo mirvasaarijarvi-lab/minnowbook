@@ -141,9 +141,16 @@ jobs:
           VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
           SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # Owner login for the shared test business; specs that need it
+          # (e.g. offers-expired-staff-actions) self-skip when these are unset.
+          E2E_STAFF_EMAIL: ${{ secrets.E2E_STAFF_EMAIL }}
+          E2E_STAFF_PASSWORD: ${{ secrets.E2E_STAFF_PASSWORD }}
         run: |
           if [ -z "${SERVICE_ROLE_KEY:-}" ]; then
             echo "::notice::SUPABASE_SERVICE_ROLE_KEY not configured, backend-seeded specs will self-skip."
+          fi
+          if [ -z "${E2E_STAFF_EMAIL:-}" ] || [ -z "${E2E_STAFF_PASSWORD:-}" ]; then
+            echo "::warning::E2E_STAFF_EMAIL / E2E_STAFF_PASSWORD secrets not set, staff-login offer specs will self-skip."
           fi
           bunx playwright test
 

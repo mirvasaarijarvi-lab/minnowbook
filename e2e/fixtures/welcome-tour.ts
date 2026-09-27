@@ -5,7 +5,24 @@
  *
  * Key must match TOUR_STORAGE_KEY in src/pages/Dashboard.tsx.
  */
-import type { BrowserContext } from "@playwright/test";
+import { expect, type BrowserContext, type Page } from "@playwright/test";
+
+/**
+ * Call after opening the dashboard, before clicking offer actions: fails
+ * clearly if the tour was not marked as seen or its overlay is on screen.
+ */
+export async function expectWelcomeTourDismissed(page: Page) {
+  const seen = await page.evaluate(
+    (key) => window.localStorage.getItem(key),
+    WELCOME_TOUR_KEY,
+  );
+  expect(seen, "welcome tour should be marked as seen").toBe("true");
+  await expect(
+    page.getByRole("button", { name: "Close tour" }),
+    "welcome tour overlay should not be showing",
+  ).toHaveCount(0);
+  await expect(page.locator("div.fixed.inset-0.z-\\[9999\\]")).toHaveCount(0);
+}
 
 export const WELCOME_TOUR_KEY = "mimmobook-tour-completed";
 

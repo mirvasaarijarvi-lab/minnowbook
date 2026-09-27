@@ -399,6 +399,8 @@ jobs:
           SUPABASE_URL: ${{ env.SUPABASE_URL }}
           VITE_SUPABASE_URL: ${{ env.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          E2E_STAFF_EMAIL: ${{ secrets.E2E_STAFF_EMAIL }}
+          E2E_STAFF_PASSWORD: ${{ secrets.E2E_STAFF_PASSWORD }}
         run: bunx playwright test
 
       - name: Playwright (deterministic rerun of quarantined failures)
