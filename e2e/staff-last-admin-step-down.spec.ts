@@ -62,14 +62,12 @@ test.describe("Staff management: the last administrator cannot step down", () =>
       if (tErr || !tenant) throw tErr ?? new Error("tenant not created");
       tenantId = tenant.id;
 
-      const { error: mErr } = await admin
-        .from("tenant_users")
-        .insert({
-          user_id: userId,
-          tenant_id: tenantId,
-          role: "owner",
-          is_approved: true,
-        });
+      const { error: mErr } = await admin.from("tenant_users").insert({
+        user_id: userId,
+        tenant_id: tenantId,
+        role: "owner",
+        is_approved: true,
+      });
       if (mErr) throw mErr;
 
       const roleInDb = async () => {
