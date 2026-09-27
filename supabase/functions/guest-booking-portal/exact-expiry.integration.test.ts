@@ -21,6 +21,7 @@
 // Needs SUPABASE_URL + a publishable key and GUEST_PORTAL_TEST_ACCESS_TOKEN
 // (falls back to ADMIN_USERS_TEST_ACCESS_TOKEN). Self-skips otherwise.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { deleteAndVerifyLinks, maybeForcedFailure, type CleanupClient } from "./test-link-cleanup.ts";
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 
 const URL_BASE = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("VITE_SUPABASE_URL");
@@ -101,6 +102,7 @@ Deno.test({
     assert(!insErr && stored?.length === 2, `could not store test links: ${insErr?.message}`);
 
     try {
+      await maybeForcedFailure(t);
       await t.step("before the expiry moment both links view the booking", async () => {
         assert(Date.now() < T - 1_000, "setup took too long; expiry moment already close");
         for (const [name, tok] of [["A", A], ["B", B]]) {
@@ -170,7 +172,8 @@ Deno.test({
         assertEquals(pending ?? [], [], "a change request was saved through the expired link");
       });
     } finally {
-      await staff.from("booking_tokens").delete().in("token", [A, B]);
+      // Runs even when a step failed; fails the test if any link is left.
+      await deleteAndVerifyLinks(staff as unknown as CleanupClient, [A, B]);
     }
   },
 });

@@ -18,6 +18,7 @@
 // GUEST_PORTAL_TEST_ACCESS_TOKEN (falls back to ADMIN_USERS_TEST_ACCESS_TOKEN).
 // Self-skips when any is missing.
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { deleteAndVerifyLinks, maybeForcedFailure, type CleanupClient } from "./test-link-cleanup.ts";
 import {
   assert,
   assertEquals,
@@ -130,6 +131,7 @@ Deno.test({
     let revokeFinishedAt = 0;
 
     try {
+      await maybeForcedFailure(t);
       await t.step(
         "before: all three links can view their booking",
         async () => {
@@ -355,13 +357,11 @@ Deno.test({
         },
       );
     } finally {
-      await staff
-        .from("booking_tokens")
-        .delete()
-        .in(
-          "token",
-          Object.values(links).map((l) => l.token),
-        );
+      // Runs even when a step failed; fails the test if any link is left.
+      await deleteAndVerifyLinks(
+        staff as unknown as CleanupClient,
+        Object.values(links).map((l) => l.token),
+      );
     }
   },
 });
