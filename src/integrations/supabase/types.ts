@@ -610,6 +610,42 @@ export type Database = {
           },
         ]
       }
+      booking_token_revocation_audit: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_kind: string
+          actor_user_id: string | null
+          booking_token_id: string
+          id: string
+          occurred_at: string
+          reservation_id: string | null
+          tenant_id: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_kind: string
+          actor_user_id?: string | null
+          booking_token_id: string
+          id?: string
+          occurred_at?: string
+          reservation_id?: string | null
+          tenant_id: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_kind?: string
+          actor_user_id?: string | null
+          booking_token_id?: string
+          id?: string
+          occurred_at?: string
+          reservation_id?: string | null
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       booking_tokens: {
         Row: {
           created_at: string
