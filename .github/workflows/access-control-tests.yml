@@ -1,0 +1,92 @@
+name: Access control tests
+
+# Staff management (admin-users) and guest booking link (guest-booking-portal)
+# access-control regression tests, on every pull request.
+#
+# - offline: pretend-backend tests, always run, no secrets needed.
+# - live: call the deployed functions. Each test skips itself when the
+#   secrets it needs are missing (e.g. pull requests from forks):
+#     SUPABASE_URL + SUPABASE_PUBLISHABLE_KEY: basic live checks
+#     SUPABASE_SERVICE_ROLE_KEY: role / account change test (temporary user)
+#     ADMIN_USERS_TEST_ACCESS_TOKEN: signed-in owner checks (optional)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  offline:
+    name: Access control (pretend backend)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      DENO_DIR: ${{ github.workspace }}/.deno-cache
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - name: Stale commit check
+        uses: ./.github/actions/stale-commit-check
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v1.x
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ${{ env.DENO_DIR }}
+          key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/*.ts', 'deno.json', 'deno.jsonc', 'deno.lock', 'import_map.json') }}
+          restore-keys: |
+            deno-${{ runner.os }}-
+      - name: Run tests
+        run: |
+          deno test --allow-net --allow-env --allow-read \
+            supabase/functions/admin-users/role-status-change.test.ts \
+            supabase/functions/guest-booking-portal/token-expiry-revocation.test.ts \
+            supabase/functions/guest-booking-portal/token-malformed-tampered-unknown.test.ts
+
+  live:
+    name: Access control (live backend)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      DENO_DIR: ${{ github.workspace }}/.deno-cache
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.VITE_SUPABASE_URL || vars.SUPABASE_URL || vars.VITE_SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.VITE_SUPABASE_PUBLISHABLE_KEY || secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      ADMIN_USERS_TEST_ACCESS_TOKEN: ${{ secrets.ADMIN_USERS_TEST_ACCESS_TOKEN }}
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - name: Stale commit check
+        uses: ./.github/actions/stale-commit-check
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        with:
+          deno-version: v1.x
+      - uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ${{ env.DENO_DIR }}
+          key: deno-${{ runner.os }}-${{ hashFiles('supabase/functions/**/*.ts', 'deno.json', 'deno.jsonc', 'deno.lock', 'import_map.json') }}
+          restore-keys: |
+            deno-${{ runner.os }}-
+      - name: Note missing secrets
+        run: |
+          [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_PUBLISHABLE_KEY" ] || echo "::warning::SUPABASE_URL / SUPABASE_PUBLISHABLE_KEY missing: live access-control tests are skipped."
+          [ -n "$SUPABASE_SERVICE_ROLE_KEY" ] || echo "::warning::SUPABASE_SERVICE_ROLE_KEY missing: role / account change test is skipped."
+          [ -n "$ADMIN_USERS_TEST_ACCESS_TOKEN" ] || echo "::notice::ADMIN_USERS_TEST_ACCESS_TOKEN not set: signed-in owner checks are skipped."
+      - name: Run tests
+        run: |
+          deno test --allow-net --allow-env --allow-read \
+            supabase/functions/admin-users/access-control.live.test.ts \
+            supabase/functions/admin-users/role-status-change.integration.test.ts \
+            supabase/functions/guest-booking-portal/access-control.live.test.ts \
+            supabase/functions/guest-booking-portal/revoked-token.integration.test.ts
