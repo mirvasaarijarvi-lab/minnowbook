@@ -339,6 +339,9 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
         .maybeSingle();
 
       if (!reservation) return json({ ok: false, code: "not_found" });
+      // A cancelled booking must not stay visible through older links
+      // (lookup and reminder flows issue separate tokens per reservation).
+      if (reservation.status === "cancelled") return json({ ok: false, code: "revoked" });
 
       const { data: settings } = await admin
         .from("tenant_settings")
