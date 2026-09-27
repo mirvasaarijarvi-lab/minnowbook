@@ -25,6 +25,13 @@ known_values() {
     "${DB_URL:-}" "${GUEST_LINK_TOKEN:-}" "$FIXED_PASSWORD"; do
     [ -n "$v" ] && printf '%s\n' "$v"
   done
+  # The database password on its own, taken from DB_URL.
+  if [ -n "${DB_URL:-}" ]; then
+    local pw
+    pw=$(printf '%s' "$DB_URL" | sed -nE 's#^[a-z]+://[^:/@]+:([^@]+)@.*#\1#p')
+    [ -n "$pw" ] && printf '%s\n' "$pw"
+  fi
+  return 0
 }
 
 redact_known() {

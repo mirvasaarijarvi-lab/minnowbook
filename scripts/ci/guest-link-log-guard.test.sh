@@ -84,11 +84,12 @@ for f in revoked-test.log functions-serve.log supabase-start.log; do
   [ "$(leaks "$out")" = 0 ] && pass "scan message for $f names no secret" || bad "scan message for $f leaked"
 done
 # One fake value at a time, each on its own, must be caught.
-for v in "${ALL[@]}"; do
-  printf 'line %s end\n' "$v" > "$WORK/one.log"
-  bash "$GUARD" scan "$WORK/one.log" > /dev/null 2>&1 && bad "scan missed one fake value" || true
+missed=0
+for i in "${!ALL[@]}"; do
+  printf 'line %s end\n' "${ALL[$i]}" > "$WORK/one.log"
+  bash "$GUARD" scan "$WORK/one.log" > /dev/null 2>&1 && { bad "scan missed fake value #$i"; missed=1; }
 done
-pass "scan catches every fake value on its own"
+[ "$missed" = 0 ] && pass "scan catches every fake value on its own"
 printf 'test ok | 1 passed | 0 failed\n' > "$WORK/clean.log"
 bash "$GUARD" scan "$WORK/clean.log" > /dev/null 2>&1 && pass "scan passes a clean log" || bad "scan failed a clean log"
 
