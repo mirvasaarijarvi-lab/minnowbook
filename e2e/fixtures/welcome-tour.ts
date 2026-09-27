@@ -6,12 +6,15 @@
  * Key must match TOUR_STORAGE_KEY in src/pages/Dashboard.tsx.
  */
 import { expect, type BrowserContext, type Page } from "@playwright/test";
+import { expectNoTwoStepScreen } from "./two-step-guard";
 
 /**
  * Call after opening the dashboard, before clicking offer actions: fails
- * clearly if the tour was not marked as seen or its overlay is on screen.
+ * clearly if the two-step code screen is showing, the tour was not marked
+ * as seen, or its overlay is on screen.
  */
 export async function expectWelcomeTourDismissed(page: Page) {
+  await expectNoTwoStepScreen(page);
   const seen = await page.evaluate(
     (key) => window.localStorage.getItem(key),
     WELCOME_TOUR_KEY,

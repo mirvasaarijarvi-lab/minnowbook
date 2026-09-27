@@ -1,3 +1,4 @@
+import { assertNoTwoStepRequired } from "./fixtures/two-step-guard";
 import {
   test,
   expect,
@@ -50,6 +51,7 @@ test.describe("Offer confirm creates main + linked cross reservations", () => {
       });
     expect(signInErr, `sign-in failed: ${signInErr?.message}`).toBeNull();
     expect(signIn?.user?.id).toBeTruthy();
+    await assertNoTwoStepRequired(supabase);
 
     // Resolve tenant id for the signed-in user and assert it matches the
     // shared fixture so guest, offer, and linked reservations all stay

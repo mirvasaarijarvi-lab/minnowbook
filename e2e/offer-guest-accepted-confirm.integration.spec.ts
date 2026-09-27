@@ -1,3 +1,4 @@
+import { assertNoTwoStepRequired } from "./fixtures/two-step-guard";
 import {
   test,
   expect,
@@ -36,6 +37,7 @@ async function staffClient(): Promise<SupabaseClient> {
     password: STAFF_PASSWORD!,
   });
   expect(error, error?.message).toBeNull();
+  await assertNoTwoStepRequired(sb);
   return sb;
 }
 
