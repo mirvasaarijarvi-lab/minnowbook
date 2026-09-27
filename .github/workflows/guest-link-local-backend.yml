@@ -16,6 +16,21 @@ on:
 permissions: {}
 
 jobs:
+  log-guard:
+    name: Guest link log guard (fake secrets)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - name: Stale commit check
+        uses: ./.github/actions/stale-commit-check
+      - name: Inject fake credentials into every output path
+        run: bash scripts/ci/guest-link-log-guard.test.sh
+
   revoked-link:
     name: Revoked guest link (local backend)
     runs-on: ubuntu-latest
@@ -66,7 +81,8 @@ jobs:
             fi
             mask_local_credentials
             echo "::warning::supabase start attempt ${attempt} failed, retrying"
-            tail -n 40 /tmp/supabase-start.log | grep -viE 'key|secret|postgres(ql)?://' || true
+            eval "$(supabase status -o env 2>/dev/null)" || true
+            scripts/ci/guest-link-log-guard.sh filter /tmp/supabase-start.log 40
             supabase stop --no-backup > /dev/null 2>&1 || true
             sleep 10
           done
@@ -85,7 +101,7 @@ jobs:
             [ "$code" != "000" ] && [ "$code" != "502" ] && [ "$code" != "503" ] && { echo "function up (${code})"; exit 0; }
             sleep 2
           done
-          cat /tmp/functions-serve.log; exit 1
+          scripts/ci/guest-link-log-guard.sh filter /tmp/functions-serve.log 80; exit 1
 
       - name: Run revoked-link test
         run: |
@@ -95,6 +111,7 @@ jobs:
             -d '{"email":"ci-guest-portal-owner@example.invalid","password":"ci-guest-portal-password"}' \
             | python3 -c 'import sys,json;print(json.load(sys.stdin)["access_token"])')
           echo "::add-mask::$TOKEN"
+          echo "GUEST_LINK_TOKEN=$TOKEN" >> "$GITHUB_ENV"
           GUEST_PORTAL_TEST_BACKEND=local \
           SUPABASE_URL="$API_URL" SUPABASE_PUBLISHABLE_KEY="$ANON_KEY" \
           GUEST_PORTAL_TEST_ACCESS_TOKEN="$TOKEN" \
@@ -107,19 +124,13 @@ jobs:
         if: always()
         run: |
           eval "$(supabase status -o env 2>/dev/null)" || true
-          leaked=0
-          for f in /tmp/revoked-test.log /tmp/functions-serve.log; do
-            [ -f "$f" ] || continue
-            for v in "${SERVICE_ROLE_KEY:-}" "${JWT_SECRET:-}" "${ANON_KEY:-}" "${DB_URL:-}" ci-guest-portal-password; do
-              [ -n "$v" ] && grep -qF -- "$v" "$f" && { echo "::error::$(basename "$f") contains a backend credential"; leaked=1; }
-            done
-            grep -qE 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.' "$f" && { echo "::error::$(basename "$f") contains a sign-in token"; leaked=1; }
-          done
-          exit $leaked
+          scripts/ci/guest-link-log-guard.sh scan /tmp/revoked-test.log /tmp/functions-serve.log
 
       - name: Function log on failure
         if: failure()
-        run: grep -vE 'eyJ[A-Za-z0-9_-]{10,}' /tmp/functions-serve.log || true
+        run: |
+          eval "$(supabase status -o env 2>/dev/null)" || true
+          scripts/ci/guest-link-log-guard.sh filter /tmp/functions-serve.log 200
 
       # Delete the throwaway backend on EVERY exit: success, startup
       # failure, test failure and cancellation. `always()` also runs after
