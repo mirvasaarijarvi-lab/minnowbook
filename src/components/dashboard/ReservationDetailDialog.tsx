@@ -42,6 +42,7 @@ import { useResourceTypeLabel } from "@/hooks/useResourceTypeLabel";
 import LinkedReservationsPanel from "./LinkedReservationsPanel";
 import { ReservationOffers } from "./OfferTraceability";
 import ReservationEmailTimeline from "./ReservationEmailTimeline";
+import GuestLinkHistory from "./GuestLinkHistory";
 import { useInvoiceRefusalNotice } from "@/hooks/useInvoiceRefusalNotice";
 
 const statusColors: Record<string, string> = {
@@ -375,6 +376,8 @@ const ReservationDetailDialog = ({
 
           <Separator />
           <ReservationEmailTimeline reservation={r} />
+
+          <GuestLinkHistory reservationId={r.id} />
 
           <div className="text-xs text-muted-foreground">
             {"Created"}:{" "}
