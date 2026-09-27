@@ -288,10 +288,14 @@ try:
                     if m.size > MAX_FILE: raise Limit(f"a file inside {os.path.basename(src)} is larger than {MAX_FILE} bytes")
                     with t.extractfile(m) as i: copy(i, p, m.name)
     else:
-        sys.exit(1)
+        # The name says archive but neither zip nor tar can read it (for
+        # example a zip cut short before its index): treat as damaged.
+        raise ValueError("unreadable archive")
 except Limit as e:
     save(); print(e); sys.exit(3)
-except (zipfile.BadZipFile, tarfile.TarError, OSError, EOFError, gzip.BadGzipFile) as e:
+except Exception:
+    # Any read error (bad checksum, cut-off data, unsupported compression,
+    # zlib errors) means the archive cannot be fully scanned: fail closed.
     save(); print(f"{os.path.basename(src)} is damaged and cannot be fully scanned"); sys.exit(3)
 save()
 PY
