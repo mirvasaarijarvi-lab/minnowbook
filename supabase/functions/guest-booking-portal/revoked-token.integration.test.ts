@@ -12,21 +12,30 @@
 // GUEST_PORTAL_TEST_ACCESS_TOKEN (falls back to ADMIN_USERS_TEST_ACCESS_TOKEN).
 // Self-skips when any is missing or the business has no bookings.
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import {
+  assert,
+  assertEquals,
+} from "https://deno.land/std@0.224.0/assert/mod.ts";
 
-const URL_BASE = Deno.env.get("SUPABASE_URL") ?? Deno.env.get("VITE_SUPABASE_URL");
+const URL_BASE =
+  Deno.env.get("SUPABASE_URL") ?? Deno.env.get("VITE_SUPABASE_URL");
 const KEY =
   Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ??
   Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY") ??
   Deno.env.get("SUPABASE_ANON_KEY");
 const STAFF_TOKEN =
-  Deno.env.get("GUEST_PORTAL_TEST_ACCESS_TOKEN") ?? Deno.env.get("ADMIN_USERS_TEST_ACCESS_TOKEN");
+  Deno.env.get("GUEST_PORTAL_TEST_ACCESS_TOKEN") ??
+  Deno.env.get("ADMIN_USERS_TEST_ACCESS_TOKEN");
 const ENABLED = !!URL_BASE && !!KEY && !!STAFF_TOKEN;
 
 async function guestCall(body: Record<string, unknown>) {
   const res = await fetch(`${URL_BASE}/functions/v1/guest-booking-portal`, {
     method: "POST",
-    headers: { apikey: KEY!, "Content-Type": "application/json", Origin: "https://mimmobook.com" },
+    headers: {
+      apikey: KEY!,
+      "Content-Type": "application/json",
+      Origin: "https://mimmobook.com",
+    },
     body: JSON.stringify(body),
   });
   return { status: res.status, text: await res.text() };
@@ -43,8 +52,12 @@ Deno.test({
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const { data: userData, error: userErr } = await staff.auth.getUser(STAFF_TOKEN);
-    assert(!userErr && userData.user, `staff token rejected: ${userErr?.message}`);
+    const { data: userData, error: userErr } =
+      await staff.auth.getUser(STAFF_TOKEN);
+    assert(
+      !userErr && userData.user,
+      `staff token rejected: ${userErr?.message}`,
+    );
     const { data: membership } = await staff
       .from("tenant_users")
       .select("tenant_id, role")
@@ -66,7 +79,9 @@ Deno.test({
       .limit(1)
       .maybeSingle();
     if (!before.data) {
-      throw new Error("the test business has no active bookings to attach a link to");
+      throw new Error(
+        "the test business has no active bookings to attach a link to",
+      );
     }
     const reservation = before.data;
 
@@ -80,21 +95,36 @@ Deno.test({
       is_revoked: true,
       expires_at: new Date(Date.now() + 7 * 86_400_000).toISOString(),
     });
-    assert(!insErr, `could not store the revoked test link: ${insErr?.message}`);
+    assert(
+      !insErr,
+      `could not store the revoked test link: ${insErr?.message}`,
+    );
 
     try {
-      await t.step("view is refused with code revoked and shows no booking", async () => {
-        const r = await guestCall({ action: "view", token });
-        assertEquals(r.status, 200, r.text);
-        const body = JSON.parse(r.text);
-        assertEquals(body.ok, false, r.text);
-        assertEquals(body.code, "revoked", r.text);
-        assert(!("reservation" in body), `revoked link leaked booking data: ${r.text}`);
-      });
+      await t.step(
+        "view is refused with code revoked and shows no booking",
+        async () => {
+          const r = await guestCall({ action: "view", token });
+          assertEquals(r.status, 200, r.text);
+          const body = JSON.parse(r.text);
+          assertEquals(body.ok, false, r.text);
+          assertEquals(body.code, "revoked", r.text);
+          assert(
+            !("reservation" in body),
+            `revoked link leaked booking data: ${r.text}`,
+          );
+        },
+      );
 
       await t.step("changing the date is refused", async () => {
-        const date = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
-        const r = await guestCall({ action: "reschedule", token, requested_date: date });
+        const date = new Date(Date.now() + 30 * 86_400_000)
+          .toISOString()
+          .slice(0, 10);
+        const r = await guestCall({
+          action: "reschedule",
+          token,
+          requested_date: date,
+        });
         assertEquals(r.status, 403, r.text);
       });
 
@@ -115,7 +145,11 @@ Deno.test({
           .select("id")
           .eq("reservation_id", reservation.id)
           .gte("created_at", new Date(Date.now() - 5 * 60_000).toISOString());
-        assertEquals(pending ?? [], [], "a change request was saved through a revoked link");
+        assertEquals(
+          pending ?? [],
+          [],
+          "a change request was saved through a revoked link",
+        );
       });
     } finally {
       await staff.from("booking_tokens").delete().eq("token", token);
