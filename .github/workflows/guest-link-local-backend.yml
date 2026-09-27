@@ -49,10 +49,25 @@ jobs:
       - name: Start local backend
         timeout-minutes: 20
         run: |
+          # `supabase start` prints the local keys and database URL, so its
+          # output goes to a file and every value is masked before anything
+          # from it can reach the log.
+          mask_local_credentials() {
+            supabase status -o env 2>/dev/null | while IFS='=' read -r _ value; do
+              value="${value%\"}"; value="${value#\"}"
+              [ -n "$value" ] && echo "::add-mask::$value"
+            done
+          }
           for attempt in 1 2 3; do
-            supabase start --exclude=imgproxy,mailpit,studio,realtime && exit 0
+            if supabase start --exclude=imgproxy,mailpit,studio,realtime > /tmp/supabase-start.log 2>&1; then
+              mask_local_credentials
+              echo "local backend started"
+              exit 0
+            fi
+            mask_local_credentials
             echo "::warning::supabase start attempt ${attempt} failed, retrying"
-            supabase stop --no-backup || true
+            tail -n 40 /tmp/supabase-start.log | grep -viE 'key|secret|postgres(ql)?://' || true
+            supabase stop --no-backup > /dev/null 2>&1 || true
             sleep 10
           done
           exit 1
@@ -88,6 +103,20 @@ jobs:
             2>&1 | tee /tmp/revoked-test.log
           grep -q "1 passed" /tmp/revoked-test.log || { echo "::error::test did not run or failed"; exit 1; }
 
+      - name: Check logs hold no credentials
+        if: always()
+        run: |
+          eval "$(supabase status -o env 2>/dev/null)" || true
+          leaked=0
+          for f in /tmp/revoked-test.log /tmp/functions-serve.log; do
+            [ -f "$f" ] || continue
+            for v in "${SERVICE_ROLE_KEY:-}" "${JWT_SECRET:-}" "${ANON_KEY:-}" "${DB_URL:-}" ci-guest-portal-password; do
+              [ -n "$v" ] && grep -qF -- "$v" "$f" && { echo "::error::$(basename "$f") contains a backend credential"; leaked=1; }
+            done
+            grep -qE 'eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.' "$f" && { echo "::error::$(basename "$f") contains a sign-in token"; leaked=1; }
+          done
+          exit $leaked
+
       - name: Function log on failure
         if: failure()
-        run: cat /tmp/functions-serve.log || true
+        run: grep -vE 'eyJ[A-Za-z0-9_-]{10,}' /tmp/functions-serve.log || true
