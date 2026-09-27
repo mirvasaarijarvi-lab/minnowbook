@@ -105,7 +105,8 @@ export function checkWorkflow(text) {
       if (!viaGuard && logs.length && /(^|[|;&(]\s*)grep\b/.test(l) && !/grep\s+-[a-zA-Z]*[qc]/.test(l))
         problems.push(`${who}: grep prints matching log lines without the guard: ${l}`);
 
-      const bare = l.replace(/\$\([^)]*\)/g, "");
+      // Text inside $(...) is captured, and quoted echo text is just words.
+      const bare = /^(echo|printf)\b/.test(l) ? "" : l.replace(/\$\([^)]*\)/g, "");
       const redirected = />\s*\S/.test(bare) || /\|\s*(while|python3|xargs)\b/.test(bare);
       if (/\b(supabase\s+(start|status|functions\s+serve)|docker\s+logs|printenv)\b|^env\s*$|^env\s*\|/.test(bare) && !redirected)
         problems.push(`${who}: command prints backend keys straight to the log: ${l}`);
