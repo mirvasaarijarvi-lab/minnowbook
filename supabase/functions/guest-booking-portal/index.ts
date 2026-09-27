@@ -325,7 +325,8 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
 
       if (!tokenRow) return json({ ok: false, code: "not_found" });
       if (tokenRow.is_revoked) return json({ ok: false, code: "revoked" });
-      if (new Date(tokenRow.expires_at) < new Date()) {
+      // A link is expired AT its expiry moment, not only after it.
+      if (new Date(tokenRow.expires_at).getTime() <= Date.now()) {
         return json({ ok: false, code: "expired" });
       }
 
@@ -370,7 +371,7 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
         .eq("token", token)
         .maybeSingle();
 
-      if (!tokenRow || tokenRow.is_revoked || new Date(tokenRow.expires_at) < new Date()) {
+      if (!tokenRow || tokenRow.is_revoked || new Date(tokenRow.expires_at).getTime() <= Date.now()) {
         return json({ error: "This booking link is no longer valid." }, 403);
       }
 
@@ -448,7 +449,7 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
         .eq("token", token)
         .maybeSingle();
 
-      if (!tokenRow || tokenRow.is_revoked || new Date(tokenRow.expires_at) < new Date()) {
+      if (!tokenRow || tokenRow.is_revoked || new Date(tokenRow.expires_at).getTime() <= Date.now()) {
         return json({ error: "This booking link is no longer valid." }, 403);
       }
 
