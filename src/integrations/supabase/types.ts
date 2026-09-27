@@ -4317,6 +4317,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_account_active: { Args: { p_user_id: string }; Returns: boolean }
       is_custom_role_key_assignable_by_owner: {
         Args: { _custom_role_key: string; _tenant_id: string }
         Returns: boolean
