@@ -46,8 +46,9 @@ const ALTER_ADD_RE = new RegExp(
     String.raw`[^;]*?\badd\s+(?:column\s+)?(?:if\s+not\s+exists\s+)?"?tenant_id"?\s`,
   "gi",
 );
+// A real DROP TABLE statement (not "ALTER PUBLICATION ... DROP TABLE").
 const DROP_RE = new RegExp(
-  String.raw`drop\s+table\s+(?:if\s+exists\s+)?` + NAME,
+  String.raw`(?:^|;)\s*drop\s+table\s+(?:if\s+exists\s+)?` + NAME,
   "gi",
 );
 
