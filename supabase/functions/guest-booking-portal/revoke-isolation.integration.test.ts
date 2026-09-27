@@ -126,6 +126,8 @@ Deno.test({
       `could not store test links: ${insErr?.message}`,
     );
     const idA = stored.find((s) => s.token === links.A.token)!.id;
+    let revokeStartedAt = 0;
+    let revokeFinishedAt = 0;
 
     try {
       await t.step(
@@ -140,10 +142,12 @@ Deno.test({
       );
 
       await t.step("staff turn off link A", async () => {
+        revokeStartedAt = Date.now();
         const { error } = await staff
           .from("booking_tokens")
           .update({ is_revoked: true })
           .eq("id", idA);
+        revokeFinishedAt = Date.now();
         assert(!error, `could not revoke link A: ${error?.message}`);
       });
 
@@ -271,6 +275,83 @@ Deno.test({
               actor_kind: "staff",
             },
           ]);
+        },
+      );
+
+      await t.step(
+        "the revocation record names the staff member and time, never the link code",
+        async () => {
+          const { data, error } = await staff
+            .from("booking_token_revocation_audit")
+            .select("*")
+            .eq("booking_token_id", idA)
+            .eq("action", "revoked");
+          if (
+            error?.code === "PGRST205" &&
+            Deno.env.get("GUEST_PORTAL_TEST_BACKEND") === "local"
+          ) {
+            console.warn(
+              "audit table missing on the local backend; audit step skipped",
+            );
+            return;
+          }
+          assert(!error, `could not read the audit trail: ${error?.message}`);
+          assertEquals(data?.length, 1, "expected exactly one revoke record");
+          const row = data![0] as Record<string, unknown>;
+
+          // Who: the signed-in staff member, with their email.
+          assertEquals(row.actor_user_id, userData.user.id);
+          assertEquals(row.actor_kind, "staff");
+          assertEquals(
+            String(row.actor_email ?? "").toLowerCase(),
+            String(userData.user.email ?? "").toLowerCase(),
+          );
+          assertEquals(row.reservation_id, links.A.reservation.id);
+          assertEquals(row.tenant_id, links.A.reservation.tenant_id);
+
+          // When: set by the database at revoke time. Allow 2 minutes of
+          // clock difference between this machine and the database.
+          const at = Date.parse(String(row.occurred_at));
+          assert(!Number.isNaN(at), `occurred_at is not a time: ${row.occurred_at}`);
+          const slack = 120_000;
+          assert(
+            at >= revokeStartedAt - slack && at <= revokeFinishedAt + slack,
+            `occurred_at ${row.occurred_at} is outside the revoke window`,
+          );
+
+          // Never the link code: no column holds it (or any part of it), in
+          // any form, and the table has no token column at all.
+          assert(!("token" in row), "audit record has a token column");
+          const dump = JSON.stringify(row).toLowerCase();
+          for (const l of Object.values(links)) {
+            const tok = l.token.toLowerCase();
+            assert(!dump.includes(tok), "audit record contains a link code");
+            assert(
+              !dump.includes(tok.slice(0, 16)) && !dump.includes(tok.slice(-16)),
+              "audit record contains part of a link code",
+            );
+            assert(
+              !dump.includes(btoa(l.token).toLowerCase()),
+              "audit record contains an encoded link code",
+            );
+          }
+          const known = new Set([
+            "id",
+            "booking_token_id",
+            "reservation_id",
+            "tenant_id",
+            "action",
+            "actor_user_id",
+            "actor_email",
+            "actor_kind",
+            "occurred_at",
+          ]);
+          const extra = Object.keys(row).filter((k) => !known.has(k));
+          assertEquals(
+            extra,
+            [],
+            "audit table gained columns; check none can hold a link code",
+          );
         },
       );
     } finally {
