@@ -139,6 +139,14 @@ const BlogPost = () => {
                   {t("common.startFreeTrial")}
                 </Button>
               </Link>
+              <p className="mt-4">
+                <Link
+                  to="/pricing"
+                  className="text-primary hover:underline font-medium"
+                >
+                  {t("nav.pricing" as any)}
+                </Link>
+              </p>
             </div>
           </div>
         </div>
