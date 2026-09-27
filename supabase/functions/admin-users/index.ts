@@ -325,6 +325,7 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
           user_id: newUser.user!.id,
           role: VALID_SITE_ROLES.includes(sa.role) ? sa.role : "staff",
         }));
+        await assertSitesInTenant(adminClient, tenantId, siteRows.map((r: any) => r.site_id));
         const { error: suError } = await adminClient.from("site_users").insert(siteRows);
         if (suError) console.error("Failed to insert site assignments:", suError);
       }
@@ -436,6 +437,7 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
           user_id: userId,
           role: VALID_SITE_ROLES.includes(sa.role) ? sa.role : "staff",
         }));
+        await assertSitesInTenant(adminClient, tenantId, rows.map((r: any) => r.site_id));
         const { error: insertError } = await adminClient.from("site_users").insert(rows);
         if (insertError) throw insertError;
       }
