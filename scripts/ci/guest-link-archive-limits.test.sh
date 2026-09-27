@@ -250,23 +250,7 @@ d=$(mk zipdotdot); python3 -c 'import zipfile,sys
 with zipfile.ZipFile(sys.argv[1],"w") as z: z.writestr("../../../../../../tmp/pwned-by-archive","x")' "$d/a.zip"
 sec "zip entry with ../ fails closed" unsafe_path "$d"
 d=$(mk zipabs); python3 -c 'import zipfile,sys
-with zipfile.ZipFile(sys.argv[1],"w") as z:
-  i=zipfile.ZipInfo("x"); z.writestr(i,"x")
-  i.filename=sys.argv[2]+"/abs.txt"
-with open(sys.argv[1],"r+b") as f: pass' "$d/a.zip" "$OUT"
-python3 - "$d/a.zip" "$OUT" <<'PY'
-import sys
-b=open(sys.argv[1],"rb").read(); n=(sys.argv[2]+"/p.txt").encode()
-# rewrite the one-char name "x" in both headers to an absolute path
-import struct
-out=bytearray(); i=0
-lh=b.find(b"PK\x03\x04"); cd=b.find(b"PK\x01\x02"); eo=b.find(b"PK\x05\x06")
-local=bytearray(b[lh:cd]); central=bytearray(b[cd:eo]); end=bytearray(b[eo:])
-local[26:28]=struct.pack("<H",len(n)); local=local[:30]+n+local[31:]
-central[28:30]=struct.pack("<H",len(n)); central=central[:46]+n+central[47:]
-end[12:16]=struct.pack("<I",len(central)); end[16:20]=struct.pack("<I",len(local))
-open(sys.argv[1],"wb").write(bytes(local+central+end))
-PY
+with zipfile.ZipFile(sys.argv[1],"w") as z: z.writestr(zipfile.ZipInfo(sys.argv[2]+"/abs.txt"),"x")' "$d/a.zip" "$OUT"
 sec "zip entry with an absolute path fails closed" unsafe_path "$d"
 d=$(mk tardotdot); python3 -c 'import tarfile,sys,io
 with tarfile.open(sys.argv[1],"w") as t:

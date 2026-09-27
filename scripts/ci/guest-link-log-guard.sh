@@ -329,7 +329,7 @@ try:
                     raise Limit("encrypted", "-", "-", m.filename)
                 if stat.S_ISLNK(mode):
                     raise Limit("link", "-", "-", m.filename)
-                if mode and not (stat.S_ISREG(mode) or stat.S_ISDIR(mode)):
+                if stat.S_IFMT(mode) not in (0, stat.S_IFREG, stat.S_IFDIR):
                     raise Limit("special", "-", "-", m.filename)
                 p = safe(m.filename)
                 if not m.is_dir():
