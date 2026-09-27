@@ -109,14 +109,19 @@ async function expectRefused(res: Response, label: string) {
   assert(!/"users"\s*:/.test(body), `${label}: refused request still returned the staff list`);
 }
 
-Deno.test("control: an owner can list staff", async () => {
+// The staff code starts a rate-limit cleanup timer when it loads; it is not
+// part of these checks, so the timer leak detector is turned off here.
+const test = (name: string, fn: () => Promise<void>) =>
+  Deno.test({ name, fn, sanitizeOps: false, sanitizeResources: false });
+
+test("control: an owner can list staff", async () => {
   await withBackend({ role: "owner", accountActive: true, sysAdmin: false }, async (send) => {
     await expectAllowed(await send(), "owner");
   });
 });
 
 for (const from of ["owner", "admin"]) {
-  Deno.test(`${from} demoted to staff: the same sign-in is refused on the next request`, async () => {
+  test(`${from} demoted to staff: the same sign-in is refused on the next request`, async () => {
     const state: State = { role: from, accountActive: true, sysAdmin: false };
     await withBackend(state, async (send) => {
       await expectAllowed(await send(), `${from} before demotion`);
@@ -126,7 +131,7 @@ for (const from of ["owner", "admin"]) {
   });
 }
 
-Deno.test("admin removed from the business: the same sign-in is refused", async () => {
+test("admin removed from the business: the same sign-in is refused", async () => {
   const state: State = { role: "admin", accountActive: true, sysAdmin: false };
   await withBackend(state, async (send) => {
     await expectAllowed(await send(), "admin before removal");
@@ -135,7 +140,7 @@ Deno.test("admin removed from the business: the same sign-in is refused", async 
   });
 });
 
-Deno.test("owner account disabled: the same sign-in is refused as not signed in", async () => {
+test("owner account disabled: the same sign-in is refused as not signed in", async () => {
   const state: State = { role: "owner", accountActive: true, sysAdmin: false };
   await withBackend(state, async (send) => {
     await expectAllowed(await send(), "owner before disabling");
@@ -146,7 +151,7 @@ Deno.test("owner account disabled: the same sign-in is refused as not signed in"
   });
 });
 
-Deno.test("staff promoted to admin: access starts on the next request", async () => {
+test("staff promoted to admin: access starts on the next request", async () => {
   const state: State = { role: "staff", accountActive: true, sysAdmin: false };
   await withBackend(state, async (send) => {
     await expectRefused(await send(), "staff before promotion");
@@ -155,7 +160,7 @@ Deno.test("staff promoted to admin: access starts on the next request", async ()
   });
 });
 
-Deno.test("platform admin rights withdrawn: a non-member is refused", async () => {
+test("platform admin rights withdrawn: a non-member is refused", async () => {
   const state: State = { role: null, accountActive: true, sysAdmin: true };
   await withBackend(state, async (send) => {
     state.sysAdmin = false;
