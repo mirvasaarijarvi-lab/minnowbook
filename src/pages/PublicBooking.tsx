@@ -1245,9 +1245,17 @@ const PublicBookingInner = () => {
       setServiceMisconfigured(false);
       // The edge function answers `duplicate: true` when this exact booking
       // (same guest, service, date, resource, dates, guest count and notes)
-      // was already received. No second reservation exists, so the guest must
-      // be told plainly instead of seeing a normal confirmation.
-      setDuplicateDetected(Boolean(data?.duplicate));
+      // was already received. It sends `reservation: null` then, so the
+      // guest sees the "already sent" notice and nothing reads a booking id.
+      // A reply with neither a reservation nor the duplicate flag is treated
+      // as a failed submission: the form stays filled so the guest can retry.
+      const outcome = classifyBookingResponse(data);
+      if (outcome === "invalid") {
+        setDuplicateDetected(false);
+        toast.error(t("booking.submitError"));
+        return;
+      }
+      setDuplicateDetected(outcome === "duplicate");
       setSubmitted(true);
     },
     onError: (err: any) => {
