@@ -57,7 +57,10 @@ describe("Cross-business RLS test list covers every tenant-scoped table", () => 
 
   it("the RLS test list has no tables the migrations don't define", () => {
     const stale = [...rlsTables].filter((t) => !migrationTables.has(t)).sort();
-    expect(stale, `remove from TENANT_SCOPED_TABLES: ${stale.join(", ")}`).toEqual([]);
+    expect(
+      stale,
+      `remove from TENANT_SCOPED_TABLES: ${stale.join(", ")}`,
+    ).toEqual([]);
   });
 
   it("no table is both tested and excluded", () => {
@@ -72,10 +75,20 @@ describe("tenant table finder (fixture tests)", () => {
     ]);
     expect([...found]).toEqual(["guest_notes"]);
     expect(
-      coverageGaps({ migrationTables: found, rlsTestTables: new Set(), otherSuiteTables: new Set(), excluded: new Set() }),
+      coverageGaps({
+        migrationTables: found,
+        rlsTestTables: new Set(),
+        otherSuiteTables: new Set(),
+        excluded: new Set(),
+      }),
     ).toEqual(["guest_notes"]);
     expect(
-      coverageGaps({ migrationTables: found, rlsTestTables: new Set(["guest_notes"]), otherSuiteTables: new Set(), excluded: new Set() }),
+      coverageGaps({
+        migrationTables: found,
+        rlsTestTables: new Set(["guest_notes"]),
+        otherSuiteTables: new Set(),
+        excluded: new Set(),
+      }),
     ).toEqual([]);
   });
 
