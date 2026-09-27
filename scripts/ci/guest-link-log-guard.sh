@@ -276,6 +276,9 @@ try:
                     member()
                     if m.file_size > MAX_FILE: raise Limit(f"a file inside {os.path.basename(src)} is larger than {MAX_FILE} bytes")
                     with z.open(m) as i: copy(i, p, m.filename)
+    elif src.endswith(".gz") and not src.endswith(".tar.gz"):
+        member()
+        with gzip.open(src) as i: copy(i, os.path.join(dest, os.path.basename(src)[:-3] or "data"), "data")
     elif tarfile.is_tarfile(src):
         with tarfile.open(src) as t:
             for m in t:  # streaming: never loads the whole member list
@@ -284,9 +287,6 @@ try:
                     member()
                     if m.size > MAX_FILE: raise Limit(f"a file inside {os.path.basename(src)} is larger than {MAX_FILE} bytes")
                     with t.extractfile(m) as i: copy(i, p, m.name)
-    elif src.endswith(".gz"):
-        member()
-        with gzip.open(src) as i: copy(i, os.path.join(dest, os.path.basename(src)[:-3] or "data"), "data")
     else:
         sys.exit(1)
 except Limit as e:

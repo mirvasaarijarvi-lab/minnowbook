@@ -59,8 +59,8 @@ with zipfile.ZipFile(sys.argv[1],'w',zipfile.ZIP_DEFLATED) as z:
     b=bytes(1<<20)
     for _ in range(400): f.write(b)
 " "$WORK/bomb/bomb.zip"
-expect_stop "zip bomb stops on the size ratio" "times its size" "$WORK/bomb"
-expect_stop "zip bomb stops on the file size limit" "larger than" "$WORK/bomb" ARTIFACT_MAX_RATIO=100000
+expect_stop "zip bomb stops on its declared file size" "larger than" "$WORK/bomb"
+expect_stop "zip bomb stops on the size ratio" "times its size" "$WORK/bomb" ARTIFACT_MAX_FILE_BYTES=1000000000
 
 # gzip and tar.gz bombs (sizes not declared up front for .gz).
 mkdir -p "$WORK/gzb" "$WORK/tgzb"
@@ -102,10 +102,7 @@ expect_stop "folder with too many files" "more than 20 files" "$WORK/manydir" AR
 mkdir -p "$WORK/huge"; head -c 2000000 /dev/zero > "$WORK/huge/big.log"
 expect_stop "oversized plain file" "larger than 1000000 bytes" "$WORK/huge" ARTIFACT_MAX_FILE_BYTES=1000000
 
-# Damaged archive: truncated zip that claims to be a zip.
-mkdir -p "$WORK/broken"; head -c 300 "$WORK/many/many.zip" > "$WORK/broken/cut.zip"
-py "import zipfile,sys; z=zipfile.ZipFile(sys.argv[1],'w'); z.writestr('a.log','x'*5000); z.close()" "$WORK/ok.zip"
-head -c $(( $(stat -c %s "$WORK/ok.zip") - 30 )) "$WORK/ok.zip" > "$WORK/broken/cut.zip"
+# Damaged archive: a truncated gzip.
 gzip -c "$WORK/f1.log" | head -c 1000 > "$WORK/broken2.log.gz"; mkdir -p "$WORK/broken2"; mv "$WORK/broken2.log.gz" "$WORK/broken2/"
 expect_stop "truncated gzip fails closed" "damaged" "$WORK/broken2"
 
