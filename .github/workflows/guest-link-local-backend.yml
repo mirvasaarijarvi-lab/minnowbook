@@ -30,6 +30,11 @@ jobs:
         uses: ./.github/actions/stale-commit-check
       - name: Inject fake credentials into every output path
         run: bash scripts/ci/guest-link-log-guard.test.sh
+      # Flags any step whose logs or saved files skip the secret guard.
+      - name: Every step goes through the secret guard
+        run: |
+          node --test scripts/ci/guest-link-step-guard.test.mjs
+          node scripts/ci/guest-link-step-guard.mjs
 
   revoked-link:
     name: Revoked guest link (local backend)
