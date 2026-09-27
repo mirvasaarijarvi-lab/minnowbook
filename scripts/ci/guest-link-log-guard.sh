@@ -224,12 +224,46 @@ case "$cmd" in
     leaked=0
     n=0
     stop=0
-    limit() { # $1 = reason; fail closed and stop scanning
-      echo "::error::artifact scan stopped: $1"
+    # Diagnostics are sanitized: they name the limit, the measured value, the
+    # threshold, the nesting depth and a cleaned file name. They never carry
+    # file contents, and a file name that itself looks like a credential is
+    # replaced by "[name hidden]". Optional machine-readable copy:
+    #   ARTIFACT_SCAN_REPORT=<path>  writes one JSON object (key=value only).
+    report="${ARTIFACT_SCAN_REPORT:-}"
+    r_status=ok r_limit="" r_observed="" r_threshold="" r_depth="" r_file="" r_detail=""
+    safe_name() { # $1 = raw name -> printable, <=120 chars, hidden if it holds a credential
+      local raw="$1" clean chk="$tmp/.name"
+      clean=$(printf '%s' "$raw" | LC_ALL=C tr -cd '[:alnum:]._/!+@=,:-' | cut -c1-120)
+      [ ${#raw} -gt 120 ] && clean="$clean..."
+      printf '%s\n' "$raw" > "$chk"
+      if ! bash "$self" scan "$chk" > /dev/null 2>&1 \
+        || printf '%s' "$raw" | grep -qiE 'eyJ[a-z0-9_-]{8,}|(secret|password|passwd|token|apikey|api_key|service_role)[^/]*[=:]'; then
+        clean="[name hidden]"
+      fi
+      rm -f "$chk"
+      printf '%s' "${clean:-[unnamed]}"
+    }
+    limit() { # $1 = code, $2 = observed, $3 = threshold, $4 = raw file name, $5 = depth, $6 = detail
+      local code="$1" obs="$2" thr="$3" file depth="${5:-0}" detail="${6:-}" reason
+      file=$(safe_name "${4:-}")
+      case "$code" in
+        depth) reason="$file is nested more than $thr archive levels deep" ;;
+        files) reason="more than $thr files to scan" ;;
+        archive_files) reason="$file holds more than $thr files" ;;
+        file_bytes) reason="$file is larger than $thr bytes" ;;
+        total_bytes) reason="more than $thr bytes unpacked in total" ;;
+        ratio) reason="$file unpacks to over $thr times its size (possible zip bomb)" ;;
+        seconds) reason="took longer than $thr seconds" ;;
+        damaged) reason="$file is damaged and cannot be fully scanned" ;;
+        *) code=unknown; reason="$file could not be scanned" ;;
+      esac
+      detail=$(printf '%s' "$detail" | LC_ALL=C tr -cd '[:alnum:]_' | cut -c1-40)
+      echo "::error::artifact scan stopped: $reason [limit=$code observed=${obs:--} threshold=${thr:--} depth=$depth file=$file${detail:+ detail=$detail}]"
+      r_status=limit r_limit=$code r_observed=$obs r_threshold=$thr r_depth=$depth r_file=$file r_detail=$detail
       leaked=1
       stop=1
     }
-    unpack() { # $1 = archive, $2 = dest; exit 0 ok, 1 not an archive, 3 limit hit (reason on stdout)
+    unpack() { # $1 = archive, $2 = dest; exit 0 ok, 3 limit hit or damaged (code, observed, threshold, member, detail separated by \x1f on stdout)
       python3 - "$1" "$2" <<'PY' 2>/dev/null
 import gzip, os, sys, tarfile, zipfile
 src, dest = sys.argv[1], sys.argv[2]
@@ -239,7 +273,9 @@ budget_path = os.environ["BUDGET"]
 with open(budget_path) as b: total = int(b.read().strip() or 0)
 packed = max(os.path.getsize(src), 1)
 written = 0; members = 0
-class Limit(Exception): pass
+class Limit(Exception):
+    def __init__(self, code, observed, threshold, member=""):
+        self.row = (code, str(observed), str(threshold), member)
 def save():
     with open(budget_path, "w") as b: b.write(str(total))
 def safe(name):
@@ -255,37 +291,37 @@ def copy(i, p, name):
             chunk = i.read(1 << 16)
             if not chunk: break
             size += len(chunk); written += len(chunk); total += len(chunk)
-            if size > MAX_FILE: raise Limit(f"a file inside {os.path.basename(src)} is larger than {MAX_FILE} bytes")
-            if total > MAX_TOTAL: raise Limit(f"more than {MAX_TOTAL} bytes unpacked in total")
+            if size > MAX_FILE: raise Limit("file_bytes", f">{MAX_FILE}", MAX_FILE, name)
+            if total > MAX_TOTAL: raise Limit("total_bytes", total, MAX_TOTAL, name)
             if written > packed * MAX_RATIO and written > (1 << 20):
-                raise Limit(f"{os.path.basename(src)} unpacks to over {MAX_RATIO} times its size (possible zip bomb)")
+                raise Limit("ratio", written // packed, MAX_RATIO, "")
             o.write(chunk)
 def member():
     global members
     members += 1
-    if members > MAX_FILES: raise Limit(f"{os.path.basename(src)} holds more than {MAX_FILES} files")
+    if members > MAX_FILES: raise Limit("archive_files", members, MAX_FILES, "")
 os.makedirs(dest, exist_ok=True)
 try:
     if zipfile.is_zipfile(src):
         with zipfile.ZipFile(src) as z:
             infos = z.infolist()
-            if len(infos) > MAX_FILES: raise Limit(f"{os.path.basename(src)} holds more than {MAX_FILES} files")
+            if len(infos) > MAX_FILES: raise Limit("archive_files", len(infos), MAX_FILES, "")
             for m in infos:
                 p = safe(m.filename)
                 if p and not m.is_dir():
                     member()
-                    if m.file_size > MAX_FILE: raise Limit(f"a file inside {os.path.basename(src)} is larger than {MAX_FILE} bytes")
+                    if m.file_size > MAX_FILE: raise Limit("file_bytes", m.file_size, MAX_FILE, m.filename)
                     with z.open(m) as i: copy(i, p, m.filename)
     elif src.endswith(".gz") and not src.endswith(".tar.gz"):
         member()
-        with gzip.open(src) as i: copy(i, os.path.join(dest, os.path.basename(src)[:-3] or "data"), "data")
+        with gzip.open(src) as i: copy(i, os.path.join(dest, os.path.basename(src)[:-3] or "data"), "")
     elif tarfile.is_tarfile(src):
         with tarfile.open(src) as t:
             for m in t:  # streaming: never loads the whole member list
                 p = safe(m.name)
                 if p and m.isfile():
                     member()
-                    if m.size > MAX_FILE: raise Limit(f"a file inside {os.path.basename(src)} is larger than {MAX_FILE} bytes")
+                    if m.size > MAX_FILE: raise Limit("file_bytes", m.size, MAX_FILE, m.name)
                     with t.extractfile(m) as i: copy(i, p, m.name)
         if src.endswith((".tar.gz", ".tgz")):
             # tarfile stops at the end-of-archive marker and never reads the
@@ -298,28 +334,32 @@ try:
         # example a zip cut short before its index): treat as damaged.
         raise ValueError("unreadable archive")
 except Limit as e:
-    save(); print(e); sys.exit(3)
-except Exception:
+    save(); print("\x1f".join(x.replace("\x1f", " ").replace("\n", " ") for x in e.row) + "\x1f"); sys.exit(3)
+except Exception as e:
     # Any read error (bad checksum, cut-off data, unsupported compression,
     # zlib errors) means the archive cannot be fully scanned: fail closed.
-    save(); print(f"{os.path.basename(src)} is damaged and cannot be fully scanned"); sys.exit(3)
+    # Only the error TYPE is reported, never its message (it can quote data).
+    save(); print(f"damaged\x1f-\x1f-\x1f\x1f{type(e).__name__}"); sys.exit(3)
 save()
 PY
     }
     walk() { # $1 = path, $2 = label prefix, $3 = depth
-      local path="$1" label="$2" depth="$3" f rel rc msg
+      local path="$1" label="$2" depth="$3" f rel rc msg code obs thr mem det size
       while IFS= read -r -d '' f; do
         [ "$stop" = 1 ] && return
-        rel="${label}${f#"$path"}"
+        rel="${f#"$path"}"
+        rel="$label${rel#/}"
         [ -f "$path" ] && rel="$label$(basename "$f")"
         n=$((n + 1))
-        if [ "$n" -gt "$MAX_FILES" ]; then limit "more than $MAX_FILES files to scan"; return; fi
-        if [ "$(date +%s)" -gt "$deadline" ]; then limit "took longer than $MAX_SECONDS seconds"; return; fi
-        if [ "$(stat -c %s "$f")" -gt "$MAX_FILE_BYTES" ]; then
-          limit "${rel#/} is larger than $MAX_FILE_BYTES bytes"; return
+        if [ "$n" -gt "$MAX_FILES" ]; then limit files "$n" "$MAX_FILES" "$rel" "$depth"; return; fi
+        if [ "$(date +%s)" -gt "$deadline" ]; then
+          limit seconds "$(($(date +%s) - deadline + MAX_SECONDS))" "$MAX_SECONDS" "$rel" "$depth"; return
         fi
+        size=$(stat -c %s "$f")
+        if [ "$size" -gt "$MAX_FILE_BYTES" ]; then limit file_bytes "$size" "$MAX_FILE_BYTES" "$rel" "$depth"; return; fi
         if ! bash "$self" scan "$f" > /dev/null 2>&1; then
-          echo "::error::artifact file ${rel#/} contains a backend credential"
+          echo "::error::artifact file $(safe_name "$rel") contains a backend credential"
+          r_status=leak
           leaked=1
         fi
         case "$f" in
@@ -327,25 +367,31 @@ PY
             local d="$tmp/u$n"
             rc=0
             msg=$(unpack "$f" "$d") || rc=$?
-            if [ "$rc" = 3 ]; then limit "$msg"; rm -rf "$d"; return; fi
-            # Any other failure (crash, killed for memory) is never a pass.
-            if [ "$rc" != 0 ]; then limit "${rel#/} is damaged and cannot be fully scanned"; rm -rf "$d"; return; fi
-            if [ "$rc" = 0 ]; then
-              if [ "$depth" -ge "$MAX_DEPTH" ]; then
-                limit "${rel#/} is nested more than $MAX_DEPTH archive levels deep"; rm -rf "$d"; return
-              fi
-              walk "$d" "${rel#/}!" $((depth + 1))
-              rm -rf "$d" # free disk as soon as a level is scanned
+            if [ "$rc" = 3 ]; then
+              IFS=$'\x1f' read -r code obs thr mem det <<< "$msg"
+              limit "$code" "$obs" "$thr" "$rel${mem:+!$mem}" "$depth" "$det"; rm -rf "$d"; return
             fi
+            # Any other failure (crash, killed for memory) is never a pass.
+            if [ "$rc" != 0 ]; then limit damaged - - "$rel" "$depth" "exit_$rc"; rm -rf "$d"; return; fi
+            if [ "$depth" -ge "$MAX_DEPTH" ]; then
+              limit depth "$((depth + 1))" "$MAX_DEPTH" "$rel" "$depth"; rm -rf "$d"; return
+            fi
+            walk "$d" "$rel!" $((depth + 1))
+            rm -rf "$d" # free disk as soon as a level is scanned
             ;;
         esac
       done < <(find "$path" -type f -print0)
     }
     for p in "$@"; do
       [ "$stop" = 1 ] && break
-      [ -e "$p" ] || { echo "::error::artifact path not found: $(basename "$p")"; leaked=1; continue; }
+      [ -e "$p" ] || { echo "::error::artifact path not found: $(safe_name "$(basename "$p")")"; leaked=1; r_status=missing; continue; }
       walk "$p" "" 0
     done
+    if [ -n "$report" ]; then
+      python3 -c 'import json,sys
+k=["status","limit","observed","threshold","depth","file","detail","files_scanned","bytes_unpacked"]
+print(json.dumps(dict(zip(k,sys.argv[1:]))))' "$r_status" "$r_limit" "$r_observed" "$r_threshold" "$r_depth" "$r_file" "$r_detail" "$n" "$(cat "$BUDGET")" > "$report"
+    fi
     [ "$leaked" = 0 ] && echo "Scanned $n artifact file(s): no backend credentials."
     exit $leaked
     ;;
