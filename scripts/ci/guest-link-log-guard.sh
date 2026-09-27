@@ -136,7 +136,14 @@ case "$cmd" in
     [ -f "$file" ] || exit 0
     mapfile -t orig < <(tail -n "$lines" "$file")
     mapfile -t decoded < <(printf '%s\n' "${orig[@]}" | decode_lines)
+    # Lines that only hold a secret together with their neighbours.
+    declare -A split_drop=()
+    while IFS= read -r k; do [ -n "$k" ] && split_drop[$k]=1; done < <(
+      printf '%s\n' "${orig[@]}" | split_hits drop
+      printf '%s\n' "${decoded[@]}" | split_hits drop
+    )
     for i in "${!orig[@]}"; do
+      [ -n "${split_drop[$i]:-}" ] && continue
       d="${decoded[$i]:-}"
       printf '%s' "$d" | grep -qiE "$DROP_RE" && continue
       printf '%s' "$d" | holds_secret && continue
@@ -146,25 +153,45 @@ case "$cmd" in
     ;;
   scan)
     leaked=0
+    present=()
     for f in "$@"; do
       [ -f "$f" ] || continue
+      present+=("$f")
+      file_leaked=0
       while IFS= read -r v; do
         if grep -qF -- "$v" "$f"; then
           echo "::error::$(basename "$f") contains a backend credential"
-          leaked=1
+          file_leaked=1
           break
         fi
       done < <(known_values)
       # Encoded or escaped copies: only checked on the decoded text.
       if decode_lines < "$f" | holds_secret && ! holds_secret < "$f"; then
         echo "::error::$(basename "$f") contains an encoded or escaped backend credential"
-        leaked=1
+        file_leaked=1
       fi
       if grep -qE "$JWT_RE" "$f"; then
         echo "::error::$(basename "$f") contains a sign-in token"
-        leaked=1
+        file_leaked=1
       fi
+      # Split across adjacent lines (raw or decoded).
+      if [ "$file_leaked" = 0 ]; then
+        dec=$(mktemp)
+        decode_lines < "$f" > "$dec"
+        if split_hits any "$f" || split_hits any "$dec"; then
+          echo "::error::$(basename "$f") contains a backend credential split across lines"
+          file_leaked=1
+        fi
+        rm -f "$dec"
+      fi
+      [ "$file_leaked" = 1 ] && leaked=1
     done
+    # Split across output chunks: the files joined in the order given.
+    if [ "$leaked" = 0 ] && [ "${#present[@]}" -gt 1 ] && split_hits any "${present[@]}"; then
+      names=$(for f in "${present[@]}"; do basename "$f"; done | paste -sd, -)
+      echo "::error::a backend credential is split across output chunks ($names)"
+      leaked=1
+    fi
     exit $leaked
     ;;
   scan-artifacts)
