@@ -201,63 +201,136 @@ case "$cmd" in
   scan-artifacts)
     # Scan every file of an artifact folder (or single file), including hidden
     # files, subfolders and .zip/.tar/.tar.gz/.tgz/.gz archives, unpacked up to
-    # 3 levels deep. Reports file names only, never contents.
+    # ARTIFACT_MAX_DEPTH levels deep. Reports file names only, never contents.
+    #
+    # Resource safeguards (fail closed: anything we cannot fully scan fails):
+    #   ARTIFACT_MAX_DEPTH        archive nesting levels (default 3)
+    #   ARTIFACT_MAX_FILES        files scanned in total (default 5000)
+    #   ARTIFACT_MAX_FILE_BYTES   size of one file, packed or unpacked (default 50 MiB)
+    #   ARTIFACT_MAX_TOTAL_BYTES  bytes unpacked in total (default 200 MiB)
+    #   ARTIFACT_MAX_RATIO        unpacked:packed size ratio per archive (default 200)
+    #   ARTIFACT_MAX_SECONDS      wall-clock time for the whole scan (default 300)
     [ "$#" -gt 0 ] || { echo "usage: $0 scan-artifacts <dir|file>..." >&2; exit 2; }
     self="$0"
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"' EXIT
+    export MAX_DEPTH="${ARTIFACT_MAX_DEPTH:-3}" MAX_FILES="${ARTIFACT_MAX_FILES:-5000}"
+    export MAX_FILE_BYTES="${ARTIFACT_MAX_FILE_BYTES:-52428800}"
+    export MAX_TOTAL_BYTES="${ARTIFACT_MAX_TOTAL_BYTES:-209715200}"
+    export MAX_RATIO="${ARTIFACT_MAX_RATIO:-200}" MAX_SECONDS="${ARTIFACT_MAX_SECONDS:-300}"
+    export BUDGET="$tmp/.budget"
+    echo 0 > "$BUDGET"
+    deadline=$(($(date +%s) + MAX_SECONDS))
     leaked=0
     n=0
-    unpack() { # $1 = archive, $2 = dest; prints nothing on success
+    stop=0
+    limit() { # $1 = reason; fail closed and stop scanning
+      echo "::error::artifact scan stopped: $1"
+      leaked=1
+      stop=1
+    }
+    unpack() { # $1 = archive, $2 = dest; exit 0 ok, 1 not an archive, 3 limit hit (reason on stdout)
       python3 - "$1" "$2" <<'PY' 2>/dev/null
-import gzip, os, shutil, sys, tarfile, zipfile
+import gzip, os, sys, tarfile, zipfile
 src, dest = sys.argv[1], sys.argv[2]
-os.makedirs(dest, exist_ok=True)
+MAX_FILE = int(os.environ["MAX_FILE_BYTES"]); MAX_TOTAL = int(os.environ["MAX_TOTAL_BYTES"])
+MAX_RATIO = int(os.environ["MAX_RATIO"]); MAX_FILES = int(os.environ["MAX_FILES"])
+budget_path = os.environ["BUDGET"]
+with open(budget_path) as b: total = int(b.read().strip() or 0)
+packed = max(os.path.getsize(src), 1)
+written = 0; members = 0
+class Limit(Exception): pass
+def save():
+    with open(budget_path, "w") as b: b.write(str(total))
 def safe(name):
-    p = os.path.normpath(os.path.join(dest, name))
-    return p if p.startswith(os.path.abspath(dest)) or p.startswith(dest) else None
-if zipfile.is_zipfile(src):
-    with zipfile.ZipFile(src) as z:
-        for m in z.infolist():
-            p = safe(m.filename)
-            if p and not m.is_dir():
-                os.makedirs(os.path.dirname(p), exist_ok=True)
-                with z.open(m) as i, open(p, "wb") as o: shutil.copyfileobj(i, o)
-elif tarfile.is_tarfile(src):
-    with tarfile.open(src) as t:
-        for m in t.getmembers():
-            p = safe(m.name)
-            if p and m.isfile():
-                os.makedirs(os.path.dirname(p), exist_ok=True)
-                with t.extractfile(m) as i, open(p, "wb") as o: shutil.copyfileobj(i, o)
-elif src.endswith(".gz"):
-    with gzip.open(src) as i, open(os.path.join(dest, os.path.basename(src)[:-3] or "data"), "wb") as o:
-        shutil.copyfileobj(i, o)
-else:
-    sys.exit(1)
+    root = os.path.abspath(dest)
+    p = os.path.abspath(os.path.join(root, name))
+    return p if p.startswith(root + os.sep) else None
+def copy(i, p, name):
+    global total, written
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    size = 0
+    with open(p, "wb") as o:
+        while True:
+            chunk = i.read(1 << 16)
+            if not chunk: break
+            size += len(chunk); written += len(chunk); total += len(chunk)
+            if size > MAX_FILE: raise Limit(f"a file inside {os.path.basename(src)} is larger than {MAX_FILE} bytes")
+            if total > MAX_TOTAL: raise Limit(f"more than {MAX_TOTAL} bytes unpacked in total")
+            if written > packed * MAX_RATIO and written > (1 << 20):
+                raise Limit(f"{os.path.basename(src)} unpacks to over {MAX_RATIO} times its size (possible zip bomb)")
+            o.write(chunk)
+def member():
+    global members
+    members += 1
+    if members > MAX_FILES: raise Limit(f"{os.path.basename(src)} holds more than {MAX_FILES} files")
+os.makedirs(dest, exist_ok=True)
+try:
+    if zipfile.is_zipfile(src):
+        with zipfile.ZipFile(src) as z:
+            infos = z.infolist()
+            if len(infos) > MAX_FILES: raise Limit(f"{os.path.basename(src)} holds more than {MAX_FILES} files")
+            for m in infos:
+                p = safe(m.filename)
+                if p and not m.is_dir():
+                    member()
+                    if m.file_size > MAX_FILE: raise Limit(f"a file inside {os.path.basename(src)} is larger than {MAX_FILE} bytes")
+                    with z.open(m) as i: copy(i, p, m.filename)
+    elif tarfile.is_tarfile(src):
+        with tarfile.open(src) as t:
+            for m in t:  # streaming: never loads the whole member list
+                p = safe(m.name)
+                if p and m.isfile():
+                    member()
+                    if m.size > MAX_FILE: raise Limit(f"a file inside {os.path.basename(src)} is larger than {MAX_FILE} bytes")
+                    with t.extractfile(m) as i: copy(i, p, m.name)
+    elif src.endswith(".gz"):
+        member()
+        with gzip.open(src) as i: copy(i, os.path.join(dest, os.path.basename(src)[:-3] or "data"), "data")
+    else:
+        sys.exit(1)
+except Limit as e:
+    save(); print(e); sys.exit(3)
+except (zipfile.BadZipFile, tarfile.TarError, OSError, EOFError, gzip.BadGzipFile) as e:
+    save(); print(f"{os.path.basename(src)} is damaged and cannot be fully scanned"); sys.exit(3)
+save()
 PY
     }
     walk() { # $1 = path, $2 = label prefix, $3 = depth
-      local path="$1" label="$2" depth="$3" f rel
+      local path="$1" label="$2" depth="$3" f rel rc msg
       while IFS= read -r -d '' f; do
+        [ "$stop" = 1 ] && return
         rel="${label}${f#"$path"}"
         [ -f "$path" ] && rel="$label$(basename "$f")"
         n=$((n + 1))
+        if [ "$n" -gt "$MAX_FILES" ]; then limit "more than $MAX_FILES files to scan"; return; fi
+        if [ "$(date +%s)" -gt "$deadline" ]; then limit "took longer than $MAX_SECONDS seconds"; return; fi
+        if [ "$(stat -c %s "$f")" -gt "$MAX_FILE_BYTES" ]; then
+          limit "${rel#/} is larger than $MAX_FILE_BYTES bytes"; return
+        fi
         if ! bash "$self" scan "$f" > /dev/null 2>&1; then
           echo "::error::artifact file ${rel#/} contains a backend credential"
           leaked=1
         fi
         case "$f" in
           *.zip | *.tar | *.tar.gz | *.tgz | *.gz)
-            if [ "$depth" -lt 3 ]; then
-              local d="$tmp/u$n"
-              if unpack "$f" "$d"; then walk "$d" "${rel#/}!" $((depth + 1)); fi
+            local d="$tmp/u$n"
+            rc=0
+            msg=$(unpack "$f" "$d") || rc=$?
+            if [ "$rc" = 3 ]; then limit "$msg"; rm -rf "$d"; return; fi
+            if [ "$rc" = 0 ]; then
+              if [ "$depth" -ge "$MAX_DEPTH" ]; then
+                limit "${rel#/} is nested more than $MAX_DEPTH archive levels deep"; rm -rf "$d"; return
+              fi
+              walk "$d" "${rel#/}!" $((depth + 1))
+              rm -rf "$d" # free disk as soon as a level is scanned
             fi
             ;;
         esac
       done < <(find "$path" -type f -print0)
     }
     for p in "$@"; do
+      [ "$stop" = 1 ] && break
       [ -e "$p" ] || { echo "::error::artifact path not found: $(basename "$p")"; leaked=1; continue; }
       walk "$p" "" 0
     done
