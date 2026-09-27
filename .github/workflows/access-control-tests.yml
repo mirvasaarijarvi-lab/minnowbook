@@ -49,7 +49,8 @@ jobs:
           deno test --allow-net --allow-env --allow-read \
             supabase/functions/admin-users/role-status-change.test.ts \
             supabase/functions/guest-booking-portal/token-expiry-revocation.test.ts \
-            supabase/functions/guest-booking-portal/token-malformed-tampered-unknown.test.ts
+            supabase/functions/guest-booking-portal/token-malformed-tampered-unknown.test.ts \
+            supabase/functions/guest-booking-portal/booking-cancelled-deleted.test.ts
 
   live:
     name: Access control (live backend)
