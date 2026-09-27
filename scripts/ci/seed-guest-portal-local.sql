@@ -38,3 +38,11 @@ VALUES (
   '9ac05fbf-0834-44fd-a52a-d030b7074a30', 'custom', current_date + 60,
   'CI Guest', 'ci-guest@example.invalid', 'confirmed'
 );
+
+-- Second booking, so revoke-isolation.integration.test.ts can check that a
+-- link on another booking keeps working.
+INSERT INTO public.reservations (tenant_id, reservation_type, date, guest_name, guest_email, status)
+VALUES (
+  '9ac05fbf-0834-44fd-a52a-d030b7074a30', 'custom', current_date + 61,
+  'CI Guest Two', 'ci-guest-two@example.invalid', 'confirmed'
+);
