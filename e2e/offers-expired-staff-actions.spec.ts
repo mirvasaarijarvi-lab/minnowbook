@@ -7,7 +7,7 @@ import {
 } from "./fixtures/test-tenant";
 import { createClient } from "@supabase/supabase-js";
 import type { Page, Locator } from "@playwright/test";
-import { markWelcomeTourSeen } from "./fixtures/welcome-tour";
+import { expectWelcomeTourDismissed, markWelcomeTourSeen } from "./fixtures/welcome-tour";
 
 /**
  * Browser-level regression: offers whose valid-until date has passed but
@@ -102,6 +102,7 @@ test.describe("Offers page: expired draft/sent offers keep staff actions", () =>
         [`sb-${ref}-auth-token`, JSON.stringify(signIn!.session)] as const,
       );
       await page.goto("/dashboard");
+      await expectWelcomeTourDismissed(page);
       await page
         .getByRole("button", { name: /^Offers/ })
         .or(page.getByRole("link", { name: /^Offers/ }))

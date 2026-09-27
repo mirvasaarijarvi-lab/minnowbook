@@ -12,7 +12,7 @@ import {
   ensureOfferStaffAccounts,
   type OfferStaffAccount,
 } from "./fixtures/offer-staff-accounts";
-import { markWelcomeTourSeen } from "./fixtures/welcome-tour";
+import { expectWelcomeTourDismissed, markWelcomeTourSeen } from "./fixtures/welcome-tour";
 
 /**
  * Browser end-to-end: two DIFFERENT staff members (each in their own browser,
@@ -52,6 +52,7 @@ async function openOffersAs(
     [`sb-${ref}-auth-token`, JSON.stringify(data.session)] as const,
   );
   await page.goto("/dashboard");
+  await expectWelcomeTourDismissed(page);
   await page
     .getByRole("button", { name: /^Offers/ })
     .or(page.getByRole("link", { name: /^Offers/ }))
