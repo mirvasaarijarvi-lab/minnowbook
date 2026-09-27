@@ -13,9 +13,16 @@ export const TWO_STEP_FAILURE =
   "see docs/ci/e2e-staff-secrets.md.";
 
 /** After signing in through the API: fail if the login still needs a code. */
-export async function assertNoTwoStepRequired(client: SupabaseClient, label = "staff test login") {
-  const { data, error } = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (error) throw new Error(`Could not check two-step sign-in for ${label}: ${error.message}`);
+export async function assertNoTwoStepRequired(
+  client: SupabaseClient,
+  label = "staff test login",
+) {
+  const { data, error } =
+    await client.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (error)
+    throw new Error(
+      `Could not check two-step sign-in for ${label}: ${error.message}`,
+    );
   if (data?.nextLevel === "aal2" && data.currentLevel !== "aal2") {
     throw new Error(`${TWO_STEP_FAILURE} (${label})`);
   }
