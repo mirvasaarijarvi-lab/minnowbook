@@ -63,11 +63,11 @@ export type LinkHistoryRow = {
 
 // Only these columns are read: the audit table never holds link codes, and
 // the internal link id is used for numbering only, never displayed.
-export const LINK_HISTORY_COLUMNS =
+const LINK_HISTORY_COLUMNS =
   "id, booking_token_id, action, actor_email, actor_kind, occurred_at";
 
 /** Numbers each link 1, 2, 3 by its first appearance, oldest first. */
-export function numberLinks(rows: LinkHistoryRow[]): Map<string, number> {
+function numberLinks(rows: LinkHistoryRow[]): Map<string, number> {
   const out = new Map<string, number>();
   [...rows]
     .sort((a, b) => a.occurred_at.localeCompare(b.occurred_at))
