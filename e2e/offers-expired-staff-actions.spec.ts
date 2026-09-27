@@ -7,7 +7,10 @@ import {
 } from "./fixtures/test-tenant";
 import { createClient } from "@supabase/supabase-js";
 import type { Page, Locator } from "@playwright/test";
-import { expectWelcomeTourDismissed, markWelcomeTourSeen } from "./fixtures/welcome-tour";
+import {
+  expectWelcomeTourDismissed,
+  markWelcomeTourSeen,
+} from "./fixtures/welcome-tour";
 
 /**
  * Browser-level regression: offers whose valid-until date has passed but

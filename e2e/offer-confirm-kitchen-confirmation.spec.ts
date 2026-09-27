@@ -1,5 +1,8 @@
 import { test, expect, Page, Route } from "@playwright/test";
-import { expectWelcomeTourDismissed, markWelcomeTourSeen } from "./fixtures/welcome-tour";
+import {
+  expectWelcomeTourDismissed,
+  markWelcomeTourSeen,
+} from "./fixtures/welcome-tour";
 
 /**
  * End-to-end: the confirmation shown after accepting an offer must state the

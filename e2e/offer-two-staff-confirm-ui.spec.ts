@@ -12,7 +12,10 @@ import {
   ensureOfferStaffAccounts,
   type OfferStaffAccount,
 } from "./fixtures/offer-staff-accounts";
-import { expectWelcomeTourDismissed, markWelcomeTourSeen } from "./fixtures/welcome-tour";
+import {
+  expectWelcomeTourDismissed,
+  markWelcomeTourSeen,
+} from "./fixtures/welcome-tour";
 
 /**
  * Browser end-to-end: two DIFFERENT staff members (each in their own browser,
