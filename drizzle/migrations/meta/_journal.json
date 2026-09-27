@@ -309,6 +309,13 @@
       "when": 1790435254379,
       "tag": "0043_faster_list_tenant_scoped_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1790503378202,
+      "tag": "0044_protect_last_tenant_admin",
+      "breakpoints": true
     }
   ]
 }

@@ -45,6 +45,9 @@ export const SAFE_ERRORS = new Set<string>([
 export const GENERIC_ERROR_MESSAGE =
   "An unexpected error occurred. Please try again.";
 
+export const LAST_ADMIN_MESSAGE =
+  "A business must keep at least one owner or admin";
+
 export function sanitizeError(msg: string): string {
   if (SAFE_ERRORS.has(msg)) return msg;
   // Allow validation errors from our own validators
@@ -55,6 +58,8 @@ export function sanitizeError(msg: string): string {
   if (/^Tier ".{1,40}" allows at most \d+/.test(msg)) return msg;
   if (/^Your plan allows only \d+ resource\(s\) per type/.test(msg)) return msg;
   if (/already belongs to another organization/i.test(msg)) return msg;
+  // protect_last_tenant_admin trigger: user-actionable, no internals leaked.
+  if (msg.includes("LAST_TENANT_ADMIN")) return LAST_ADMIN_MESSAGE;
   console.error("[admin-users] Internal error:", msg);
   return GENERIC_ERROR_MESSAGE;
 }
