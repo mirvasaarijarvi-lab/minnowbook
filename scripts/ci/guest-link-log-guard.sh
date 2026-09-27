@@ -71,6 +71,50 @@ for line in sys.stdin.buffer.read().decode("utf-8", "replace").split("\n"):
 '
 }
 
+# Values split across adjacent lines (or output chunks). Pieces are joined
+# with line ends and surrounding spaces removed, up to MAX_SPLIT lines.
+#   split_hits drop   : stdin = decoded lines; prints the index of every line
+#                       that belongs to a smallest group of neighbours whose
+#                       joined text holds a secret.
+#   split_hits any F..: exit 0 if the joined text of each file, or of all
+#                       files in order, holds a secret.
+MAX_SPLIT=8
+split_hits() {
+  GUARD_KNOWN="$(known_values)" GUARD_JWT_RE="$JWT_RE" GUARD_MAX="$MAX_SPLIT" python3 - "$@" <<'PY'
+import os, re, sys
+known = [v for v in os.environ["GUARD_KNOWN"].split("\n") if v]
+jwt = re.compile(os.environ["GUARD_JWT_RE"])
+mx = int(os.environ["GUARD_MAX"])
+def hit(t):
+    return any(v in t for v in known) or bool(jwt.search(t))
+def pieces(text):
+    return [l.strip() for l in re.split(r"\r?\n|\r", text)]
+mode, files = sys.argv[1], sys.argv[2:]
+if mode == "drop":
+    ls = pieces(sys.stdin.buffer.read().decode("utf-8", "replace"))
+    drop = set()
+    for i in range(len(ls)):
+        for j in range(i + 1, min(i + mx, len(ls))):
+            w = "".join(ls[i:j + 1])
+            if hit(w):
+                # Smallest group: neither end line can be left out.
+                if not hit("".join(ls[i + 1:j + 1])) and not hit("".join(ls[i:j])):
+                    drop.update(range(i, j + 1))
+                break
+    for k in sorted(drop):
+        print(k)
+    sys.exit(0)
+texts = []
+for f in files:
+    try:
+        texts.append(open(f, "rb").read().decode("utf-8", "replace"))
+    except OSError:
+        pass
+joined = ["".join(pieces(t)) for t in texts]
+sys.exit(0 if any(hit(j) for j in joined) or hit("".join(joined)) else 1)
+PY
+}
+
 # True if the text on stdin holds a known value or a JWT.
 holds_secret() {
   local text
