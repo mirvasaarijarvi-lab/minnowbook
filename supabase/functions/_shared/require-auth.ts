@@ -138,6 +138,38 @@ function nonUserTokenReason(token: string): string | null {
 }
 
 
+/**
+ * Returns a reason when the account behind a verified token is no longer
+ * active (turned off, deleted, or the check could not be completed), or null
+ * when it is active. Fails closed.
+ */
+export async function accountInactiveReason(
+  adminClient: SupabaseClient,
+  userId: string,
+  timeoutMs: number,
+): Promise<string | null> {
+  let timer: number | undefined;
+  const timeout = new Promise<"__timeout__">((resolve) => {
+    timer = setTimeout(() => resolve("__timeout__"), timeoutMs) as unknown as number;
+  });
+  try {
+    const res = await Promise.race([adminClient.auth.admin.getUserById(userId), timeout]);
+    if (res === "__timeout__") return "account_check_timeout";
+    const { data, error } = res;
+    if (error || !data?.user) return "account_missing";
+    const user = data.user as { banned_until?: string | null; deleted_at?: string | null };
+    if (user.deleted_at) return "account_deleted";
+    if (user.banned_until && new Date(user.banned_until).getTime() > Date.now()) {
+      return "account_disabled";
+    }
+    return null;
+  } catch {
+    return "account_check_failed";
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
+}
+
 let requestSeq = 0;
 function newRequestId(): string {
   requestSeq = (requestSeq + 1) % 0xffffffff;
@@ -343,6 +375,20 @@ export async function requireAuth(
   const email = typeof claims.email === "string" ? claims.email : null;
   const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
+  // A signed token stays valid until it expires (~1h), so confirm on every
+  // request that the account has not been turned off or deleted since.
+  const inactive = await accountInactiveReason(adminClient, userId, timeoutMs);
+  if (inactive) {
+    logEvent("warn", "reject", {
+      reqId,
+      caller,
+      reason: inactive,
+      tokenFp: fp,
+      userFp: tokenFingerprint(userId),
+    });
+    return unauthorized(corsHeaders, options, reqId);
+  }
+
   logEvent("info", "verify_ok", {
     reqId,
     caller,
@@ -517,6 +563,21 @@ export async function verifyBearer(
     return { ok: false, reason: "invalid_token" };
   }
 
+  const verifyAdminClient = createClient(supabaseUrl, serviceRoleKey);
+  const inactive = await accountInactiveReason(verifyAdminClient, userId, timeoutMs);
+  if (inactive) {
+    logEvent("warn", "reject", {
+      reqId,
+      caller,
+      api: "verifyBearer",
+      reason: "invalid_token",
+      detail: inactive,
+      tokenFp: fp,
+      userFp: tokenFingerprint(userId),
+    });
+    return { ok: false, reason: "invalid_token" };
+  }
+
   logEvent("info", "verify_ok", {
     reqId,
     caller,
@@ -533,6 +594,6 @@ export async function verifyBearer(
     token,
     claims,
     userClient,
-    adminClient: createClient(supabaseUrl, serviceRoleKey),
+    adminClient: verifyAdminClient,
   };
 }

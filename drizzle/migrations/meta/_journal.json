@@ -316,6 +316,13 @@
       "when": 1790503378202,
       "tag": "0044_protect_last_tenant_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1790505077468,
+      "tag": "0045_block_disabled_accounts_in_access_helpers",
+      "breakpoints": true
     }
   ]
 }
