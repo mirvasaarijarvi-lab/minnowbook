@@ -744,16 +744,16 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
           date,
           validateUuid(body.site_id, "site_id", false),
         );
+        // Never echo the existing booking's references: the caller has not
+        // proved they own it, so only a generic "already received" answer
+        // is returned.
         return new Response(
           JSON.stringify({
             success: true,
             duplicate: true,
             warning: null,
-            reservation: {
-              id: existing.id,
-              linked_group_id: existing.linked_group_id ?? null,
-            },
-            linked_group_id: existing.linked_group_id ?? null,
+            reservation: null,
+            linked_group_id: null,
             linked_siblings: [],
             capacity: {
               current_load: dupLoad,
