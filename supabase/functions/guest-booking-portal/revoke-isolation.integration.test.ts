@@ -39,7 +39,9 @@ const ENABLED = !!URL_BASE && !!KEY && !!STAFF_TOKEN;
 if (Deno.env.get("GUEST_PORTAL_TEST_BACKEND") === "local" && URL_BASE) {
   const host = new URL(URL_BASE).hostname;
   if (host !== "127.0.0.1" && host !== "localhost") {
-    throw new Error(`GUEST_PORTAL_TEST_BACKEND=local but SUPABASE_URL host is ${host}`);
+    throw new Error(
+      `GUEST_PORTAL_TEST_BACKEND=local but SUPABASE_URL host is ${host}`,
+    );
   }
 }
 
@@ -76,7 +78,10 @@ Deno.test({
     });
     const { data: userData, error: userErr } =
       await staff.auth.getUser(STAFF_TOKEN);
-    assert(!userErr && userData.user, `staff token rejected: ${userErr?.message}`);
+    assert(
+      !userErr && userData.user,
+      `staff token rejected: ${userErr?.message}`,
+    );
     const { data: membership } = await staff
       .from("tenant_users")
       .select("tenant_id")
@@ -84,7 +89,8 @@ Deno.test({
       .in("role", ["superadmin", "owner", "admin"])
       .limit(1)
       .maybeSingle();
-    if (!membership) throw new Error("test login is not an owner/admin of any business");
+    if (!membership)
+      throw new Error("test login is not an owner/admin of any business");
 
     const { data: bookings } = await staff
       .from("reservations")
@@ -115,17 +121,23 @@ Deno.test({
         })),
       )
       .select("id, token");
-    assert(!insErr && stored?.length === 3, `could not store test links: ${insErr?.message}`);
+    assert(
+      !insErr && stored?.length === 3,
+      `could not store test links: ${insErr?.message}`,
+    );
     const idA = stored.find((s) => s.token === links.A.token)!.id;
 
     try {
-      await t.step("before: all three links can view their booking", async () => {
-        for (const [name, l] of Object.entries(links)) {
-          const r = await guestCall({ action: "view", token: l.token });
-          const body = JSON.parse(r.text);
-          assertEquals(body.ok, true, `link ${name}: ${r.text}`);
-        }
-      });
+      await t.step(
+        "before: all three links can view their booking",
+        async () => {
+          for (const [name, l] of Object.entries(links)) {
+            const r = await guestCall({ action: "view", token: l.token });
+            const body = JSON.parse(r.text);
+            assertEquals(body.ok, true, `link ${name}: ${r.text}`);
+          }
+        },
+      );
 
       await t.step("staff turn off link A", async () => {
         const { error } = await staff
@@ -135,40 +147,75 @@ Deno.test({
         assert(!error, `could not revoke link A: ${error?.message}`);
       });
 
-      await t.step("link A: view refused as revoked, no booking shown", async () => {
-        const r = await guestCall({ action: "view", token: links.A.token });
-        assertEquals(r.status, 200, r.text);
-        const body = JSON.parse(r.text);
-        assertEquals(body.ok, false, r.text);
-        assertEquals(body.code, "revoked", r.text);
-        assert(!("reservation" in body), `revoked link leaked booking data: ${r.text}`);
-      });
-
-      await t.step("link A: changing the date and cancelling are refused", async () => {
-        const date = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
-        const re = await guestCall({ action: "reschedule", token: links.A.token, requested_date: date });
-        assertEquals(re.status, 403, re.text);
-        const ca = await guestCall({ action: "cancel", token: links.A.token, language: "en" });
-        assertEquals(ca.status, 403, ca.text);
-      });
-
-      await t.step("link B (same booking) and link C (other booking) still work", async () => {
-        for (const name of ["B", "C"] as const) {
-          const l = links[name];
-          const r = await guestCall({ action: "view", token: l.token });
+      await t.step(
+        "link A: view refused as revoked, no booking shown",
+        async () => {
+          const r = await guestCall({ action: "view", token: links.A.token });
           assertEquals(r.status, 200, r.text);
           const body = JSON.parse(r.text);
-          assertEquals(body.ok, true, `link ${name} stopped working: ${r.text}`);
-          assertEquals(body.reservation?.id, l.reservation.id, `link ${name} showed the wrong booking`);
-        }
-      });
+          assertEquals(body.ok, false, r.text);
+          assertEquals(body.code, "revoked", r.text);
+          assert(
+            !("reservation" in body),
+            `revoked link leaked booking data: ${r.text}`,
+          );
+        },
+      );
+
+      await t.step(
+        "link A: changing the date and cancelling are refused",
+        async () => {
+          const date = new Date(Date.now() + 30 * 86_400_000)
+            .toISOString()
+            .slice(0, 10);
+          const re = await guestCall({
+            action: "reschedule",
+            token: links.A.token,
+            requested_date: date,
+          });
+          assertEquals(re.status, 403, re.text);
+          const ca = await guestCall({
+            action: "cancel",
+            token: links.A.token,
+            language: "en",
+          });
+          assertEquals(ca.status, 403, ca.text);
+        },
+      );
+
+      await t.step(
+        "link B (same booking) and link C (other booking) still work",
+        async () => {
+          for (const name of ["B", "C"] as const) {
+            const l = links[name];
+            const r = await guestCall({ action: "view", token: l.token });
+            assertEquals(r.status, 200, r.text);
+            const body = JSON.parse(r.text);
+            assertEquals(
+              body.ok,
+              true,
+              `link ${name} stopped working: ${r.text}`,
+            );
+            assertEquals(
+              body.reservation?.id,
+              l.reservation.id,
+              `link ${name} showed the wrong booking`,
+            );
+          }
+        },
+      );
 
       await t.step("only link A is turned off in the database", async () => {
         const { data } = await staff
           .from("booking_tokens")
           .select("token, is_revoked")
-          .in("token", Object.values(links).map((l) => l.token));
-        const byToken = new Map((data ?? []).map((d) => [d.token, d.is_revoked]));
+          .in(
+            "token",
+            Object.values(links).map((l) => l.token),
+          );
+        const byToken = new Map(
+          (data ?? []).map((d) => [d.token, d.is_revoked]),
+        );
         assertEquals(byToken.get(links.A.token), true);
         assertEquals(byToken.get(links.B.token), false);
         assertEquals(byToken.get(links.C.token), false);
@@ -187,30 +234,53 @@ Deno.test({
           .select("id")
           .eq("reservation_id", one.id)
           .gte("created_at", new Date(Date.now() - 5 * 60_000).toISOString());
-        assertEquals(pending ?? [], [], "a change request was saved through a revoked link");
+        assertEquals(
+          pending ?? [],
+          [],
+          "a change request was saved through a revoked link",
+        );
       });
 
-      await t.step("the audit trail records who turned off link A", async () => {
-        const { data, error } = await staff
-          .from("booking_token_revocation_audit")
-          .select("booking_token_id, action, actor_user_id, actor_kind")
-          .in("booking_token_id", stored.map((s) => s.id));
-        // A throwaway backend built only from supabase/migrations may not
-        // have the audit table; everywhere else it must be there.
-        if (error?.code === "PGRST205" && Deno.env.get("GUEST_PORTAL_TEST_BACKEND") === "local") {
-          console.warn("audit table missing on the local backend; audit step skipped");
-          return;
-        }
-        assert(!error, `could not read the audit trail: ${error?.message}`);
-        assertEquals(data, [
-          { booking_token_id: idA, action: "revoked", actor_user_id: userData.user.id, actor_kind: "staff" },
-        ]);
-      });
+      await t.step(
+        "the audit trail records who turned off link A",
+        async () => {
+          const { data, error } = await staff
+            .from("booking_token_revocation_audit")
+            .select("booking_token_id, action, actor_user_id, actor_kind")
+            .in(
+              "booking_token_id",
+              stored.map((s) => s.id),
+            );
+          // A throwaway backend built only from supabase/migrations may not
+          // have the audit table; everywhere else it must be there.
+          if (
+            error?.code === "PGRST205" &&
+            Deno.env.get("GUEST_PORTAL_TEST_BACKEND") === "local"
+          ) {
+            console.warn(
+              "audit table missing on the local backend; audit step skipped",
+            );
+            return;
+          }
+          assert(!error, `could not read the audit trail: ${error?.message}`);
+          assertEquals(data, [
+            {
+              booking_token_id: idA,
+              action: "revoked",
+              actor_user_id: userData.user.id,
+              actor_kind: "staff",
+            },
+          ]);
+        },
+      );
     } finally {
       await staff
         .from("booking_tokens")
         .delete()
-        .in("token", Object.values(links).map((l) => l.token));
+        .in(
+          "token",
+          Object.values(links).map((l) => l.token),
+        );
     }
   },
 });
