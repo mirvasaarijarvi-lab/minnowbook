@@ -296,9 +296,9 @@ export const posts: Record<string, BlogPostData> = {
       "blog.post6C5",
       "blog.post6C6",
     ],
-    seoTitle: "Best Restaurant Reservation Apps 2026: Free vs Paid",
+    seoTitle: "Best Reservation App for Restaurants 2026: Cost and Setup",
     seoDescription:
-      "Compare the best restaurant reservation apps in 2026. Free online booking systems, marketplaces and dedicated software for restaurants, cafés and venues.",
+      "Looking for the best reservation app for your restaurant? Compare monthly cost, commission fees and setup time of free apps, marketplaces and booking software.",
     relatedSlugs: [
       "comparison-resy-tock-mimmobook",
       "branded-booking-pages-matter",
