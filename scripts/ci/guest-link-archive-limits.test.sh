@@ -130,9 +130,9 @@ dmg "tar.gz with corrupted data"   upload.tar.gz  "$WORK/good.tar.gz" "$FLIP"
 dmg "truncated gzip"               upload.log.gz  "$WORK/good.log.gz" "$TRUNC"
 dmg "gzip with corrupted data"     upload.log.gz  "$WORK/good.log.gz" "$FLIP"
 dmg "gzip with a bad checksum"     upload.log.gz  "$WORK/good.log.gz" 'import os; b=bytearray(open(os.environ["SRC"],"rb").read()); b[-8]^=0xFF; open(os.environ["DST"],"wb").write(b)'
-dmg "zip with a bad file checksum" upload.zip     "$WORK/good.zip"    'import os,zipfile,io
-z=zipfile.ZipFile(os.environ["SRC"]); b=bytearray(open(os.environ["SRC"],"rb").read())
-i=z.infolist()[0]; b[i.header_offset+14]^=0xFF; open(os.environ["DST"],"wb").write(b)'
+dmg "zip with a bad file checksum" upload.zip     "$WORK/good.zip"    'import os,zipfile,struct
+b=bytearray(open(os.environ["SRC"],"rb").read()); c=b.rfind(b"PK\x05\x06")
+cd=struct.unpack("<I",b[c+16:c+20])[0]; b[cd+16]^=0xFF; open(os.environ["DST"],"wb").write(b)'
 dmg "random bytes named .zip"      upload.zip     /dev/null           'import os; open(os.environ["DST"],"wb").write(os.urandom(5000))'
 dmg "empty file named .tar.gz"     upload.tar.gz  /dev/null           'import os; open(os.environ["DST"],"wb").write(b"")'
 dmg "zip header only"              upload.zip     /dev/null           'import os; open(os.environ["DST"],"wb").write(b"PK\x03\x04"+os.urandom(40))'
