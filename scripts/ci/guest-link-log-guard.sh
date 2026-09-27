@@ -255,6 +255,10 @@ case "$cmd" in
         ratio) reason="$file unpacks to over $thr times its size (possible zip bomb)" ;;
         seconds) reason="took longer than $thr seconds" ;;
         damaged) reason="$file is damaged and cannot be fully scanned" ;;
+        encrypted) reason="$file is password-protected and cannot be scanned" ;;
+        link) reason="$file is a link, which is never followed or unpacked" ;;
+        special) reason="$file is not a regular file (device, pipe or socket)" ;;
+        unsafe_path) reason="$file points outside the scan folder" ;;
         *) code=unknown; reason="$file could not be scanned" ;;
       esac
       detail=$(printf '%s' "$detail" | LC_ALL=C tr -cd '[:alnum:]_' | cut -c1-40)
@@ -265,7 +269,7 @@ case "$cmd" in
     }
     unpack() { # $1 = archive, $2 = dest; exit 0 ok, 3 limit hit or damaged (code, observed, threshold, member, detail separated by \x1f on stdout)
       python3 - "$1" "$2" <<'PY' 2>/dev/null
-import gzip, os, sys, tarfile, zipfile
+import gzip, os, stat, sys, tarfile, zipfile
 src, dest = sys.argv[1], sys.argv[2]
 MAX_FILE = int(os.environ["MAX_FILE_BYTES"]); MAX_TOTAL = int(os.environ["MAX_TOTAL_BYTES"])
 MAX_RATIO = int(os.environ["MAX_RATIO"]); MAX_FILES = int(os.environ["MAX_FILES"])
@@ -278,15 +282,28 @@ class Limit(Exception):
         self.row = (code, str(observed), str(threshold), member)
 def save():
     with open(budget_path, "w") as b: b.write(str(total))
+ROOT = os.path.realpath(dest if os.path.isdir(dest) else (os.makedirs(dest, exist_ok=True) or dest))
+def inside(p):
+    return p == ROOT or p.startswith(ROOT + os.sep)
 def safe(name):
-    root = os.path.abspath(dest)
-    p = os.path.abspath(os.path.join(root, name))
-    return p if p.startswith(root + os.sep) else None
+    # Absolute names, drive letters, ".." hops and NUL bytes are refused
+    # (fail closed) instead of being silently skipped.
+    if not name or "\x00" in name or name.startswith(("/", "\\")) or (len(name) > 1 and name[1] == ":"):
+        raise Limit("unsafe_path", "-", "-", name)
+    p = os.path.abspath(os.path.join(ROOT, name))
+    if not inside(p) or ".." in name.replace("\\", "/").split("/"):
+        raise Limit("unsafe_path", "-", "-", name)
+    return p
 def copy(i, p, name):
     global total, written
     os.makedirs(os.path.dirname(p), exist_ok=True)
+    # Re-check after creating folders: the real parent must still be inside
+    # the scan folder, and the file is opened without following links.
+    if not inside(os.path.realpath(os.path.dirname(p))):
+        raise Limit("unsafe_path", "-", "-", name)
     size = 0
-    with open(p, "wb") as o:
+    fd = os.open(p, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, "wb") as o:
         while True:
             chunk = i.read(1 << 16)
             if not chunk: break
@@ -307,8 +324,15 @@ try:
             infos = z.infolist()
             if len(infos) > MAX_FILES: raise Limit("archive_files", len(infos), MAX_FILES, "")
             for m in infos:
+                mode = m.external_attr >> 16
+                if m.flag_bits & 0x1:
+                    raise Limit("encrypted", "-", "-", m.filename)
+                if stat.S_ISLNK(mode):
+                    raise Limit("link", "-", "-", m.filename)
+                if mode and not (stat.S_ISREG(mode) or stat.S_ISDIR(mode)):
+                    raise Limit("special", "-", "-", m.filename)
                 p = safe(m.filename)
-                if p and not m.is_dir():
+                if not m.is_dir():
                     member()
                     if m.file_size > MAX_FILE: raise Limit("file_bytes", m.file_size, MAX_FILE, m.filename)
                     with z.open(m) as i: copy(i, p, m.filename)
@@ -318,8 +342,12 @@ try:
     elif tarfile.is_tarfile(src):
         with tarfile.open(src) as t:
             for m in t:  # streaming: never loads the whole member list
+                if m.issym() or m.islnk():
+                    raise Limit("link", "-", "-", m.name)
+                if not (m.isfile() or m.isdir()):
+                    raise Limit("special", "-", "-", m.name)
                 p = safe(m.name)
-                if p and m.isfile():
+                if m.isfile():
                     member()
                     if m.size > MAX_FILE: raise Limit("file_bytes", m.size, MAX_FILE, m.name)
                     with t.extractfile(m) as i: copy(i, p, m.name)
@@ -345,6 +373,15 @@ PY
     }
     walk() { # $1 = path, $2 = label prefix, $3 = depth
       local path="$1" label="$2" depth="$3" f rel rc msg code obs thr mem det size
+      # Links and special files in the folder itself are never followed and
+      # would otherwise be skipped unscanned: fail closed.
+      local odd
+      odd=$(find "$path" -mindepth 0 \( -type l -o \( ! -type f ! -type d \) \) -print -quit 2>/dev/null)
+      if [ -n "$odd" ]; then
+        rel="${odd#"$path"}"; rel="$label${rel#/}"; [ "$odd" = "$path" ] && rel="$label$(basename "$odd")"
+        if [ -L "$odd" ]; then limit link - - "$rel" "$depth"; else limit special - - "$rel" "$depth"; fi
+        return
+      fi
       while IFS= read -r -d '' f; do
         [ "$stop" = 1 ] && return
         rel="${f#"$path"}"
