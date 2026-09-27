@@ -287,11 +287,21 @@ try:
                     member()
                     if m.size > MAX_FILE: raise Limit(f"a file inside {os.path.basename(src)} is larger than {MAX_FILE} bytes")
                     with t.extractfile(m) as i: copy(i, p, m.name)
+        if src.endswith((".tar.gz", ".tgz")):
+            # tarfile stops at the end-of-archive marker and never reads the
+            # gzip checksum, so corrupted data could pass unnoticed: read the
+            # whole stream once to force the checksum and length checks.
+            with gzip.open(src) as g:
+                while g.read(1 << 16): pass
     else:
-        sys.exit(1)
+        # The name says archive but neither zip nor tar can read it (for
+        # example a zip cut short before its index): treat as damaged.
+        raise ValueError("unreadable archive")
 except Limit as e:
     save(); print(e); sys.exit(3)
-except (zipfile.BadZipFile, tarfile.TarError, OSError, EOFError, gzip.BadGzipFile) as e:
+except Exception:
+    # Any read error (bad checksum, cut-off data, unsupported compression,
+    # zlib errors) means the archive cannot be fully scanned: fail closed.
     save(); print(f"{os.path.basename(src)} is damaged and cannot be fully scanned"); sys.exit(3)
 save()
 PY
@@ -318,6 +328,8 @@ PY
             rc=0
             msg=$(unpack "$f" "$d") || rc=$?
             if [ "$rc" = 3 ]; then limit "$msg"; rm -rf "$d"; return; fi
+            # Any other failure (crash, killed for memory) is never a pass.
+            if [ "$rc" != 0 ]; then limit "${rel#/} is damaged and cannot be fully scanned"; rm -rf "$d"; return; fi
             if [ "$rc" = 0 ]; then
               if [ "$depth" -ge "$MAX_DEPTH" ]; then
                 limit "${rel#/} is nested more than $MAX_DEPTH archive levels deep"; rm -rf "$d"; return

@@ -106,6 +106,56 @@ expect_stop "oversized plain file" "larger than 1000000 bytes" "$WORK/huge" ARTI
 gzip -c "$WORK/f1.log" | head -c 1000 > "$WORK/broken2.log.gz"; mkdir -p "$WORK/broken2"; mv "$WORK/broken2.log.gz" "$WORK/broken2/"
 expect_stop "truncated gzip fails closed" "damaged" "$WORK/broken2"
 
+# Corrupted and truncated archives: every one must FAIL with "damaged", even
+# when the readable part looks clean, and never print contents.
+CL="$WORK/clean-src"; mkdir -p "$CL"; for i in $(seq 1 40); do head -c 4000 /dev/urandom | base64 > "$CL/f$i.log"; done
+(cd "$CL" && python3 -c "
+import zipfile,glob
+with zipfile.ZipFile('../good.zip','w',zipfile.ZIP_DEFLATED) as z:
+  [z.write(f) for f in sorted(glob.glob('*.log'))]" && tar -cf ../good.tar *.log && tar -czf ../good.tar.gz *.log && cat *.log | gzip -c > ../good.log.gz)
+dmg() { # $1 = label, $2 = file name inside the artifact, then python to build it from $SRC into $DST
+  local d="$WORK/dmg-$RANDOM$RANDOM"; mkdir -p "$d"
+  SRC="$3" DST="$d/$2" python3 -c "$4"
+  expect_stop "$1" "damaged" "$d"
+}
+TRUNC='import os; b=open(os.environ["SRC"],"rb").read(); open(os.environ["DST"],"wb").write(b[:len(b)//2])'
+FLIP='import os; b=bytearray(open(os.environ["SRC"],"rb").read()); n=len(b)//2
+for i in range(n, n+64): b[i]^=0xFF
+open(os.environ["DST"],"wb").write(b)'
+dmg "truncated zip"                upload.zip     "$WORK/good.zip"    "$TRUNC"
+dmg "zip with corrupted data"      upload.zip     "$WORK/good.zip"    "$FLIP"
+dmg "truncated tar"                upload.tar     "$WORK/good.tar"    "$TRUNC"
+dmg "truncated tar.gz"             upload.tar.gz  "$WORK/good.tar.gz" "$TRUNC"
+dmg "tar.gz with corrupted data"   upload.tar.gz  "$WORK/good.tar.gz" "$FLIP"
+dmg "truncated gzip"               upload.log.gz  "$WORK/good.log.gz" "$TRUNC"
+dmg "gzip with corrupted data"     upload.log.gz  "$WORK/good.log.gz" "$FLIP"
+dmg "gzip with a bad checksum"     upload.log.gz  "$WORK/good.log.gz" 'import os; b=bytearray(open(os.environ["SRC"],"rb").read()); b[-8]^=0xFF; open(os.environ["DST"],"wb").write(b)'
+dmg "zip with a bad file checksum" upload.zip     "$WORK/good.zip"    'import os,zipfile,struct
+b=bytearray(open(os.environ["SRC"],"rb").read()); c=b.rfind(b"PK\x05\x06")
+cd=struct.unpack("<I",b[c+16:c+20])[0]; b[cd+16]^=0xFF; open(os.environ["DST"],"wb").write(b)'
+dmg "random bytes named .zip"      upload.zip     /dev/null           'import os; open(os.environ["DST"],"wb").write(os.urandom(5000))'
+dmg "empty file named .tar.gz"     upload.tar.gz  /dev/null           'import os; open(os.environ["DST"],"wb").write(b"")'
+dmg "zip header only"              upload.zip     /dev/null           'import os; open(os.environ["DST"],"wb").write(b"PK\x03\x04"+os.urandom(40))'
+# Damaged archive nested inside a valid one.
+d="$WORK/dmg-nested"; mkdir -p "$d"
+SRC="$WORK/good.zip" python3 -c 'import os,zipfile; b=open(os.environ["SRC"],"rb").read()
+with zipfile.ZipFile("'"$d"'/outer.zip","w") as z: z.writestr("inner/cut.zip", b[:len(b)//2])'
+expect_stop "damaged zip inside a valid zip" "damaged" "$d"
+# A secret in the readable part of a truncated archive is still reported.
+d="$WORK/dmg-leak"; mkdir -p "$d"
+python3 -c 'import zipfile,io,sys
+buf=io.BytesIO()
+with zipfile.ZipFile(buf,"w") as z:
+  z.writestr("a.log","SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.abcdefghijklmnopqrstu\n")
+  z.writestr("b.log","x"*20000)
+b=buf.getvalue(); open(sys.argv[1],"wb").write(b[:len(b)-200])' "$d/cut.zip"
+ARGS=("$d"); run "$WORK/out.txt" && { bad "truncated zip with a secret passed"; } || {
+  grep -q "damaged" "$WORK/out.txt" && ! grep -q "abcdefghijklmnop" "$WORK/out.txt" \
+    && pass "truncated zip with a secret fails without printing it" || { bad "truncated zip with a secret"; cat "$WORK/out.txt"; }; }
+# The same clean archives, undamaged, pass.
+d="$WORK/good-all"; mkdir -p "$d"; cp "$WORK"/good.zip "$WORK"/good.tar "$WORK"/good.tar.gz "$WORK"/good.log.gz "$d"/
+expect_ok "undamaged copies of the same archives pass" "$d"
+
 # Time limit.
 mkdir -p "$WORK/slow"; for i in 1 2 3; do echo x > "$WORK/slow/$i.log"; done
 expect_stop "time limit" "longer than" "$WORK/slow" ARTIFACT_MAX_SECONDS=-1
