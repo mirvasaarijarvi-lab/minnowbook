@@ -176,7 +176,7 @@ PY
           *.zip | *.tar | *.tar.gz | *.tgz | *.gz)
             if [ "$depth" -lt 3 ]; then
               local d="$tmp/u$n"
-              if unpack "$f" "$d"; then walk "$d" "${rel#/}!/" $((depth + 1)); fi
+              if unpack "$f" "$d"; then walk "$d" "${rel#/}!" $((depth + 1)); fi
             fi
             ;;
         esac
