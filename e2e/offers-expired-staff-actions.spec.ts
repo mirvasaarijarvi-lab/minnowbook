@@ -1,3 +1,4 @@
+import { assertNoTwoStepRequired } from "./fixtures/two-step-guard";
 import {
   test,
   expect,
@@ -57,6 +58,7 @@ test.describe("Offers page: expired draft/sent offers keep staff actions", () =>
           password: STAFF_PASSWORD!,
         });
     expect(signInErr, signInErr?.message).toBeNull();
+    await assertNoTwoStepRequired(sb);
 
     const stamp = Date.now();
     const base = {
