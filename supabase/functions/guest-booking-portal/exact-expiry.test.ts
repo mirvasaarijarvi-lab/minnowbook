@@ -25,6 +25,9 @@ type Seen = { method: string; table: string };
 function install() {
   const seen: Seen[] = [];
   const realFetch = globalThis.fetch;
+  // Save the real values so later test files in the same run (live tests
+  // that read SUPABASE_URL when they load) never see the fake address.
+  const prevEnv = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"].map((k) => [k, Deno.env.get(k)] as const);
   Deno.env.set("SUPABASE_URL", "https://stub.supabase.test");
   Deno.env.set("SUPABASE_SERVICE_ROLE_KEY", "stub-service-role-key");
   globalThis.fetch = ((input: Request | URL | string, init?: RequestInit) => {
@@ -46,7 +49,13 @@ function install() {
     if (req.method === "GET") return reply(null);
     return reply({});
   }) as typeof fetch;
-  return { seen, restore: () => { globalThis.fetch = realFetch; } };
+  return {
+    seen,
+    restore: () => {
+      globalThis.fetch = realFetch;
+      for (const [k, v] of prevEnv) v === undefined ? Deno.env.delete(k) : Deno.env.set(k, v);
+    },
+  };
 }
 
 let ip = 0;
