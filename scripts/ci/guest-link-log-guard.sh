@@ -11,6 +11,11 @@
 #   guest-link-log-guard.sh scan <file>...
 #       Exit 1 if any file contains a known secret value or a JWT.
 #
+# Both commands also look through URL encoding (including double and
+# every-byte encoding) and escaping (JSON \/ \" \uXXXX, \xHH, backslash
+# escapes): each line is decoded first, and a line whose decoded form holds
+# a secret is dropped (filter) or reported (scan).
+#
 # Known secret values are read from the environment: SERVICE_ROLE_KEY,
 # JWT_SECRET, ANON_KEY, DB_URL, GUEST_LINK_TOKEN, plus the fixed test
 # password. Values are never printed.
@@ -45,6 +50,38 @@ redact_known() {
   done
 }
 
+# Print each input line decoded, one output line per input line.
+decode_lines() {
+  python3 -c '
+import re, sys
+from urllib.parse import unquote
+def dec(s):
+    for _ in range(3):
+        prev = s
+        s = unquote(s)
+        s = re.sub(r"\\u([0-9a-fA-F]{4})", lambda m: chr(int(m.group(1), 16)), s)
+        s = re.sub(r"\\x([0-9a-fA-F]{2})", lambda m: chr(int(m.group(1), 16)), s)
+        s = re.sub(r"\\(.)", r"\1", s)
+        s = s.replace("&quot;", "\"").replace("&amp;", "&").replace("&#x2F;", "/").replace("&#47;", "/")
+        if s == prev:
+            break
+    return s.replace("\n", " ").replace("\r", " ")
+for line in sys.stdin.buffer.read().decode("utf-8", "replace").split("\n"):
+    print(dec(line))
+'
+}
+
+# True if the text on stdin holds a known value or a JWT.
+holds_secret() {
+  local text
+  text=$(cat)
+  printf '%s' "$text" | grep -qE "$JWT_RE" && return 0
+  while IFS= read -r v; do
+    [ -n "$v" ] && [[ "$text" == *"$v"* ]] && return 0
+  done < <(known_values)
+  return 1
+}
+
 cmd="${1:-}"
 shift || true
 
@@ -53,10 +90,14 @@ case "$cmd" in
     file="${1:-}"
     lines="${2:-40}"
     [ -f "$file" ] || exit 0
-    tail -n "$lines" "$file" \
-      | grep -viE "$DROP_RE" \
-      | sed -E "s/${JWT_RE}/***/g" \
-      | redact_known
+    mapfile -t orig < <(tail -n "$lines" "$file")
+    mapfile -t decoded < <(printf '%s\n' "${orig[@]}" | decode_lines)
+    for i in "${!orig[@]}"; do
+      d="${decoded[$i]:-}"
+      printf '%s' "$d" | grep -qiE "$DROP_RE" && continue
+      printf '%s' "$d" | holds_secret && continue
+      printf '%s\n' "${orig[$i]}"
+    done | sed -E "s/${JWT_RE}/***/g" | redact_known
     exit 0
     ;;
   scan)
@@ -70,6 +111,11 @@ case "$cmd" in
           break
         fi
       done < <(known_values)
+      # Encoded or escaped copies: only checked on the decoded text.
+      if decode_lines < "$f" | holds_secret && ! holds_secret < "$f"; then
+        echo "::error::$(basename "$f") contains an encoded or escaped backend credential"
+        leaked=1
+      fi
       if grep -qE "$JWT_RE" "$f"; then
         echo "::error::$(basename "$f") contains a sign-in token"
         leaked=1
