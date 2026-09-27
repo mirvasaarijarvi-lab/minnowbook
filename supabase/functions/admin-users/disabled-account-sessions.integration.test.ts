@@ -9,6 +9,7 @@
 //   3. Business bookings read straight from the database (row security)
 //   4. Staff list read straight from the database (row security)
 //   5. Manager permission check in the database (is_tenant_manager)
+//   6. Own records opened by matching the person's own ID (login history)
 // Then the account is turned back on and access returns, proving the block
 // comes from the account status and not a broken sign-in.
 //
@@ -78,6 +79,13 @@ async function probeAreas(token: string): Promise<AreaResult[]> {
     detail: mgr.error ? mgr.error.message : String(mgr.data),
   });
 
+  const own = await db.from("login_history").select("id").eq("user_id", claims.sub);
+  out.push({
+    area: "own records in the database",
+    allowed: !own.error && (own.data?.length ?? 0) > 0,
+    detail: own.error ? own.error.message : `${own.data?.length ?? 0} rows`,
+  });
+
   return out;
 }
 
@@ -103,6 +111,10 @@ Deno.test({
         .from("tenant_users")
         .insert({ user_id: userId, tenant_id: TENANT, role: "admin", is_approved: true });
       if (tuErr) throw tuErr;
+      const { error: lhErr } = await admin
+        .from("login_history")
+        .insert({ user_id: userId, tenant_id: TENANT, user_agent: "ci-disabled-account-test" });
+      if (lhErr) throw lhErr;
 
       const anon = createClient(URL_BASE!, KEY!, { auth: { persistSession: false } });
       const { data: signIn, error: signErr } = await anon.auth.signInWithPassword({ email, password });
@@ -136,6 +148,7 @@ Deno.test({
       }
     } finally {
       await admin.from("site_users").delete().eq("user_id", userId);
+      await admin.from("login_history").delete().eq("user_id", userId);
       await admin.from("tenant_users").delete().eq("user_id", userId);
       const { error } = await admin.auth.admin.deleteUser(userId);
       if (error) console.error("cleanup: could not delete temporary user", userId, error.message);
