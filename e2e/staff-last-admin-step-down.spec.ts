@@ -81,6 +81,32 @@ test.describe("Staff management: the last administrator cannot step down", () =>
       });
       await markWelcomeTourSeen(context);
       const page = await context.newPage();
+      // Staff management only answers pages on mimmobook.com addresses, and
+      // the test app runs on a local address. Forward its calls with the
+      // mimmobook.com address; the sign-in and request are unchanged.
+      await page.route("**/functions/v1/admin-users", async (route) => {
+        const req = route.request();
+        const cors = {
+          "access-control-allow-origin": "*",
+          "access-control-allow-headers": "*",
+          "access-control-allow-methods": "POST, OPTIONS",
+        };
+        if (req.method() === "OPTIONS") {
+          await route.fulfill({ status: 204, headers: cors });
+          return;
+        }
+        const headers = { ...req.headers(), origin: "https://mimmobook.com" };
+        delete headers["referer"];
+        const resp = await route.fetch({ headers });
+        await route.fulfill({
+          status: resp.status(),
+          body: await resp.body(),
+          headers: {
+            ...cors,
+            "content-type": resp.headers()["content-type"] ?? "application/json",
+          },
+        });
+      });
       const ref = new URL(SUPABASE_URL).hostname.split(".")[0];
       await page.goto("/");
       await page.evaluate(
