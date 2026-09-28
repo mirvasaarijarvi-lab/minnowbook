@@ -1,0 +1,75 @@
+name: Lockfile three-way sync
+
+# Fails when package.json, bun.lock and package-lock.json disagree.
+# 1. Pure-Node manifest comparison of all three files.
+# 2. Bun must not want to rewrite bun.lock.
+# 3. npm must not want to rewrite package-lock.json.
+# Nothing is committed; the job only reads and compares.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: lockfile-three-way-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  three-way-sync:
+    name: package.json, bun.lock and package-lock.json agree
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/stale-commit-check
+
+      - name: All three files are present
+        run: |
+          set -euo pipefail
+          missing=0
+          for f in package.json bun.lock package-lock.json; do
+            if [ ! -f "$f" ]; then echo "::error file=$f::$f is missing."; missing=1; fi
+          done
+          exit "$missing"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Setup pinned Bun
+        uses: ./.github/actions/setup-bun-with-diagnostics
+
+      - name: Compare declared versions across all three files
+        run: node scripts/ci/preflight-manifest-drift.mjs
+
+      - name: bun.lock would not change
+        run: |
+          set -euo pipefail
+          bun install --lockfile-only --ignore-scripts --no-summary
+          if ! git diff --quiet -- bun.lock; then
+            echo "::error file=bun.lock::bun.lock is out of sync with package.json. Run: bun install --save-text-lockfile"
+            git --no-pager diff --stat -- bun.lock
+            exit 1
+          fi
+
+      - name: package-lock.json would not change
+        run: |
+          set -euo pipefail
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          node scripts/ci/check-npm-lockfile-hygiene.mjs --fix-urls
+          if ! git diff --quiet -- package-lock.json; then
+            echo "::error file=package-lock.json::package-lock.json is out of sync with package.json. Run: npm install --package-lock-only --ignore-scripts"
+            git --no-pager diff --stat -- package-lock.json
+            exit 1
+          fi
+          echo "All three files agree."
