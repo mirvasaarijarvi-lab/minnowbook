@@ -33,6 +33,9 @@ const PRICE_TO_TIER: Record<string, string> = {
   "price_1T9LFNAi9C4ePV8hBMDXEnP5": "business",
 };
 
+// Only these roles may change a business's plan.
+const BILLING_ROLES = ["owner", "admin", "superadmin"];
+
 export async function handleCheckSubscriptionRequest(req: Request): Promise<Response> {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
@@ -173,13 +176,16 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
       tier = PRICE_TO_TIER[priceId] || null;
       logStep("Active subscription found", { tier, status: subscriptionStatus, priceId });
 
-      // Sync tier to tenant table
+      // Sync tier to tenant table: only an approved owner/admin may make a
+      // billing decision for the business.
       const { data: tenantUser } = await supabaseClient
         .from("tenant_users")
         .select("tenant_id")
         .eq("user_id", user.id)
+        .eq("is_approved", true)
+        .in("role", BILLING_ROLES)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (tenantUser && tier) {
         await supabaseClient
@@ -204,8 +210,10 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
         .from("tenant_users")
         .select("tenant_id")
         .eq("user_id", user.id)
+        .eq("is_approved", true)
+        .in("role", BILLING_ROLES)
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (tenantUser) {
         const { data: tenantRow } = await supabaseClient
