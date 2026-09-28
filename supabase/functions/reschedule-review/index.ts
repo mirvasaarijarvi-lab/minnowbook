@@ -116,23 +116,25 @@ export async function handleRescheduleReviewRequest(req: Request): Promise<Respo
       .eq("id", requestId)
       .maybeSingle();
 
-    if (!request) return json({ error: "Request not found" }, 404);
-    if (request.status !== "pending") return json({ error: "This request has already been reviewed." }, 409);
-
-    // Authorization: caller must belong to the request's tenant with a
-    // staff-or-above role. Membership is checked against the tenant on the
-    // request row, never a tenant id supplied by the client.
-    const { data: membership } = await adminClient
-      .from("tenant_users")
-      .select("role, is_approved")
-      .eq("user_id", userId)
-      .eq("tenant_id", request.tenant_id)
-      .maybeSingle();
-
+    // Authorization comes before revealing anything about the request: a
+    // missing request and a request in another business get the same
+    // "not found" reply, so request ids and review status can't be probed.
+    // Membership is checked against the tenant on the request row, never a
+    // tenant id supplied by the client.
     const allowedRoles = ["owner", "admin", "superadmin", "staff"];
-    if (!membership || membership.is_approved === false || !allowedRoles.includes(String(membership.role))) {
-      return json({ error: "Insufficient permissions" }, 403);
+    let authorized = false;
+    if (request) {
+      const { data: membership } = await adminClient
+        .from("tenant_users")
+        .select("role, is_approved")
+        .eq("user_id", userId)
+        .eq("tenant_id", request.tenant_id)
+        .maybeSingle();
+      authorized = !!membership && membership.is_approved !== false &&
+        allowedRoles.includes(String(membership.role));
     }
+    if (!request || !authorized) return json({ error: "Request not found" }, 404);
+    if (request.status !== "pending") return json({ error: "This request has already been reviewed." }, 409);
     // The staff note is internal only: it is saved on the request for the
     // team, but never inserted into the guest email, so nobody can send
     // their own free text to a guest in the venue's name.
