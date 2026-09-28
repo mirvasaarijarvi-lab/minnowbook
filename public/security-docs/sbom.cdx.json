@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:5b9a69fa-a16b-5c18-b6f7-8480d30beee7",
+  "serialNumber": "urn:uuid:8b11c390-9ed5-5d33-8894-2d4de3c095b4",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "5e045b3f1032b4570ad4777ff4a081c810a61bcfa2890b6354122a5e78f3146d"
+          "value": "880668aa691671ad8097ee13d4404de15b527bf83c13d84e6edcf12800ba3771"
         }
       ]
     }
@@ -67,11 +67,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.0",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.1",
       "type": "library",
       "name": "@lovable.dev/vite-tanstack-config",
-      "version": "2.25.0",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.0",
+      "version": "2.25.1",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.1",
       "scope": "optional"
     },
     {
@@ -299,11 +299,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.117.1",
+      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.117.2",
       "type": "library",
       "name": "@supabase/supabase-js",
-      "version": "2.117.1",
-      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.117.1",
+      "version": "2.117.2",
+      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.117.2",
       "scope": "required"
     },
     {
@@ -459,11 +459,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/dompurify@3.4.14",
+      "bom-ref": "pkg:npm/dompurify@3.4.16",
       "type": "library",
       "name": "dompurify",
-      "version": "3.4.14",
-      "purl": "pkg:npm/dompurify@3.4.14",
+      "version": "3.4.16",
+      "purl": "pkg:npm/dompurify@3.4.16",
       "scope": "required"
     },
     {
@@ -587,11 +587,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.47.0",
+      "bom-ref": "pkg:npm/lucide-react@1.48.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.47.0",
-      "purl": "pkg:npm/lucide-react@1.47.0",
+      "version": "1.48.0",
+      "purl": "pkg:npm/lucide-react@1.48.0",
       "scope": "required"
     },
     {
@@ -667,11 +667,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-resizable-panels@4.13.2",
+      "bom-ref": "pkg:npm/react-resizable-panels@4.13.3",
       "type": "library",
       "name": "react-resizable-panels",
-      "version": "4.13.2",
-      "purl": "pkg:npm/react-resizable-panels@4.13.2",
+      "version": "4.13.3",
+      "purl": "pkg:npm/react-resizable-panels@4.13.3",
       "scope": "required"
     },
     {
@@ -739,11 +739,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/vite@8.3.0",
+      "bom-ref": "pkg:npm/vite@8.3.1",
       "type": "library",
       "name": "vite",
-      "version": "8.3.0",
-      "purl": "pkg:npm/vite@8.3.0",
+      "version": "8.3.1",
+      "purl": "pkg:npm/vite@8.3.1",
       "scope": "optional"
     },
     {
