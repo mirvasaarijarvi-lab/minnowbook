@@ -59,11 +59,20 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup pinned Bun
+        uses: ./.github/actions/setup-bun-with-diagnostics
+
+      - name: Regenerate bun.lock
+        run: bun install --lockfile-only --ignore-scripts --no-summary
+
       - name: Regenerate package-lock.json
         run: |
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
           node scripts/ci/check-npm-lockfile-hygiene.mjs --fix-urls
           node scripts/ci/check-npm-lockfile-hygiene.mjs
+
+      - name: Confirm all three files agree
+        run: node scripts/ci/preflight-manifest-drift.mjs
 
       - name: Regenerate SBOM
         run: node scripts/generate-sbom.mjs
@@ -72,7 +81,7 @@ jobs:
         env:
           BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
-          FILES="package-lock.json docs/sbom.cdx.json docs/sbom.cdx.json.sha256 public/security-docs/sbom.cdx.json public/security-docs/sbom.cdx.json.sha256"
+          FILES="bun.lock package-lock.json docs/sbom.cdx.json docs/sbom.cdx.json.sha256 public/security-docs/sbom.cdx.json public/security-docs/sbom.cdx.json.sha256"
           # shellcheck disable=SC2086
           if git diff --quiet -- $FILES; then
             echo "package-lock.json and SBOM already in sync; nothing to push."

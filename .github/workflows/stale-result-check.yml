@@ -12,6 +12,7 @@ on:
       - CI Build Check
       - Lint
       - Lockfile sync (npm)
+      - Lockfile three-way sync
       - Package registry and audit gate
       - Dependency audit
       - E2E Tests
