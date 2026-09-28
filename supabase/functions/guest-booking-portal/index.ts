@@ -16,7 +16,22 @@ function escapeHtml(str: unknown): string {
 
 // --- Rate limiting: 5 requests per IP per minute ---
 const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 5;
+// The throwaway CI backend sends every test request from one address, so it
+// may raise the limit via GUEST_PORTAL_TEST_RATE_LIMIT_MAX. That override is
+// honoured ONLY when the function talks to a local backend; the live project
+// always keeps 5.
+function resolveRateLimitMax(): number {
+  const override = Number(Deno.env.get("GUEST_PORTAL_TEST_RATE_LIMIT_MAX") ?? "");
+  if (!Number.isInteger(override) || override <= 5) return 5;
+  try {
+    const host = new URL(Deno.env.get("SUPABASE_URL") ?? "").hostname;
+    const local = ["kong", "localhost", "127.0.0.1", "host.docker.internal"];
+    return local.includes(host) ? Math.min(override, 1000) : 5;
+  } catch {
+    return 5;
+  }
+}
+const RATE_LIMIT_MAX = resolveRateLimitMax();
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
 function checkRateLimit(ip: string): boolean {
