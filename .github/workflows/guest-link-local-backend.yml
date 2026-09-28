@@ -103,7 +103,10 @@ jobs:
 
       - name: Serve guest-booking-portal
         run: |
-          nohup supabase functions serve guest-booking-portal --no-verify-jwt > /tmp/functions-serve.log 2>&1 &
+          # All test requests come from one address here, so raise the
+          # per-address limit. The function only honours this on a local backend.
+          printf 'GUEST_PORTAL_TEST_RATE_LIMIT_MAX=500\n' > /tmp/portal-test.env
+          nohup supabase functions serve guest-booking-portal --no-verify-jwt --env-file /tmp/portal-test.env > /tmp/functions-serve.log 2>&1 &
           for i in $(seq 1 120); do
             code=$(curl -s -o /dev/null -w '%{http_code}' -X OPTIONS http://127.0.0.1:54321/functions/v1/guest-booking-portal || true)
             [ "$code" != "000" ] && [ "$code" != "502" ] && [ "$code" != "503" ] && { echo "function up (${code})"; exit 0; }
