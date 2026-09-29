@@ -332,7 +332,11 @@ export async function handleReportStorageRejectionRequest(req: Request): Promise
       threshold: TENANT_THRESHOLD,
     });
   }
-  if (ev.callsite) {
+  // SECURITY: shared (cross-business) callsite alerts are only evaluated
+  // for reports whose business attribution was verified above. Reports
+  // without a proven business are still stored for review, but can never
+  // trip a shared alert, so any signed-in user cannot fabricate spikes.
+  if (ev.callsite && ev.tenant_id) {
     checks.push({
       scope: "callsite",
       tenantId: null,
