@@ -555,14 +555,16 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       .maybeSingle();
     if (tenantErr) {
       // Database hiccup, not a bad link: tell the guest to retry.
-      console.error("[public-booking] tenant lookup failed", { tenant_id, code: tenantErr.code });
+      console.error("[public-booking] business lookup failed", { code: tenantErr.code });
       const e: any = new Error("Booking is temporarily unavailable. Please try again in a moment.");
       e.http_status = 503;
       e.error_code = "TENANT_LOOKUP_FAILED";
       throw e;
     }
     if (!tenant) {
-      console.warn("[public-booking] unknown tenant in booking link", { tenant_id });
+      // Never log the ID itself; only whether it is one of the all-zero test IDs.
+      const testProbe = tenant_id.startsWith("00000000-0000-0000-0000-");
+      console.warn("[public-booking] unknown business in booking link", { test_probe: testProbe });
       const e: any = new Error("Tenant not found");
       e.http_status = 404;
       e.error_code = "TENANT_NOT_FOUND";
