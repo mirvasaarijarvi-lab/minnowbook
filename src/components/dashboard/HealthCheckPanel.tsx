@@ -227,7 +227,54 @@ const HealthCheckPanel = () => {
         });
       }
 
-      // 6. Backup reminder (advisory)
+      // 6. Guest link limit: refusals and database errors (platform admins)
+      try {
+        const { data, error } = await supabase.rpc(
+          "get_guest_portal_limit_health",
+        );
+        const row = (Array.isArray(data) ? data[0] : data) as
+          | {
+              refused_1h: number;
+              refused_24h: number;
+              db_errors_1h: number;
+              db_errors_24h: number;
+              last_db_error_at: string | null;
+            }
+          | undefined;
+        if (error || !row) {
+          results.push({
+            name: "Guest Link Limit",
+            status: "warning",
+            message: "Cannot read limit monitoring",
+          });
+        } else if (Number(row.db_errors_1h) > 0) {
+          results.push({
+            name: "Guest Link Limit",
+            status: "error",
+            message: `${row.db_errors_1h} database errors in the last hour, guest links are being refused`,
+          });
+        } else if (Number(row.db_errors_24h) > 0) {
+          results.push({
+            name: "Guest Link Limit",
+            status: "warning",
+            message: `${row.db_errors_24h} database errors in 24h (last ${new Date(row.last_db_error_at ?? "").toLocaleString()}), ${row.refused_24h} refused`,
+          });
+        } else {
+          results.push({
+            name: "Guest Link Limit",
+            status: "ok",
+            message: `Working, ${row.refused_1h} refused in the last hour, ${row.refused_24h} in 24h`,
+          });
+        }
+      } catch {
+        results.push({
+          name: "Guest Link Limit",
+          status: "warning",
+          message: "Unable to check",
+        });
+      }
+
+      // 7. Backup reminder (advisory)
       const daysSinceSetup = Math.floor(
         (Date.now() - new Date("2025-01-01").getTime()) / (1000 * 60 * 60 * 24),
       );
