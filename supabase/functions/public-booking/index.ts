@@ -552,8 +552,22 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       .from("tenants")
       .select("id, name, is_active, allowed_reservation_types")
       .eq("id", tenant_id)
-      .single();
-    if (tenantErr || !tenant) throw new Error("Tenant not found");
+      .maybeSingle();
+    if (tenantErr) {
+      // Database hiccup, not a bad link: tell the guest to retry.
+      console.error("[public-booking] tenant lookup failed", { tenant_id, code: tenantErr.code });
+      const e: any = new Error("Booking is temporarily unavailable. Please try again in a moment.");
+      e.http_status = 503;
+      e.error_code = "TENANT_LOOKUP_FAILED";
+      throw e;
+    }
+    if (!tenant) {
+      console.warn("[public-booking] unknown tenant in booking link", { tenant_id });
+      const e: any = new Error("Tenant not found");
+      e.http_status = 404;
+      e.error_code = "TENANT_NOT_FOUND";
+      throw e;
+    }
     if (!tenant.is_active) throw new Error("Tenant is not active");
     if (
       tenant.allowed_reservation_types.length > 0 &&
@@ -1498,7 +1512,7 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       ...(typeof errorCode === "string" ? { error_code: errorCode } : {}),
       ...(occasionContext ? { occasion: occasionContext } : {}),
     }), {
-      status: 400,
+      status: [404, 503].includes((error as any)?.http_status) ? (error as any).http_status : 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
