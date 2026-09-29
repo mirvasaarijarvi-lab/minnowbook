@@ -37,25 +37,47 @@ export function resolveRateLimitMax(
   }
 }
 const RATE_LIMIT_MAX = resolveRateLimitMax();
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return true;
-  }
-  entry.count++;
-  return entry.count <= RATE_LIMIT_MAX;
+// Caller address: first hop of x-forwarded-for, else cf-connecting-ip.
+export function callerAddress(headers: Headers): string {
+  return (
+    headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headers.get("cf-connecting-ip")?.trim() ||
+    "unknown"
+  );
 }
 
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, val] of rateLimitMap) {
-    if (now > val.resetAt) rateLimitMap.delete(key);
+async function bucketKeyFor(ip: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(`guest-portal:${ip}`),
+  );
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// Shared count in the database so every running copy of this function
+// enforces one limit per person. Fails closed: any error refuses the request.
+export async function checkRateLimit(
+  // deno-lint-ignore no-explicit-any
+  admin: { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: any; error: any }> },
+  ip: string,
+  max: number = RATE_LIMIT_MAX,
+): Promise<boolean> {
+  try {
+    const { data, error } = await admin.rpc("consume_guest_portal_rate_limit", {
+      _bucket_key: await bucketKeyFor(ip),
+      _max: max,
+      _window_seconds: RATE_LIMIT_WINDOW_MS / 1000,
+    });
+    if (error) {
+      console.error("rate limit check failed:", error.code ?? "unknown");
+      return false;
+    }
+    return data === true;
+  } catch {
+    return false;
   }
-}, 300_000);
+}
 
 // --- Validation helpers (pure, exported for unit tests) ---
 export function validateEmail(val: unknown): string {
@@ -232,8 +254,11 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
     return json({ error: "Guest portal is not fully configured. Please contact the venue." }, 400);
   }
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  if (!checkRateLimit(ip)) {
+  const admin = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  if (!(await checkRateLimit(admin, callerAddress(req.headers)))) {
     return json({ error: "Too many requests. Please try again in a minute." }, 429);
   }
 
@@ -243,10 +268,6 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
   } catch {
     return json({ error: "Invalid request body" }, 400);
   }
-
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
 
   const action = typeof body.action === "string" ? body.action : "";
   // Only our own domains may appear in emailed booking links.

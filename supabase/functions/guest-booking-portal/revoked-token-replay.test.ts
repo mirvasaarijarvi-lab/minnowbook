@@ -1,3 +1,4 @@
+import "../_shared/test-rate-limit-stub.ts";
 // Regression tests: once a guest booking link is revoked, replaying it (again
 // and again, across view / reschedule / cancel, in parallel, or with extra
 // fields) must never show, change or cancel the booking. The backend is a

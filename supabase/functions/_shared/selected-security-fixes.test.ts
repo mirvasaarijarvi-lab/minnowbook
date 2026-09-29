@@ -1,3 +1,4 @@
+import "./test-rate-limit-stub.ts";
 // Regression tests for three security fixes:
 //   1. guest-booking-portal "lookup" matches the typed email exactly: LIKE
 //      wildcards (% _ \) are escaped, so one lookup can never reach other

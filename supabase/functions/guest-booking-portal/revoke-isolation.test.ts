@@ -1,3 +1,4 @@
+import "../_shared/test-rate-limit-stub.ts";
 // Regression tests: revoking one guest booking link must leave every other
 // booking's link working. The backend is a small in-memory database behind a
 // stubbed fetch that applies the real eq-filters the portal sends, so a

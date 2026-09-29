@@ -1,3 +1,4 @@
+import "../_shared/test-rate-limit-stub.ts";
 // Regression tests: a guest booking link must stop working once its booking
 // is cancelled or deleted, even while the link itself is still valid.
 // The backend is a stubbed fetch; every request the portal makes is recorded.

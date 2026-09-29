@@ -1,3 +1,4 @@
+import "../_shared/test-rate-limit-stub.ts";
 // Regression tests: an expired guest booking link is refused for every
 // booking state, booking type and action variant, before the booking is
 // looked up, with no booking details in the reply and nothing written.
