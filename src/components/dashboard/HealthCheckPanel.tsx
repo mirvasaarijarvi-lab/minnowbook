@@ -17,6 +17,7 @@ import {
   Clock,
 } from "lucide-react";
 import { useT } from "@/contexts/I18nContext";
+import { useIsSystemAdmin } from "@/hooks/useIsSystemAdmin";
 
 type CheckStatus = "ok" | "warning" | "error" | "checking";
 
@@ -54,6 +55,7 @@ const statusBadge = (status: CheckStatus) => {
 
 const HealthCheckPanel = () => {
   const t = useT();
+  const { isSystemAdmin } = useIsSystemAdmin();
   const [lastRun, setLastRun] = useState<Date | null>(null);
 
   const {
@@ -62,7 +64,7 @@ const HealthCheckPanel = () => {
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: ["health-check"],
+    queryKey: ["health-check", isSystemAdmin],
     queryFn: async (): Promise<HealthCheck[]> => {
       const results: HealthCheck[] = [];
 
@@ -227,8 +229,9 @@ const HealthCheckPanel = () => {
         });
       }
 
-      // 6. Guest link limit: refusals and database errors (platform admins)
-      try {
+      // 6. Guest link limit: refusals and database errors (platform admins only;
+      // the monitoring data is not readable by business owners/admins).
+      if (isSystemAdmin) try {
         const { data, error } = await supabase.rpc(
           "get_guest_portal_limit_health",
         );
