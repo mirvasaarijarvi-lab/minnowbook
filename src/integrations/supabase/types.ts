@@ -937,6 +937,24 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_portal_rate_limits: {
+        Row: {
+          bucket_key: string
+          request_count: number
+          window_start: string
+        }
+        Insert: {
+          bucket_key: string
+          request_count?: number
+          window_start?: string
+        }
+        Update: {
+          bucket_key?: string
+          request_count?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       guest_reviews: {
         Row: {
           comment: string | null
@@ -4167,6 +4185,10 @@ export type Database = {
       cleanup_old_booking_validation_logs: { Args: never; Returns: undefined }
       cleanup_old_redemption_events: { Args: never; Returns: undefined }
       cleanup_storage_rejection_telemetry: { Args: never; Returns: undefined }
+      consume_guest_portal_rate_limit: {
+        Args: { _bucket_key: string; _max: number; _window_seconds: number }
+        Returns: boolean
+      }
       copy_tenant_defaults_to_site: {
         Args: { p_site_id: string; p_tenant_id: string }
         Returns: undefined
