@@ -30,6 +30,7 @@ import {
   existsSync,
 } from "node:fs";
 import { join, relative } from "node:path";
+import { safeResolveWithin } from "./safe-path.mjs";
 
 const REPO_ROOT = process.cwd();
 export const MANIFEST_PATH = ".github/action-versions.json";
@@ -196,7 +197,12 @@ export function applyFixes(content, manifest) {
 }
 
 export function loadManifest(root = REPO_ROOT) {
-  return JSON.parse(readFileSync(join(root, MANIFEST_PATH), "utf8"));
+  return JSON.parse(
+    readFileSync(
+      safeResolveWithin(MANIFEST_PATH, safeResolveWithin(root, REPO_ROOT)),
+      "utf8",
+    ),
+  );
 }
 
 export function listWorkflowFiles(root = REPO_ROOT) {

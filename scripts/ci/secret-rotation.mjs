@@ -20,6 +20,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { safeResolveWithin } from "./safe-path.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const INVENTORY_PATH = join(HERE, "secret-inventory.json");
@@ -28,7 +29,7 @@ export const INVENTORY_PATH = join(HERE, "secret-inventory.json");
 const VALUE_LIKE = /^(sk_|rk_|re_|sb_|eyJ|lovc_|ghp_|github_pat_)/;
 
 export function loadInventory(path = INVENTORY_PATH) {
-  const raw = JSON.parse(readFileSync(path, "utf8"));
+  const raw = JSON.parse(readFileSync(safeResolveWithin(path, HERE), "utf8"));
   if (!Array.isArray(raw.secrets) || raw.secrets.length === 0) {
     throw new Error("secret inventory is empty");
   }
