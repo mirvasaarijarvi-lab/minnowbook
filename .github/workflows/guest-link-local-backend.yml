@@ -100,6 +100,8 @@ jobs:
         run: |
           eval "$(supabase status -o env)"
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f scripts/ci/seed-guest-portal-local.sql
+          # Shared guest-link request count (lives in drizzle/migrations).
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f drizzle/migrations/0048_guest_portal_rate_limits.sql > /dev/null
 
       - name: Serve guest-booking-portal
         run: |
