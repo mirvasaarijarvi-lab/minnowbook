@@ -57,12 +57,34 @@ async function bucketKeyFor(ip: string): Promise<string> {
 
 // Shared count in the database so every running copy of this function
 // enforces one limit per person. Fails closed: any error refuses the request.
+export type LimitEventKind = "refused" | "db_error";
+
+// Monitoring: count refusals and database errors per minute so platform
+// admins can see when live enforcement stops working. Never records the
+// caller's address. A fixed log tag is also written so failures stay
+// visible in logs even when the database itself is unreachable.
+export async function recordLimitEvent(
+  // deno-lint-ignore no-explicit-any
+  admin: { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: any; error: any }> },
+  kind: LimitEventKind,
+): Promise<void> {
+  console.warn(`[GUEST-PORTAL-LIMIT] ${kind}`);
+  try {
+    const { error } = await admin.rpc("record_guest_portal_limit_event", { _kind: kind });
+    if (error) console.error("[GUEST-PORTAL-LIMIT] monitor write failed:", error.code ?? "unknown");
+  } catch {
+    console.error("[GUEST-PORTAL-LIMIT] monitor write failed: exception");
+  }
+}
+
 export async function checkRateLimit(
   // deno-lint-ignore no-explicit-any
   admin: { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: any; error: any }> },
   ip: string,
   max: number = RATE_LIMIT_MAX,
 ): Promise<boolean> {
+  let allowed = false;
+  let dbError = false;
   try {
     const { data, error } = await admin.rpc("consume_guest_portal_rate_limit", {
       _bucket_key: await bucketKeyFor(ip),
@@ -71,12 +93,15 @@ export async function checkRateLimit(
     });
     if (error) {
       console.error("rate limit check failed:", error.code ?? "unknown");
-      return false;
+      dbError = true;
+    } else {
+      allowed = data === true;
     }
-    return data === true;
   } catch {
-    return false;
+    dbError = true;
   }
+  if (!allowed) await recordLimitEvent(admin, dbError ? "db_error" : "refused");
+  return allowed;
 }
 
 // --- Validation helpers (pure, exported for unit tests) ---

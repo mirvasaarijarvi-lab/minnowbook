@@ -937,6 +937,24 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_portal_limit_events: {
+        Row: {
+          event_count: number
+          kind: string
+          minute: string
+        }
+        Insert: {
+          event_count?: number
+          kind: string
+          minute: string
+        }
+        Update: {
+          event_count?: number
+          kind?: string
+          minute?: string
+        }
+        Relationships: []
+      }
       guest_portal_rate_limits: {
         Row: {
           bucket_key: string
@@ -4283,6 +4301,17 @@ export type Database = {
           slug: string
         }[]
       }
+      get_guest_portal_limit_health: {
+        Args: never
+        Returns: {
+          db_errors_1h: number
+          db_errors_24h: number
+          last_db_error_at: string
+          last_refused_at: string
+          refused_1h: number
+          refused_24h: number
+        }[]
+      }
       get_offer_for_guest: { Args: { _token: string }; Returns: Json }
       get_public_availability_counts: {
         Args: {
@@ -4508,6 +4537,10 @@ export type Database = {
           p_tenant_slug?: string
           p_user_agent?: string
         }
+        Returns: undefined
+      }
+      record_guest_portal_limit_event: {
+        Args: { _kind: string }
         Returns: undefined
       }
       run_test_reservation_cleanup: {

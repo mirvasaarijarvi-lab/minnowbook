@@ -14,6 +14,7 @@ function fakeDb() {
     calls,
     rpc(fn: string, args: Record<string, unknown>) {
       calls.push({ fn, args });
+      if (fn === "record_guest_portal_limit_event") return Promise.resolve({ data: null, error: null });
       const key = String(args._bucket_key);
       const n = (counts.get(key) ?? 0) + 1;
       counts.set(key, n);

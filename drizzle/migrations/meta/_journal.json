@@ -344,6 +344,13 @@
       "when": 1790660143202,
       "tag": "0048_guest_portal_rate_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1790661239726,
+      "tag": "0049_guest_portal_limit_monitoring",
+      "breakpoints": true
     }
   ]
 }
