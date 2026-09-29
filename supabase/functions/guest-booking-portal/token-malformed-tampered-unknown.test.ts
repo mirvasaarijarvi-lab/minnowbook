@@ -1,3 +1,4 @@
+import "../_shared/test-rate-limit-stub.ts";
 // Regression tests: malformed, tampered and unknown guest booking links must
 // never show, change or cancel a booking. The backend is a stubbed fetch that
 // only knows one stored link, so any other link value finds nothing.

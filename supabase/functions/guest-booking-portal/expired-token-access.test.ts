@@ -1,3 +1,4 @@
+import "../_shared/test-rate-limit-stub.ts";
 // Regression tests: expired guest booking links must never show, change or
 // cancel a booking, including right at the expiry moment, when replayed, when
 // a link expires after it worked, and when extra fields are sent with it.

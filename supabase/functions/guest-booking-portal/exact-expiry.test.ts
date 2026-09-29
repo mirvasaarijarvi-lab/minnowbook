@@ -1,3 +1,4 @@
+import "../_shared/test-rate-limit-stub.ts";
 // Pretend-backend tests with a frozen clock: a guest link is refused AT its
 // exact expiry moment (not only after), works 1 ms before it, and a link that
 // expires later keeps working at that same moment.

@@ -1,3 +1,4 @@
+import "../_shared/test-rate-limit-stub.ts";
 // Regression tests: expired and revoked guest booking links must never show,
 // change or cancel a booking. The backend is replaced by a stubbed fetch so
 // each test controls the stored link and can see every request the portal makes.

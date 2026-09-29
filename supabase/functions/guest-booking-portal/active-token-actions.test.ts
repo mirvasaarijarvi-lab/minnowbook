@@ -1,3 +1,4 @@
+import "../_shared/test-rate-limit-stub.ts";
 // Regression tests: an active guest booking link must keep working for the
 // intended actions (view, ask for a new date, cancel), and each action must
 // touch only the booking the link belongs to.
