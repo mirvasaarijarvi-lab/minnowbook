@@ -100,7 +100,9 @@ jobs:
         run: |
           eval "$(supabase status -o env)"
           psql "$DB_URL" -v ON_ERROR_STOP=1 -f scripts/ci/seed-guest-portal-local.sql
-          # Shared guest-link request count (lives in drizzle/migrations).
+          # Shared guest-link request count (lives in drizzle/migrations). Its
+          # policy calls is_account_active, which the local backend may lack.
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -q -c "DO \$\$ BEGIN IF to_regprocedure('public.is_account_active(uuid)') IS NULL THEN CREATE FUNCTION public.is_account_active(uuid) RETURNS boolean LANGUAGE sql STABLE AS 'SELECT true'; END IF; END \$\$;" > /dev/null
           psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f drizzle/migrations/0048_guest_portal_rate_limits.sql > /dev/null
 
       - name: Serve guest-booking-portal
