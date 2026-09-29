@@ -1227,6 +1227,22 @@ const PublicBookingInner = () => {
           (e as any).occasion = occasionContext ?? {};
           throw e;
         }
+        // Venue lookup: a missing venue (bad/old link) and a temporary
+        // database problem are reported separately so only the latter
+        // offers a retry.
+        const status = (error as any)?.context?.status;
+        if (
+          errorCode === "TENANT_LOOKUP_FAILED" ||
+          errorCode === "TENANT_NOT_FOUND" ||
+          status === 503
+        ) {
+          const e = new Error(serverMessage ?? "Venue lookup failed");
+          (e as any).code =
+            errorCode === "TENANT_NOT_FOUND"
+              ? "TENANT_NOT_FOUND"
+              : "TENANT_LOOKUP_FAILED";
+          throw e;
+        }
         if (errorCode === BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING) {
           const e = new Error(serverMessage ?? "Service misconfigured");
           (e as any).code = BOOKING_ERROR_CODES.SERVICE_ROLE_KEY_MISSING;
@@ -1281,6 +1297,21 @@ const PublicBookingInner = () => {
         queryClient.invalidateQueries({
           queryKey: ["public-special-occasions"],
         });
+        return;
+      }
+      if (err?.code === "TENANT_LOOKUP_FAILED") {
+        // Temporary: keep the form filled and offer a one-tap retry.
+        toast.error(t("booking.venueUnavailable"), {
+          duration: 15000,
+          action: {
+            label: t("booking.retry"),
+            onClick: () => submitMutation.mutate(),
+          },
+        });
+        return;
+      }
+      if (err?.code === "TENANT_NOT_FOUND") {
+        toast.error(t("booking.venueNotFound"), { duration: 10000 });
         return;
       }
       const descriptor = resolveBookingError(err, { isStaff });

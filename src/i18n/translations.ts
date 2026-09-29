@@ -269,6 +269,9 @@ type TranslationKeys = {
   "booking.reservations": string;
   "booking.submitting": string;
   "booking.submitError": string;
+  "booking.venueUnavailable": string;
+  "booking.venueNotFound": string;
+  "booking.retry": string;
   "booking.serviceMisconfigured": string;
   "booking.serviceMisconfiguredAdmin": string;
   "booking.misconfigBannerTitle": string;
@@ -2705,6 +2708,9 @@ const en: TranslationKeys = {
   "booking.reservations": "reservations",
   "booking.submitting": "Submitting...",
   "booking.submitError": "Failed to submit reservation. Please try again.",
+  "booking.venueUnavailable": "Booking is briefly unavailable. Your details are kept, please try again in a moment.",
+  "booking.venueNotFound": "This booking link no longer points to an active business. Please ask the business for a new link.",
+  "booking.retry": "Try again",
   "booking.serviceMisconfigured":
     "Online booking is temporarily unavailable. No reservation was created and you have not been charged. Please contact the venue directly by phone or email, or try again in a few minutes.",
   "booking.serviceMisconfiguredAdmin":
@@ -5700,6 +5706,9 @@ const fi: TranslationKeys = {
   "booking.reservations": "varausta",
   "booking.submitting": "Lähetetään...",
   "booking.submitError": "Varauksen lähetys epäonnistui. Yritä uudelleen.",
+  "booking.venueUnavailable": "Varaus ei ole hetkeen käytettävissä. Tietosi on tallessa, yritä hetken päästä uudelleen.",
+  "booking.venueNotFound": "Tämä varauslinkki ei enää johda toimivaan yritykseen. Pyydä yritykseltä uusi linkki.",
+  "booking.retry": "Yritä uudelleen",
   "booking.serviceMisconfigured":
     "Verkkovaraus ei ole tilapäisesti käytettävissä. Varausta ei luotu eikä sinua ole veloitettu. Ota yhteyttä toimipaikkaan suoraan puhelimitse tai sähköpostilla, tai yritä uudelleen muutaman minuutin kuluttua.",
   "booking.serviceMisconfiguredAdmin":
@@ -8706,6 +8715,9 @@ const sv: TranslationKeys = {
   "booking.reservations": "bokningar",
   "booking.submitting": "Skickar...",
   "booking.submitError": "Kunde inte skicka bokningen. Försök igen.",
+  "booking.venueUnavailable": "Bokningen är tillfälligt otillgänglig. Dina uppgifter finns kvar, försök igen om en stund.",
+  "booking.venueNotFound": "Den här bokningslänken leder inte längre till ett aktivt företag. Be företaget om en ny länk.",
+  "booking.retry": "Försök igen",
   "booking.serviceMisconfigured":
     "Onlinebokning är tillfälligt otillgänglig. Ingen bokning skapades och du har inte debiterats. Kontakta verksamheten direkt via telefon eller e-post, eller försök igen om några minuter.",
   "booking.serviceMisconfiguredAdmin":
