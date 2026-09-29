@@ -1513,7 +1513,6 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
       ...(occasionContext ? { occasion: occasionContext } : {}),
     }), {
       status: [404, 503].includes((error as any)?.http_status) ? (error as any).http_status : 400,
-      ...((error as any)?.http_status === 503 ? {} : {}),
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
