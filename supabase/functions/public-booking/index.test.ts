@@ -155,8 +155,10 @@ Deno.test("public-booking: rejects unknown tenant", async () => {
     guests_count: 2,
   }, "rejects unknown tenant");
   if (!result) return;
+  // A missing venue returns 404 TENANT_NOT_FOUND (distinct from the 503
+  // retryable response used for temporary database errors).
   assertFunctionError(result, {
-    status: 400,
+    status: 404,
     errorMatch: /tenant/i,
     label: "unknown tenant",
   });
