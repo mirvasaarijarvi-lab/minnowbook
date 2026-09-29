@@ -18,6 +18,7 @@
 // base branch's audit means a PR is only annotated for what it adds.
 
 import fs from "node:fs";
+import { safeResolveWithin } from "../../../scripts/ci/safe-path.mjs";
 import path from "node:path";
 import { parseAuditReport, severityRank } from "./parse-audit.mjs";
 
@@ -176,6 +177,7 @@ function arg(name, fallback = "") {
 
 function readAudit(manager, file) {
   if (!file) return null;
+  file = safeResolveWithin(file);
   if (!fs.existsSync(file) || fs.statSync(file).size === 0) return null;
   return parseAuditReport(manager, fs.readFileSync(file, "utf8"));
 }
