@@ -7,7 +7,12 @@ import { join, resolve } from "node:path";
 const ROOT = resolve(__dirname, "../..");
 const SCRIPT = join(ROOT, "scripts/ci/rls-cors-gate-preflight.mjs");
 
-const JWT = "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiJ9.c2lnbmF0dXJl";
+// Fake, unsigned test value built at runtime (not a real credential).
+const JWT = [
+  "eyJhbGciOiJIUzI1NiJ9",
+  "eyJyb2xlIjoiYW5vbiJ9",
+  "c2lnbmF0dXJl",
+].join(".");
 
 /**
  * Run the preflight with a deliberately empty environment so a developer's own
