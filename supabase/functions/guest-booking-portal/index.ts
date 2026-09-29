@@ -20,15 +20,20 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 // may raise the limit via GUEST_PORTAL_TEST_RATE_LIMIT_MAX. That override is
 // honoured ONLY when the function talks to a local backend; the live project
 // always keeps 5.
-function resolveRateLimitMax(): number {
-  const override = Number(Deno.env.get("GUEST_PORTAL_TEST_RATE_LIMIT_MAX") ?? "");
-  if (!Number.isInteger(override) || override <= 5) return 5;
+export const LIVE_RATE_LIMIT_MAX = 5;
+export function resolveRateLimitMax(
+  getEnv: (name: string) => string | undefined = (n) => Deno.env.get(n),
+): number {
+  const override = Number(getEnv("GUEST_PORTAL_TEST_RATE_LIMIT_MAX") ?? "");
+  if (!Number.isInteger(override) || override <= LIVE_RATE_LIMIT_MAX) {
+    return LIVE_RATE_LIMIT_MAX;
+  }
   try {
-    const host = new URL(Deno.env.get("SUPABASE_URL") ?? "").hostname;
+    const host = new URL(getEnv("SUPABASE_URL") ?? "").hostname;
     const local = ["kong", "localhost", "127.0.0.1", "host.docker.internal"];
-    return local.includes(host) ? Math.min(override, 1000) : 5;
+    return local.includes(host) ? Math.min(override, 1000) : LIVE_RATE_LIMIT_MAX;
   } catch {
-    return 5;
+    return LIVE_RATE_LIMIT_MAX;
   }
 }
 const RATE_LIMIT_MAX = resolveRateLimitMax();
