@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:19ea99a2-ef28-5d3c-8e89-3eacccb1ec07",
+  "serialNumber": "urn:uuid:f8b35010-9a78-534e-81c1-ad14203a684b",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "9d6f4815e4d29cfb2abdc6bc141da370d5c3c73ac792b48129db7bc8ec1a9221"
+          "value": "c131641fe1bbb97c2cda147c125db6a1110ed74004d026e5075b384aaf082a37"
         }
       ]
     }
@@ -331,27 +331,27 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.39",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.40",
       "type": "library",
       "name": "@tanstack/react-router",
-      "version": "1.170.39",
-      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.39",
+      "version": "1.170.40",
+      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.40",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.168.58",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.168.59",
       "type": "library",
       "name": "@tanstack/react-start",
-      "version": "1.168.58",
-      "purl": "pkg:npm/@tanstack%2Freact-start@1.168.58",
+      "version": "1.168.59",
+      "purl": "pkg:npm/@tanstack%2Freact-start@1.168.59",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.40",
+      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.41",
       "type": "library",
       "name": "@tanstack/router-plugin",
-      "version": "1.168.40",
-      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.40",
+      "version": "1.168.41",
+      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.41",
       "scope": "required"
     },
     {
