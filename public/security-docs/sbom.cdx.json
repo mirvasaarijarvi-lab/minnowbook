@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:8b11c390-9ed5-5d33-8894-2d4de3c095b4",
+  "serialNumber": "urn:uuid:19ea99a2-ef28-5d3c-8e89-3eacccb1ec07",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "aef363f491754bfa90f23e534d74a9ac4d85fb1b6d411dbcfe5aa2ae2472f5b7"
+          "value": "9d6f4815e4d29cfb2abdc6bc141da370d5c3c73ac792b48129db7bc8ec1a9221"
         }
       ]
     }
@@ -323,11 +323,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.103.2",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.104.0",
       "type": "library",
       "name": "@tanstack/react-query",
-      "version": "5.103.2",
-      "purl": "pkg:npm/@tanstack%2Freact-query@5.103.2",
+      "version": "5.104.0",
+      "purl": "pkg:npm/@tanstack%2Freact-query@5.104.0",
       "scope": "required"
     },
     {
@@ -395,11 +395,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@types%2Fnode@26.6.2",
+      "bom-ref": "pkg:npm/@types%2Fnode@26.6.3",
       "type": "library",
       "name": "@types/node",
-      "version": "26.6.2",
-      "purl": "pkg:npm/@types%2Fnode@26.6.2",
+      "version": "26.6.3",
+      "purl": "pkg:npm/@types%2Fnode@26.6.3",
       "scope": "optional"
     },
     {
@@ -659,11 +659,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-hook-form@7.71.2",
+      "bom-ref": "pkg:npm/react-hook-form@7.89.0",
       "type": "library",
       "name": "react-hook-form",
-      "version": "7.71.2",
-      "purl": "pkg:npm/react-hook-form@7.71.2",
+      "version": "7.89.0",
+      "purl": "pkg:npm/react-hook-form@7.89.0",
       "scope": "required"
     },
     {
