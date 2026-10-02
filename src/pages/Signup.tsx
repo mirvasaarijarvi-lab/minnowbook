@@ -178,7 +178,7 @@ const Signup = () => {
               <Input
                 id="businessName"
                 name="businessName"
-                placeholder="e.g. Restaurant Wiurila"
+                placeholder={t("signup.businessNamePlaceholder")}
                 value={form.businessName}
                 onChange={handleChange}
                 required
