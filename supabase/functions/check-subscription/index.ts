@@ -125,7 +125,7 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
 
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    logStep("User authenticated");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil", timeout: 8000, maxNetworkRetries: 1 });
     const customers = await withTimeout<Stripe.ApiList<Stripe.Customer>>(

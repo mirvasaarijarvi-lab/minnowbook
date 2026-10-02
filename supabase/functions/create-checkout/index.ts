@@ -101,7 +101,7 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
       cancel_url: `${origin}/pricing?checkout=cancelled`,
     });
 
-    logStep("Checkout session created", { sessionId: session.id, url: session.url });
+    logStep("Checkout session created");
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
