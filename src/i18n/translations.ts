@@ -3031,7 +3031,8 @@ const en: TranslationKeys = {
   "signup.heroSubtitle":
     "30-day free trial. No credit card required. Set up in minutes.",
   "signup.businessName": "Business name",
-  "signup.businessNamePlaceholder": "The name of your restaurant, hotel, massage parlor, barber shop, hairdresser...",
+  "signup.businessNamePlaceholder":
+    "The name of your restaurant, hotel, massage parlor, barber shop, hairdresser...",
   "signup.yourName": "Your name",
   "signup.creatingAccount": "Creating account...",
   "signup.alreadyHaveAccount": "Already have an account?",
@@ -6033,7 +6034,8 @@ const fi: TranslationKeys = {
   "signup.heroSubtitle":
     "30 päivän ilmainen kokeilu. Ei luottokorttia tarvita. Käyttövalmis minuuteissa.",
   "signup.businessName": "Yrityksen nimi",
-  "signup.businessNamePlaceholder": "Ravintolasi, hotellisi, hierontapaikkasi, parturisi tai kampaamosi nimi...",
+  "signup.businessNamePlaceholder":
+    "Ravintolasi, hotellisi, hierontapaikkasi, parturisi tai kampaamosi nimi...",
   "signup.yourName": "Nimesi",
   "signup.creatingAccount": "Luodaan tiliä...",
   "signup.alreadyHaveAccount": "Onko sinulla jo tili?",
@@ -9047,7 +9049,8 @@ const sv: TranslationKeys = {
   "signup.heroSubtitle":
     "30 dagars gratis provperiod. Inget kreditkort krävs. Igång på minuter.",
   "signup.businessName": "Företagsnamn",
-  "signup.businessNamePlaceholder": "Namnet på din restaurang, ditt hotell, din massagesalong, barberare, frisör...",
+  "signup.businessNamePlaceholder":
+    "Namnet på din restaurang, ditt hotell, din massagesalong, barberare, frisör...",
   "signup.yourName": "Ditt namn",
   "signup.creatingAccount": "Skapar konto...",
   "signup.alreadyHaveAccount": "Har du redan ett konto?",
