@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:ab5310ba-f23f-527b-8bfc-9029a0917c53",
+  "serialNumber": "urn:uuid:e38d02b2-1ad2-5162-9a5d-b428a00cf457",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "38aff0b5edf5936a5b045c96afb4eaee81d51b5564814627d6f54f3ec9f9dc9e"
+          "value": "1b9bebf2476b5919f04648ff3c2953b7e2a58d68c0efcdf7190ba80f95dc58ae"
         }
       ]
     }
@@ -723,11 +723,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/typescript-eslint@8.70.1",
+      "bom-ref": "pkg:npm/typescript-eslint@8.71.0",
       "type": "library",
       "name": "typescript-eslint",
-      "version": "8.70.1",
-      "purl": "pkg:npm/typescript-eslint@8.70.1",
+      "version": "8.71.0",
+      "purl": "pkg:npm/typescript-eslint@8.71.0",
       "scope": "optional"
     },
     {
