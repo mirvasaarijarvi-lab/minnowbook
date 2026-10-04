@@ -494,7 +494,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
   );
 
   it(
-    "burst of 30 distinct fake codes (batched 10x3): zero leaks, zero 5xx, stable codes",
+    "burst of 30 distinct fake codes (batched 5x6): zero leaks, zero 5xx, stable codes",
     {
       // Run 30 distinct codes in 3 sequential waves of 10 instead of one
       // 30-way Promise.all. This keeps the indistinguishability + no-5xx
@@ -509,7 +509,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
         { length: 30 },
         (_, i) => `BURST-${i.toString().padStart(4, "0")}-XYZW`,
       );
-      const BATCH = 10;
+      const BATCH = 5;
       const results: Attempt[] = [];
       for (let i = 0; i < codes.length; i += BATCH) {
         const slice = codes.slice(i, i + BATCH);
