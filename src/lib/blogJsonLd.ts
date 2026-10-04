@@ -294,12 +294,14 @@ export const posts: Record<string, BlogPostData> = {
       "blog.post6C3",
       "blog.post6C4",
       "blog.post6C5",
+      "blog.post6C7",
       "blog.post6C6",
     ],
-    seoTitle: "Best Reservation App for Restaurants 2026: Cost and Setup",
+    seoTitle: "Best Reservation Apps 2026: vs Acuity, Mindbody, Vagaro",
     seoDescription:
-      "Looking for the best reservation app for your restaurant? Compare monthly cost, commission fees and setup time of free apps, marketplaces and booking software.",
+      "Compare the best reservation apps for restaurants in 2026, plus how Acuity, Mindbody and Vagaro differ. See monthly cost, commission fees and setup time.",
     relatedSlugs: [
+      "MimmoBook_compared_to_other_bookingsystems_for_wellness",
       "comparison-resy-tock-mimmobook",
       "branded-booking-pages-matter",
       "multi-site-management-hospitality",
