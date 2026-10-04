@@ -33,6 +33,7 @@ describe("new blog post has copy in every supported locale", () => {
     "blog.post6C4",
     "blog.post6C5",
     "blog.post6C6",
+    "blog.post6C7",
   ];
 
   // App ships EN, FI, SV. Each locale is a separate object literal in
