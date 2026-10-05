@@ -333,6 +333,11 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
       const copy = lookupCopy[language];
       const today = new Date().toISOString().slice(0, 10);
 
+      // Same generic reply either way, so the cooldown reveals nothing.
+      if (!(await allowLookupEmail(admin, email))) {
+        return json({ ok: true });
+      }
+
       const { data: reservations } = await admin
         .from("reservations")
         .select("id, tenant_id, date, start_time, reservation_type, guest_name, status")
