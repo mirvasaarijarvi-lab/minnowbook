@@ -78,6 +78,10 @@ const PricingTier = ({
         }
       }
     } catch (err: any) {
+      if (err?.context?.status === 403) {
+        toast.error(t("settings.planParentOnly"));
+        return;
+      }
       toast.error(err.message || "Failed to start checkout");
     } finally {
       setLoading(false);

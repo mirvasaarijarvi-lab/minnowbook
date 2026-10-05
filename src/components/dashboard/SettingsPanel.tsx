@@ -698,6 +698,7 @@ const COLOR_PRESETS = [
 
 const SubscriptionCard = ({ tenant }: { tenant: any }) => {
   const t = useT();
+  const { isAdmin } = useTenant();
   const [loading, setLoading] = useState(false);
 
   const tierLabel =
@@ -802,33 +803,42 @@ const SubscriptionCard = ({ tenant }: { tenant: any }) => {
             {statusLabel}
           </Badge>
         </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            onClick={handleManage}
-            disabled={loading}
+        {!isAdmin ? (
+          <p
+            role="note"
+            className="rounded-lg border border-border bg-muted/50 p-3 text-sm text-muted-foreground"
           >
-            {loading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <ExternalLink className="h-3.5 w-3.5" />
-            )}
-            {"Manage Subscription"}
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <a
-              href="/pricing"
-              target="_blank"
-              rel="noopener noreferrer"
+            {t("settings.planParentOnly")}
+          </p>
+        ) : (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
               className="gap-1.5"
+              onClick={handleManage}
+              disabled={loading}
             >
-              {"View Plans"}
-              <ArrowRight className="h-3.5 w-3.5" />
-            </a>
-          </Button>
-        </div>
+              {loading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <ExternalLink className="h-3.5 w-3.5" />
+              )}
+              {"Manage Subscription"}
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <a
+                href="/pricing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="gap-1.5"
+              >
+                {"View Plans"}
+                <ArrowRight className="h-3.5 w-3.5" />
+              </a>
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
