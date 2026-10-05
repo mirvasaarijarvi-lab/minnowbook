@@ -116,6 +116,7 @@ type TranslationKeys = {
   "reports.noDiscounts": string;
 
   // Settings
+  "settings.planParentOnly": string;
   "settings.businessDetails": string;
   "settings.brandColors": string;
   "settings.presets": string;
@@ -2538,6 +2539,8 @@ const en: TranslationKeys = {
   "reports.noDiscounts": "No discounts applied in this period",
 
   // Settings
+  "settings.planParentOnly":
+    "Only the parent company can change the account plan. Your location is covered by the plan the parent company chooses. Ask the account owner or an account admin if you need a different plan.",
   "settings.businessDetails": "Business Details",
   "settings.brandColors": "Brand Colors",
   "settings.presets": "Presets",
@@ -5536,6 +5539,8 @@ const fi: TranslationKeys = {
   "reports.noDiscounts": "Ei alennuksia tällä jaksolla",
 
   // Settings
+  "settings.planParentOnly":
+    "Vain emoyhtiö voi muuttaa tilin pakettia. Toimipisteesi kuuluu emoyhtiön valitsemaan pakettiin. Jos tarvitset toisen paketin, ota yhteyttä tilin omistajaan tai pääkäyttäjään.",
   "settings.businessDetails": "Yritystiedot",
   "settings.brandColors": "Brändivärit",
   "settings.presets": "Esiasetukset",
@@ -8550,6 +8555,8 @@ const sv: TranslationKeys = {
   "reports.noDiscounts": "Inga rabatter under denna period",
 
   // Settings
+  "settings.planParentOnly":
+    "Endast moderbolaget kan ändra kontots plan. Din plats omfattas av den plan som moderbolaget väljer. Kontakta kontots ägare eller administratör om du behöver en annan plan.",
   "settings.businessDetails": "Företagsinformation",
   "settings.brandColors": "Varumärkesfärger",
   "settings.presets": "Förval",
