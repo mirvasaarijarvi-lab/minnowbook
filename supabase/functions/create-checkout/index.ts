@@ -96,21 +96,14 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { persistSession: false } },
     );
-    const { data: billingMembership } = await adminClient
-      .from("tenant_users")
-      .select("tenant_id")
-      .eq("user_id", user.id)
-      .eq("is_approved", true)
-      .in("role", ["owner", "admin", "superadmin"])
-      .limit(1)
-      .maybeSingle();
-    if (!billingMembership?.tenant_id) {
+    const billingTenantId = await findBillingTenantId(adminClient, user.id);
+    if (!billingTenantId) {
       return new Response(
         JSON.stringify({ error: "Only a business owner or admin can buy a plan." }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
-    const tenantId = billingMembership.tenant_id as string;
+    const tenantId = billingTenantId;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
