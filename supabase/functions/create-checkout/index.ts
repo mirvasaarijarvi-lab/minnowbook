@@ -89,13 +89,39 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
     const rawOrigin = req.headers.get("origin") ?? "";
     const origin = isOriginAllowed(rawOrigin) ? rawOrigin : SAFE_ORIGIN_FALLBACK;
 
+    // Bind the subscription to the business it is bought for, so the plan
+    // sync only ever applies it to that business.
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } },
+    );
+    const { data: billingMembership } = await adminClient
+      .from("tenant_users")
+      .select("tenant_id")
+      .eq("user_id", user.id)
+      .eq("is_approved", true)
+      .in("role", ["owner", "admin", "superadmin"])
+      .limit(1)
+      .maybeSingle();
+    if (!billingMembership?.tenant_id) {
+      return new Response(
+        JSON.stringify({ error: "Only a business owner or admin can buy a plan." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+    const tenantId = billingMembership.tenant_id as string;
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
+      client_reference_id: tenantId,
+      metadata: { tenant_id: tenantId },
       subscription_data: {
         trial_period_days: 14,
+        metadata: { tenant_id: tenantId },
       },
       success_url: `${origin}/dashboard?checkout=success`,
       cancel_url: `${origin}/pricing?checkout=cancelled`,
