@@ -187,7 +187,28 @@ export async function handleCheckSubscriptionRequest(req: Request): Promise<Resp
         .limit(1)
         .maybeSingle();
 
-      if (tenantUser && tier) {
+      // The subscription must belong to this business: either it was bought
+      // for it (tenant_id in the subscription metadata) or the business is
+      // already linked to this exact payment account. A personal or
+      // other-business subscription never upgrades it.
+      let boundToTenant = false;
+      if (tenantUser) {
+        const metaTenant = (subscription.metadata as Record<string, string> | null)?.tenant_id;
+        if (metaTenant) {
+          boundToTenant = metaTenant === tenantUser.tenant_id;
+        } else {
+          const { data: linkedTenant } = await supabaseClient
+            .from("tenants")
+            .select("stripe_customer_id")
+            .eq("id", tenantUser.tenant_id)
+            .maybeSingle();
+          boundToTenant = !!linkedTenant?.stripe_customer_id &&
+            linkedTenant.stripe_customer_id === customerId;
+        }
+        if (!boundToTenant) logStep("Subscription not bound to this business; skipping sync");
+      }
+
+      if (tenantUser && tier && boundToTenant) {
         await supabaseClient
           .from("tenants")
           .update({

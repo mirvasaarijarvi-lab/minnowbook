@@ -77,6 +77,30 @@ export async function recordLimitEvent(
   }
 }
 
+// Per-recipient cooldown: one booking-link email per address every 15 minutes,
+// so strangers cannot flood a guest's inbox. Keys are hashed; fails closed.
+export const LOOKUP_EMAIL_COOLDOWN_SECONDS = 15 * 60;
+export async function allowLookupEmail(
+  // deno-lint-ignore no-explicit-any
+  admin: { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: any; error: any }> },
+  email: string,
+): Promise<boolean> {
+  try {
+    const { data, error } = await admin.rpc("consume_guest_portal_rate_limit", {
+      _bucket_key: await bucketKeyFor(`lookup-email:${email}`),
+      _max: 1,
+      _window_seconds: LOOKUP_EMAIL_COOLDOWN_SECONDS,
+    });
+    if (error) {
+      console.error("lookup email cooldown check failed:", error.code ?? "unknown");
+      return false;
+    }
+    return data === true;
+  } catch {
+    return false;
+  }
+}
+
 export async function checkRateLimit(
   // deno-lint-ignore no-explicit-any
   admin: { rpc: (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: any; error: any }> },
@@ -308,6 +332,11 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
       const language = ["en", "fi", "sv"].includes(String(body.language)) ? String(body.language) : "en";
       const copy = lookupCopy[language];
       const today = new Date().toISOString().slice(0, 10);
+
+      // Same generic reply either way, so the cooldown reveals nothing.
+      if (!(await allowLookupEmail(admin, email))) {
+        return json({ ok: true });
+      }
 
       const { data: reservations } = await admin
         .from("reservations")
