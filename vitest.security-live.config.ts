@@ -35,7 +35,9 @@ export default defineConfig({
     // timeouts rather than real regressions. Serialise the whole live
     // run: one worker, one file at a time, no concurrent tests.
     pool: "forks",
-    poolOptions: { forks: { singleFork: true, minForks: 1, maxForks: 1 } },
+    // Vitest 4 equivalent of the old singleFork / maxForks: 1 options.
+    maxWorkers: 1,
+    isolate: false,
     fileParallelism: false,
     maxConcurrency: 1,
     // Absorb single transient pooler/cold-start blips without turning
