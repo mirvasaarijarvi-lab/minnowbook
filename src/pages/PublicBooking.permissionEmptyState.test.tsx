@@ -129,11 +129,15 @@ describe("PublicBooking branding permission fallback", () => {
 
   it("shows the branding-unavailable notice when the branding read is denied", async () => {
     denyBranding = true;
+    const { gtm } = await import("@/lib/gtm");
     renderPage();
 
     expect(
       await screen.findByText("booking.brandingUnavailable"),
     ).toBeInTheDocument();
+    // Let the page finish its analytics report before cleanup, so it can't
+    // land in the next test's call count.
+    await waitFor(() => expect(gtm.permissionEmptyStateShown).toHaveBeenCalled());
   });
 
   it("reports the blocked branding state to analytics once", async () => {
