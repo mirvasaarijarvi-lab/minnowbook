@@ -76,7 +76,8 @@
     "react": "$react",
     "react-dom": "$react-dom",
     "uuid": "^11.1.1",
-    "@asamuzakjp/css-color": ">=7.0.1"
+    "@asamuzakjp/css-color": ">=7.0.1",
+    "postcss-selector-parser": "^7.1.6"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
