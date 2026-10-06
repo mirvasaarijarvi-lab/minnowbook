@@ -137,7 +137,9 @@ describe("PublicBooking branding permission fallback", () => {
     ).toBeInTheDocument();
     // Let the page finish its analytics report before cleanup, so it can't
     // land in the next test's call count.
-    await waitFor(() => expect(gtm.permissionEmptyStateShown).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(gtm.permissionEmptyStateShown).toHaveBeenCalled(),
+    );
   });
 
   it("reports the blocked branding state to analytics once", async () => {
