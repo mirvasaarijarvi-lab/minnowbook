@@ -49,6 +49,7 @@
   },
   "overrides": {
     "glob": ">=10.5.0",
+    "source-map-js": "^1.2.2",
     "lodash": ">=4.18.1",
     "dompurify": ">=3.4.16",
     "rollup": ">=4.30.0",
