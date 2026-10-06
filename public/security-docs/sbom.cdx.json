@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:d339a7ca-7f8b-522e-a8d3-b6ac0c49a1d0",
+  "serialNumber": "urn:uuid:3d3fa473-c169-5a68-8000-0e71a61732c6",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "e78393c8377707e5ea1e2972e7b844deb106fed808181b3f7d042b4cd18a3062"
+          "value": "55d0e89bb171002eb04bf4e86e91b399338f539042158c4b682ce10208cfdf34"
         }
       ]
     }
@@ -755,11 +755,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/vitest@3.2.7",
+      "bom-ref": "pkg:npm/vitest@4.1.9",
       "type": "library",
       "name": "vitest",
-      "version": "3.2.7",
-      "purl": "pkg:npm/vitest@3.2.7",
+      "version": "4.1.9",
+      "purl": "pkg:npm/vitest@4.1.9",
       "scope": "optional"
     },
     {

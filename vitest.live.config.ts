@@ -20,7 +20,9 @@ export default defineConfig({
     // Live DB calls are slow and serial-only to avoid trigger-state
     // races between parallel workers using the same Postgres.
     pool: "forks",
-    poolOptions: { forks: { singleFork: true } },
+    // Vitest 4 equivalent of the old singleFork option.
+    maxWorkers: 1,
+    isolate: false,
     testTimeout: 30_000,
     hookTimeout: 30_000,
   },

@@ -24,13 +24,8 @@ export default defineConfig({
     // timeout. Forks trade a small startup cost for a guaranteed clean
     // exit, which is the right call for CI.
     pool: "forks",
-    poolOptions: {
-      forks: {
-        // Keep parallelism — only force singleFork when explicitly debugging.
-        singleFork: false,
-        isolate: true,
-      },
-    },
+    // Keep parallelism and per-file isolation (Vitest 4 top-level options).
+    isolate: true,
     // Don't wait forever on a stuck afterAll/afterEach hook.
     teardownTimeout: 10_000,
     // Many security regression suites hit the live Supabase project over
