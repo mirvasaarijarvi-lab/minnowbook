@@ -121,6 +121,8 @@ const renderPage = () => {
 describe("PublicBooking branding permission fallback", () => {
   beforeEach(() => {
     denyBranding = false;
+    // Start each test with fresh call counts so earlier renders don't leak in.
+    vi.clearAllMocks();
   });
 
   afterEach(() => cleanup());
