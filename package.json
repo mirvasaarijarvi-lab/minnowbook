@@ -49,6 +49,7 @@
   },
   "overrides": {
     "glob": ">=10.5.0",
+    "source-map-js": "^1.2.2",
     "lodash": ">=4.18.1",
     "dompurify": ">=3.4.16",
     "rollup": ">=4.30.0",
@@ -149,7 +150,7 @@
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-plugin-dev-server-bridge": "^1.0.2",
     "@lovable.dev/vite-plugin-hmr-gate": "^1.8.0",
-    "@lovable.dev/vite-tanstack-config": "2.25.1",
+    "@lovable.dev/vite-tanstack-config": "2.25.2",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.0.0",
