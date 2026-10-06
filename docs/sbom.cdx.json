@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:3d3fa473-c169-5a68-8000-0e71a61732c6",
+  "serialNumber": "urn:uuid:32a04646-5fa3-59f7-b2ec-784219d68691",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "7603efd0db7ad7701d8b8f4bd9aaee98dbc7b441124bd8969f61f9962ebef1ab"
+          "value": "3601d1c2ca6e1150f3d39b7cb4d4149c58cb6017cb9a89b84eda81145d20907b"
         }
       ]
     }
@@ -323,11 +323,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.104.0",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.104.1",
       "type": "library",
       "name": "@tanstack/react-query",
-      "version": "5.104.0",
-      "purl": "pkg:npm/@tanstack%2Freact-query@5.104.0",
+      "version": "5.104.1",
+      "purl": "pkg:npm/@tanstack%2Freact-query@5.104.1",
       "scope": "required"
     },
     {
@@ -395,11 +395,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@types%2Fnode@26.6.3",
+      "bom-ref": "pkg:npm/@types%2Fnode@26.6.4",
       "type": "library",
       "name": "@types/node",
-      "version": "26.6.3",
-      "purl": "pkg:npm/@types%2Fnode@26.6.3",
+      "version": "26.6.4",
+      "purl": "pkg:npm/@types%2Fnode@26.6.4",
       "scope": "optional"
     },
     {
@@ -587,11 +587,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.48.0",
+      "bom-ref": "pkg:npm/lucide-react@1.50.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.48.0",
-      "purl": "pkg:npm/lucide-react@1.48.0",
+      "version": "1.50.0",
+      "purl": "pkg:npm/lucide-react@1.50.0",
       "scope": "required"
     },
     {
