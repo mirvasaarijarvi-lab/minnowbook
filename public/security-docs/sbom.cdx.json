@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:32a04646-5fa3-59f7-b2ec-784219d68691",
+  "serialNumber": "urn:uuid:9b5d3d92-1ab3-535a-b989-7a3b53841e9e",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "3601d1c2ca6e1150f3d39b7cb4d4149c58cb6017cb9a89b84eda81145d20907b"
+          "value": "ec52fe5b1f1e8c8799664d6fae13fa8990d672b68646415050b7cad5452be358"
         }
       ]
     }
@@ -67,11 +67,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.2",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.3",
       "type": "library",
       "name": "@lovable.dev/vite-tanstack-config",
-      "version": "2.25.2",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.2",
+      "version": "2.25.3",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.3",
       "scope": "optional"
     },
     {
