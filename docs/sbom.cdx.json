@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:9b5d3d92-1ab3-535a-b989-7a3b53841e9e",
+  "serialNumber": "urn:uuid:ea83737f-d035-5e52-8b3c-6ace0892578f",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "dd73aa2e6700ca503b27e8fd13c36bf1bf51166638d99aba7d6dd03c57805e38"
+          "value": "8f8ebcf3a9c87e2f4d92807d1daa2f67c9f2c9f5cfc552f26db097b7212df67e"
         }
       ]
     }
@@ -587,11 +587,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.50.0",
+      "bom-ref": "pkg:npm/lucide-react@1.51.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.50.0",
-      "purl": "pkg:npm/lucide-react@1.50.0",
+      "version": "1.51.0",
+      "purl": "pkg:npm/lucide-react@1.51.0",
       "scope": "required"
     },
     {
@@ -667,11 +667,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-resizable-panels@4.13.3",
+      "bom-ref": "pkg:npm/react-resizable-panels@4.14.2",
       "type": "library",
       "name": "react-resizable-panels",
-      "version": "4.13.3",
-      "purl": "pkg:npm/react-resizable-panels@4.13.3",
+      "version": "4.14.2",
+      "purl": "pkg:npm/react-resizable-panels@4.14.2",
       "scope": "required"
     },
     {
