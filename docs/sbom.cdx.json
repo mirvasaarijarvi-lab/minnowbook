@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:ea83737f-d035-5e52-8b3c-6ace0892578f",
+  "serialNumber": "urn:uuid:fbc27939-8777-509a-be36-e3c22e78e7db",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "8f8ebcf3a9c87e2f4d92807d1daa2f67c9f2c9f5cfc552f26db097b7212df67e"
+          "value": "e0e460695486884c76cebec0c83a54e7d78b046e87ec6f5903faa00ae6a3d69a"
         }
       ]
     }
@@ -587,11 +587,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.51.0",
+      "bom-ref": "pkg:npm/lucide-react@1.52.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.51.0",
-      "purl": "pkg:npm/lucide-react@1.51.0",
+      "version": "1.52.0",
+      "purl": "pkg:npm/lucide-react@1.52.0",
       "scope": "required"
     },
     {
