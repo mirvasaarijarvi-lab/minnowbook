@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:a90e0946-391c-57f6-b4ab-7366b7027e72",
+  "serialNumber": "urn:uuid:9a511916-0e4e-56f3-9d82-327332ecc89f",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "85c8ba85f661e755287c03ffd991f84d159ef23151c510a80b0239381307f051"
+          "value": "ccec2a34b4b610953f3aea4c93c56ef8b750d4cf014bb0fb63d2d7d8c1e10e86"
         }
       ]
     }
@@ -67,19 +67,19 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.3",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.26.6",
       "type": "library",
       "name": "@lovable.dev/vite-tanstack-config",
-      "version": "2.25.3",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.3",
+      "version": "2.26.6",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.26.6",
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@playwright%2Ftest@1.59.1",
+      "bom-ref": "pkg:npm/@playwright%2Ftest@1.64.0",
       "type": "library",
       "name": "@playwright/test",
-      "version": "1.59.1",
-      "purl": "pkg:npm/@playwright%2Ftest@1.59.1",
+      "version": "1.64.0",
+      "purl": "pkg:npm/@playwright%2Ftest@1.64.0",
       "scope": "required"
     },
     {
@@ -299,11 +299,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.117.2",
+      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.117.3",
       "type": "library",
       "name": "@supabase/supabase-js",
-      "version": "2.117.2",
-      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.117.2",
+      "version": "2.117.3",
+      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.117.3",
       "scope": "required"
     },
     {
@@ -323,35 +323,35 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.104.1",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.104.2",
       "type": "library",
       "name": "@tanstack/react-query",
-      "version": "5.104.1",
-      "purl": "pkg:npm/@tanstack%2Freact-query@5.104.1",
+      "version": "5.104.2",
+      "purl": "pkg:npm/@tanstack%2Freact-query@5.104.2",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.41",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.42",
       "type": "library",
       "name": "@tanstack/react-router",
-      "version": "1.170.41",
-      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.41",
+      "version": "1.170.42",
+      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.42",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.168.60",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.168.61",
       "type": "library",
       "name": "@tanstack/react-start",
-      "version": "1.168.60",
-      "purl": "pkg:npm/@tanstack%2Freact-start@1.168.60",
+      "version": "1.168.61",
+      "purl": "pkg:npm/@tanstack%2Freact-start@1.168.61",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.42",
+      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.43",
       "type": "library",
       "name": "@tanstack/router-plugin",
-      "version": "1.168.42",
-      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.42",
+      "version": "1.168.43",
+      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.43",
       "scope": "required"
     },
     {
@@ -395,11 +395,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@types%2Fnode@26.6.4",
+      "bom-ref": "pkg:npm/@types%2Fnode@26.6.5",
       "type": "library",
       "name": "@types/node",
-      "version": "26.6.4",
-      "purl": "pkg:npm/@types%2Fnode@26.6.4",
+      "version": "26.6.5",
+      "purl": "pkg:npm/@types%2Fnode@26.6.5",
       "scope": "optional"
     },
     {
@@ -475,11 +475,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/drizzle-orm@0.45.3",
+      "bom-ref": "pkg:npm/drizzle-orm@0.45.4",
       "type": "library",
       "name": "drizzle-orm",
-      "version": "0.45.3",
-      "purl": "pkg:npm/drizzle-orm@0.45.3",
+      "version": "0.45.4",
+      "purl": "pkg:npm/drizzle-orm@0.45.4",
       "scope": "optional"
     },
     {
@@ -587,11 +587,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.52.0",
+      "bom-ref": "pkg:npm/lucide-react@1.55.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.52.0",
-      "purl": "pkg:npm/lucide-react@1.52.0",
+      "version": "1.55.0",
+      "purl": "pkg:npm/lucide-react@1.55.0",
       "scope": "required"
     },
     {
@@ -627,11 +627,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/prettier@3.9.9",
+      "bom-ref": "pkg:npm/prettier@3.9.10",
       "type": "library",
       "name": "prettier",
-      "version": "3.9.9",
-      "purl": "pkg:npm/prettier@3.9.9",
+      "version": "3.9.10",
+      "purl": "pkg:npm/prettier@3.9.10",
       "scope": "optional"
     },
     {
@@ -659,19 +659,19 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-hook-form@7.89.0",
+      "bom-ref": "pkg:npm/react-hook-form@7.90.0",
       "type": "library",
       "name": "react-hook-form",
-      "version": "7.89.0",
-      "purl": "pkg:npm/react-hook-form@7.89.0",
+      "version": "7.90.0",
+      "purl": "pkg:npm/react-hook-form@7.90.0",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-resizable-panels@4.14.2",
+      "bom-ref": "pkg:npm/react-resizable-panels@4.14.4",
       "type": "library",
       "name": "react-resizable-panels",
-      "version": "4.14.2",
-      "purl": "pkg:npm/react-resizable-panels@4.14.2",
+      "version": "4.14.4",
+      "purl": "pkg:npm/react-resizable-panels@4.14.4",
       "scope": "required"
     },
     {
@@ -739,11 +739,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/vite@8.3.3",
+      "bom-ref": "pkg:npm/vite@8.3.4",
       "type": "library",
       "name": "vite",
-      "version": "8.3.3",
-      "purl": "pkg:npm/vite@8.3.3",
+      "version": "8.3.4",
+      "purl": "pkg:npm/vite@8.3.4",
       "scope": "optional"
     },
     {
@@ -763,11 +763,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/zod@4.6.5",
+      "bom-ref": "pkg:npm/zod@4.6.6",
       "type": "library",
       "name": "zod",
-      "version": "4.6.5",
-      "purl": "pkg:npm/zod@4.6.5",
+      "version": "4.6.6",
+      "purl": "pkg:npm/zod@4.6.6",
       "scope": "required"
     }
   ]
