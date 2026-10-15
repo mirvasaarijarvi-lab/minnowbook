@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:a90e0946-391c-57f6-b4ab-7366b7027e72",
+  "serialNumber": "urn:uuid:123d9e7c-d8af-54f2-bb80-7b9f96799335",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "85c8ba85f661e755287c03ffd991f84d159ef23151c510a80b0239381307f051"
+          "value": "ab416a89b7938e14494bdb6e6525247626fb9ab6327d4a9a34fa4d7a63a03e30"
         }
       ]
     }
@@ -67,11 +67,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.3",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.26.5",
       "type": "library",
       "name": "@lovable.dev/vite-tanstack-config",
-      "version": "2.25.3",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.25.3",
+      "version": "2.26.5",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.26.5",
       "scope": "optional"
     },
     {
@@ -763,11 +763,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/zod@4.6.5",
+      "bom-ref": "pkg:npm/zod@4.6.7",
       "type": "library",
       "name": "zod",
-      "version": "4.6.5",
-      "purl": "pkg:npm/zod@4.6.5",
+      "version": "4.6.7",
+      "purl": "pkg:npm/zod@4.6.7",
       "scope": "required"
     }
   ]
