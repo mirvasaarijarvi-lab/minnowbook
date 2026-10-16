@@ -65,7 +65,7 @@ jobs:
       - name: package-lock.json would not change
         run: |
           set -euo pipefail
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npx --yes --registry=https://registry.npmjs.org npm@11.21.1 install --registry=https://registry.npmjs.org --package-lock-only --ignore-scripts --no-audit --no-fund
           node scripts/ci/check-npm-lockfile-hygiene.mjs --fix-urls
           if ! git diff --quiet -- package-lock.json; then
             echo "::error file=package-lock.json::package-lock.json is out of sync with package.json. Run: npm install --package-lock-only --ignore-scripts"

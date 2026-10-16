@@ -424,7 +424,7 @@ jobs:
           # package.json without touching node_modules, giving npm
           # audit a lockfile to scan. Safe because we never publish
           # this file from CI.
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npx --yes --registry=https://registry.npmjs.org npm@11.21.1 install --registry=https://registry.npmjs.org --package-lock-only --ignore-scripts --no-audit --no-fund
 
       # ---------------------------------------------------------------
       # Lockfile freshness guard. A stale package-lock.json means npm
@@ -445,7 +445,7 @@ jobs:
           # Snapshot the committed lockfile so we can diff after the
           # regenerate step rewrites it in place.
           cp package-lock.json package-lock.committed.json
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npx --yes --registry=https://registry.npmjs.org npm@11.21.1 install --registry=https://registry.npmjs.org --package-lock-only --ignore-scripts --no-audit --no-fund
           if ! diff -q package-lock.committed.json package-lock.json >/dev/null; then
             echo "::error file=package-lock.json::package-lock.json is out of sync with package.json. The dependency-audit gate would scan a stale graph."
             echo "Fix locally with: npm install --package-lock-only --ignore-scripts && git add package-lock.json"
