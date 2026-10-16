@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:3aa0bc60-217d-54b0-bd0c-1f76abbccfb5",
+  "serialNumber": "urn:uuid:3803f5b0-115d-56ad-b26f-85f024fb54ac",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "58b48c0854fbd9eb128afe4f2638814961e297f317eb97e0d95a6b12342f5b2b"
+          "value": "c78eb0ada37fd66290db1a3bc055d10d5a68f008a26485c3b23550b9c9424f81"
         }
       ]
     }
@@ -67,11 +67,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.26.6",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.26.7",
       "type": "library",
       "name": "@lovable.dev/vite-tanstack-config",
-      "version": "2.26.6",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.26.6",
+      "version": "2.26.7",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.26.7",
       "scope": "optional"
     },
     {
@@ -331,27 +331,27 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.42",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.44",
       "type": "library",
       "name": "@tanstack/react-router",
-      "version": "1.170.42",
-      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.42",
+      "version": "1.170.44",
+      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.44",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.168.61",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.1",
       "type": "library",
       "name": "@tanstack/react-start",
-      "version": "1.168.61",
-      "purl": "pkg:npm/@tanstack%2Freact-start@1.168.61",
+      "version": "1.169.1",
+      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.1",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.43",
+      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.45",
       "type": "library",
       "name": "@tanstack/router-plugin",
-      "version": "1.168.43",
-      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.43",
+      "version": "1.168.45",
+      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.45",
       "scope": "required"
     },
     {
@@ -379,11 +379,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@testing-library%2Fuser-event@14.6.1",
+      "bom-ref": "pkg:npm/@testing-library%2Fuser-event@14.6.8",
       "type": "library",
       "name": "@testing-library/user-event",
-      "version": "14.6.1",
-      "purl": "pkg:npm/@testing-library%2Fuser-event@14.6.1",
+      "version": "14.6.8",
+      "purl": "pkg:npm/@testing-library%2Fuser-event@14.6.8",
       "scope": "required"
     },
     {
@@ -587,11 +587,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.55.0",
+      "bom-ref": "pkg:npm/lucide-react@1.56.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.55.0",
-      "purl": "pkg:npm/lucide-react@1.55.0",
+      "version": "1.56.0",
+      "purl": "pkg:npm/lucide-react@1.56.0",
       "scope": "required"
     },
     {
@@ -723,11 +723,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/typescript-eslint@8.71.1",
+      "bom-ref": "pkg:npm/typescript-eslint@8.71.2",
       "type": "library",
       "name": "typescript-eslint",
-      "version": "8.71.1",
-      "purl": "pkg:npm/typescript-eslint@8.71.1",
+      "version": "8.71.2",
+      "purl": "pkg:npm/typescript-eslint@8.71.2",
       "scope": "optional"
     },
     {
