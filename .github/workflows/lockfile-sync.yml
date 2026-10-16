@@ -32,6 +32,8 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: ./.github/actions/stale-commit-check
+
       - name: Verify package-lock.json is present in checkout
         run: |
           if [ ! -f package-lock.json ]; then
@@ -54,7 +56,7 @@ jobs:
         run: node scripts/ci/check-npm-lockfile-hygiene.mjs
 
       - name: Regenerate package-lock.json
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+        run: npx --yes --registry=https://registry.npmjs.org npm@11.21.1 install --registry=https://registry.npmjs.org --package-lock-only --ignore-scripts --no-audit --no-fund
 
       - name: Fail if package-lock.json drifted
         run: |

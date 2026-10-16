@@ -66,7 +66,8 @@ jobs:
 
       - name: Regenerate package-lock.json
         run: |
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          # Node 22's bundled npm 10 crashes with edgesOut on updated dependency graphs.
+          npx --yes --registry=https://registry.npmjs.org npm@11.21.1 install --registry=https://registry.npmjs.org --package-lock-only --ignore-scripts --no-audit --no-fund
           node scripts/ci/check-npm-lockfile-hygiene.mjs --fix-urls
           node scripts/ci/check-npm-lockfile-hygiene.mjs
 
