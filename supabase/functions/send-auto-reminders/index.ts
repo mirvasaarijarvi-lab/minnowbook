@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/http-headers.ts";
+import { sendManagedEmail } from "../_shared/managed-email.ts";
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
 const PORTAL_BASE_URL = "https://mimmobook.com";
@@ -314,43 +315,22 @@ export async function handleSendAutoRemindersRequest(req: Request): Promise<Resp
           }
         }
 
-        // Enqueue via transactional email queue
-        // Generate or reuse unsubscribe token
-        const autoUnsubToken = crypto.randomUUID();
-        await adminClient
-          .from("email_unsubscribe_tokens")
-          .upsert({ email: reservation.guest_email, token: autoUnsubToken }, { onConflict: "email", ignoreDuplicates: true });
-        const { data: autoTokenRow } = await adminClient
-          .from("email_unsubscribe_tokens")
-          .select("token")
-          .eq("email", reservation.guest_email)
-          .maybeSingle();
-
+        // Send through managed email delivery
         const autoIdempotencyKey = `reminder-${reservation.id}`;
-        const enqueuePayload: Record<string, any> = {
-          to: reservation.guest_email,
-          from: `${fromName} <noreply@${SENDER_DOMAIN}>`,
-          sender_domain: SENDER_DOMAIN,
-          subject,
-          html,
-          purpose: "transactional",
-          label: "booking_reminder",
-          message_id: autoIdempotencyKey,
-          idempotency_key: autoIdempotencyKey,
-          unsubscribe_token: autoTokenRow?.token || autoUnsubToken,
-          queued_at: new Date().toISOString(),
-        };
-        if (replyToEmail) {
-          enqueuePayload.reply_to = replyToEmail;
-        }
-
-        const { error: enqueueError } = await adminClient.rpc("enqueue_email", {
-          queue_name: "transactional_emails",
-          payload: enqueuePayload,
-        });
-
-        if (enqueueError) {
-          console.error(`Failed to enqueue reminder for ${reservation.id}:`, enqueueError);
+        try {
+          await sendManagedEmail(adminClient, {
+            to: reservation.guest_email,
+            from: `${fromName} <noreply@${SENDER_DOMAIN}>`,
+            sender_domain: SENDER_DOMAIN,
+            subject,
+            html,
+            label: "booking_reminder",
+            message_id: autoIdempotencyKey,
+            idempotency_key: autoIdempotencyKey,
+            ...(replyToEmail ? { reply_to: replyToEmail } : {}),
+          });
+        } catch (sendError) {
+          console.error(`Failed to send reminder for ${reservation.id}:`, sendError);
           errorCount++;
           continue;
         }
