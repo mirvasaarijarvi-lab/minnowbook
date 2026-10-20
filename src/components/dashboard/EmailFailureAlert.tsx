@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertTriangle, Mail } from "lucide-react";
 import { useTierGate } from "@/hooks/useTierGate";
+import { isTestRecipient } from "@/lib/email-test-recipients";
 
 const EmailFailureAlert = () => {
   const { isSystemAdmin } = useTierGate();
@@ -19,9 +20,13 @@ const EmailFailureAlert = () => {
         .in("status", ["failed", "dlq"])
         .gte("created_at", since)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(200);
       if (error) throw error;
-      return data ?? [];
+      // Automated test bookings use reserved addresses that can never
+      // receive mail; they stay in the email log but do not raise this alert.
+      return (data ?? [])
+        .filter((e) => !isTestRecipient(e.recipient_email))
+        .slice(0, 50);
     },
     enabled: isSystemAdmin,
     refetchInterval: 60_000, // poll every 60s
