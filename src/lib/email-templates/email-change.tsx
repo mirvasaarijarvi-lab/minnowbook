@@ -17,16 +17,20 @@ import {
 interface EmailChangeEmailProps {
   siteName: string
   email: string
+  oldEmail?: string
   newEmail: string
   confirmationUrl: string
 }
 
 export const EmailChangeEmail = ({
   siteName,
-  email,
+  email: currentEmail,
+  oldEmail,
   newEmail,
   confirmationUrl,
-}: EmailChangeEmailProps) => (
+}: EmailChangeEmailProps) => {
+  const email = oldEmail || currentEmail
+  return (
   <Html lang="en" dir="ltr">
     <Head />
     <Preview>Confirm your email change for {siteName}</Preview>
@@ -53,7 +57,8 @@ export const EmailChangeEmail = ({
       </Container>
     </Body>
   </Html>
-)
+  )
+}
 
 export default EmailChangeEmail
 
