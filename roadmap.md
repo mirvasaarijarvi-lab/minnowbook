@@ -1,5 +1,6 @@
 # Dependency sync
 
+- [ ] Repair the post-email-install Bun lockfile rewrite and verify both lockfiles stay stable with the CI-pinned tools.
 - [x] Apply the seven updates shown in PR #129 and regenerate both lockfiles.
 - [x] Check lockfile stability, hygiene, security floors, and targeted tests; regenerate SBOMs.
 - [x] Reproduce the Dependabot refresh npm edgesOut crash and verify a pinned npm fixes it.
