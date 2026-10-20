@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders, isOriginAllowed } from "../_shared/http-headers.ts";
+import { sendManagedEmail } from "../_shared/managed-email.ts";
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
 const TOKEN_TTL_DAYS = 7;
@@ -220,19 +221,18 @@ async function notifyStaffByEmail(
 </body></html>`;
 
     for (const to of recipients) {
-      await admin.rpc("enqueue_email", {
-        queue_name: "transactional_emails",
-        payload: {
+      try {
+        await sendManagedEmail(admin, {
           to,
           from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
           sender_domain: SENDER_DOMAIN,
           subject,
           html,
-          purpose: "transactional",
           label: "guest_request_staff_alert",
-          queued_at: new Date().toISOString(),
-        },
-      });
+        });
+      } catch (sendErr) {
+        console.error("Failed to send staff alert", sendErr);
+      }
     }
   } catch (err) {
     console.error("Failed to enqueue staff alert", err);
@@ -387,21 +387,16 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
 </body></html>`;
 
         try {
-          await admin.rpc("enqueue_email", {
-            queue_name: "transactional_emails",
-            payload: {
-              to: email,
-              from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
-              sender_domain: SENDER_DOMAIN,
-              subject: copy.subject,
-              html,
-              purpose: "transactional",
-              label: "guest_booking_lookup",
-              queued_at: new Date().toISOString(),
-            },
+          await sendManagedEmail(admin, {
+            to: email,
+            from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
+            sender_domain: SENDER_DOMAIN,
+            subject: copy.subject,
+            html,
+            label: "guest_booking_lookup",
           });
         } catch (mailErr) {
-          console.error("Failed to enqueue lookup email", mailErr);
+          console.error("Failed to send lookup email", mailErr);
         }
       }
 
@@ -605,24 +600,19 @@ export async function handleGuestBookingPortalRequest(req: Request): Promise<Res
 
       const copy = cancelCopy[language];
       try {
-        await admin.rpc("enqueue_email", {
-          queue_name: "transactional_emails",
-          payload: {
-            to: reservation.guest_email,
-            from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
-            sender_domain: SENDER_DOMAIN,
-            subject: copy.subject,
-            html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:32px;background:#ffffff;font-family:'Inter',Arial,sans-serif">
+        await sendManagedEmail(admin, {
+          to: reservation.guest_email,
+          from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
+          sender_domain: SENDER_DOMAIN,
+          subject: copy.subject,
+          html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:32px;background:#ffffff;font-family:'Inter',Arial,sans-serif">
   <h1 style="color:#1E1519;font-size:22px;font-family:'Playfair Display',Georgia,serif;margin:0 0 12px">${copy.title}</h1>
   <p style="color:#63516E;font-size:15px;line-height:1.6">${copy.body} <strong>${escapeHtml(reservation.date)}</strong>${reservation.start_time ? ` ${escapeHtml(String(reservation.start_time).slice(0, 5))}` : ""}.</p>
 </body></html>`,
-            purpose: "transactional",
-            label: "guest_cancellation",
-            queued_at: new Date().toISOString(),
-          },
+          label: "guest_cancellation",
         });
       } catch (mailErr) {
-        console.error("Failed to enqueue cancellation email", mailErr);
+        console.error("Failed to send cancellation email", mailErr);
       }
 
       return json({ ok: true });
