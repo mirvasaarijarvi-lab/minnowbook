@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/http-headers.ts";
+import { sendManagedEmail } from "../_shared/managed-email.ts";
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
 const FROM_DOMAIN = "mimmobook.com";
@@ -291,61 +292,23 @@ export async function handleSendOfferEmailRequest(req: Request): Promise<Respons
     }
 
     const messageId = `offer-${crypto.randomUUID()}`;
-    const generatedToken = crypto.randomUUID();
 
-    await supabaseAdmin
-      .from("email_unsubscribe_tokens")
-      .upsert({ email: recipientEmail, token: generatedToken }, { onConflict: "email", ignoreDuplicates: true });
-
-    const { data: tokenRow } = await supabaseAdmin
-      .from("email_unsubscribe_tokens")
-      .select("token")
-      .eq("email", recipientEmail)
-      .maybeSingle();
-
-    await supabaseAdmin.from("email_send_log").insert({
-      message_id: messageId,
-      template_name: OFFER_TEMPLATE_LABEL,
-      recipient_email: recipientEmail,
-      status: "pending",
-      tenant_id: tenantUser.tenant_id,
-    });
-
-    const enqueuePayload: Record<string, unknown> = {
-      to: recipientEmail,
-      from: `${displayName} <noreply@${FROM_DOMAIN}>`,
-      sender_domain: SENDER_DOMAIN,
-      subject: emailSubject,
-      html: buildOfferHtml(messageBody, downloadUrl),
-      text: buildOfferText(messageBody, downloadUrl),
-      purpose: "transactional",
-      label: OFFER_TEMPLATE_LABEL,
-      message_id: messageId,
-      idempotency_key: messageId,
-      unsubscribe_token: tokenRow?.token || generatedToken,
-      queued_at: new Date().toISOString(),
-      tenant_id: tenantUser.tenant_id,
-    };
-
-    if (replyToEmail) {
-      enqueuePayload.reply_to = replyToEmail;
-    }
-
-    const { error: enqueueError } = await supabaseAdmin.rpc("enqueue_email", {
-      queue_name: "transactional_emails",
-      payload: enqueuePayload,
-    });
-
-    if (enqueueError) {
-      await supabaseAdmin.from("email_send_log").insert({
+    try {
+      await sendManagedEmail(supabaseAdmin, {
+        to: recipientEmail,
+        from: `${displayName} <noreply@${FROM_DOMAIN}>`,
+        sender_domain: SENDER_DOMAIN,
+        subject: emailSubject,
+        html: buildOfferHtml(messageBody, downloadUrl),
+        text: buildOfferText(messageBody, downloadUrl),
+        label: OFFER_TEMPLATE_LABEL,
         message_id: messageId,
-        template_name: OFFER_TEMPLATE_LABEL,
-        recipient_email: recipientEmail,
-        status: "failed",
-        error_message: "Failed to enqueue offer email",
+        idempotency_key: messageId,
         tenant_id: tenantUser.tenant_id,
+        ...(replyToEmail ? { reply_to: replyToEmail } : {}),
       });
-
+    } catch (sendError) {
+      console.error("[send-offer-email] send failed:", sendError);
       return jsonResponse({ error: "Email send failed" }, 500);
     }
 
