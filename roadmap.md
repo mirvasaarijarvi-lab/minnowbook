@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Correct cleanup-test formatting reported by Test CI and rerun lint and its regression tests.
+
 - [x] Repair the post-email-install Bun lockfile rewrite: normalized two email-package URLs without version changes; Bun 1.3.14 with the public registry and npm 11.21.1 regenerate unchanged, manifest and hygiene checks pass, and all 13 lockfile hygiene tests pass.
 - [x] Apply the seven updates shown in PR #129 and regenerate both lockfiles.
 - [x] Check lockfile stability, hygiene, security floors, and targeted tests; regenerate SBOMs.
