@@ -11,7 +11,8 @@
 # Scheduled job pressure
 
 - [x] Discard only the old booking-email backlog and preserve account messages: 3,280 removed through the existing deletion RPC, both queues verified empty.
-- [ ] Verify future email delivery: email-sending update rewritten (all senders send directly, account emails keep branding, old queue pieces removed). Blocked on the user publishing the update, then a fresh test send.
+- [x] Verify future email delivery: update published, test email received by the owner.
+- [x] Dashboard delivery warning ignores reserved test addresses (all 30 recent failures were test bookings); email log rows kept.
 
 - [x] Identify safe cadence reductions without breaking required delivery and retention timing.
 - [x] Reduce disabled test-cleanup checks to weekly and verify live schedules; preserve delivery-critical jobs.
