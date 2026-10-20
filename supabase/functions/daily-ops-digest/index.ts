@@ -10,6 +10,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/http-headers.ts";
 import { requireAuth } from "../_shared/require-auth.ts";
+import { sendManagedEmail } from "../_shared/managed-email.ts";
 
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
@@ -262,21 +263,18 @@ export async function handleDailyOpsDigestRequest(req: Request): Promise<Respons
       const subjectPrefix = staffTenantId ? "Test run sheet" : "Run sheet";
 
       for (const to of recipients) {
-        const { error: enqueueErr } = await admin.rpc("enqueue_email", {
-          queue_name: "transactional_emails",
-          payload: {
+        try {
+          const result = await sendManagedEmail(admin, {
             to,
             from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
             sender_domain: SENDER_DOMAIN,
             subject: `${subjectPrefix} ${date} · ${setting.business_name || "MimmoBook"}`,
             html,
-            purpose: "transactional",
             label: staffTenantId ? "daily_ops_digest_test" : "daily_ops_digest",
-            queued_at: new Date().toISOString(),
-          },
-        });
-        if (enqueueErr) {
-          console.error("Failed to enqueue digest", enqueueErr.message);
+          });
+          if (!result.sent) continue;
+        } catch (sendErr) {
+          console.error("Failed to send digest", sendErr instanceof Error ? sendErr.message : sendErr);
           continue;
         }
         enqueued++;

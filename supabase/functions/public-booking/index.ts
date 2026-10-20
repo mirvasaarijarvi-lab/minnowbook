@@ -7,6 +7,7 @@ import {
   type OccasionErrorContext,
 } from "../_shared/booking-error-codes.ts";
 import { corsHeaders } from "../_shared/http-headers.ts";
+import { sendManagedEmail } from "../_shared/managed-email.ts";
 import { applyDedupFilters, RETRY_WINDOW_MINUTES } from "../_shared/booking-dedup.ts";
 import { parseSeatingTimes, validateOccasionBooking } from "../_shared/special-occasions.ts";
 
@@ -1393,37 +1394,17 @@ export const handlePublicBookingRequest = async (req: Request): Promise<Response
         }
       }
 
-      const unsubToken = crypto.randomUUID();
-      await adminClient
-        .from("email_unsubscribe_tokens")
-        .upsert({ email: guest_email, token: unsubToken }, { onConflict: "email", ignoreDuplicates: true });
-      const { data: tokenRow } = await adminClient
-        .from("email_unsubscribe_tokens")
-        .select("token")
-        .eq("email", guest_email)
-        .maybeSingle();
-
       const ackIdempotencyKey = `ack-${insertedRes.id}`;
-      const enqueuePayload: Record<string, any> = {
+      await sendManagedEmail(adminClient, {
         to: guest_email,
         from: `${businessName} <noreply@${SENDER_DOMAIN}>`,
         sender_domain: SENDER_DOMAIN,
         subject: tr.subject,
         html: ackHtml,
-        purpose: "transactional",
         label: "booking_acknowledgment",
         message_id: ackIdempotencyKey,
         idempotency_key: ackIdempotencyKey,
-        unsubscribe_token: tokenRow?.token || unsubToken,
-        queued_at: new Date().toISOString(),
-      };
-      if (replyToEmail) {
-        enqueuePayload.reply_to = replyToEmail;
-      }
-
-      await adminClient.rpc("enqueue_email", {
-        queue_name: "transactional_emails",
-        payload: enqueuePayload,
+        ...(replyToEmail ? { reply_to: replyToEmail } : {}),
       });
 
       await adminClient

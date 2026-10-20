@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/http-headers.ts";
+import { sendManagedEmail } from "../_shared/managed-email.ts";
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
 
@@ -442,45 +443,20 @@ export async function handleSendReminderRequest(req: Request): Promise<Response>
       }
     }
 
-    // Enqueue via transactional email queue
-    // Generate or reuse unsubscribe token
-    const unsubToken = crypto.randomUUID();
-    await adminClient
-      .from("email_unsubscribe_tokens")
-      .upsert({ email: reservation.guest_email, token: unsubToken }, { onConflict: "email", ignoreDuplicates: true });
-    const { data: tokenRow } = await adminClient
-      .from("email_unsubscribe_tokens")
-      .select("token")
-      .eq("email", reservation.guest_email)
-      .maybeSingle();
-
+    // Send through managed email delivery
     const reminderIdempotencyKey = `${emailType}-${reservationId}`;
-    const enqueuePayload: Record<string, any> = {
+    await sendManagedEmail(adminClient, {
       to: reservation.guest_email,
       from: `${fromName} <noreply@${SENDER_DOMAIN}>`,
       sender_domain: SENDER_DOMAIN,
       subject,
       html,
-      purpose: "transactional",
       label: `booking_${emailType}`,
       message_id: reminderIdempotencyKey,
       idempotency_key: reminderIdempotencyKey,
-      unsubscribe_token: tokenRow?.token || unsubToken,
-      queued_at: new Date().toISOString(),
-    };
-    if (replyToEmail) {
-      enqueuePayload.reply_to = replyToEmail;
-    }
-
-    const { error: enqueueError } = await adminClient.rpc("enqueue_email", {
-      queue_name: "transactional_emails",
-      payload: enqueuePayload,
+      tenant_id: tenantId,
+      ...(replyToEmail ? { reply_to: replyToEmail } : {}),
     });
-
-    if (enqueueError) {
-      console.error("Failed to enqueue email:", enqueueError);
-      throw new Error("Failed to queue email for sending");
-    }
 
     // Update the appropriate sent_at timestamp
     const timestampField =

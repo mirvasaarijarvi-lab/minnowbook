@@ -12,6 +12,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/http-headers.ts";
 import { requireAuth } from "../_shared/require-auth.ts";
+import { sendManagedEmail } from "../_shared/managed-email.ts";
 import {
   addDaysIso,
   normalizeTimezone,
@@ -311,22 +312,19 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
       const subjectPrefix = staffTenantId ? "Test weekly report" : "Weekly report";
 
       for (const to of recipients) {
-        const { error: enqueueErr } = await admin.rpc("enqueue_email", {
-          queue_name: "transactional_emails",
-          payload: {
+        try {
+          const result = await sendManagedEmail(admin, {
             to,
             from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
             sender_domain: SENDER_DOMAIN,
             subject: `${subjectPrefix} ${startDate} to ${endDate} · ${businessName}`,
             html,
-            purpose: "transactional",
             label: staffTenantId ? "weekly_ops_report_test" : "weekly_ops_report",
             tenant_id: setting.tenant_id,
-            queued_at: new Date().toISOString(),
-          },
-        });
-        if (enqueueErr) {
-          console.error("Failed to enqueue weekly report", enqueueErr.message);
+          });
+          if (!result.sent) continue;
+        } catch (sendErr) {
+          console.error("Failed to send weekly report", sendErr instanceof Error ? sendErr.message : sendErr);
           continue;
         }
         enqueued++;

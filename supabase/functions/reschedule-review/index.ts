@@ -8,6 +8,7 @@
 //   guest with the venue's sender identity.
 import { getCorsHeaders } from "../_shared/http-headers.ts";
 import { requireAuth } from "../_shared/require-auth.ts";
+import { sendManagedEmail } from "../_shared/managed-email.ts";
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
 
@@ -194,26 +195,21 @@ export async function handleRescheduleReviewRequest(req: Request): Promise<Respo
       : reservation.start_time;
 
     try {
-      await adminClient.rpc("enqueue_email", {
-        queue_name: "transactional_emails",
-        payload: {
-          to: reservation.guest_email,
-          from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
-          sender_domain: SENDER_DOMAIN,
-          subject: variant.subject,
-          html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+      await sendManagedEmail(adminClient, {
+        to: reservation.guest_email,
+        from: `MimmoBook <noreply@${SENDER_DOMAIN}>`,
+        sender_domain: SENDER_DOMAIN,
+        subject: variant.subject,
+        html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
 <body style="margin:0;padding:32px;background:#ffffff;font-family:'Inter',Arial,sans-serif">
   <h1 style="color:#1E1519;font-size:22px;font-family:'Playfair Display',Georgia,serif;margin:0 0 12px">${variant.title}</h1>
   <p style="color:#63516E;font-size:15px;line-height:1.6">${variant.body} <strong>${escapeHtml(shownDate)}</strong>${shownTime ? ` ${escapeHtml(String(shownTime).slice(0, 5))}` : ""}.</p>
   ${guestNote ? `<p style="color:#63516E;font-size:14px;line-height:1.6"><strong>${copy.noteLabel}:</strong><br>${escapeHtml(guestNote)}</p>` : ""}
 </body></html>`,
-          purpose: "transactional",
-          label: `reschedule_${decision}`,
-          queued_at: new Date().toISOString(),
-        },
+        label: `reschedule_${decision}`,
       });
     } catch (mailErr) {
-      console.error("Failed to enqueue reschedule decision email", mailErr);
+      console.error("Failed to send reschedule decision email", mailErr);
     }
 
     return json({ ok: true, decision });

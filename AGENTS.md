@@ -1,6 +1,6 @@
 # Project rules
 
-- Keep Lovable email callbacks under `/lovable/email/` authenticated by their own handlers and exempt from app redirects; the managed queue setup owns scheduling and credentials.
+- Keep Lovable email callbacks under `/lovable/email/` authenticated by their own handlers and exempt from app redirects. Edge-function senders send directly through `_shared/managed-email.ts` (no queue), because Lovable's managed delivery owns retries, suppression and unsubscribe.
 
 - Keep one-off application job cadence changes as scoped SQL with adjacent regression tests; do not alter platform-managed email queue functions, because wake/disarm behavior and credentials are maintained by Lovable Cloud.
 
