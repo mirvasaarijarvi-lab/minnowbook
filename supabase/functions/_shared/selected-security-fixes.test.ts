@@ -140,8 +140,8 @@ Deno.test("reschedule-review: staff note is saved but never put in the guest ema
   const src = await read("../reschedule-review/index.ts");
   assert(/const guestNote: string \| null = null;/.test(src), "guestNote must be fixed to null");
   assert(/staff_note:\s*staffNote/.test(src), "staff note must still be saved on the request");
-  const emailStart = src.indexOf('rpc("enqueue_email"');
-  assert(emailStart > 0, "email enqueue not found");
+  const emailStart = src.indexOf("await sendManagedEmail(");
+  assert(emailStart > 0, "guest email send not found");
   const htmlStart = src.lastIndexOf("<p", src.indexOf("noteLabel"));
   const emailArea = src.slice(Math.min(emailStart, htmlStart));
   assert(!/staffNote|staff_note|body\.staff_note/.test(emailArea), "staff note used in guest email");
