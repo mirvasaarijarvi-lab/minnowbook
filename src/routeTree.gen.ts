@@ -41,6 +41,7 @@ import { Route as SuperadminIndexRouteImport } from './routes/superadmin/index'
 import { Route as SuperadminBlogJsonLdRouteImport } from './routes/superadmin/blog-json-ld'
 import { Route as SuperadminGaDebugRouteImport } from './routes/superadmin/ga-debug'
 import { Route as SuperadminGaValidateRouteImport } from './routes/superadmin/ga-validate'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -202,6 +203,12 @@ const SuperadminGaValidateRoute = SuperadminGaValidateRouteImport.update({
   path: '/superadmin/ga-validate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByFullPath {
   '/superadmin/ga-validate': typeof SuperadminGaValidateRoute
   '/blog/': typeof BlogIndexRoute
   '/superadmin/': typeof SuperadminIndexRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -270,6 +278,7 @@ export interface FileRoutesByTo {
   '/superadmin/ga-validate': typeof SuperadminGaValidateRoute
   '/blog': typeof BlogIndexRoute
   '/superadmin': typeof SuperadminIndexRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -305,6 +314,7 @@ export interface FileRoutesById {
   '/superadmin/ga-validate': typeof SuperadminGaValidateRoute
   '/blog/': typeof BlogIndexRoute
   '/superadmin/': typeof SuperadminIndexRoute
+  '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -341,6 +351,7 @@ export interface FileRouteTypes {
     | '/superadmin/ga-validate'
     | '/blog/'
     | '/superadmin/'
+    | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -375,6 +386,7 @@ export interface FileRouteTypes {
     | '/superadmin/ga-validate'
     | '/blog'
     | '/superadmin'
+    | '/lovable/email/queue/process'
   id:
     | '__root__'
     | '/'
@@ -409,6 +421,7 @@ export interface FileRouteTypes {
     | '/superadmin/ga-validate'
     | '/blog/'
     | '/superadmin/'
+    | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -444,6 +457,7 @@ export interface RootRouteChildren {
   SuperadminGaValidateRoute: typeof SuperadminGaValidateRoute
   BlogIndexRoute: typeof BlogIndexRoute
   SuperadminIndexRoute: typeof SuperadminIndexRoute
+  LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -672,6 +686,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuperadminGaValidateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -708,6 +729,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuperadminGaValidateRoute: SuperadminGaValidateRoute,
   BlogIndexRoute: BlogIndexRoute,
   SuperadminIndexRoute: SuperadminIndexRoute,
+  LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

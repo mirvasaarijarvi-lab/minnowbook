@@ -7,8 +7,8 @@
 
 # Scheduled job pressure
 
-- [ ] Discard only the old booking-email backlog and preserve account messages.
-- [ ] Repair and verify future email processing without sending the discarded backlog.
+- [x] Discard only the old booking-email backlog and preserve account messages: 3,280 removed through the existing deletion RPC, both queues verified empty.
+- [ ] Verify future email delivery: managed credentials refreshed and modern processor installed; local callback responds 401 to unauthenticated requests. Blocked on publishing the new callback and a user-approved test recipient.
 
 - [x] Identify safe cadence reductions without breaking required delivery and retention timing.
 - [x] Reduce disabled test-cleanup checks to weekly and verify live schedules; preserve delivery-critical jobs.

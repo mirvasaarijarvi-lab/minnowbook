@@ -1,5 +1,7 @@
 # Project rules
 
+- Keep Lovable email callbacks under `/lovable/email/` authenticated by their own handlers and exempt from app redirects; the managed queue setup owns scheduling and credentials.
+
 - Keep one-off application job cadence changes as scoped SQL with adjacent regression tests; do not alter platform-managed email queue functions, because wake/disarm behavior and credentials are maintained by Lovable Cloud.
 
 - Lockfiles (package-lock.json and bun.lock) reference only public registry URLs; after installs run `node scripts/ci/check-npm-lockfile-hygiene.mjs --fix-urls`, because the sandbox cache writes private URLs and CI fails on them.
