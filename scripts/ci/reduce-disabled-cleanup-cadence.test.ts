@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const sql = readFileSync(new URL('./reduce-disabled-cleanup-cadence.sql', import.meta.url), 'utf8');
+const sql = readFileSync(resolve(process.cwd(), 'scripts/ci/reduce-disabled-cleanup-cadence.sql'), 'utf8');
 
 describe('less frequent disabled test cleanup', () => {
   it('schedules the existing job once weekly on Sunday at 03:15 UTC', () => {

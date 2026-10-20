@@ -7,6 +7,6 @@
 
 # Scheduled job pressure
 
-- [ ] Identify safe cadence reductions without breaking required delivery and retention timing.
-- [ ] Apply safe schedule changes and verify live schedules.
-- [ ] Report remaining email-queue pressure and any maintenance blocker.
+- [x] Identify safe cadence reductions without breaking required delivery and retention timing.
+- [x] Reduce disabled test-cleanup checks to weekly and verify live schedules; preserve delivery-critical jobs.
+- [x] Identify remaining email-queue pressure: 3,280 unread messages and recent processor calls rejected with 401; credential recovery is a separate repair, not a cadence change.
