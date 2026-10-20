@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:3803f5b0-115d-56ad-b26f-85f024fb54ac",
+  "serialNumber": "urn:uuid:67e8c085-f9ec-54ef-9c9c-5202b3dbc308",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "c78eb0ada37fd66290db1a3bc055d10d5a68f008a26485c3b23550b9c9424f81"
+          "value": "11170dfcdca6a54ddd7f0d60a145d14110d69961b1c0c69a5f64090125504128"
         }
       ]
     }
@@ -51,6 +51,14 @@
       "scope": "required"
     },
     {
+      "bom-ref": "pkg:npm/@lovable.dev%2Femail-js@0.3.1",
+      "type": "library",
+      "name": "@lovable.dev/email-js",
+      "version": "0.3.1",
+      "purl": "pkg:npm/@lovable.dev%2Femail-js@0.3.1",
+      "scope": "required"
+    },
+    {
       "bom-ref": "pkg:npm/@lovable.dev%2Fvite-plugin-dev-server-bridge@1.0.2",
       "type": "library",
       "name": "@lovable.dev/vite-plugin-dev-server-bridge",
@@ -73,6 +81,14 @@
       "version": "2.26.7",
       "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.26.7",
       "scope": "optional"
+    },
+    {
+      "bom-ref": "pkg:npm/@lovable.dev%2Fwebhooks-js@0.0.3",
+      "type": "library",
+      "name": "@lovable.dev/webhooks-js",
+      "version": "0.0.3",
+      "purl": "pkg:npm/@lovable.dev%2Fwebhooks-js@0.0.3",
+      "scope": "required"
     },
     {
       "bom-ref": "pkg:npm/@playwright%2Ftest@1.64.0",
