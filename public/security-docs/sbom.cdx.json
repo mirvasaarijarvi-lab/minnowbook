@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:67e8c085-f9ec-54ef-9c9c-5202b3dbc308",
+  "serialNumber": "urn:uuid:fbdafb80-c187-5369-b557-a3aeae644ee5",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "11170dfcdca6a54ddd7f0d60a145d14110d69961b1c0c69a5f64090125504128"
+          "value": "07588d51cd2fe4a6ccc47cbfcf76483c68db09e269cba91d0a9554df8f868efb"
         }
       ]
     }
@@ -312,6 +312,22 @@
       "name": "@radix-ui/react-tooltip",
       "version": "1.4.0",
       "purl": "pkg:npm/@radix-ui%2Freact-tooltip@1.4.0",
+      "scope": "required"
+    },
+    {
+      "bom-ref": "pkg:npm/@react-email%2Fcomponents@1.0.12",
+      "type": "library",
+      "name": "@react-email/components",
+      "version": "1.0.12",
+      "purl": "pkg:npm/@react-email%2Fcomponents@1.0.12",
+      "scope": "required"
+    },
+    {
+      "bom-ref": "pkg:npm/@react-email%2Frender@2.0.10",
+      "type": "library",
+      "name": "@react-email/render",
+      "version": "2.0.10",
+      "purl": "pkg:npm/@react-email%2Frender@2.0.10",
       "scope": "required"
     },
     {
