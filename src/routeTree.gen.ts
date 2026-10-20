@@ -41,6 +41,8 @@ import { Route as SuperadminIndexRouteImport } from './routes/superadmin/index'
 import { Route as SuperadminBlogJsonLdRouteImport } from './routes/superadmin/blog-json-ld'
 import { Route as SuperadminGaDebugRouteImport } from './routes/superadmin/ga-debug'
 import { Route as SuperadminGaValidateRouteImport } from './routes/superadmin/ga-validate'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 
 const IndexRoute = IndexRouteImport.update({
@@ -203,6 +205,16 @@ const SuperadminGaValidateRoute = SuperadminGaValidateRouteImport.update({
   path: '/superadmin/ga-validate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -243,6 +255,8 @@ export interface FileRoutesByFullPath {
   '/superadmin/ga-validate': typeof SuperadminGaValidateRoute
   '/blog/': typeof BlogIndexRoute
   '/superadmin/': typeof SuperadminIndexRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesByTo {
@@ -278,6 +292,8 @@ export interface FileRoutesByTo {
   '/superadmin/ga-validate': typeof SuperadminGaValidateRoute
   '/blog': typeof BlogIndexRoute
   '/superadmin': typeof SuperadminIndexRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRoutesById {
@@ -314,6 +330,8 @@ export interface FileRoutesById {
   '/superadmin/ga-validate': typeof SuperadminGaValidateRoute
   '/blog/': typeof BlogIndexRoute
   '/superadmin/': typeof SuperadminIndexRoute
+  '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
+  '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
 }
 export interface FileRouteTypes {
@@ -351,6 +369,8 @@ export interface FileRouteTypes {
     | '/superadmin/ga-validate'
     | '/blog/'
     | '/superadmin/'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -386,6 +406,8 @@ export interface FileRouteTypes {
     | '/superadmin/ga-validate'
     | '/blog'
     | '/superadmin'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
   id:
     | '__root__'
@@ -421,6 +443,8 @@ export interface FileRouteTypes {
     | '/superadmin/ga-validate'
     | '/blog/'
     | '/superadmin/'
+    | '/lovable/email/auth/preview'
+    | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
   fileRoutesById: FileRoutesById
 }
@@ -457,6 +481,8 @@ export interface RootRouteChildren {
   SuperadminGaValidateRoute: typeof SuperadminGaValidateRoute
   BlogIndexRoute: typeof BlogIndexRoute
   SuperadminIndexRoute: typeof SuperadminIndexRoute
+  LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
+  LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
 }
 
@@ -686,6 +712,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuperadminGaValidateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
       path: '/lovable/email/queue/process'
@@ -729,6 +769,8 @@ const rootRouteChildren: RootRouteChildren = {
   SuperadminGaValidateRoute: SuperadminGaValidateRoute,
   BlogIndexRoute: BlogIndexRoute,
   SuperadminIndexRoute: SuperadminIndexRoute,
+  LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
+  LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
 }
 export const routeTree = rootRouteImport
