@@ -4,3 +4,9 @@
 - [x] Check lockfile stability, hygiene, security floors, and targeted tests; regenerate SBOMs.
 - [x] Reproduce the Dependabot refresh npm edgesOut crash and verify a pinned npm fixes it.
 - [x] Apply the verified npm pin to refresh and related sync/audit checks; validate workflow safety.
+
+# Scheduled job pressure
+
+- [ ] Identify safe cadence reductions without breaking required delivery and retention timing.
+- [ ] Apply safe schedule changes and verify live schedules.
+- [ ] Report remaining email-queue pressure and any maintenance blocker.
