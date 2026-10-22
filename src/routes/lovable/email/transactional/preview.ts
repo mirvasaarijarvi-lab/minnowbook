@@ -21,9 +21,8 @@ export const Route = createFileRoute("/lovable/email/transactional/preview")({
         // Verify the caller is authorized with LOVABLE_API_KEY
         const authHeader = request.headers.get("Authorization");
         const token = authHeader?.replace(/^Bearer\s+/i, "");
-        const { matchesEmailPreviewSecret } = await import(
-          "@/lib/email-preview-auth.server"
-        );
+        const { matchesEmailPreviewSecret } =
+          await import("@/lib/email-preview-auth.server");
         if (!matchesEmailPreviewSecret(token, apiKey)) {
           return Response.json({ error: "Unauthorized" }, { status: 401 });
         }
