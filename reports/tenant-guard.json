@@ -1,8 +1,8 @@
 {
   "records": [
     {
-      "suite": "cross-tenant-rls",
-      "recordedAt": "2026-09-27T13:11:01.995Z",
+      "suite": "discount-redemption-fuzz",
+      "recordedAt": "2026-10-06T05:59:26.998Z",
       "tenantA": "341849d8-0c52-428d-9efd-3000af4d13a7",
       "tenantB": "d76a4af7-0ea1-4c5b-9f7c-d8db856e8427",
       "membershipA": true,
@@ -11,8 +11,8 @@
       "emailB": "rls-fixture-b@mimmobook.local"
     },
     {
-      "suite": "discount-redemption-fuzz",
-      "recordedAt": "2026-10-06T05:59:26.998Z",
+      "suite": "cross-tenant-rls",
+      "recordedAt": "2026-10-27T06:45:53.527Z",
       "tenantA": "341849d8-0c52-428d-9efd-3000af4d13a7",
       "tenantB": "d76a4af7-0ea1-4c5b-9f7c-d8db856e8427",
       "membershipA": true,
