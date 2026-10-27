@@ -15,6 +15,10 @@
  */
 const PER_ATTEMPT_TIMEOUT_MS = 8_000;
 
+function isTransientNetworkError(err: unknown): boolean {
+  return err instanceof TypeError;
+}
+
 export async function fetchWithColdStartRetry(
   input: string,
   init: RequestInit,
@@ -38,7 +42,10 @@ export async function fetchWithColdStartRetry(
         (typeof err === "object" &&
           err !== null &&
           (err as { name?: string }).name === "AbortError");
-      if (!aborted) throw err;
+      // Connection resets and DNS/TLS hiccups surface as a thrown
+      // TypeError ("fetch failed"); treat them like a timeout so one
+      // dropped connection does not fail an otherwise healthy probe.
+      if (!aborted && !isTransientNetworkError(err)) throw err;
       return { res: null, aborted: true };
     } finally {
       clearTimeout(t);
@@ -95,3 +102,20 @@ export async function fetchWithColdStartRetry(
     },
   );
 }
+
+/**
+ * `fetch`-compatible adapter for clients that accept a custom fetch
+ * (for example `createClient(url, key, { global: { fetch: retryingFetch } })`).
+ * Only safe for read-only or idempotent probes, because a timed-out
+ * attempt is sent again.
+ */
+export const retryingFetch: typeof fetch = (input, init) => {
+  if (typeof Request !== "undefined" && input instanceof Request) {
+    return fetchWithColdStartRetry(input.url, {
+      method: input.method,
+      headers: input.headers,
+      ...init,
+    });
+  }
+  return fetchWithColdStartRetry(String(input), init ?? {});
+};

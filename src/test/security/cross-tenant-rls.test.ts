@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { retryingFetch } from "./cold-start-retry";
 import {
   expectReadDenied,
   expectWriteDenied,
@@ -151,6 +152,9 @@ const hasSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 const newAnonClient = (): SupabaseClient =>
   createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
+    // Bounded per-attempt timeout + retry: a single hung connection
+    // would otherwise stall the first probe until the test times out.
+    global: { fetch: retryingFetch },
   });
 
 describe("Cross-Tenant RLS Regression Tests", () => {
