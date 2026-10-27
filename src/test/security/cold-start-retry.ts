@@ -24,7 +24,7 @@ export async function fetchWithColdStartRetry(
   init: RequestInit,
 ): Promise<Response> {
   const method = (init.method ?? "GET").toUpperCase();
-  const maxAttempts = 3; // 1 initial + 2 retries
+  const maxAttempts = 4; // 1 initial + 3 retries
   const baseDelayMs = 500;
 
   async function attempt(): Promise<{
@@ -59,13 +59,26 @@ export async function fetchWithColdStartRetry(
       (last.res !== null &&
         (last.res.status === 502 ||
           last.res.status === 503 ||
-          last.res.status === 504));
+          last.res.status === 504 ||
+          // Platform gateway rate limit: the request never reached the
+          // function, and the gateway's own reply carries a wildcard
+          // CORS header, so asserting on it would test the platform.
+          last.res.status === 429));
     if (!transient) return last.res as Response;
 
     // Drain body so the connection can be reused.
     if (last.res) await last.res.text().catch(() => "");
 
-    const expDelay = baseDelayMs * Math.pow(3, i - 1);
+    const retryAfterSec = Number(last.res?.headers.get("retry-after"));
+    const expDelay =
+      last.res?.status === 429
+        ? Math.min(
+            Number.isFinite(retryAfterSec) && retryAfterSec > 0
+              ? retryAfterSec * 1000
+              : 1000 * Math.pow(2, i),
+            10_000,
+          )
+        : baseDelayMs * Math.pow(3, i - 1);
     const jitter = expDelay * 0.25 * (Math.random() * 2 - 1);
     const delay = Math.max(0, Math.round(expDelay + jitter));
     const statusLabel = last.aborted

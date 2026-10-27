@@ -20,6 +20,21 @@ describe("cold-start retry helper", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("retries a platform rate-limit (429) reply", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response("{}", { status: 429, headers: { "retry-after": "0.01" } }),
+      )
+      .mockResolvedValueOnce(new Response("", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const res = await fetchWithColdStartRetry("https://example.test/x", {});
+    expect(res.status).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("does not retry a real 4xx answer", async () => {
     const fetchMock = vi
       .fn()

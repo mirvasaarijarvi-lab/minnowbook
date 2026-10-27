@@ -12,7 +12,7 @@
     },
     {
       "suite": "cross-tenant-rls",
-      "recordedAt": "2026-10-27T06:45:53.527Z",
+      "recordedAt": "2026-10-27T06:50:53.439Z",
       "tenantA": "341849d8-0c52-428d-9efd-3000af4d13a7",
       "tenantB": "d76a4af7-0ea1-4c5b-9f7c-d8db856e8427",
       "membershipA": true,
