@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:fbdafb80-c187-5369-b557-a3aeae644ee5",
+  "serialNumber": "urn:uuid:f8ee8982-a41e-5345-87ec-ac0e5538c8b4",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "d8c60f4cb9d72c1e92d2f6ffafaac5b9434ca4a38d4c0fd4c2c126cc441c4134"
+          "value": "c89e7e7d4323e4c5fe70759ec9c3790cbf7da06a6d3a1d6a6984e2c14238af0b"
         }
       ]
     }
@@ -35,11 +35,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@hookform%2Fresolvers@5.2.2",
+      "bom-ref": "pkg:npm/@hookform%2Fresolvers@5.9.2",
       "type": "library",
       "name": "@hookform/resolvers",
-      "version": "5.2.2",
-      "purl": "pkg:npm/@hookform%2Fresolvers@5.2.2",
+      "version": "5.9.2",
+      "purl": "pkg:npm/@hookform%2Fresolvers@5.9.2",
       "scope": "required"
     },
     {
@@ -51,27 +51,27 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Femail-js@0.3.1",
+      "bom-ref": "pkg:npm/@lovable.dev%2Femail-js@0.5.0",
       "type": "library",
       "name": "@lovable.dev/email-js",
-      "version": "0.3.1",
-      "purl": "pkg:npm/@lovable.dev%2Femail-js@0.3.1",
+      "version": "0.5.0",
+      "purl": "pkg:npm/@lovable.dev%2Femail-js@0.5.0",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-plugin-dev-server-bridge@1.0.2",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-plugin-dev-server-bridge@1.3.3",
       "type": "library",
       "name": "@lovable.dev/vite-plugin-dev-server-bridge",
-      "version": "1.0.2",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-plugin-dev-server-bridge@1.0.2",
+      "version": "1.3.3",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-plugin-dev-server-bridge@1.3.3",
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-plugin-hmr-gate@1.8.0",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-plugin-hmr-gate@1.8.2",
       "type": "library",
       "name": "@lovable.dev/vite-plugin-hmr-gate",
-      "version": "1.8.0",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-plugin-hmr-gate@1.8.0",
+      "version": "1.8.2",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-plugin-hmr-gate@1.8.2",
       "scope": "optional"
     },
     {
@@ -331,11 +331,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.117.3",
+      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.118.0",
       "type": "library",
       "name": "@supabase/supabase-js",
-      "version": "2.117.3",
-      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.117.3",
+      "version": "2.118.0",
+      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.118.0",
       "scope": "required"
     },
     {
@@ -355,35 +355,35 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.104.2",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.104.5",
       "type": "library",
       "name": "@tanstack/react-query",
-      "version": "5.104.2",
-      "purl": "pkg:npm/@tanstack%2Freact-query@5.104.2",
+      "version": "5.104.5",
+      "purl": "pkg:npm/@tanstack%2Freact-query@5.104.5",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.44",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-router@1.170.46",
       "type": "library",
       "name": "@tanstack/react-router",
-      "version": "1.170.44",
-      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.44",
+      "version": "1.170.46",
+      "purl": "pkg:npm/@tanstack%2Freact-router@1.170.46",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.1",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.4",
       "type": "library",
       "name": "@tanstack/react-start",
-      "version": "1.169.1",
-      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.1",
+      "version": "1.169.4",
+      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.4",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.45",
+      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.48",
       "type": "library",
       "name": "@tanstack/router-plugin",
-      "version": "1.168.45",
-      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.45",
+      "version": "1.168.48",
+      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.48",
       "scope": "required"
     },
     {
@@ -539,11 +539,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/eslint-plugin-prettier@5.2.6",
+      "bom-ref": "pkg:npm/eslint-plugin-prettier@5.5.7",
       "type": "library",
       "name": "eslint-plugin-prettier",
-      "version": "5.2.6",
-      "purl": "pkg:npm/eslint-plugin-prettier@5.2.6",
+      "version": "5.5.7",
+      "purl": "pkg:npm/eslint-plugin-prettier@5.5.7",
       "scope": "optional"
     },
     {
@@ -611,19 +611,19 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/jspdf-autotable@5.0.8",
+      "bom-ref": "pkg:npm/jspdf-autotable@5.0.9",
       "type": "library",
       "name": "jspdf-autotable",
-      "version": "5.0.8",
-      "purl": "pkg:npm/jspdf-autotable@5.0.8",
+      "version": "5.0.9",
+      "purl": "pkg:npm/jspdf-autotable@5.0.9",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.56.0",
+      "bom-ref": "pkg:npm/lucide-react@1.61.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.56.0",
-      "purl": "pkg:npm/lucide-react@1.56.0",
+      "version": "1.61.0",
+      "purl": "pkg:npm/lucide-react@1.61.0",
       "scope": "required"
     },
     {
@@ -667,11 +667,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/react@19.3.0",
+      "bom-ref": "pkg:npm/react@19.3.1",
       "type": "library",
       "name": "react",
-      "version": "19.3.0",
-      "purl": "pkg:npm/react@19.3.0",
+      "version": "19.3.1",
+      "purl": "pkg:npm/react@19.3.1",
       "scope": "required"
     },
     {
@@ -683,27 +683,27 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-dom@19.3.0",
+      "bom-ref": "pkg:npm/react-dom@19.3.1",
       "type": "library",
       "name": "react-dom",
-      "version": "19.3.0",
-      "purl": "pkg:npm/react-dom@19.3.0",
+      "version": "19.3.1",
+      "purl": "pkg:npm/react-dom@19.3.1",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-hook-form@7.90.0",
+      "bom-ref": "pkg:npm/react-hook-form@7.91.0",
       "type": "library",
       "name": "react-hook-form",
-      "version": "7.90.0",
-      "purl": "pkg:npm/react-hook-form@7.90.0",
+      "version": "7.91.0",
+      "purl": "pkg:npm/react-hook-form@7.91.0",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-resizable-panels@4.14.4",
+      "bom-ref": "pkg:npm/react-resizable-panels@4.14.8",
       "type": "library",
       "name": "react-resizable-panels",
-      "version": "4.14.4",
-      "purl": "pkg:npm/react-resizable-panels@4.14.4",
+      "version": "4.14.8",
+      "purl": "pkg:npm/react-resizable-panels@4.14.8",
       "scope": "required"
     },
     {
@@ -755,11 +755,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/typescript-eslint@8.71.2",
+      "bom-ref": "pkg:npm/typescript-eslint@8.72.0",
       "type": "library",
       "name": "typescript-eslint",
-      "version": "8.71.2",
-      "purl": "pkg:npm/typescript-eslint@8.71.2",
+      "version": "8.72.0",
+      "purl": "pkg:npm/typescript-eslint@8.72.0",
       "scope": "optional"
     },
     {
@@ -771,11 +771,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/vite@8.3.4",
+      "bom-ref": "pkg:npm/vite@8.3.5",
       "type": "library",
       "name": "vite",
-      "version": "8.3.4",
-      "purl": "pkg:npm/vite@8.3.4",
+      "version": "8.3.5",
+      "purl": "pkg:npm/vite@8.3.5",
       "scope": "optional"
     },
     {
@@ -787,11 +787,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/vitest@4.1.9",
+      "bom-ref": "pkg:npm/vitest@4.1.12",
       "type": "library",
       "name": "vitest",
-      "version": "4.1.9",
-      "purl": "pkg:npm/vitest@4.1.9",
+      "version": "4.1.12",
+      "purl": "pkg:npm/vitest@4.1.12",
       "scope": "optional"
     },
     {
