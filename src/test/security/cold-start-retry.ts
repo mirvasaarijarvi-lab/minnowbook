@@ -15,12 +15,16 @@
  */
 const PER_ATTEMPT_TIMEOUT_MS = 8_000;
 
+function isTransientNetworkError(err: unknown): boolean {
+  return err instanceof TypeError;
+}
+
 export async function fetchWithColdStartRetry(
   input: string,
   init: RequestInit,
 ): Promise<Response> {
   const method = (init.method ?? "GET").toUpperCase();
-  const maxAttempts = 3; // 1 initial + 2 retries
+  const maxAttempts = 4; // 1 initial + 3 retries
   const baseDelayMs = 500;
 
   async function attempt(): Promise<{
@@ -38,7 +42,10 @@ export async function fetchWithColdStartRetry(
         (typeof err === "object" &&
           err !== null &&
           (err as { name?: string }).name === "AbortError");
-      if (!aborted) throw err;
+      // Connection resets and DNS/TLS hiccups surface as a thrown
+      // TypeError ("fetch failed"); treat them like a timeout so one
+      // dropped connection does not fail an otherwise healthy probe.
+      if (!aborted && !isTransientNetworkError(err)) throw err;
       return { res: null, aborted: true };
     } finally {
       clearTimeout(t);
@@ -52,13 +59,26 @@ export async function fetchWithColdStartRetry(
       (last.res !== null &&
         (last.res.status === 502 ||
           last.res.status === 503 ||
-          last.res.status === 504));
+          last.res.status === 504 ||
+          // Platform gateway rate limit: the request never reached the
+          // function, and the gateway's own reply carries a wildcard
+          // CORS header, so asserting on it would test the platform.
+          last.res.status === 429));
     if (!transient) return last.res as Response;
 
     // Drain body so the connection can be reused.
     if (last.res) await last.res.text().catch(() => "");
 
-    const expDelay = baseDelayMs * Math.pow(3, i - 1);
+    const retryAfterSec = Number(last.res?.headers.get("retry-after"));
+    const expDelay =
+      last.res?.status === 429
+        ? Math.min(
+            Number.isFinite(retryAfterSec) && retryAfterSec > 0
+              ? retryAfterSec * 1000
+              : 1000 * Math.pow(2, i),
+            10_000,
+          )
+        : baseDelayMs * Math.pow(3, i - 1);
     const jitter = expDelay * 0.25 * (Math.random() * 2 - 1);
     const delay = Math.max(0, Math.round(expDelay + jitter));
     const statusLabel = last.aborted
@@ -95,3 +115,20 @@ export async function fetchWithColdStartRetry(
     },
   );
 }
+
+/**
+ * `fetch`-compatible adapter for clients that accept a custom fetch
+ * (for example `createClient(url, key, { global: { fetch: retryingFetch } })`).
+ * Only safe for read-only or idempotent probes, because a timed-out
+ * attempt is sent again.
+ */
+export const retryingFetch: typeof fetch = (input, init) => {
+  if (typeof Request !== "undefined" && input instanceof Request) {
+    return fetchWithColdStartRetry(input.url, {
+      method: input.method,
+      headers: input.headers,
+      ...init,
+    });
+  }
+  return fetchWithColdStartRetry(String(input), init ?? {});
+};

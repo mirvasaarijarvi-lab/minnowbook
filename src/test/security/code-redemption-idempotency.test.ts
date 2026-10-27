@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
+import { fetchWithColdStartRetry } from "./cold-start-retry";
 
 /**
  * Idempotency tests for `redeem-access-code`.
@@ -89,7 +90,7 @@ async function callRedeem(opts: CallOpts) {
     headers["Idempotency-Key"] = opts.idempotencyKey;
   }
 
-  const res = await fetch(FUNCTION_URL, {
+  const res = await fetchWithColdStartRetry(FUNCTION_URL, {
     method: "POST",
     headers,
     body: JSON.stringify(body),
@@ -191,7 +192,7 @@ describe("redeem-access-code — idempotency key contract", () => {
         first.rawText,
       );
     }
-  }, 30_000);
+  }, 120_000);
 
   it("parallel calls with the same key collapse to a single deterministic outcome", async () => {
     // Hit the function 10 times concurrently with the same key. All

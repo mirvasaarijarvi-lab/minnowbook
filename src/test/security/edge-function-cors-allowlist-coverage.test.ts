@@ -18,6 +18,7 @@
  */
 import "@/test/setup";
 import { describe, it, expect } from "vitest";
+import { fetchWithColdStartRetry } from "./cold-start-retry";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
@@ -113,7 +114,10 @@ async function preflight(name: string, origin: string) {
     "Access-Control-Request-Headers": "authorization, content-type, apikey",
   };
   if (origin !== "") headers["Origin"] = origin;
-  return await fetch(fnUrl(name), { method: "OPTIONS", headers });
+  return await fetchWithColdStartRetry(fnUrl(name), {
+    method: "OPTIONS",
+    headers,
+  });
 }
 
 // -------- Sanity checks on local allowlist mirror --------
