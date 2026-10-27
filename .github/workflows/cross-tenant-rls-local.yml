@@ -394,7 +394,9 @@ jobs:
         # race (transient `address already in use` on 54322 has been observed
         # on GitHub-hosted runners even after the preflight cleanup).
         run: |
-          set -uo pipefail
+          # GitHub's default bash runs with -e; turn it off so a failed
+          # attempt reaches the retry loop instead of ending the step.
+          set +e -uo pipefail
           free_ports() {
             # Stop host-installed Postgres (often bound to :5432 but sometimes
             # bleeds into the Supabase range on prewarmed runner images).
