@@ -80,7 +80,8 @@
     "postcss-selector-parser": "^7.1.6",
     "shell-quote": "^1.11.0",
     "zod": "^4.6.7",
-    "traverse": ">=0.3.10 <0.4"
+    "traverse": ">=0.3.10 <0.4",
+    "seroval": "1.6.11"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

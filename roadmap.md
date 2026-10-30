@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Fix the two reported seroval injection advisories, refresh both lockfiles and SBOMs, and verify the audit gate.
+
 - [x] Correct cleanup-test formatting reported by Test CI: full lint passes and both regression tests pass.
 
 - [x] Repair the post-email-install Bun lockfile rewrite: normalized two email-package URLs without version changes; Bun 1.3.14 with the public registry and npm 11.21.1 regenerate unchanged, manifest and hygiene checks pass, and all 13 lockfile hygiene tests pass.
