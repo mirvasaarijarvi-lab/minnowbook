@@ -1,6 +1,6 @@
 # Dependency sync
 
-- [ ] Fix the two reported seroval injection advisories, refresh both lockfiles and SBOMs, and verify the audit gate.
+- [x] Fix both reported seroval injection advisories with compatible version 1.6.11; both lockfiles and SBOMs refreshed, audit gate has zero blocking findings, and all 15 security and lockfile regression tests pass.
 
 - [x] Correct cleanup-test formatting reported by Test CI: full lint passes and both regression tests pass.
 
