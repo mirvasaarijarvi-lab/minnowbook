@@ -137,7 +137,7 @@ jobs:
               echo "    - 'No data leak when service role key missing' test will run in validate-only mode (no insert)."
               echo "    - 'Validation-only request leaves row count unchanged' test will be ignored (needs service role for count)."
               echo ""
-              echo "Add SUPABASE_SERVICE_ROLE_KEY under **Settings → Secrets and variables → Actions** to run the full suite. Use the service-role key from Lovable Cloud (Backend → API keys)."
+              echo "Lovable Cloud does not expose service-role keys. Validation-only checks remain supported; full database verification requires an isolated CI test backend. Do not enable REQUIRE_SERVICE_ROLE_KEY for Cloud-only live tests."
             } >> "$summary"
 
             if [ "${REQUIRE_SERVICE_ROLE_KEY:-0}" = "1" ]; then
