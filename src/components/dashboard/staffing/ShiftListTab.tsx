@@ -68,6 +68,8 @@ import { STAFF_LABELS, type StaffLang } from "@/lib/staffing/labels";
 import StaffRegisterDialog from "./StaffRegisterDialog";
 import StaffingSettingsDialog from "./StaffingSettingsDialog";
 import ShiftHistoryDialog from "./ShiftHistoryDialog";
+import DailyShiftView from "./DailyShiftView";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const NONE = "__none__";
 const roleName = (r: StaffRole | undefined, lang: StaffLang) =>
@@ -108,12 +110,14 @@ const CellInput = ({
   placeholder,
   disabled,
   label,
+  large = false,
 }: {
   value: string;
   onCommit: (v: string) => boolean;
   placeholder?: string;
   disabled?: boolean;
   label: string;
+  large?: boolean;
 }) => {
   const [v, setV] = useState(value);
   const [bad, setBad] = useState(false);
@@ -146,13 +150,16 @@ const CellInput = ({
         )
           e.preventDefault();
       }}
-      className={`w-full min-w-[3.2rem] bg-transparent px-1 py-1 text-center text-[11px] outline-none focus:bg-accent/40 disabled:opacity-60 ${bad ? "text-destructive" : ""}`}
+      className={`${large ? "h-12 w-full min-w-0 rounded-md border border-border bg-background px-3 text-base focus-visible:ring-2 focus-visible:ring-ring" : "w-full min-w-[3.2rem] bg-transparent px-1 py-1 text-center text-[11px] focus:bg-accent/40"} outline-none disabled:opacity-60 ${bad ? "text-destructive" : ""}`}
     />
   );
 };
 
 export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   const L = STAFF_LABELS[lang];
+  const isMobile = useIsMobile();
+  const [mobileView, setMobileView] = useState<"daily" | "table">("daily");
+  const [dailyDate, setDailyDate] = useState("");
   const { isAdmin, tenant, tenantId } = useTenant();
   const { isGated } = useTierGate();
   const proLocked = isGated("basic");
@@ -248,6 +255,11 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
     );
   }, [period]);
   const roleMap = useMemo(() => new Map(roles.map((r) => [r.key, r])), [roles]);
+  useEffect(() => {
+    if (days.includes(dailyDate)) return;
+    const today = format(new Date(), "yyyy-MM-dd");
+    setDailyDate(days.includes(today) ? today : (days[0] ?? ""));
+  }, [days, dailyDate]);
   // Staff the open list may use: those at its location plus all-locations
   // staff. An all-locations list may use everyone.
   const siteMembers = useMemo(
@@ -829,236 +841,320 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
 
       {period && data && (
         <div id="shift-print">
+          {isMobile && (
+            <div
+              className="no-print mb-4 flex gap-2"
+              role="group"
+              aria-label={L.shiftView}
+            >
+              <Button
+                variant={mobileView === "daily" ? "default" : "outline"}
+                className="min-h-11"
+                aria-pressed={mobileView === "daily"}
+                disabled={payrollBusy}
+                onClick={() => setMobileView("daily")}
+              >
+                {L.dailyView}
+              </Button>
+              <Button
+                variant={mobileView === "table" ? "default" : "outline"}
+                className="min-h-11"
+                aria-pressed={mobileView === "table"}
+                disabled={payrollBusy}
+                onClick={() => setMobileView("table")}
+              >
+                {L.tableView}
+              </Button>
+            </div>
+          )}
+          {isMobile && mobileView === "daily" && (
+            <DailyShiftView
+              lang={lang}
+              days={days}
+              date={dailyDate}
+              onDateChange={setDailyDate}
+              actual={mode === "actual"}
+              busy={payrollBusy}
+              rows={visible.map((slot) => {
+                const shift = shiftIndex.get(`${slot.id}|${dailyDate}`);
+                const worker =
+                  memberMap.get(slot.staff_member_id ?? "")?.name ?? L.vacant;
+                return {
+                  id: slot.id,
+                  worker,
+                  role:
+                    roleName(roleMap.get(slot.role_key ?? ""), lang) ||
+                    L.noRole,
+                  planned: formatShiftCell(toCell(shift)),
+                  missingActual:
+                    mode === "actual" &&
+                    !!shift &&
+                    !shift.code &&
+                    !!(
+                      shift.start_time ||
+                      shift.actual_start_time ||
+                      shift.actual_end_time
+                    ) &&
+                    !(shift.actual_start_time && shift.actual_end_time),
+                  editor: (
+                    <CellInput
+                      large
+                      label={`${worker} ${dailyDate}`}
+                      value={formatShiftCell(
+                        mode === "actual" ? toActualCell(shift) : toCell(shift),
+                      )}
+                      disabled={
+                        payrollBusy ||
+                        (mode === "planned" ? !isAdmin : !shift || !!shift.code)
+                      }
+                      onCommit={(value) =>
+                        mode === "actual"
+                          ? commitActual(slot.id, dailyDate, value)
+                          : commitPlanned(slot.id, dailyDate, value)
+                      }
+                    />
+                  ),
+                };
+              })}
+            />
+          )}
           <h2 className="mb-2 hidden text-lg font-semibold print:block">
             {tenant?.name}: {L.period}{" "}
             {format(parseISO(period.start_date), "d.M.yyyy")}
           </h2>
-          <div
-            className="max-h-[70vh] overflow-auto border border-border print:max-h-none print:overflow-visible print:border-0"
-            data-testid="shift-table-scroll"
-          >
-            <table className="border-collapse text-[11px]">
-              <thead className="sticky top-0 z-10 bg-card print:static">
-                <tr>
-                  <th
-                    data-shift-pinned
-                    className="sticky left-0 z-20 w-36 min-w-36 border border-border bg-card px-1 py-1 text-left print:static"
-                  >
-                    {L.role}
-                  </th>
-                  <th
-                    data-shift-pinned
-                    className="sticky left-36 z-20 w-36 min-w-36 border border-border bg-card px-1 py-1 text-left print:static"
-                  >
-                    {L.worker}
-                  </th>
-                  {days.map((d) => (
-                    <th
-                      key={d}
-                      className={`border border-border px-1 py-1 font-normal ${isSundayWorkDay(d, settings.rules.finnishHolidays !== false) ? "bg-muted" : ""}`}
-                    >
-                      {format(parseISO(d), "EEEEE")}
-                      <br />
-                      {format(parseISO(d), "d.M")}
-                    </th>
-                  ))}
-                  {[
-                    L.totalHours,
-                    L.xz,
-                    L.sunday,
-                    L.evening,
-                    L.night,
-                    L.holiday,
-                    L.notes,
-                  ].map((h) => (
-                    <th key={h} className="border border-border px-1 py-1">
-                      {h}
-                    </th>
-                  ))}
-                  <th className="no-print border border-border" />
-                </tr>
-              </thead>
-              <tbody>
-                {visible.length === 0 && (
+          {(!isMobile || mobileView === "table") && (
+            <div
+              className="max-h-[70vh] overflow-auto border border-border print:max-h-none print:overflow-visible print:border-0"
+              data-testid="shift-table-scroll"
+            >
+              <table className="border-collapse text-[11px]">
+                <thead className="sticky top-0 z-10 bg-card print:static">
                   <tr>
-                    <td colSpan={days.length + 10} className="p-6 text-center">
-                      <SearchX className="mx-auto mb-1 h-5 w-5 text-muted-foreground" />
-                      <p className="font-medium">{L.noMatch}</p>
-                      <p className="text-muted-foreground">{L.noMatchBody}</p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-2"
-                        onClick={() => {
-                          setSearch("");
-                          setRoleFilter(NONE);
-                          setOnlyMember(NONE);
-                        }}
+                    <th
+                      data-shift-pinned
+                      className="sticky left-0 z-20 w-36 min-w-36 border border-border bg-card px-1 py-1 text-left print:static"
+                    >
+                      {L.role}
+                    </th>
+                    <th
+                      data-shift-pinned
+                      className="sticky left-36 z-20 w-36 min-w-36 border border-border bg-card px-1 py-1 text-left print:static"
+                    >
+                      {L.worker}
+                    </th>
+                    {days.map((d) => (
+                      <th
+                        key={d}
+                        className={`border border-border px-1 py-1 font-normal ${isSundayWorkDay(d, settings.rules.finnishHolidays !== false) ? "bg-muted" : ""}`}
                       >
-                        <RotateCcw className="mr-1 h-3.5 w-3.5" />
-                        {L.clearFilters}
-                      </Button>
-                    </td>
+                        {format(parseISO(d), "EEEEE")}
+                        <br />
+                        {format(parseISO(d), "d.M")}
+                      </th>
+                    ))}
+                    {[
+                      L.totalHours,
+                      L.xz,
+                      L.sunday,
+                      L.evening,
+                      L.night,
+                      L.holiday,
+                      L.notes,
+                    ].map((h) => (
+                      <th key={h} className="border border-border px-1 py-1">
+                        {h}
+                      </th>
+                    ))}
+                    <th className="no-print border border-border" />
                   </tr>
-                )}
-                {visible.map((s) => {
-                  const cells = days.map((d) => shiftIndex.get(`${s.id}|${d}`));
-                  const basis = cells.map(
-                    mode === "actual" ? toActualCell : toCell,
-                  );
-                  const t = computeRowTotals(
-                    days.map((d, i) => ({ date: d, cell: basis[i] })),
-                    settings.rules,
-                  );
-                  const eligible = siteMembers.filter(
-                    (x) =>
-                      x.is_active &&
-                      (!s.role_key || x.role_keys.includes(s.role_key)),
-                  );
-                  const current = s.staff_member_id
-                    ? memberMap.get(s.staff_member_id)
-                    : undefined;
-                  return (
-                    <tr key={s.id}>
-                      <td className="sticky left-0 z-[5] border border-border bg-card p-0 print:static">
-                        <select
-                          disabled={!isAdmin}
-                          aria-label={L.role}
-                          value={s.role_key ?? ""}
-                          onChange={(e) =>
-                            m.updateSlot.mutate(
-                              { id: s.id, role_key: e.target.value || null },
-                              { onError: err },
-                            )
-                          }
-                          className="w-full bg-transparent px-1 py-1 text-[11px]"
-                        >
-                          <option value="">{L.noRole}</option>
-                          {roles.map((r) => (
-                            <option key={r.key} value={r.key}>
-                              {roleName(r, lang)}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="sticky left-36 z-[5] border border-border bg-card p-0 print:static">
-                        <select
-                          disabled={!isAdmin}
-                          aria-label={L.worker}
-                          value={s.staff_member_id ?? ""}
-                          onChange={(e) =>
-                            m.updateSlot.mutate(
-                              {
-                                id: s.id,
-                                staff_member_id: e.target.value || null,
-                              },
-                              { onError: err },
-                            )
-                          }
-                          className="w-full bg-transparent px-1 py-1 text-[11px]"
-                        >
-                          <option value="">{L.vacant}</option>
-                          {current && !eligible.includes(current) && (
-                            <option value={current.id}>{current.name}</option>
-                          )}
-                          {eligible.map((x) => (
-                            <option key={x.id} value={x.id}>
-                              {x.name}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      {days.map((d, i) => (
-                        <td
-                          key={d}
-                          className={`border border-border p-0 ${isSundayWorkDay(d, settings.rules.finnishHolidays !== false) ? "bg-muted/60" : ""}`}
-                        >
-                          {mode === "planned" ? (
-                            <CellInput
-                              label={`${current?.name ?? L.vacant} ${d}`}
-                              disabled={!isAdmin || payrollBusy}
-                              value={formatShiftCell(toCell(cells[i]))}
-                              onCommit={(v) => commitPlanned(s.id, d, v)}
-                            />
-                          ) : (
-                            <CellInput
-                              label={`${current?.name ?? L.vacant} ${d}`}
-                              disabled={
-                                payrollBusy || !cells[i] || !!cells[i]?.code
-                              }
-                              value={formatShiftCell(
-                                cells[i]?.actual_start_time
-                                  ? toActualCell(cells[i])
-                                  : null,
-                              )}
-                              placeholder={formatShiftCell(toCell(cells[i]))}
-                              onCommit={(v) => commitActual(s.id, d, v)}
-                            />
-                          )}
-                        </td>
-                      ))}
-                      <td className="border border-border px-1 text-center font-medium">
-                        {t.hours || ""}
-                      </td>
-                      <td className="border border-border px-1 text-center">
-                        {t.xzDays || ""}
-                      </td>
-                      <td className="border border-border px-1 text-center">
-                        {t.sundayHours || ""}
-                      </td>
-                      <td className="border border-border px-1 text-center">
-                        {t.eveningHours || ""}
-                      </td>
-                      <td className="border border-border px-1 text-center">
-                        {t.nightHours || ""}
-                      </td>
-                      <td className="border border-border px-1 text-center">
-                        {t.holidayDays || ""}
-                      </td>
-                      <td className="border border-border p-0">
-                        <CellInput
-                          label={L.notes}
-                          disabled={!isAdmin}
-                          value={s.notes ?? ""}
-                          onCommit={(v) => {
-                            m.updateSlot.mutate(
-                              { id: s.id, notes: v.slice(0, 200) || null },
-                              { onError: err },
-                            );
-                            return true;
+                </thead>
+                <tbody>
+                  {visible.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={days.length + 10}
+                        className="p-6 text-center"
+                      >
+                        <SearchX className="mx-auto mb-1 h-5 w-5 text-muted-foreground" />
+                        <p className="font-medium">{L.noMatch}</p>
+                        <p className="text-muted-foreground">{L.noMatchBody}</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => {
+                            setSearch("");
+                            setRoleFilter(NONE);
+                            setOnlyMember(NONE);
                           }}
-                        />
-                      </td>
-                      <td className="no-print whitespace-nowrap border border-border px-1">
-                        <button
-                          className="mr-1"
-                          aria-label={
-                            current
-                              ? `${L.perWorker}: ${current.name}`
-                              : L.perWorker
-                          }
-                          disabled={!current}
-                          onClick={() => current && workerSheet(current.id)}
                         >
-                          <FileDown className="h-3.5 w-3.5 text-muted-foreground" />
-                        </button>
-                        {isAdmin && (
-                          <button
-                            aria-label={L.removeRow}
-                            onClick={() =>
-                              m.deleteSlot.mutate(s.id, { onError: err })
-                            }
-                          >
-                            <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
-                          </button>
-                        )}
+                          <RotateCcw className="mr-1 h-3.5 w-3.5" />
+                          {L.clearFilters}
+                        </Button>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  )}
+                  {visible.map((s) => {
+                    const cells = days.map((d) =>
+                      shiftIndex.get(`${s.id}|${d}`),
+                    );
+                    const basis = cells.map(
+                      mode === "actual" ? toActualCell : toCell,
+                    );
+                    const t = computeRowTotals(
+                      days.map((d, i) => ({ date: d, cell: basis[i] })),
+                      settings.rules,
+                    );
+                    const eligible = siteMembers.filter(
+                      (x) =>
+                        x.is_active &&
+                        (!s.role_key || x.role_keys.includes(s.role_key)),
+                    );
+                    const current = s.staff_member_id
+                      ? memberMap.get(s.staff_member_id)
+                      : undefined;
+                    return (
+                      <tr key={s.id}>
+                        <td className="sticky left-0 z-[5] border border-border bg-card p-0 print:static">
+                          <select
+                            disabled={!isAdmin}
+                            aria-label={L.role}
+                            value={s.role_key ?? ""}
+                            onChange={(e) =>
+                              m.updateSlot.mutate(
+                                { id: s.id, role_key: e.target.value || null },
+                                { onError: err },
+                              )
+                            }
+                            className="w-full bg-transparent px-1 py-1 text-[11px]"
+                          >
+                            <option value="">{L.noRole}</option>
+                            {roles.map((r) => (
+                              <option key={r.key} value={r.key}>
+                                {roleName(r, lang)}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="sticky left-36 z-[5] border border-border bg-card p-0 print:static">
+                          <select
+                            disabled={!isAdmin}
+                            aria-label={L.worker}
+                            value={s.staff_member_id ?? ""}
+                            onChange={(e) =>
+                              m.updateSlot.mutate(
+                                {
+                                  id: s.id,
+                                  staff_member_id: e.target.value || null,
+                                },
+                                { onError: err },
+                              )
+                            }
+                            className="w-full bg-transparent px-1 py-1 text-[11px]"
+                          >
+                            <option value="">{L.vacant}</option>
+                            {current && !eligible.includes(current) && (
+                              <option value={current.id}>{current.name}</option>
+                            )}
+                            {eligible.map((x) => (
+                              <option key={x.id} value={x.id}>
+                                {x.name}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        {days.map((d, i) => (
+                          <td
+                            key={d}
+                            className={`border border-border p-0 ${isSundayWorkDay(d, settings.rules.finnishHolidays !== false) ? "bg-muted/60" : ""}`}
+                          >
+                            {mode === "planned" ? (
+                              <CellInput
+                                label={`${current?.name ?? L.vacant} ${d}`}
+                                disabled={!isAdmin || payrollBusy}
+                                value={formatShiftCell(toCell(cells[i]))}
+                                onCommit={(v) => commitPlanned(s.id, d, v)}
+                              />
+                            ) : (
+                              <CellInput
+                                label={`${current?.name ?? L.vacant} ${d}`}
+                                disabled={
+                                  payrollBusy || !cells[i] || !!cells[i]?.code
+                                }
+                                value={formatShiftCell(
+                                  cells[i]?.actual_start_time
+                                    ? toActualCell(cells[i])
+                                    : null,
+                                )}
+                                placeholder={formatShiftCell(toCell(cells[i]))}
+                                onCommit={(v) => commitActual(s.id, d, v)}
+                              />
+                            )}
+                          </td>
+                        ))}
+                        <td className="border border-border px-1 text-center font-medium">
+                          {t.hours || ""}
+                        </td>
+                        <td className="border border-border px-1 text-center">
+                          {t.xzDays || ""}
+                        </td>
+                        <td className="border border-border px-1 text-center">
+                          {t.sundayHours || ""}
+                        </td>
+                        <td className="border border-border px-1 text-center">
+                          {t.eveningHours || ""}
+                        </td>
+                        <td className="border border-border px-1 text-center">
+                          {t.nightHours || ""}
+                        </td>
+                        <td className="border border-border px-1 text-center">
+                          {t.holidayDays || ""}
+                        </td>
+                        <td className="border border-border p-0">
+                          <CellInput
+                            label={L.notes}
+                            disabled={!isAdmin}
+                            value={s.notes ?? ""}
+                            onCommit={(v) => {
+                              m.updateSlot.mutate(
+                                { id: s.id, notes: v.slice(0, 200) || null },
+                                { onError: err },
+                              );
+                              return true;
+                            }}
+                          />
+                        </td>
+                        <td className="no-print whitespace-nowrap border border-border px-1">
+                          <button
+                            className="mr-1"
+                            aria-label={
+                              current
+                                ? `${L.perWorker}: ${current.name}`
+                                : L.perWorker
+                            }
+                            disabled={!current}
+                            onClick={() => current && workerSheet(current.id)}
+                          >
+                            <FileDown className="h-3.5 w-3.5 text-muted-foreground" />
+                          </button>
+                          {isAdmin && (
+                            <button
+                              aria-label={L.removeRow}
+                              onClick={() =>
+                                m.deleteSlot.mutate(s.id, { onError: err })
+                              }
+                            >
+                              <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
           <p className="mt-2 text-[11px] text-muted-foreground">{L.legend}</p>
           {isAdmin && (
             <Button

@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [x] Add daily mobile staffing view with 48px time fields and 44px date controls. Signed-in checks confirmed time save/readback, restored the test edit, date navigation, worker filtering, no overflow at 360px/390px, optional full table and unchanged desktop table. Thirteen targeted tests pass.
+
 - [x] Show subscription checkout failures with retry in EN/FI/SV and use same-tab handoff. Four regression tests pass; signed-in phone-sized browser checks with simulated provider replies confirmed missing-link feedback, same-plan retry, no popups and no runtime errors. No charge or real checkout session created.
 
 - [x] Block incomplete payroll exports, wait for all pending time edits, reject failed saves, and show download progress. Nine payroll tests pass; signed-in checks confirmed missing-hour refusal, delayed-save waiting, saved hours readback and a real XLSX download. Test time restored.
