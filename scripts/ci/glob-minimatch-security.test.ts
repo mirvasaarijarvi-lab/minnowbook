@@ -10,14 +10,21 @@ import { describe, expect, it } from "vitest";
 describe("filesystem matcher security and compatibility", () => {
   it("locks only patched glob and minimatch releases", async () => {
     const lock = JSON.parse(
-      await readFile(new URL("../../package-lock.json", import.meta.url), "utf8"),
+      await readFile(
+        new URL("../../package-lock.json", import.meta.url),
+        "utf8",
+      ),
     );
     for (const [name, floor] of [
       ["glob", [14, 0, 3]],
       ["minimatch", [11, 0, 3]],
     ] as const) {
       const versions = Object.entries(lock.packages)
-        .filter(([key]) => key.endsWith(`/node_modules/${name}`) || key === `node_modules/${name}`)
+        .filter(
+          ([key]) =>
+            key.endsWith(`/node_modules/${name}`) ||
+            key === `node_modules/${name}`,
+        )
         .map(([, entry]) => (entry as { version: string }).version);
       expect(versions.length).toBeGreaterThan(0);
       for (const version of versions) {
@@ -52,8 +59,12 @@ describe("filesystem matcher security and compatibility", () => {
       await writeFile(file, await workbook.xlsx.writeBuffer());
       const restored = new ExcelJS.Workbook();
       await restored.xlsx.readFile(file);
-      expect(restored.getWorksheet("Bookings")?.getRow(1).getCell(1).value).toBe("Test booking");
-      expect(restored.getWorksheet("Bookings")?.getRow(1).getCell(2).value).toBe(42);
+      expect(
+        restored.getWorksheet("Bookings")?.getRow(1).getCell(1).value,
+      ).toBe("Test booking");
+      expect(
+        restored.getWorksheet("Bookings")?.getRow(1).getCell(2).value,
+      ).toBe(42);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
