@@ -150,6 +150,8 @@ test.describe("Payroll Excel download follows the selected location", () => {
           date: day,
           start_time: "10:00",
           end_time: "18:00",
+          actual_start_time: "10:00",
+          actual_end_time: "18:00",
         } as any);
         expect(shErr, shErr?.message).toBeNull();
       }
