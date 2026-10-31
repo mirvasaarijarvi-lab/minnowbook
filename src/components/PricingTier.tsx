@@ -5,7 +5,11 @@ import { cn } from "@/lib/utils";
 import { Link } from "@/lib/router-compat";
 import { useLanguage, useT } from "@/contexts/I18nContext";
 import { supabase } from "@/integrations/supabase/client";
-import { CHECKOUT_LABELS, checkoutUrl, handoffToCheckout } from "@/lib/subscription-checkout";
+import {
+  CHECKOUT_LABELS,
+  checkoutUrl,
+  handoffToCheckout,
+} from "@/lib/subscription-checkout";
 
 interface PricingTierProps {
   name: string;
@@ -184,17 +188,27 @@ const PricingTier = ({
               {L.opening}
             </>
           ) : (
-            <>{checkoutError && <RotateCcw className="mr-2 h-4 w-4" />}{t(checkoutError ? "booking.retry" : "common.startFreeTrial")}</>
+            <>
+              {checkoutError && <RotateCcw className="mr-2 h-4 w-4" />}
+              {t(checkoutError ? "booking.retry" : "common.startFreeTrial")}
+            </>
           )}
         </Button>
       )}
 
       {loading && (
-        <p role="status" className="text-xs text-accent text-center mt-3 font-medium">
+        <p
+          role="status"
+          className="text-xs text-accent text-center mt-3 font-medium"
+        >
           {L.opening}
         </p>
       )}
-      {checkoutError && <p id={errorId} role="alert" className="mt-3 text-sm text-destructive">{checkoutError}</p>}
+      {checkoutError && (
+        <p id={errorId} role="alert" className="mt-3 text-sm text-destructive">
+          {checkoutError}
+        </p>
+      )}
     </div>
   );
 };

@@ -20,7 +20,8 @@ export function checkoutUrl(value: unknown): string | null {
     const url = new URL(value);
     return url.protocol === "https:" &&
       ["checkout.stripe.com", "billing.stripe.com"].includes(url.hostname) &&
-      !url.username && !url.password
+      !url.username &&
+      !url.password
       ? url.toString()
       : null;
   } catch {
