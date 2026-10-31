@@ -157,7 +157,7 @@ describe("PublicBooking branding permission fallback", () => {
       fireEvent.submit(form);
       await waitFor(() =>
         expect(
-          screen.getByRole("button", { name: "booking.pickDate" }),
+          screen.getByRole("button", { name: "common.date *" }),
         ).toHaveFocus(),
       );
     } finally {
