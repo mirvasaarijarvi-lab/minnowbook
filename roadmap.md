@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Fix the two reported glob and minimatch advisories; synchronize both lockfiles, regenerate SBOMs, and verify audit and targeted regressions.
+
 - [x] Fix both reported seroval injection advisories with compatible version 1.6.11; both lockfiles and SBOMs refreshed, audit gate has zero blocking findings, and all 15 security and lockfile regression tests pass.
 
 - [x] Correct cleanup-test formatting reported by Test CI: full lint passes and both regression tests pass.
