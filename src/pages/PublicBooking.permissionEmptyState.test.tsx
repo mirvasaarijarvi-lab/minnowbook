@@ -151,9 +151,15 @@ describe("PublicBooking branding permission fallback", () => {
         block: "center",
         behavior: "instant",
       });
-      fireEvent.click(screen.getByRole("button", { name: /dashboard.restaurant/ }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /dashboard.restaurant/ }),
+      );
       fireEvent.submit(form);
-      await waitFor(() => expect(screen.getByRole("button", { name: "booking.pickDate" })).toHaveFocus());
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: "booking.pickDate" }),
+        ).toHaveFocus(),
+      );
     } finally {
       clock.mockRestore();
       HTMLElement.prototype.scrollIntoView = originalScroll;
