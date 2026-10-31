@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Block incomplete payroll exports, wait for pending time edits, show download progress, and verify safeguards.
+
 - [x] Compact mobile booking locations and link validation errors to fields with focus and scroll movement; four booking tests and live mobile/desktop checks pass.
 
 - [x] Fix the two reported glob and minimatch advisories with versions 14.0.3 and 11.0.3; both lockfiles synchronized, SBOMs regenerated, moderate audit gate has zero blockers, and all 19 targeted tests pass.
