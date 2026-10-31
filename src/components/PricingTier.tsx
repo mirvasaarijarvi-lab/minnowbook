@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { Check, Loader2 } from "lucide-react";
+import { useId, useRef, useState } from "react";
+import { Check, Loader2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Link } from "@/lib/router-compat";
-import { useT } from "@/contexts/I18nContext";
+import { useLanguage, useT } from "@/contexts/I18nContext";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { CHECKOUT_LABELS, checkoutUrl, handoffToCheckout } from "@/lib/subscription-checkout";
 
 interface PricingTierProps {
   name: string;
@@ -40,16 +40,23 @@ const PricingTier = ({
 }: PricingTierProps) => {
   const t = useT();
   const [loading, setLoading] = useState(false);
+  const { language } = useLanguage();
+  const L = CHECKOUT_LABELS[language];
+  const [checkoutError, setCheckoutError] = useState("");
+  const errorId = useId();
+  const busy = useRef(false);
 
   const handleSubscribe = async () => {
-    if (!priceId) return;
+    if (!priceId || busy.current) return;
+    busy.current = true;
+    setCheckoutError("");
     setLoading(true);
     try {
       const {
         data: { session },
       } = await supabase.auth.getSession();
       if (!session) {
-        // Not logged in — redirect to signup
+        // Preserve the existing signup handoff for signed-out visitors.
         window.location.href = "/signup";
         return;
       }
@@ -60,31 +67,21 @@ const PricingTier = ({
         },
       );
       if (error) throw error;
-      if (data?.url && typeof data.url === "string") {
-        // Validate URL scheme against allowlist to prevent XSS via javascript:/data: URIs
-        try {
-          const parsed = new URL(data.url);
-          const allowedHosts = ["checkout.stripe.com", "billing.stripe.com"];
-          if (
-            parsed.protocol === "https:" &&
-            allowedHosts.includes(parsed.hostname)
-          ) {
-            window.open(parsed.toString(), "_blank", "noopener,noreferrer");
-          } else {
-            toast.error("Invalid checkout URL received");
-          }
-        } catch {
-          toast.error("Invalid checkout URL received");
-        }
-      }
-    } catch (err: any) {
-      if (err?.context?.status === 403) {
-        toast.error(t("settings.planParentOnly"));
+      const url = checkoutUrl(data?.url);
+      if (!url) {
+        setCheckoutError(L.unavailable);
         return;
       }
-      toast.error(err.message || "Failed to start checkout");
+      handoffToCheckout(url);
+    } catch (err: any) {
+      if (err?.context?.status === 403) {
+        setCheckoutError(t("settings.planParentOnly"));
+        return;
+      }
+      setCheckoutError(L.unavailable);
     } finally {
       setLoading(false);
+      busy.current = false;
     }
   };
 
@@ -178,23 +175,26 @@ const PricingTier = ({
           className={cn("w-full", loading && "opacity-90")}
           onClick={handleSubscribe}
           disabled={loading}
+          aria-busy={loading}
+          aria-describedby={checkoutError ? errorId : undefined}
         >
           {loading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              {"Redirecting to checkout…"}
+              <Loader2 className="h-4 w-4 motion-safe:animate-spin mr-2" />
+              {L.opening}
             </>
           ) : (
-            t("common.startFreeTrial")
+            <>{checkoutError && <RotateCcw className="mr-2 h-4 w-4" />}{t(checkoutError ? "booking.retry" : "common.startFreeTrial")}</>
           )}
         </Button>
       )}
 
       {loading && (
-        <p className="text-xs text-accent text-center mt-3 animate-pulse font-medium">
-          {name} — Opening checkout…
+        <p role="status" className="text-xs text-accent text-center mt-3 font-medium">
+          {L.opening}
         </p>
       )}
+      {checkoutError && <p id={errorId} role="alert" className="mt-3 text-sm text-destructive">{checkoutError}</p>}
     </div>
   );
 };
