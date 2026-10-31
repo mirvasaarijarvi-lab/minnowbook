@@ -27,7 +27,8 @@ export class InfraTimeoutError extends Error {
 }
 
 export function isInfraTimeout(e: unknown): e is InfraTimeoutError {
-  return e instanceof InfraTimeoutError || (e instanceof Error && e.name === "InfraTimeoutError");
+  return e instanceof InfraTimeoutError ||
+    (e instanceof Error && e.name === "InfraTimeoutError");
 }
 
 const TRANSIENT_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
@@ -54,13 +55,21 @@ function isTransientBody(text: string): boolean {
 }
 
 /** Respect the shared service's cooldown instead of retrying inside it. */
-export function retryDelayMs(res: Response, fallbackMs: number, now = Date.now()): number {
+export function retryDelayMs(
+  res: Response,
+  fallbackMs: number,
+  now = Date.now(),
+): number {
   if (res.status !== 429) return fallbackMs;
   const header = res.headers.get("Retry-After");
   if (!header) return fallbackMs;
   const seconds = Number(header);
-  const delay = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(header) - now;
-  return Number.isFinite(delay) && delay >= 0 ? Math.max(fallbackMs, delay) : fallbackMs;
+  const delay = Number.isFinite(seconds)
+    ? seconds * 1000
+    : Date.parse(header) - now;
+  return Number.isFinite(delay) && delay >= 0
+    ? Math.max(fallbackMs, delay)
+    : fallbackMs;
 }
 
 export async function fetchWithRetry(
@@ -104,12 +113,15 @@ export async function fetchWithRetry(
         /* leave as null */
       }
 
-      const transient = TRANSIENT_STATUSES.has(res.status) || isTransientBody(text);
+      const transient = TRANSIENT_STATUSES.has(res.status) ||
+        isTransientBody(text);
       if (transient && attempt < attempts) {
         console.warn(
           `[test-fetch] ${label}: transient ${res.status} on attempt ${attempt}/${attempts}, retrying`,
         );
-        await new Promise((r) => setTimeout(r, retryDelayMs(res, backoffMs * attempt)));
+        await new Promise((r) =>
+          setTimeout(r, retryDelayMs(res, backoffMs * attempt))
+        );
         continue;
       }
 
@@ -128,7 +140,9 @@ export async function fetchWithRetry(
     }
   }
 
-  const lastMessage = lastError instanceof Error ? lastError.message : String(lastError);
+  const lastMessage = lastError instanceof Error
+    ? lastError.message
+    : String(lastError);
   const summary =
     `[test-fetch] ${label}: all ${attempts} attempts failed. Last error: ${lastMessage}`;
   const name = lastError instanceof Error ? lastError.name : "";
