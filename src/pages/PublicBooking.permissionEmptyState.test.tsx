@@ -140,13 +140,18 @@ describe("PublicBooking branding permission fallback", () => {
     if (!form) throw new Error("Booking form missing");
     const now = Date.now();
     const clock = vi.spyOn(Date, "now").mockReturnValue(now + 4000);
+    const originalScroll = HTMLElement.prototype.scrollIntoView;
+    const scroll = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scroll;
     try {
       fireEvent.submit(form);
       await waitFor(() => expect(name).toHaveFocus());
+      expect(scroll).toHaveBeenCalledWith({ block: "center", behavior: "instant" });
       fireEvent.change(name, { target: { value: "Guest" } });
       expect(name).toHaveFocus();
     } finally {
       clock.mockRestore();
+      HTMLElement.prototype.scrollIntoView = originalScroll;
     }
   });
 
