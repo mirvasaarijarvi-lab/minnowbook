@@ -193,8 +193,12 @@ describe("majorOf", () => {
 describe("this repository", () => {
   it("keeps all three CodeQL actions on the same release", () => {
     const pins = loadManifest().actions;
-    expect(pins["github/codeql-action/init"]).toEqual(pins["github/codeql-action/analyze"]);
-    expect(pins["github/codeql-action/upload-sarif"]).toEqual(pins["github/codeql-action/analyze"]);
+    expect(pins["github/codeql-action/init"]).toEqual(
+      pins["github/codeql-action/analyze"],
+    );
+    expect(pins["github/codeql-action/upload-sarif"]).toEqual(
+      pins["github/codeql-action/analyze"],
+    );
   });
   it("has no inconsistent, deprecated or mutable action versions", () => {
     const realManifest = loadManifest();
