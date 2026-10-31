@@ -1,6 +1,6 @@
 # Dependency sync
 
-- [ ] Fix Deno booking test retries to respect the 60-second rate-limit cooldown and remove unavailable Cloud credential instructions; verify the reported test.
+- [x] Fix shared Deno retries to honor Retry-After on 429 and preserve final assertions; remove unavailable Cloud credential instructions. Three retry regressions and the exact live booking check in CI missing-key mode pass; shell syntax checked. Production booking limits unchanged.
 
 - [x] Add daily mobile staffing view with 48px time fields and 44px date controls. Signed-in checks confirmed time save/readback, restored the test edit, date navigation, worker filtering, no overflow at 360px/390px, optional full table and unchanged desktop table. Thirteen targeted tests pass.
 
