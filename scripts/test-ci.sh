@@ -180,8 +180,8 @@ if command -v deno >/dev/null 2>&1; then
       echo "ERROR: SUPABASE_SERVICE_ROLE_KEY is missing and"
       echo "       REQUIRE_SERVICE_ROLE_KEY=1 is set. Failing the run."
       echo ""
-      echo "  Add the service-role key from Lovable Cloud (Backend > API"
-      echo "  keys), then re-run."
+      echo "  Lovable Cloud does not expose service-role keys. Use the"
+      echo "  supported degraded mode or an isolated CI test backend."
       exit 1
     fi
     cat <<'EOF'
@@ -208,14 +208,10 @@ WARNING: SUPABASE_SERVICE_ROLE_KEY is not set. The Deno edge function
         * "public-booking: validation-only request leaves reservations
           row count unchanged" needs service-role count=exact access.
 
-  To run the FULL suite, add the service-role key from Lovable Cloud
-  (Backend > API keys):
-    - Local dev: export SUPABASE_SERVICE_ROLE_KEY=... before running
-      `bun run test:ci`, or put it in a gitignored .env.local you
-      source.
-    - CI: add SUPABASE_SERVICE_ROLE_KEY under Settings > Secrets and
-      variables > Actions. Set repo variable REQUIRE_SERVICE_ROLE_KEY=1
-      to make a missing key a hard failure on protected branches.
+  Lovable Cloud does not expose service-role keys. This supported
+  degraded mode preserves non-writing validation checks. Full database
+  verification needs an isolated CI test backend with its own credentials.
+  Do not set REQUIRE_SERVICE_ROLE_KEY=1 for a Cloud-only live test run.
 EOF
     echo ""
   else

@@ -1,5 +1,7 @@
 # Project rules
 
+- Deno live-test retries honor HTTP Retry-After on 429 responses and retain failure assertions after exhaustion, because short retries cannot outwait the booking cooldown.
+
 - The mobile daily staffing view reuses the full table's filtered slots and time-edit handlers, because permissions, site scope and payroll save tracking must stay identical in both views.
 
 - Subscription checkout validates Stripe HTTPS links and navigates in the same tab, because async popup handoffs can be blocked on mobile.

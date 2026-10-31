@@ -53,6 +53,16 @@ function isTransientBody(text: string): boolean {
   return text.includes("IDLE_TIMEOUT") || text.includes("WORKER_LIMIT");
 }
 
+/** Respect the shared service's cooldown instead of retrying inside it. */
+export function retryDelayMs(res: Response, fallbackMs: number, now = Date.now()): number {
+  if (res.status !== 429) return fallbackMs;
+  const header = res.headers.get("Retry-After");
+  if (!header) return fallbackMs;
+  const seconds = Number(header);
+  const delay = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(header) - now;
+  return Number.isFinite(delay) && delay >= 0 ? Math.max(fallbackMs, delay) : fallbackMs;
+}
+
 export async function fetchWithRetry(
   url: string,
   init: RequestInit = {},
@@ -99,7 +109,7 @@ export async function fetchWithRetry(
         console.warn(
           `[test-fetch] ${label}: transient ${res.status} on attempt ${attempt}/${attempts}, retrying`,
         );
-        await new Promise((r) => setTimeout(r, backoffMs * attempt));
+        await new Promise((r) => setTimeout(r, retryDelayMs(res, backoffMs * attempt)));
         continue;
       }
 
