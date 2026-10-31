@@ -145,13 +145,15 @@ describe("PublicBooking branding permission fallback", () => {
     HTMLElement.prototype.scrollIntoView = scroll;
     try {
       fireEvent.submit(form);
-      await waitFor(() => expect(name).toHaveFocus());
+      const type = screen.getByRole("group", { name: "booking.selectType" });
+      await waitFor(() => expect(type).toHaveFocus());
       expect(scroll).toHaveBeenCalledWith({
         block: "center",
         behavior: "instant",
       });
-      fireEvent.change(name, { target: { value: "Guest" } });
-      expect(name).toHaveFocus();
+      fireEvent.click(screen.getByRole("button", { name: /dashboard.restaurant/ }));
+      fireEvent.submit(form);
+      await waitFor(() => expect(screen.getByRole("button", { name: "booking.pickDate" })).toHaveFocus());
     } finally {
       clock.mockRestore();
       HTMLElement.prototype.scrollIntoView = originalScroll;
