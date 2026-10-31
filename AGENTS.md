@@ -1,5 +1,7 @@
 # Project rules
 
+- The mobile daily staffing view reuses the full table's filtered slots and time-edit handlers, because permissions, site scope and payroll save tracking must stay identical in both views.
+
 - Subscription checkout validates Stripe HTTPS links and navigates in the same tab, because async popup handoffs can be blocked on mobile.
 
 - Payroll exports use the shared payroll export guard and per-edit save barrier before fetching fresh rows, because a mutation's latest pending state cannot cover overlapping saves or failed edits.
