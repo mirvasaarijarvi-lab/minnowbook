@@ -10,7 +10,13 @@
  * branding read.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  cleanup,
+  fireEvent,
+} from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "@/lib/router-compat";
 
@@ -126,6 +132,39 @@ describe("PublicBooking branding permission fallback", () => {
   });
 
   afterEach(() => cleanup());
+
+  it("moves focus to the first invalid booking field after custom validation", async () => {
+    renderPage();
+    const name = await screen.findByLabelText("common.name *");
+    const form = name.closest("form");
+    if (!form) throw new Error("Booking form missing");
+    const now = Date.now();
+    const clock = vi.spyOn(Date, "now").mockReturnValue(now + 4000);
+    const originalScroll = HTMLElement.prototype.scrollIntoView;
+    const scroll = vi.fn();
+    HTMLElement.prototype.scrollIntoView = scroll;
+    try {
+      fireEvent.submit(form);
+      const type = screen.getByRole("group", { name: "booking.selectType" });
+      await waitFor(() => expect(type).toHaveFocus());
+      expect(scroll).toHaveBeenCalledWith({
+        block: "center",
+        behavior: "instant",
+      });
+      fireEvent.click(
+        screen.getByRole("button", { name: /dashboard.restaurant/ }),
+      );
+      fireEvent.submit(form);
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: "common.date *" }),
+        ).toHaveFocus(),
+      );
+    } finally {
+      clock.mockRestore();
+      HTMLElement.prototype.scrollIntoView = originalScroll;
+    }
+  });
 
   it("shows the branding-unavailable notice when the branding read is denied", async () => {
     denyBranding = true;
