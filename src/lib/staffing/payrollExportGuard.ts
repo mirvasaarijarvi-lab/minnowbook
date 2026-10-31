@@ -8,7 +8,12 @@ export function missingPayrollActuals(slots: PayrollSlotInput[]) {
           .filter(
             (s) =>
               !s.code &&
-              !!(s.start_time || s.end_time || s.actual_start_time || s.actual_end_time) &&
+              !!(
+                s.start_time ||
+                s.end_time ||
+                s.actual_start_time ||
+                s.actual_end_time
+              ) &&
               !(s.actual_start_time && s.actual_end_time),
           )
           .map((s) => ({ worker: slot.worker, role: slot.role, date: s.date }))
@@ -21,10 +26,19 @@ export function createPayrollSaveBarrier() {
   const pending = new Set<Promise<void>>();
   const failed = new Set<string>();
   return {
-    track(key: string, save: Promise<unknown>, onError: (error: unknown) => void) {
+    track(
+      key: string,
+      save: Promise<unknown>,
+      onError: (error: unknown) => void,
+    ) {
       const settled = save.then(
-        () => { failed.delete(key); },
-        (error) => { failed.add(key); onError(error); },
+        () => {
+          failed.delete(key);
+        },
+        (error) => {
+          failed.add(key);
+          onError(error);
+        },
       );
       pending.add(settled);
       void settled.finally(() => pending.delete(settled));

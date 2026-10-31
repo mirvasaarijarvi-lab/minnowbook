@@ -59,7 +59,10 @@ import {
   focusShiftFieldByArrow,
 } from "@/lib/staffing/shiftFieldNavigation";
 import { buildPayroll, toCsv } from "@/lib/staffing/shiftPayroll";
-import { createPayrollSaveBarrier, missingPayrollActuals } from "@/lib/staffing/payrollExportGuard";
+import {
+  createPayrollSaveBarrier,
+  missingPayrollActuals,
+} from "@/lib/staffing/payrollExportGuard";
 import { sanitizePathSegment } from "@/lib/sanitize-path";
 import { STAFF_LABELS, type StaffLang } from "@/lib/staffing/labels";
 import StaffRegisterDialog from "./StaffRegisterDialog";
@@ -214,9 +217,14 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   const [payTo, setPayTo] = useState("");
   const saveBarrier = useRef(createPayrollSaveBarrier());
   const exportBusy = useRef(false);
-  const [payrollStage, setPayrollStage] = useState<"saving" | "checking" | "preparing" | "ready" | null>(null);
+  const [payrollStage, setPayrollStage] = useState<
+    "saving" | "checking" | "preparing" | "ready" | null
+  >(null);
   const [payrollIssue, setPayrollIssue] = useState("");
-  const payrollBusy = payrollStage === "saving" || payrollStage === "checking" || payrollStage === "preparing";
+  const payrollBusy =
+    payrollStage === "saving" ||
+    payrollStage === "checking" ||
+    payrollStage === "preparing";
   useEffect(() => {
     if (!period) return;
     const s = parseISO(`${period.start_date}T00:00:00`);
@@ -292,14 +300,16 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
       toast.error(L.badCell);
       return false;
     }
-    saveBarrier.current.track(`${slotId}|${date}`, m.setShift.mutateAsync(
-      {
+    saveBarrier.current.track(
+      `${slotId}|${date}`,
+      m.setShift.mutateAsync({
         slot_id: slotId,
         date,
         existing: shiftIndex.get(`${slotId}|${date}`),
         value: p.value,
-      },
-    ), err);
+      }),
+      err,
+    );
     return true;
   };
   const commitActual = (slotId: string, date: string, raw: string) => {
@@ -310,13 +320,15 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
       toast.error(L.badActual);
       return false;
     }
-    saveBarrier.current.track(`${slotId}|${date}`, m.setActual.mutateAsync(
-      {
+    saveBarrier.current.track(
+      `${slotId}|${date}`,
+      m.setActual.mutateAsync({
         existing,
         start: p.value?.start_time ?? null,
         end: p.value?.end_time ?? null,
-      },
-    ), err);
+      }),
+      err,
+    );
     return true;
   };
 
@@ -365,12 +377,22 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   };
 
   const payroll = async () => {
-    if (!tenantId || !payFrom || !payTo || bizLocked || !isAdmin || exportBusy.current) return;
+    if (
+      !tenantId ||
+      !payFrom ||
+      !payTo ||
+      bizLocked ||
+      !isAdmin ||
+      exportBusy.current
+    )
+      return;
     if (payFrom > payTo) {
       toast.error(L.payRangeInvalid);
       return;
     }
-    const invalidCell = document.querySelector<HTMLInputElement>('[data-shift-field][aria-invalid="true"]');
+    const invalidCell = document.querySelector<HTMLInputElement>(
+      '[data-shift-field][aria-invalid="true"]',
+    );
     if (invalidCell) {
       setPayrollIssue(L.payrollInvalidEdit);
       invalidCell.focus();
@@ -395,13 +417,15 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
         siteFilter === NONE ? null : siteFilter,
       );
       const slots = groups.map((g) => ({
-          worker: workerName(g.staff_member_id),
-          role: roleName(roleMap.get(g.role_key ?? ""), lang),
-          shifts: g.shifts,
-        }));
+        worker: workerName(g.staff_member_id),
+        role: roleName(roleMap.get(g.role_key ?? ""), lang),
+        shifts: g.shifts,
+      }));
       const missing = missingPayrollActuals(slots);
       if (missing.length) {
-        setPayrollIssue(`${L.payrollMissing.replace("{count}", String(missing.length))} ${missing.map((s) => `${s.worker} (${s.date})`).join(", ")}`);
+        setPayrollIssue(
+          `${L.payrollMissing.replace("{count}", String(missing.length))} ${missing.map((s) => `${s.worker} (${s.date})`).join(", ")}`,
+        );
         setPayrollStage(null);
         return;
       }
@@ -695,11 +719,36 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
                 aria-busy={payrollBusy}
                 title={bizLocked ? L.upgradePayroll : undefined}
               >
-                {payrollBusy ? <Loader2 className="mr-1 h-4 w-4 motion-safe:animate-spin" /> : <FileSpreadsheet className="mr-1 h-4 w-4" />}
+                {payrollBusy ? (
+                  <Loader2 className="mr-1 h-4 w-4 motion-safe:animate-spin" />
+                ) : (
+                  <FileSpreadsheet className="mr-1 h-4 w-4" />
+                )}
                 {L.payrollExcel}
               </Button>
-              {payrollStage && <p role="status" aria-live="polite" className="w-full text-sm text-muted-foreground">{payrollStage === "saving" ? L.payrollSaving : payrollStage === "checking" ? L.payrollChecking : payrollStage === "preparing" ? L.payrollPreparing : L.payrollReady}</p>}
-              {payrollIssue && <p role="alert" className="w-full break-words text-sm text-destructive">{payrollIssue}</p>}
+              {payrollStage && (
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className="w-full text-sm text-muted-foreground"
+                >
+                  {payrollStage === "saving"
+                    ? L.payrollSaving
+                    : payrollStage === "checking"
+                      ? L.payrollChecking
+                      : payrollStage === "preparing"
+                        ? L.payrollPreparing
+                        : L.payrollReady}
+                </p>
+              )}
+              {payrollIssue && (
+                <p
+                  role="alert"
+                  className="w-full break-words text-sm text-destructive"
+                >
+                  {payrollIssue}
+                </p>
+              )}
               <Button
                 size="sm"
                 variant="outline"
@@ -934,7 +983,9 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
                           ) : (
                             <CellInput
                               label={`${current?.name ?? L.vacant} ${d}`}
-                              disabled={payrollBusy || !cells[i] || !!cells[i]?.code}
+                              disabled={
+                                payrollBusy || !cells[i] || !!cells[i]?.code
+                              }
                               value={formatShiftCell(
                                 cells[i]?.actual_start_time
                                   ? toActualCell(cells[i])

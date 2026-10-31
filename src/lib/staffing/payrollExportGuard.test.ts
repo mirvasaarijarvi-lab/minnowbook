@@ -1,19 +1,33 @@
 import { describe, expect, it, vi } from "vitest";
-import { createPayrollSaveBarrier, missingPayrollActuals } from "./payrollExportGuard";
+import {
+  createPayrollSaveBarrier,
+  missingPayrollActuals,
+} from "./payrollExportGuard";
 
 const shift = {
-  date: "2026-10-31", start_time: "10:00", end_time: "18:00",
-  actual_start_time: null, actual_end_time: null, actual_note: null, code: null,
+  date: "2026-10-31",
+  start_time: "10:00",
+  end_time: "18:00",
+  actual_start_time: null,
+  actual_end_time: null,
+  actual_note: null,
+  code: null,
 };
 
 describe("payroll export safeguards", () => {
   it("blocks missing and partial actuals, but not complete actuals or rest codes", () => {
-    const missing = missingPayrollActuals([{ worker: "Anna", role: "Cook", shifts: [
-      shift,
-      { ...shift, date: "2026-11-01", actual_start_time: "10:00" },
-      { ...shift, actual_start_time: "10:00", actual_end_time: "18:00" },
-      { ...shift, code: "V" },
-    ] }]);
+    const missing = missingPayrollActuals([
+      {
+        worker: "Anna",
+        role: "Cook",
+        shifts: [
+          shift,
+          { ...shift, date: "2026-11-01", actual_start_time: "10:00" },
+          { ...shift, actual_start_time: "10:00", actual_end_time: "18:00" },
+          { ...shift, code: "V" },
+        ],
+      },
+    ]);
     expect(missing).toEqual([
       { worker: "Anna", role: "Cook", date: "2026-10-31" },
       { worker: "Anna", role: "Cook", date: "2026-11-01" },
@@ -24,8 +38,20 @@ describe("payroll export safeguards", () => {
     const barrier = createPayrollSaveBarrier();
     let finishFirst: () => void = () => {};
     let finishSecond: () => void = () => {};
-    barrier.track("first", new Promise<void>((resolve) => { finishFirst = resolve; }), vi.fn());
-    barrier.track("second", new Promise<void>((resolve) => { finishSecond = resolve; }), vi.fn());
+    barrier.track(
+      "first",
+      new Promise<void>((resolve) => {
+        finishFirst = resolve;
+      }),
+      vi.fn(),
+    );
+    barrier.track(
+      "second",
+      new Promise<void>((resolve) => {
+        finishSecond = resolve;
+      }),
+      vi.fn(),
+    );
     const downloaded = vi.fn();
     const exporting = barrier.wait().then(downloaded);
     finishSecond();
