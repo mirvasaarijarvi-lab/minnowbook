@@ -1,6 +1,6 @@
 # Dependency sync
 
-- [ ] Block incomplete payroll exports, wait for pending time edits, show download progress, and verify safeguards.
+- [x] Block incomplete payroll exports, wait for all pending time edits, reject failed saves, and show download progress. Nine payroll tests pass; signed-in checks confirmed missing-hour refusal, delayed-save waiting, saved hours readback and a real XLSX download. Test time restored.
 
 - [x] Compact mobile booking locations and link validation errors to fields with focus and scroll movement; four booking tests and live mobile/desktop checks pass.
 
