@@ -2138,7 +2138,11 @@ const PublicBookingInner = () => {
           </div>
         )}
 
-        <form ref={bookingFormRef} onSubmit={handleSubmit} className="space-y-6">
+        <form
+          ref={bookingFormRef}
+          onSubmit={handleSubmit}
+          className="space-y-6"
+        >
           {/* Honeypot field - hidden from real users, bots will fill it */}
           <div
             aria-hidden="true"
@@ -2184,15 +2188,24 @@ const PublicBookingInner = () => {
                       setForm((prev) => ({ ...prev, resource_id: "" }));
                     }}
                   >
-                    <SelectTrigger aria-label={t("booking.selectLocation")} className="min-h-11 w-full [&>span]:min-w-0 [&>span]:truncate">
+                    <SelectTrigger
+                      aria-label={t("booking.selectLocation")}
+                      className="min-h-11 w-full [&>span]:min-w-0 [&>span]:truncate"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{t("booking.allLocations")}</SelectItem>
+                      <SelectItem value="all">
+                        {t("booking.allLocations")}
+                      </SelectItem>
                       {allSites?.map((s) => (
                         <SelectItem key={s.id} value={s.id}>
                           <span className="block break-words">{s.name}</span>
-                          {s.location && <span className="block text-xs text-muted-foreground break-words">{s.location}</span>}
+                          {s.location && (
+                            <span className="block text-xs text-muted-foreground break-words">
+                              {s.location}
+                            </span>
+                          )}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -2322,7 +2335,14 @@ const PublicBookingInner = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div id="reservation_type" role="group" aria-label={t("booking.selectType")} tabIndex={-1} {...errorProps("reservation_type")} className="grid gap-4 sm:grid-cols-3">
+                <div
+                  id="reservation_type"
+                  role="group"
+                  aria-label={t("booking.selectType")}
+                  tabIndex={-1}
+                  {...errorProps("reservation_type")}
+                  className="grid gap-4 sm:grid-cols-3"
+                >
                   {typeTiles.map((tile) => {
                     const isCustom = tile.kind === "custom";
                     const isWellness = tile.kind === "wellness";
@@ -2462,7 +2482,10 @@ const PublicBookingInner = () => {
                   })}
                 </div>
                 {errors.reservation_type && (
-                  <p id="reservation_type-error" className="text-sm text-destructive mt-2">
+                  <p
+                    id="reservation_type-error"
+                    className="text-sm text-destructive mt-2"
+                  >
                     {errors.reservation_type}
                   </p>
                 )}
@@ -2955,7 +2978,9 @@ const PublicBookingInner = () => {
                     </div>
                   )}
                 {errors.date && (
-                  <p id="date-error" className="text-sm text-destructive">{errors.date}</p>
+                  <p id="date-error" className="text-sm text-destructive">
+                    {errors.date}
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -2975,7 +3000,9 @@ const PublicBookingInner = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="check_out_date">{t("booking.checkOutDate")} *</Label>
+                  <Label htmlFor="check_out_date">
+                    {t("booking.checkOutDate")} *
+                  </Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -3023,7 +3050,10 @@ const PublicBookingInner = () => {
                     </PopoverContent>
                   </Popover>
                   {errors.check_out_date && (
-                    <p id="check_out_date-error" className="text-sm text-destructive">
+                    <p
+                      id="check_out_date-error"
+                      className="text-sm text-destructive"
+                    >
                       {errors.check_out_date}
                     </p>
                   )}
@@ -4164,7 +4194,10 @@ const PublicBookingInner = () => {
                     required
                   />
                   {errors.guest_name && (
-                    <p id="guest_name-error" className="text-sm text-destructive">
+                    <p
+                      id="guest_name-error"
+                      className="text-sm text-destructive"
+                    >
                       {errors.guest_name}
                     </p>
                   )}
@@ -4181,7 +4214,10 @@ const PublicBookingInner = () => {
                     required
                   />
                   {errors.guest_email && (
-                    <p id="guest_email-error" className="text-sm text-destructive">
+                    <p
+                      id="guest_email-error"
+                      className="text-sm text-destructive"
+                    >
                       {errors.guest_email}
                     </p>
                   )}
@@ -4196,7 +4232,14 @@ const PublicBookingInner = () => {
                     onChange={(e) => updateField("guest_phone", e.target.value)}
                     maxLength={30}
                   />
-                  {errors.guest_phone && <p id="guest_phone-error" className="text-sm text-destructive">{errors.guest_phone}</p>}
+                  {errors.guest_phone && (
+                    <p
+                      id="guest_phone-error"
+                      className="text-sm text-destructive"
+                    >
+                      {errors.guest_phone}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="guests_count">
@@ -4215,7 +4258,10 @@ const PublicBookingInner = () => {
                     required
                   />
                   {errors.guests_count && (
-                    <p id="guests_count-error" className="text-sm text-destructive">
+                    <p
+                      id="guests_count-error"
+                      className="text-sm text-destructive"
+                    >
                       {errors.guests_count}
                     </p>
                   )}
@@ -4235,7 +4281,14 @@ const PublicBookingInner = () => {
                   }
                   maxLength={1000}
                 />
-                {errors.special_requests && <p id="special_requests-error" className="text-sm text-destructive">{errors.special_requests}</p>}
+                {errors.special_requests && (
+                  <p
+                    id="special_requests-error"
+                    className="text-sm text-destructive"
+                  >
+                    {errors.special_requests}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="promo_code">{t("discount.promoCode")}</Label>
