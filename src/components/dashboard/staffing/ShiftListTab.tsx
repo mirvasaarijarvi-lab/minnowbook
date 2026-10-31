@@ -3,7 +3,7 @@ import {
   memberInListScope,
   memberSiteIds,
 } from "@/lib/staffing/siteScope";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { addDays, format, parseISO, startOfWeek } from "date-fns";
 import {
   FileSpreadsheet,
@@ -16,6 +16,7 @@ import {
   Users,
   FileDown,
   SearchX,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,7 @@ import {
   focusShiftFieldByArrow,
 } from "@/lib/staffing/shiftFieldNavigation";
 import { buildPayroll, toCsv } from "@/lib/staffing/shiftPayroll";
+import { createPayrollSaveBarrier, missingPayrollActuals } from "@/lib/staffing/payrollExportGuard";
 import { sanitizePathSegment } from "@/lib/sanitize-path";
 import { STAFF_LABELS, type StaffLang } from "@/lib/staffing/labels";
 import StaffRegisterDialog from "./StaffRegisterDialog";
@@ -122,6 +124,7 @@ const CellInput = ({
       placeholder={placeholder}
       disabled={disabled}
       aria-label={label}
+      aria-invalid={bad || undefined}
       data-shift-field
       onChange={(e) => setV(e.target.value)}
       onBlur={() => {
@@ -209,6 +212,11 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   const period = periods.find((p) => p.id === periodId) ?? null;
   const [payFrom, setPayFrom] = useState("");
   const [payTo, setPayTo] = useState("");
+  const saveBarrier = useRef(createPayrollSaveBarrier());
+  const exportBusy = useRef(false);
+  const [payrollStage, setPayrollStage] = useState<"saving" | "checking" | "preparing" | "ready" | null>(null);
+  const [payrollIssue, setPayrollIssue] = useState("");
+  const payrollBusy = payrollStage === "saving" || payrollStage === "checking" || payrollStage === "preparing";
   useEffect(() => {
     if (!period) return;
     const s = parseISO(`${period.start_date}T00:00:00`);
@@ -284,15 +292,14 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
       toast.error(L.badCell);
       return false;
     }
-    m.setShift.mutate(
+    saveBarrier.current.track(`${slotId}|${date}`, m.setShift.mutateAsync(
       {
         slot_id: slotId,
         date,
         existing: shiftIndex.get(`${slotId}|${date}`),
         value: p.value,
       },
-      { onError: err },
-    );
+    ), err);
     return true;
   };
   const commitActual = (slotId: string, date: string, raw: string) => {
@@ -303,14 +310,13 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
       toast.error(L.badActual);
       return false;
     }
-    m.setActual.mutate(
+    saveBarrier.current.track(`${slotId}|${date}`, m.setActual.mutateAsync(
       {
         existing,
         start: p.value?.start_time ?? null,
         end: p.value?.end_time ?? null,
       },
-      { onError: err },
-    );
+    ), err);
     return true;
   };
 
@@ -359,26 +365,48 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
   };
 
   const payroll = async () => {
-    if (!tenantId || !payFrom || !payTo) return;
+    if (!tenantId || !payFrom || !payTo || bizLocked || !isAdmin || exportBusy.current) return;
     if (payFrom > payTo) {
       toast.error(L.payRangeInvalid);
       return;
     }
+    const invalidCell = document.querySelector<HTMLInputElement>('[data-shift-field][aria-invalid="true"]');
+    if (invalidCell) {
+      setPayrollIssue(L.payrollInvalidEdit);
+      invalidCell.focus();
+      return;
+    }
+    exportBusy.current = true;
+    setPayrollIssue("");
+    setPayrollStage("saving");
     try {
+      try {
+        await saveBarrier.current.wait();
+      } catch {
+        setPayrollIssue(L.payrollSaveFailed);
+        setPayrollStage(null);
+        return;
+      }
+      setPayrollStage("checking");
       const groups = await fetchPayrollRange(
         tenantId,
         payFrom,
         payTo,
         siteFilter === NONE ? null : siteFilter,
       );
-      const { days: rows, summary } = buildPayroll(
-        groups.map((g) => ({
+      const slots = groups.map((g) => ({
           worker: workerName(g.staff_member_id),
           role: roleName(roleMap.get(g.role_key ?? ""), lang),
           shifts: g.shifts,
-        })),
-        settings.rules,
-      );
+        }));
+      const missing = missingPayrollActuals(slots);
+      if (missing.length) {
+        setPayrollIssue(`${L.payrollMissing.replace("{count}", String(missing.length))} ${missing.map((s) => `${s.worker} (${s.date})`).join(", ")}`);
+        setPayrollStage(null);
+        return;
+      }
+      setPayrollStage("preparing");
+      const { days: rows, summary } = buildPayroll(slots, settings.rules);
       const { buildPayrollWorkbook, XLSX_MIME } =
         await import("@/lib/staffing/shiftPayrollXlsx");
       const buf = await buildPayrollWorkbook(rows, summary, lang);
@@ -388,8 +416,13 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
       a.download = `${sanitizePathSegment(`${tenant?.slug ?? "shifts"}_payroll_${payFrom}_${payTo}`)}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
+      setPayrollStage("ready");
     } catch {
       toast.error(L.payrollError);
+      setPayrollIssue(L.payrollError);
+      setPayrollStage(null);
+    } finally {
+      exportBusy.current = false;
     }
   };
 
@@ -638,7 +671,7 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
                   type="date"
                   value={payFrom}
                   onChange={(e) => setPayFrom(e.target.value)}
-                  disabled={bizLocked}
+                  disabled={bizLocked || payrollBusy}
                   className="h-8 w-36"
                   aria-label={L.payFrom}
                 />
@@ -649,7 +682,7 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
                   type="date"
                   value={payTo}
                   onChange={(e) => setPayTo(e.target.value)}
-                  disabled={bizLocked}
+                  disabled={bizLocked || payrollBusy}
                   className="h-8 w-36"
                   aria-label={L.payTo}
                 />
@@ -658,12 +691,15 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
                 size="sm"
                 variant="outline"
                 onClick={() => void payroll()}
-                disabled={bizLocked}
+                disabled={bizLocked || payrollBusy}
+                aria-busy={payrollBusy}
                 title={bizLocked ? L.upgradePayroll : undefined}
               >
-                <FileSpreadsheet className="mr-1 h-4 w-4" />
+                {payrollBusy ? <Loader2 className="mr-1 h-4 w-4 motion-safe:animate-spin" /> : <FileSpreadsheet className="mr-1 h-4 w-4" />}
                 {L.payrollExcel}
               </Button>
+              {payrollStage && <p role="status" aria-live="polite" className="w-full text-sm text-muted-foreground">{payrollStage === "saving" ? L.payrollSaving : payrollStage === "checking" ? L.payrollChecking : payrollStage === "preparing" ? L.payrollPreparing : L.payrollReady}</p>}
+              {payrollIssue && <p role="alert" className="w-full break-words text-sm text-destructive">{payrollIssue}</p>}
               <Button
                 size="sm"
                 variant="outline"
@@ -891,14 +927,14 @@ export default function ShiftListTab({ lang }: { lang: StaffLang }) {
                           {mode === "planned" ? (
                             <CellInput
                               label={`${current?.name ?? L.vacant} ${d}`}
-                              disabled={!isAdmin}
+                              disabled={!isAdmin || payrollBusy}
                               value={formatShiftCell(toCell(cells[i]))}
                               onCommit={(v) => commitPlanned(s.id, d, v)}
                             />
                           ) : (
                             <CellInput
                               label={`${current?.name ?? L.vacant} ${d}`}
-                              disabled={!cells[i] || !!cells[i]?.code}
+                              disabled={payrollBusy || !cells[i] || !!cells[i]?.code}
                               value={formatShiftCell(
                                 cells[i]?.actual_start_time
                                   ? toActualCell(cells[i])
