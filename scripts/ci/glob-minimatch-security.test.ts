@@ -9,10 +9,7 @@ import { describe, expect, it } from "vitest";
 describe("filesystem matcher security and compatibility", () => {
   it("locks only patched glob and minimatch releases", async () => {
     const lock = JSON.parse(
-      await readFile(
-        new URL("../../package-lock.json", import.meta.url),
-        "utf8",
-      ),
+      await readFile(path.resolve("package-lock.json"), "utf8"),
     );
     for (const [name, floor] of [
       ["glob", [14, 0, 3]],
