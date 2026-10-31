@@ -10,7 +10,7 @@
  * branding read.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import { render, screen, waitFor, cleanup, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "@/lib/router-compat";
 
@@ -126,6 +126,23 @@ describe("PublicBooking branding permission fallback", () => {
   });
 
   afterEach(() => cleanup());
+
+  it("moves focus to the first invalid booking field after custom validation", async () => {
+    renderPage();
+    const name = await screen.findByLabelText("common.name *");
+    const form = name.closest("form");
+    if (!form) throw new Error("Booking form missing");
+    const now = Date.now();
+    const clock = vi.spyOn(Date, "now").mockReturnValue(now + 4000);
+    try {
+      fireEvent.submit(form);
+      await waitFor(() => expect(name).toHaveFocus());
+      fireEvent.change(name, { target: { value: "Guest" } });
+      expect(name).toHaveFocus();
+    } finally {
+      clock.mockRestore();
+    }
+  });
 
   it("shows the branding-unavailable notice when the branding read is denied", async () => {
     denyBranding = true;
