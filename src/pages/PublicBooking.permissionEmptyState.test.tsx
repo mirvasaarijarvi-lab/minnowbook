@@ -146,7 +146,10 @@ describe("PublicBooking branding permission fallback", () => {
     try {
       fireEvent.submit(form);
       await waitFor(() => expect(name).toHaveFocus());
-      expect(scroll).toHaveBeenCalledWith({ block: "center", behavior: "instant" });
+      expect(scroll).toHaveBeenCalledWith({
+        block: "center",
+        behavior: "instant",
+      });
       fireEvent.change(name, { target: { value: "Guest" } });
       expect(name).toHaveFocus();
     } finally {

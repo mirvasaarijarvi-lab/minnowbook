@@ -3822,7 +3822,14 @@ const PublicBookingInner = () => {
                   {t("booking.roomTypeLabel")} *
                 </CardTitle>
               </CardHeader>
-              <CardContent id="room_type" role="group" tabIndex={-1} aria-label={t("booking.roomTypeLabel")} {...errorProps("room_type")} className="space-y-4">
+              <CardContent
+                id="room_type"
+                role="group"
+                tabIndex={-1}
+                aria-label={t("booking.roomTypeLabel")}
+                {...errorProps("room_type")}
+                className="space-y-4"
+              >
                 {(() => {
                   // Get unique room types from resources
                   const roomTypesAvailable = [
@@ -4044,7 +4051,9 @@ const PublicBookingInner = () => {
                   );
                 })()}
                 {errors.room_type && (
-                  <p id="room_type-error" className="text-sm text-destructive">{errors.room_type}</p>
+                  <p id="room_type-error" className="text-sm text-destructive">
+                    {errors.room_type}
+                  </p>
                 )}
               </CardContent>
             </Card>
