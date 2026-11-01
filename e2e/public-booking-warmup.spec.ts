@@ -19,16 +19,18 @@ const ENDPOINT = `${SUPABASE_URL}/functions/v1/public-booking`;
 test.describe("public-booking warmup", () => {
   test.setTimeout(150_000);
   test("returns 200 with { ok: true, warmup: true }", async ({ request }) => {
-    const response = await withRateLimitRetry(() => request.post(ENDPOINT, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        apikey: SUPABASE_ANON_KEY,
-        "x-warmup-source": "playwright:public-booking-warmup.spec",
-      },
-      data: { warmup: true },
-      timeout: 30_000,
-    }));
+    const response = await withRateLimitRetry(() =>
+      request.post(ENDPOINT, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          apikey: SUPABASE_ANON_KEY,
+          "x-warmup-source": "playwright:public-booking-warmup.spec",
+        },
+        data: { warmup: true },
+        timeout: 30_000,
+      }),
+    );
 
     expect(
       response.status(),
@@ -45,16 +47,18 @@ test.describe("public-booking warmup", () => {
   });
 
   test("rejects malformed warmup payload with 400", async ({ request }) => {
-    const response = await withRateLimitRetry(() => request.post(ENDPOINT, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        apikey: SUPABASE_ANON_KEY,
-      },
-      // `warmup: "yes"` is not boolean true, so the strict shape check rejects.
-      data: { warmup: "yes" },
-      timeout: 30_000,
-    }));
+    const response = await withRateLimitRetry(() =>
+      request.post(ENDPOINT, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          apikey: SUPABASE_ANON_KEY,
+        },
+        // `warmup: "yes"` is not boolean true, so the strict shape check rejects.
+        data: { warmup: "yes" },
+        timeout: 30_000,
+      }),
+    );
 
     expect(response.status()).toBe(400);
     const body = await response.json();

@@ -278,11 +278,13 @@ export async function callPublicBooking(
       apikey: "<redacted>",
     };
     try {
-      res = await withRateLimitRetry(() => request.post(url, {
-        headers: wireHeaders,
-        data: body,
-        timeout: PUBLIC_BOOKING_TIMEOUT_MS,
-      }));
+      res = await withRateLimitRetry(() =>
+        request.post(url, {
+          headers: wireHeaders,
+          data: body,
+          timeout: PUBLIC_BOOKING_TIMEOUT_MS,
+        }),
+      );
       durationMs = Date.now() - startedAt;
       // Transparently retry Supabase platform-level degradation (the edge
       // runtime answering 5xx before our function boots).
