@@ -12,12 +12,14 @@
 
 import { test, expect } from "@playwright/test";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./fixtures/test-tenant";
+import { withRateLimitRetry } from "./fixtures/rate-limit-retry";
 
 const ENDPOINT = `${SUPABASE_URL}/functions/v1/public-booking`;
 
 test.describe("public-booking warmup", () => {
+  test.setTimeout(150_000);
   test("returns 200 with { ok: true, warmup: true }", async ({ request }) => {
-    const response = await request.post(ENDPOINT, {
+    const response = await withRateLimitRetry(() => request.post(ENDPOINT, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
@@ -26,7 +28,7 @@ test.describe("public-booking warmup", () => {
       },
       data: { warmup: true },
       timeout: 30_000,
-    });
+    }));
 
     expect(
       response.status(),
@@ -43,7 +45,7 @@ test.describe("public-booking warmup", () => {
   });
 
   test("rejects malformed warmup payload with 400", async ({ request }) => {
-    const response = await request.post(ENDPOINT, {
+    const response = await withRateLimitRetry(() => request.post(ENDPOINT, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
@@ -52,7 +54,7 @@ test.describe("public-booking warmup", () => {
       // `warmup: "yes"` is not boolean true, so the strict shape check rejects.
       data: { warmup: "yes" },
       timeout: 30_000,
-    });
+    }));
 
     expect(response.status()).toBe(400);
     const body = await response.json();

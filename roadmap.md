@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Fix the two reported Playwright booking checks to honor HTTP 429 cooldowns without skipping assertions; verify the Analytics placeholder source.
+
 - [x] Align the Python setup manifest and both workflow references with verified v7.1.0; the exact action-version gate passes for 150 pins across 43 files and all 20 regression tests pass.
 
 - [x] Align all three CodeQL manifest entries and five workflow references with verified v4.39.1. The exact action-version gate passes for 150 pins across 43 files; all 20 regression tests and targeted lint pass.

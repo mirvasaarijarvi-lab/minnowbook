@@ -561,6 +561,8 @@ test.describe("Cross-booking: same guest, multiple resources/services", () => {
     tenant,
   }, testInfo) => {
     const date = futureDate(60);
+    // Four calls can each encounter the live booking endpoint's 60s cooldown.
+    test.setTimeout(600_000);
     const checkOut = futureDate(62);
 
     // HAR collector and one umbrella correlation id for the entire flow.

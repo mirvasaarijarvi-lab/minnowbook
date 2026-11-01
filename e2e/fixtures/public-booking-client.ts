@@ -19,6 +19,7 @@ import {
   type APIResponse,
 } from "@playwright/test";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./test-tenant";
+import { withRateLimitRetry } from "./rate-limit-retry";
 
 // Per-call HTTP timeout. Edge functions can cold-start (~1.5s typical, up
 // to ~5s) so we give each call a generous explicit budget instead of
@@ -277,11 +278,11 @@ export async function callPublicBooking(
       apikey: "<redacted>",
     };
     try {
-      res = await request.post(url, {
+      res = await withRateLimitRetry(() => request.post(url, {
         headers: wireHeaders,
         data: body,
         timeout: PUBLIC_BOOKING_TIMEOUT_MS,
-      });
+      }));
       durationMs = Date.now() - startedAt;
       // Transparently retry Supabase platform-level degradation (the edge
       // runtime answering 5xx before our function boots).
