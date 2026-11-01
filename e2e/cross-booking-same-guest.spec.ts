@@ -21,7 +21,7 @@ const test = baseTest.extend({
   context: async ({ browser }, useFixture, testInfo) => {
     const harPath = path.join(testInfo.outputDir, "network.har");
     const context = await browser.newContext({
-      baseURL: "http://localhost:4173",
+      baseURL: process.env.E2E_BASE_URL ?? "http://localhost:4173",
       recordHar: { path: harPath, mode: "minimal", content: "embed" },
       recordVideo: { dir: testInfo.outputDir },
     });
