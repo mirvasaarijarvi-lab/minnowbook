@@ -1,6 +1,7 @@
 # Project rules
 
 - Deno live-test retries honor HTTP Retry-After on 429 responses and retain failure assertions after exhaustion, because short retries cannot outwait the booking cooldown.
+- Playwright booking requests use the shared rate-limit retry helper with cooldown-sized test budgets; only explicit 429 refusals are replayed and final assertions remain mandatory.
 
 - The mobile daily staffing view reuses the full table's filtered slots and time-edit handlers, because permissions, site scope and payroll save tracking must stay identical in both views.
 
