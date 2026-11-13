@@ -41,7 +41,13 @@ describe("jsdom cross-origin redirect security", () => {
     try {
       await new Promise<void>((resolve, reject) => {
         const xhr = new dom.window.XMLHttpRequest();
-        xhr.open("GET", `${sourceUrl}/redirect`, true, "test-user", "test-password");
+        xhr.open(
+          "GET",
+          `${sourceUrl}/redirect`,
+          true,
+          "test-user",
+          "test-password",
+        );
         xhr.timeout = 5000;
         xhr.onload = () => resolve();
         xhr.onerror = () => reject(new Error("Redirect request failed"));
