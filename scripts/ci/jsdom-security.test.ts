@@ -31,6 +31,11 @@ describe("jsdom cross-origin redirect security", () => {
     });
     const destinationUrl = await listen(destination);
     const source = createServer((request, response) => {
+      if (!request.headers.authorization) {
+        response.writeHead(401, { "WWW-Authenticate": 'Basic realm="test"' });
+        response.end();
+        return;
+      }
       originalAuthorization = request.headers.authorization;
       response.writeHead(302, { Location: `${destinationUrl}/target` });
       response.end();
