@@ -4,7 +4,7 @@
 - [ ] Confirm PR #158's corrected final-commit checks. Dashboard/browser/function tests, offer regressions, build and security workflows dispatched. At 18:32 UTC, 24 checks passed, 22 running, six queued and six skipped, none failed. Waiting on GitHub completion.
 
 - [x] Resolve PR #159 against main 8dc9490. Final head b7a0137 is conflict-free and zero commits behind; only seven dependency/lock/SBOM files changed. Both locks resolve postgres 4.1.1 within the intended ^4.1.0 range; safety pins and open picomatch risk preserved. Regeneration, manifest agreement, public URL hygiene and security floors passed on GitHub. Fresh PR checks started and missing build/security summary workflows dispatched; no merging or closing PRs.
-- [ ] Confirm PR #159's final required-check results. At 18:30 UTC, 32 passed, 12 running, 7 queued and 6 skipped, none failed; RLS/CORS summary is produced after its prerequisite jobs. Waiting on GitHub completion.
+- [x] Confirm PR #159's final required-check results on b7a0137 at 18:47 UTC. All 20 required contexts verified successful against main branch protection, including browser tests, build, security and RLS/CORS summaries. Overall 64 successful and eight skipped check runs, none failed or pending. PR remains open and unmerged; no PR merged or closed.
 
 - [ ] Complete final-commit regression verification for all open PRs. PR #160 has zero changed files, but its browser check failed after 49 passed and six skipped. PR #158's unsafe Query update is removed and fresh final-commit checks are running. PR #159's conflict repair completed and checks are pending. Wait for full dashboard/public/function results; nothing merged or closed.
 
