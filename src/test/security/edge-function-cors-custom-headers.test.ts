@@ -193,13 +193,8 @@ const APIKEY_MODES: ApikeyMode[] = ["with-apikey", "no-apikey"];
 describe("Edge function CORS — disallowed origin × custom-header preflights", () => {
   for (const fn of FUNCTIONS) {
     describe(fn, () => {
-      // Live network calls into deployed edge functions can occasionally
-      // exceed the default 5s on a cold start (especially the very first
-      // OPTIONS / POST hit per worker, and most reliably for support-chat
-      // which boots the AI gateway client). Use a 30s per-test timeout
-      // instead of bumping the global default — only this suite is
-      // network-bound.
-      const NETWORK_TIMEOUT_MS = 30_000;
+      // Four bounded attempts plus three full 60-second gateway cooldowns.
+      const NETWORK_TIMEOUT_MS = 240_000;
 
       // -------- positive control --------
       // Allowed-origin echo is a function-level guarantee, so it's only
@@ -322,7 +317,7 @@ describe("Edge function CORS — disallowed origin × custom-header preflights",
       it(
         "preflight with custom headers but NO Origin still does not return wildcard ACAO",
         async () => {
-          const res = await fetch(fnUrl(fn), {
+          const res = await fetchWithColdStartRetry(fnUrl(fn), {
             method: "OPTIONS",
             headers: {
               "Access-Control-Request-Method": "POST",

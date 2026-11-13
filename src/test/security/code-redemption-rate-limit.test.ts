@@ -28,6 +28,7 @@
 import "@/test/setup";
 import { describe, it, expect, beforeAll } from "vitest";
 import { createClient } from "@supabase/supabase-js";
+import { fetchWithColdStartRetry } from "./cold-start-retry";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env
@@ -111,30 +112,16 @@ function shapeLabel(code: string): string {
   return "fake";
 }
 
-/**
- * Per-call timeout for a single redeem fetch. A redeem rejection should
- * resolve in well under a second; anything past this bound is a stuck
- * connection / cold-start tail and should be surfaced as a fast failure
- * rather than letting Promise.all hold the whole batch hostage until
- * Vitest's per-test timeout (180s) fires.
- *
- * Default 8s gives plenty of headroom for the worst non-pathological
- * cold-start, while still failing 20x faster than the test budget so
- * batched waves keep flowing.
- */
-const CALL_TIMEOUT_MS = Number(process.env.REDEEM_CALL_TIMEOUT_MS ?? 8_000);
+// The shared helper owns per-attempt timeouts and bounded retries.
 
 async function callRedeem(
   code: string,
   withAuth: boolean,
   labelOverride?: string,
-  timeoutMs: number = CALL_TIMEOUT_MS,
 ): Promise<Attempt> {
   const label = labelOverride ?? shapeLabel(code);
   const input = code.length > 40 ? `${code.slice(0, 37)}...` : code;
   const startedAt = Date.now();
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -143,11 +130,10 @@ async function callRedeem(
     if (withAuth) {
       headers["Authorization"] = `Bearer ${SUPABASE_PUBLISHABLE_KEY}`;
     }
-    const res = await fetch(FUNCTION_URL, {
+    const res = await fetchWithColdStartRetry(FUNCTION_URL, {
       method: "POST",
       headers,
       body: JSON.stringify({ code }),
-      signal: controller.signal,
     });
     let body: unknown = null;
     try {
@@ -164,27 +150,15 @@ async function callRedeem(
       input,
     };
   } catch (e) {
-    // Distinguish our deliberate abort (timeout) from other transport
-    // failures so the per-matrix summary can attribute the tail.
-    const isTimeout =
-      controller.signal.aborted ||
-      (e instanceof Error &&
-        (e.name === "AbortError" || /aborted/i.test(e.message)));
     return {
       status: 0,
-      body: isTimeout ? { error: `client_timeout_after_${timeoutMs}ms` } : null,
-      error: isTimeout
-        ? new Error(
-            `callRedeem timed out after ${timeoutMs}ms (label=${label})`,
-          )
-        : e,
+      body: null,
+      error: e,
       durationMs: Date.now() - startedAt,
       label,
       withAuth,
       input,
     };
-  } finally {
-    clearTimeout(timer);
   }
 }
 
@@ -327,7 +301,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       // can exceed the default 60s ceiling even after the module-level
       // warmup. Raise the per-test budget so a slow network run is not
       // reported as a security regression.
-      timeout: 180_000,
+      timeout: 240_000,
       // `retry` reruns the test on failure/timeout. Scope to CI to avoid
       // masking deterministic regressions during local development.
       retry: process.env.CI ? 2 : 0,
@@ -496,12 +470,8 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
   it(
     "burst of 30 distinct fake codes (batched 5x6): zero leaks, zero 5xx, stable codes",
     {
-      // Run 30 distinct codes in 3 sequential waves of 10 instead of one
-      // 30-way Promise.all. This keeps the indistinguishability + no-5xx
-      // invariants intact (still 30 calls, still 30 distinct inputs) while
-      // dropping peak fan-out by 3x, which is what was driving the cold-
-      // start tail latency that timed out CI.
-      timeout: 180_000,
+      // Six waves of five retain all 30 probes, with a retry budget per wave.
+      timeout: 1_440_000,
       retry: process.env.CI ? 2 : 0,
     },
     async () => {

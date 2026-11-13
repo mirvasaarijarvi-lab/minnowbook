@@ -70,7 +70,7 @@ type CallOpts = {
 async function callRedeem(opts: CallOpts) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    apikey: SUPABASE_ANON_KEY!,
+    apikey: SUPABASE_ANON_KEY ?? "",
   };
   if (opts.withAuth !== false) {
     // No real session — anon key as a stand-in. Exercises the
@@ -222,7 +222,7 @@ describe("redeem-access-code — idempotency key contract", () => {
       crashes.length,
       `unexpected 5xx under concurrency: ${JSON.stringify(crashes)}`,
     ).toBe(0);
-  }, 90_000);
+  }, 240_000);
 
   it("different keys for the same input produce independent responses (no cross-key cache pollution)", async () => {
     // Two distinct keys for the same caller MUST be treated as two

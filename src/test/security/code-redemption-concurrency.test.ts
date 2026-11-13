@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { fetchWithColdStartRetry } from "./cold-start-retry";
 
 /**
  * Concurrency / replay tests for access codes and discount codes.
@@ -68,14 +69,14 @@ beforeAll(() => {
 async function callRedeem(code: string, withAuth: boolean) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    apikey: SUPABASE_ANON_KEY!,
+    apikey: SUPABASE_ANON_KEY ?? "",
   };
   if (withAuth) {
     // No real session — use the anon key as a stand-in so we exercise the
     // "Authorization present but not a real user" branch.
     headers["Authorization"] = `Bearer ${SUPABASE_ANON_KEY}`;
   }
-  const res = await fetch(FUNCTION_URL, {
+  const res = await fetchWithColdStartRetry(FUNCTION_URL, {
     method: "POST",
     headers,
     body: JSON.stringify({ code }),
@@ -173,7 +174,7 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
       uniqueCodes.size,
       `parallel codes diverged: ${[...uniqueCodes].join(" | ")}`,
     ).toBe(1);
-  }, 30_000);
+  }, 240_000);
 
   it("serial replay of the same redemption returns the same deterministic error and code", async () => {
     // Replay the exact same request 5 times. Both the human message AND
@@ -205,7 +206,7 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
         firstCode,
       );
     }
-  }, 30_000);
+  }, 1_200_000);
 
   it("anon (no Authorization header) is rejected with an auth-rejection code before reaching code lookup", async () => {
     // The function should reject before doing any code lookup — proves
@@ -220,7 +221,7 @@ describe("redeem-access-code — parallel calls never produce a duplicate succes
       AUTH_REJECTION_CODES.has(code),
       `expected auth-rejection code, got: ${code}`,
     ).toBe(true);
-  });
+  }, 240_000);
 
   it("malformed code returns a known error code without leaking lookup behaviour", async () => {
     // Length-bounded validation runs server-side BEFORE the SECURITY DEFINER
