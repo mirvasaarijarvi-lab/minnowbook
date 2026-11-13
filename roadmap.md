@@ -1,5 +1,11 @@
 # Dependency sync
 
+# Subscription checkout and recovery review
+
+- [ ] Fix checkout and portal failure handling, including same-tab recovery and duplicate subscription prevention.
+- [ ] Fix business-bound subscription lookup and status synchronization, including delayed activation and expired sample recovery.
+- [ ] Add regression coverage and verify signed-in mobile recovery without charging a customer.
+
 - [x] Fix the reported jsdom cross-origin credential leak with 30.1.3, synchronize both lockfiles and SBOMs, and verify redirect security plus affected UI tests. All 22 selected tests, targeted lint, manifest drift and registry hygiene checks pass.
 
 - [x] Fix Playwright booking checks to honor HTTP 429 cooldowns without skipping assertions, and honor the configured app URL in cross-booking. Eight retry regressions and all four live warmup/cross-booking checks pass. Browser confirms Analytics uses the real measurement ID with no secret placeholder; no Analytics change needed.
