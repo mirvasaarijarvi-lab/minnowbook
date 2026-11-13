@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:0dc08424-2f95-5243-9343-9b014f9d16fc",
+  "serialNumber": "urn:uuid:cbf29ecf-68d0-5bc4-a838-84693893c1eb",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "19b3c2202d82ca17329ffaf089ede986c1e1e7f495191c469ef9eb4485fd2de7"
+          "value": "ff5b05756d5279f7ffa82bc67d161af82d5e99f48056c4472430efe31befa7eb"
         }
       ]
     }
@@ -659,11 +659,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/postgres@3.4.9",
+      "bom-ref": "pkg:npm/postgres@4.1.0",
       "type": "library",
       "name": "postgres",
-      "version": "3.4.9",
-      "purl": "pkg:npm/postgres@3.4.9",
+      "version": "4.1.0",
+      "purl": "pkg:npm/postgres@4.1.0",
       "scope": "optional"
     },
     {
