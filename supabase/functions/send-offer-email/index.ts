@@ -56,6 +56,56 @@ function assertUuid(value: string, label: string): string {
   return value;
 }
 
+const ALLOWED_ORIGIN = /^https:\/\/([a-z0-9-]+\.)*(mimmobook\.com|lovable\.app)$/i;
+const DEFAULT_ORIGIN = "https://mimmobook.com";
+
+function safeOrigin(value: unknown): string {
+  if (typeof value !== "string") return DEFAULT_ORIGIN;
+  try {
+    const o = new URL(value).origin;
+    return ALLOWED_ORIGIN.test(o) ? o : DEFAULT_ORIGIN;
+  } catch {
+    return DEFAULT_ORIGIN;
+  }
+}
+
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+const OFFER_COPY: Record<string, { subject: string; greeting: string; intro: string; link: string; bye: string }> = {
+  en: {
+    subject: "Offer from",
+    greeting: "Dear",
+    intro: "Please use the PDF download link in this email to review your offer details and confirm whether you would like to proceed.",
+    link: "Review and accept your offer here:",
+    bye: "Best regards,",
+  },
+  fi: {
+    subject: "Tarjous:",
+    greeting: "Hyvä",
+    intro: "Voit tarkistaa tarjouksen tiedot tämän viestin PDF-linkistä ja vahvistaa, haluatko jatkaa.",
+    link: "Tarkista ja hyväksy tarjous täällä:",
+    bye: "Ystävällisin terveisin,",
+  },
+  sv: {
+    subject: "Offert från",
+    greeting: "Bästa",
+    intro: "Använd PDF-länken i detta e-postmeddelande för att granska offerten och bekräfta om du vill gå vidare.",
+    link: "Granska och godkänn offerten här:",
+    bye: "Med vänliga hälsningar,",
+  },
+};
+
+export function composeOfferMessage(lang: string, guestName: string, businessName: string, acceptUrl: string) {
+  const c = OFFER_COPY[lang] ?? OFFER_COPY.en;
+  return {
+    subject: `${c.subject} ${businessName}`.slice(0, 200),
+    body: `${c.greeting} ${guestName},\n\n${c.intro}\n\n${c.link}\n${acceptUrl}\n\n${c.bye}\n${businessName}`,
+  };
+}
+
 function safeFilenameOnly(value: string): string {
   // Strip any path component and disallow traversal sequences
   const base = value.split(/[/\\]/).pop() || "";
@@ -197,35 +247,32 @@ export async function handleSendOfferEmailRequest(req: Request): Promise<Respons
       return jsonResponse({ error: "Forbidden" }, 403);
     }
 
-    const { to, subject, htmlBody, textBody, pdfBase64, pdfFilename, businessName, businessEmail } = await req.json();
+    const { offerId, acceptToken, origin, pdfBase64, pdfFilename } = await req.json();
 
-    const recipientEmail = typeof to === "string" ? to.trim().toLowerCase() : "";
-    const emailSubject = typeof subject === "string" ? subject.trim() : "";
-    const messageBody = typeof textBody === "string" && textBody.trim()
-      ? textBody.trim()
-      : typeof htmlBody === "string"
-        ? stripHtml(htmlBody)
-        : "";
-
-    if (!recipientEmail || !emailSubject || !messageBody) {
+    // SECURITY: the subject and message are composed here from the stored
+    // offer, never taken from the request, so a workspace admin cannot send
+    // arbitrary content to guests in the business's name.
+    if (typeof offerId !== "string" || !UUID_REGEX.test(offerId)) {
       return jsonResponse({ error: "Missing required fields" }, 400);
     }
-    if (emailSubject.length > 200 || /[\r\n]/.test(emailSubject) || messageBody.length > 20000) {
-      return jsonResponse({ error: "Invalid email content" }, 400);
+    if (typeof acceptToken !== "string" || !/^[A-Za-z0-9_-]{32,128}$/.test(acceptToken)) {
+      return jsonResponse({ error: "Missing required fields" }, 400);
     }
+    const linkOrigin = safeOrigin(origin);
 
-    // SECURITY: offers may only be emailed to the guest of an offer that
-    // belongs to this business, never to an arbitrary address.
-    const { data: offerMatch } = await supabaseAdmin
+    const { data: offer } = await supabaseAdmin
       .from("offers")
-      .select("id")
+      .select("id, guest_email, guest_name, language, accept_token_hash")
+      .eq("id", offerId)
       .eq("tenant_id", tenantUser.tenant_id)
-      .ilike("guest_email", recipientEmail)
-      .limit(1)
       .maybeSingle();
-    if (!offerMatch) {
-      return jsonResponse({ error: "Recipient must be the guest of one of your offers" }, 403);
+    if (!offer?.guest_email) {
+      return jsonResponse({ error: "Offer not found" }, 404);
     }
+    if (!offer.accept_token_hash || offer.accept_token_hash !== (await sha256Hex(acceptToken))) {
+      return jsonResponse({ error: "Invalid offer link" }, 403);
+    }
+    const recipientEmail = String(offer.guest_email).trim().toLowerCase();
 
     const { data: tenantSettings } = await supabaseAdmin
       .from("tenant_settings")
@@ -233,10 +280,16 @@ export async function handleSendOfferEmailRequest(req: Request): Promise<Respons
       .eq("tenant_id", tenantUser.tenant_id)
       .maybeSingle();
 
-    const displayName = (tenantSettings?.business_name || businessName || "MimmoBook")
+    const displayName = (tenantSettings?.business_name || "MimmoBook")
       .replace(/[\r\n"]/g, "")
       .trim();
-    const replyToEmail = (tenantSettings?.business_email || businessEmail || "").trim() || undefined;
+    const replyToEmail = (tenantSettings?.business_email || "").trim() || undefined;
+    const { subject: emailSubject, body: messageBody } = composeOfferMessage(
+      String(offer.language || "en"),
+      String(offer.guest_name || "").replace(/[\r\n]/g, " ").slice(0, 200),
+      displayName,
+      `${linkOrigin}/offer/${encodeURIComponent(acceptToken)}`,
+    );
 
     let downloadUrl: string | undefined;
     if (typeof pdfBase64 === "string" && pdfBase64.length > 0) {
