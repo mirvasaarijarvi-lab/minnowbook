@@ -1,5 +1,15 @@
 # Dependency sync
 
+- [ ] Complete final-commit regression verification for all open PRs. PR #160 contains main e78d4b7, has zero changed files, and 44 successful checks with 6 skipped and 6 pending at 18:15 UTC. Current main public page and signed-in dashboard render without page errors, not a substitute for PR browser tests. PR #158 still proposes known dashboard-breaking React Query 5.106.1 after ignoring 5.107.x; requested full dependency ignore and updated its branch with main, but exclusion remains unverified. PR #159 recreation requested because conflict refresh has not completed. Wait for corrected heads and full dashboard/public/function checks; nothing merged or closed.
+
+- [x] Refresh PR #160 with main 3db1958; new head 3df24e8 verified ahead with zero commits behind. No PR merged or closed.
+- [ ] Complete latest-main refresh of PR #159 and corrected dependency selection for #158. #158 regenerated but substituted known-broken 5.106.1, so full query ignore requested; main update accepted at 18:15 UTC. #159 head still c481ade after rebase request, so recreate requested. Waiting on Dependabot before verifying corrected heads and fresh checks.
+
+- [x] Synchronize the config package's npm lock from 2.27.0 to the declared 2.27.1 and refresh both SBOMs. Manifest drift, public-registry hygiene, security floors and 20 regression tests pass. Production scan has no known registry findings; local picomatch risk remains open and unassessed by that scan. GitHub must test the refreshed files after automatic sync; no PR merged or closed.
+
+- [x] Repair local-stack startup cleanup to inspect Docker HostPort mappings instead of the publish filter, before the first attempt and each retry. Port conflict 54322 confirmed in all three failed attempts; 22 regressions, action gate, shell syntax, formatting and lint pass. No PR merged or closed.
+- [x] Confirm multipart GitHub rerun completes. Attempt 2 of run 43447704773 passed startup, local live tests and report upload at 18:02:23 UTC on November 13. The historical rerun used its original commit, not the new cleanup repair; no PR merged or closed.
+
 - [x] Repair PR #156 browser crash caused by query releases 5.106.1 and 5.107.1. Pinned verified 5.104.2 with both locks and SBOMs refreshed. Nine offer browser flows and 254 targeted regressions pass; security floors, lock hygiene and action gate pass, moderate production audit has zero blockers. Fresh GitHub checks still required; no PR merged or closed.
 
 - [x] Review all eight open repository PRs and create combined replacement draft PR #156 on latest main, preserving November 13 fixes. Reconstructed 26 dependency updates, refreshed both locks and SBOM copies, verified action pins, 58 targeted tests and 749 live checks. Originals remain open; nothing merged.

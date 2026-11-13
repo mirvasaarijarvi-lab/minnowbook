@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:cbf29ecf-68d0-5bc4-a838-84693893c1eb",
+  "serialNumber": "urn:uuid:ff01d45a-1dd3-55a0-ae9d-e86bd4d2f400",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "ff5b05756d5279f7ffa82bc67d161af82d5e99f48056c4472430efe31befa7eb"
+          "value": "bea29375769312b5c51653ced5d2a75b7ec7f2285d82707d701d2bdcb608b53a"
         }
       ]
     }
@@ -75,11 +75,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.27.0",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.27.1",
       "type": "library",
       "name": "@lovable.dev/vite-tanstack-config",
-      "version": "2.27.0",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.27.0",
+      "version": "2.27.1",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.27.1",
       "scope": "optional"
     },
     {
@@ -659,11 +659,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/postgres@4.1.0",
+      "bom-ref": "pkg:npm/postgres@3.4.9",
       "type": "library",
       "name": "postgres",
-      "version": "4.1.0",
-      "purl": "pkg:npm/postgres@4.1.0",
+      "version": "3.4.9",
+      "purl": "pkg:npm/postgres@3.4.9",
       "scope": "optional"
     },
     {
@@ -779,11 +779,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/vite@8.3.6",
+      "bom-ref": "pkg:npm/vite@8.3.7",
       "type": "library",
       "name": "vite",
-      "version": "8.3.6",
-      "purl": "pkg:npm/vite@8.3.6",
+      "version": "8.3.7",
+      "purl": "pkg:npm/vite@8.3.7",
       "scope": "optional"
     },
     {

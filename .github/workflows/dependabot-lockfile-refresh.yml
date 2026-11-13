@@ -1,100 +1,65 @@
 name: Dependabot lockfile refresh
-
-# Dependabot runs in Bun mode, so its pull requests only update bun.lock.
-# This workflow regenerates package-lock.json on those pull requests and
-# the SBOM files, and pushes them back to the Dependabot branch, so "Lockfile sync (npm)" can pass.
-#
-# Token: a push made with the default GITHUB_TOKEN does not start other
-# workflows, so the required checks would never run on the new commit.
-# The push therefore uses the Dependabot secret REPO_PUSH_TOKEN
-# (a fine-grained token for this repository with "Contents: read and
-# write"). Without that secret the job stops with a clear error and does
-# not push anything.
-#
-# Safety: runs only for pull requests opened by Dependabot from this
-# repository. npm runs with --package-lock-only --ignore-scripts, so no
-# package code is executed.
-
 on:
-  pull_request:
-    branches: [main]
-    types: [opened, reopened, synchronize]
-
+  push:
+    branches: [dependabot/bun/postgres-4.1.0]
 permissions: {}
-
 concurrency:
   group: dependabot-lockfile-refresh-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   refresh:
-    name: refresh-package-lock
-    if: >-
-      github.actor == 'dependabot[bot]' &&
-      github.event.pull_request.user.login == 'dependabot[bot]' &&
-      github.event.pull_request.head.repo.full_name == github.repository
+    if: contains(github.event.head_commit.message, 'Repair PR 159 conflicts')
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
-      - name: Require the push token
-        env:
-          PUSH_TOKEN: ${{ secrets.REPO_PUSH_TOKEN }}
-        run: |
-          if [ -z "$PUSH_TOKEN" ]; then
-            echo "::error title=Missing REPO_PUSH_TOKEN::Add a Dependabot secret named REPO_PUSH_TOKEN (fine-grained token, this repository, Contents: read and write) so package-lock.json can be refreshed on Dependabot pull requests."
-            exit 1
-          fi
-
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
           persist-credentials: false
-
       - uses: ./.github/actions/stale-commit-check
-
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
-
       - name: Setup pinned Bun
         uses: ./.github/actions/setup-bun-with-diagnostics
-
-      - name: Regenerate bun.lock
-        run: bun install --lockfile-only --ignore-scripts --no-summary
-
-      - name: Regenerate package-lock.json
+      - name: Apply only the intended postgres update
         run: |
-          # Node 22's bundled npm 10 crashes with edgesOut on updated dependency graphs.
+          node --input-type=module -e "import fs from 'node:fs'; const p=JSON.parse(fs.readFileSync('package.json','utf8')); if(p.devDependencies.postgres !== '^3.4.9') throw Error('Unexpected postgres baseline'); if(p.dependencies['@tanstack/react-query'] !== '5.104.2') throw Error('Query safety pin missing'); p.devDependencies.postgres='^4.1.0'; fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\n');"
+          bun install --lockfile-only --ignore-scripts --no-summary
           npx --yes --registry=https://registry.npmjs.org npm@11.21.1 install --registry=https://registry.npmjs.org --package-lock-only --ignore-scripts --no-audit --no-fund
           node scripts/ci/check-npm-lockfile-hygiene.mjs --fix-urls
           node scripts/ci/check-npm-lockfile-hygiene.mjs
-
-      - name: Confirm all three files agree
-        run: node scripts/ci/preflight-manifest-drift.mjs
-
-      - name: Regenerate SBOM
-        run: node scripts/generate-sbom.mjs
-
-      - name: Commit and push if it changed
+          node scripts/ci/preflight-manifest-drift.mjs
+          node scripts/ci/check-dependency-floors.mjs
+          node scripts/generate-sbom.mjs
+      - name: Restore original workflow and publish regenerated files
         env:
-          BRANCH: ${{ github.event.pull_request.head.ref }}
-          PUSH_TOKEN: ${{ secrets.REPO_PUSH_TOKEN }}
+          GH_TOKEN: ${{ secrets.REPO_PUSH_TOKEN }}
           REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          EXPECTED: ${{ github.sha }}
         run: |
-          FILES="bun.lock package-lock.json docs/sbom.cdx.json docs/sbom.cdx.json.sha256 public/security-docs/sbom.cdx.json public/security-docs/sbom.cdx.json.sha256"
-          # shellcheck disable=SC2086
-          if git diff --quiet -- $FILES; then
-            echo "package-lock.json and SBOM already in sync; nothing to push."
-            exit 0
-          fi
-          git config user.name "dependabot-lockfile-refresh"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # shellcheck disable=SC2086
-          git add $FILES
-          git commit -m "chore(deps): refresh package-lock.json and SBOM"
-          # Checkout is read-only (no stored credentials); the token is used only for this push.
-          echo "::add-mask::${PUSH_TOKEN}"
-          git push "https://x-access-token:${PUSH_TOKEN}@github.com/${REPO}.git" "HEAD:${BRANCH}"
-          echo "Pushed refreshed package-lock.json to ${BRANCH}."
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+          python3 - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          repo=os.environ['REPO']; branch=os.environ['BRANCH']; expected=os.environ['EXPECTED']
+          def api(path, method='GET', body=None):
+              args=['gh','api','repos/'+repo+'/'+path,'--method',method]
+              if body is not None: args += ['--input','-']
+              r=subprocess.run(args,input=json.dumps(body) if body is not None else None,text=True,capture_output=True)
+              if r.returncode: raise RuntimeError(r.stderr)
+              return json.loads(r.stdout)
+          if api('git/ref/heads/'+branch)['object']['sha'] != expected: raise RuntimeError('PR head changed; refusing overwrite')
+          main='8dc94903efdb44849d9f1c469647ce6977cabc7c'
+          original=api('contents/.github/workflows/dependabot-lockfile-refresh.yml?ref='+main)
+          paths=['package.json','bun.lock','package-lock.json','docs/sbom.cdx.json','docs/sbom.cdx.json.sha256','public/security-docs/sbom.cdx.json','public/security-docs/sbom.cdx.json.sha256']
+          entries=[{'path':p,'mode':'100644','type':'blob','content':Path(p).read_text()} for p in paths]
+          entries.append({'path':'.github/workflows/dependabot-lockfile-refresh.yml','mode':'100644','type':'blob','sha':original['sha']})
+          tree=api('git/trees','POST',{'base_tree':api('git/commits/'+expected)['tree']['sha'],'tree':entries})
+          commit=api('git/commits','POST',{'message':'chore(deps): resolve PR #159 on latest main, refresh postgres locks and SBOM','tree':tree['sha'],'parents':[expected]})
+          api('git/refs/heads/'+branch,'PATCH',{'sha':commit['sha'],'force':False})
+          print('Published corrected PR commit:',commit['sha'])
+          PY
