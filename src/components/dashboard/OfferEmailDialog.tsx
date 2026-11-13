@@ -77,7 +77,7 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(
     };
 
     const effectiveName = branding.businessName || businessName;
-    const defaultSubject = `Offer – ${effectiveName}`;
+    const defaultSubject = `Offer from ${effectiveName}`;
     const defaultBody = `Dear ${offer.guest_name},\n\nPlease use the PDF download link in this email to review your offer details and confirm whether you would like to proceed.\n\nBest regards,\n${effectiveName}`;
 
     const [subject, setSubject] = useState(defaultSubject);
@@ -112,23 +112,16 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(
           .update({ accept_token_hash: tokenHash } as any)
           .eq("id", offer.id);
         if (tokenErr) throw tokenErr;
-        const emailBody = withAcceptLink(
-          body,
-          offerAcceptUrl(window.location.origin, token),
-          offer.language || "en",
-        );
 
         const { data, error } = await supabase.functions.invoke(
           "send-offer-email",
           {
             body: {
-              to: offer.guest_email,
-              subject,
-              textBody: emailBody,
+              offerId: offer.id,
+              acceptToken: token,
+              origin: window.location.origin,
               pdfBase64,
               pdfFilename: `Offer_${offer.guest_name.replace(/\s+/g, "_")}_${offer.event_date}.pdf`,
-              businessName: effectiveName,
-              businessEmail: branding.businessEmail || undefined,
             },
           },
         );
@@ -177,18 +170,18 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(
               <Label htmlFor="offer-email-subject">
                 {t("offers.emailSubject")}
               </Label>
-              <Input
-                id="offer-email-subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-              />
+              <Input id="offer-email-subject" value={subject} readOnly />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="offer-email-body">{t("offers.emailBody")}</Label>
               <Textarea
                 id="offer-email-body"
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
+                value={withAcceptLink(
+                  body,
+                  offerAcceptUrl("", "…"),
+                  offer.language || "en",
+                )}
+                readOnly
                 rows={10}
               />
             </div>
