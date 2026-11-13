@@ -1,5 +1,8 @@
 # Project rules
 
+- Security-floor checks inspect integrity-verified local archive metadata and every nested Bun resolution, never filenames; local mitigations do not close upstream findings.
+- CI runtime matrices cover Node 22 and newer because the patched test environment cannot run safely on Node 20; do not downgrade security dependencies to keep unsupported runtimes green.
+
 - Keep the local picomatch override, source and tarball synchronized and test repeated-extglob refusal across all resolved copies; no upstream release is patched yet, so rejecting that syntax prevents matcher ReDoS without replacing the Vite stack.
 
 - Keep jsdom pinned to a patched release and exercise cross-origin XMLHttpRequest credential stripping, because the test environment must not forward Basic authentication to redirected origins.
