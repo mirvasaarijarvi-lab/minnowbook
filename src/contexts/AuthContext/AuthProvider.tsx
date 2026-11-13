@@ -88,13 +88,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return info;
       } catch {
         return null;
-      } finally {
-        if (subscriptionCheckRef.current === request)
-          subscriptionCheckRef.current = null;
       }
     })();
     request.promise = promise;
     subscriptionCheckRef.current = request;
+    void promise.finally(() => {
+      if (subscriptionCheckRef.current === request)
+        subscriptionCheckRef.current = null;
+    });
     return promise;
   }, [queryClient]);
 
