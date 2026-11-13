@@ -112,23 +112,16 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(
           .update({ accept_token_hash: tokenHash } as any)
           .eq("id", offer.id);
         if (tokenErr) throw tokenErr;
-        const emailBody = withAcceptLink(
-          body,
-          offerAcceptUrl(window.location.origin, token),
-          offer.language || "en",
-        );
 
         const { data, error } = await supabase.functions.invoke(
           "send-offer-email",
           {
             body: {
-              to: offer.guest_email,
-              subject,
-              textBody: emailBody,
+              offerId: offer.id,
+              acceptToken: token,
+              origin: window.location.origin,
               pdfBase64,
               pdfFilename: `Offer_${offer.guest_name.replace(/\s+/g, "_")}_${offer.event_date}.pdf`,
-              businessName: effectiveName,
-              businessEmail: branding.businessEmail || undefined,
             },
           },
         );
@@ -180,15 +173,19 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(
               <Input
                 id="offer-email-subject"
                 value={subject}
-                onChange={(e) => setSubject(e.target.value)}
+                readOnly
               />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="offer-email-body">{t("offers.emailBody")}</Label>
               <Textarea
                 id="offer-email-body"
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
+                value={withAcceptLink(
+                  body,
+                  offerAcceptUrl(window.location.origin, "…"),
+                  offer.language || "en",
+                )}
+                readOnly
                 rows={10}
               />
             </div>
