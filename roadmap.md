@@ -1,9 +1,9 @@
 # Dependency sync
 
-- [ ] Verify every open PR contains latest main and preserves dashboard, public booking and function behavior through final-commit diff review and regression checks; do not merge or close PRs.
+- [ ] Complete final-commit regression verification for all open PRs. PR #160 contains main e78d4b7, has zero changed files, and 44 successful checks with 6 skipped and 6 pending at 18:15 UTC. Current main public page and signed-in dashboard render without page errors, not a substitute for PR browser tests. PR #158 still proposes known dashboard-breaking React Query 5.106.1 after ignoring 5.107.x; requested full dependency ignore and updated its branch with main, but exclusion remains unverified. PR #159 recreation requested because conflict refresh has not completed. Wait for corrected heads and full dashboard/public/function checks; nothing merged or closed.
 
 - [x] Refresh PR #160 with main 3db1958; new head 3df24e8 verified ahead with zero commits behind. No PR merged or closed.
-- [ ] Complete latest-main refresh of PRs #158 and #159. GitHub update-branch refused both due to conflicts; Dependabot rebase requested for #159 and ignore of the known dashboard-breaking React Query 5.107.1 requested for #158. Dependabot acknowledged the ignore and #158 shows rebasing, but both heads remain unchanged at 18:08 UTC. Waiting on Dependabot before verifying new heads and fresh checks.
+- [ ] Complete latest-main refresh of PR #159 and corrected dependency selection for #158. #158 regenerated but substituted known-broken 5.106.1, so full query ignore requested; main update accepted at 18:15 UTC. #159 head still c481ade after rebase request, so recreate requested. Waiting on Dependabot before verifying corrected heads and fresh checks.
 
 - [x] Synchronize the config package's npm lock from 2.27.0 to the declared 2.27.1 and refresh both SBOMs. Manifest drift, public-registry hygiene, security floors and 20 regression tests pass. Production scan has no known registry findings; local picomatch risk remains open and unassessed by that scan. GitHub must test the refreshed files after automatic sync; no PR merged or closed.
 
