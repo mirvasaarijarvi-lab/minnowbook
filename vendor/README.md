@@ -17,6 +17,32 @@ Ordinary stars, globstars, braces, classes and non-repeating extglobs remain.
 This is a local mitigation, not an upstream patched release. Version-only
 scanners may keep reporting it; do not suppress that finding automatically.
 
+## Open risk and closure criteria
+
+Status as of November 13, 2026: mitigated locally, awaiting an official fix.
+The npm registry still lists 4.0.7 as latest, not a patched release.
+AIKIDO-2026-928674 remains an open dependency risk, not a resolved upstream
+vulnerability. The affected paths include development/build/test tooling;
+the local guard disables repeated extglobs across all installed copies.
+Registry-only scanners cannot assess the local tarball, so an empty registry
+scan is not evidence that this advisory has been resolved. The available
+Lovable scan has no matching persisted finding; the external Aikido finding
+has not been closed or suppressed.
+
+When an official fix becomes available:
+
+1. Verify the advisory or upstream security notes explicitly cover this
+   single-branch repeated-extglob flaw, not merely a newer version number.
+2. Replace the local dependency and override with that verified patched
+   release and regenerate both lockfiles and SBOMs.
+3. Adapt the regression tests to verify safe matching, not necessarily
+   SyntaxError refusal; timeout-bounded attack probes, normal matching,
+   every resolved copy and fresh installs must all pass.
+4. Run dependency audits and request a fresh Aikido scan. Close only the
+   matching finding once that scan confirms the vulnerable graph is gone.
+
+This is a tracked follow-up, not a background upgrade or monitoring job.
+
 Repack after changes with:
 
 ```sh
