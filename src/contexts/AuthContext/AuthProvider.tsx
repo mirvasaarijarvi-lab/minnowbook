@@ -49,32 +49,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // instead of serving the previous user's answer. The provider lives
   // inside `<QueryClientProvider>` (see App.tsx), so this hook is safe.
   const queryClient = useQueryClient();
+  const subscriptionCheckRef = useRef<{ userId: string; promise: Promise<SubscriptionInfo | null> } | null>(null);
 
   const checkSubscription = useCallback(async () => {
-    try {
-      const {
-        data: { session: currentSession },
-      } = await supabase.auth.getSession();
-      if (!currentSession) return;
-
-      const { data, error } =
-        await supabase.functions.invoke("check-subscription");
-      if (error) {
-        console.error("[AuthContext] check-subscription error:", error.message);
-        return;
-      }
-      if (data) {
-        setSubscription({
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (!currentSession) return null;
+    const userId = currentSession.user.id;
+    if (subscriptionCheckRef.current?.userId === userId) return subscriptionCheckRef.current.promise;
+    const promise = (async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("check-subscription", { signal: AbortSignal.timeout(45000) });
+        if (error || !data || typeof data.subscribed !== "boolean") return null;
+        const { data: latest } = await supabase.auth.getSession();
+        if (latest.session?.user.id !== userId) return null;
+        const info: SubscriptionInfo = {
           subscribed: data.subscribed ?? false,
           tier: data.tier ?? null,
           subscriptionEnd: data.subscription_end ?? null,
           subscriptionStatus: data.subscription_status ?? null,
-        });
+        };
+        setSubscription(info);
+        await queryClient.invalidateQueries({ queryKey: ["tenant-user", userId] });
+        return info;
+      } catch {
+        return null;
+      } finally {
+        if (subscriptionCheckRef.current?.promise === promise) subscriptionCheckRef.current = null;
       }
-    } catch (err) {
-      console.error("[AuthContext] check-subscription failed:", err);
-    }
-  }, []);
+    })();
+    subscriptionCheckRef.current = { userId, promise };
+    return promise;
+  }, [queryClient]);
 
   useEffect(() => {
     const {
@@ -365,7 +370,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     const onVisible = () => {
-      if (document.visibilityState === "visible") void checkAccountActive();
+      if (document.visibilityState === "visible") {
+        void checkAccountActive();
+        void checkSubscription();
+      }
     };
     document.addEventListener("visibilitychange", onVisible);
     window.addEventListener("focus", onVisible);

@@ -28,10 +28,8 @@ export default function SubscriptionCard({ tenant }: { tenant: any }) {
     try {
       if (action === "refresh") {
         const result = await refreshSubscription();
-        if (result === false) throw new Error("Verification failed");
-        const { data, error: readError } = await supabase.functions.invoke("check-subscription", { signal: AbortSignal.timeout(45000) });
-        if (readError || !data || typeof data.subscribed !== "boolean") throw new Error("Verification failed");
-        setStatus(data.subscribed ? L.confirmed : L.pending);
+        if (!result) throw new Error("Verification failed");
+        setStatus(result.subscribed ? L.confirmed : L.pending);
         return;
       }
       const { data, error: portalError } = await supabase.functions.invoke("customer-portal", { signal: AbortSignal.timeout(45000) });
