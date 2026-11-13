@@ -1,5 +1,8 @@
 # Dependency sync
 
+- [x] Review all eight open repository PRs and create combined replacement draft PR #156 on latest main, preserving November 13 fixes. Reconstructed 26 dependency updates, refreshed both locks and SBOM copies, verified action pins, 58 targeted tests and 749 live checks. Originals remain open; nothing merged.
+- [ ] Confirm every GitHub check on combined PR #156's latest commit passes before marking ready or closing originals. Waiting on external CI completion; local checks are not a substitute for full CI.
+
 - [ ] Resolve AIKIDO-2026-928674 with a verified official picomatch fix, then rerun attack/compatibility tests, refresh both locks and SBOMs, and confirm a fresh Aikido scan before closing. Blocked: npm latest is still unpatched 4.0.7 on November 13, 2026. Local mitigation retained; risk and closure criteria documented in vendor/README.md.
 
 - [x] Remove all seven expired live-test quarantines without extending dates. Use shared bounded retries for redemption/cacheability probes, honor full numeric or HTTP-date cooldowns, and size burst budgets accordingly. All 749 affected live checks pass twice without test reruns; eight retry regressions plus four picomatch regressions and targeted lint pass. Exact quarantine gate now reports zero entries, errors and warnings.
