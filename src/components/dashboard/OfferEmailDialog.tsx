@@ -77,7 +77,7 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(
     };
 
     const effectiveName = branding.businessName || businessName;
-    const defaultSubject = `Offer – ${effectiveName}`;
+    const defaultSubject = `Offer from ${effectiveName}`;
     const defaultBody = `Dear ${offer.guest_name},\n\nPlease use the PDF download link in this email to review your offer details and confirm whether you would like to proceed.\n\nBest regards,\n${effectiveName}`;
 
     const [subject, setSubject] = useState(defaultSubject);
@@ -182,7 +182,7 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(
                 id="offer-email-body"
                 value={withAcceptLink(
                   body,
-                  offerAcceptUrl(window.location.origin, "…"),
+                  offerAcceptUrl("", "…"),
                   offer.language || "en",
                 )}
                 readOnly
