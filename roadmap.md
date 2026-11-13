@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Mitigate the selected picomatch repeated-extglob vulnerability without an unpatched upgrade; synchronize locks and SBOMs and verify security plus tooling compatibility.
+
 # Subscription checkout and recovery review
 
 - [x] Fix checkout and portal failure handling, same-tab recovery, provider timeouts and repeat-checkout protection.
