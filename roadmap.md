@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Investigate and repair PR #160's browser-test failure, rerun the corrected check and verify its GitHub result. No PR merging or closing.
+
 - [x] Repair PR #158 on c1a5bac by retaining React Query and query-core 5.104.2 across all npm/Bun resolutions, preserving four intended updates and main 8e12730, and regenerating locks/SBOMs. Manifest agreement, registry hygiene, security floors and Query resolution checks passed. Only seven dependency/lock/SBOM files differ; temporary workflow restored. No PR merged or closed.
 - [ ] Confirm PR #158's corrected final-commit checks. Dashboard/browser/function tests, offer regressions, build and security workflows dispatched. At 18:32 UTC, 24 checks passed, 22 running, six queued and six skipped, none failed. Waiting on GitHub completion.
 
