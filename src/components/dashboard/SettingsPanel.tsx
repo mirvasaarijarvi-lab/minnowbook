@@ -25,9 +25,6 @@ import {
   Phone,
   Palette,
   RotateCcw,
-  CreditCard,
-  Crown,
-  ExternalLink,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import DashboardTooltip from "./DashboardTooltip";
@@ -37,6 +34,7 @@ import DiscountCodesPanel from "./DiscountCodesPanel";
 import RedeemAccessCode from "./RedeemAccessCode";
 import ReservationTypesCard from "./ReservationTypesCard";
 import PermissionEmptyState from "./PermissionEmptyState";
+import SubscriptionCard from "./SubscriptionCard";
 
 const SITE_COLOR_PRESETS = [
   {
@@ -695,154 +693,6 @@ const COLOR_PRESETS = [
     accent: "#e11d48",
   },
 ];
-
-const SubscriptionCard = ({ tenant }: { tenant: any }) => {
-  const t = useT();
-  const { isAdmin } = useTenant();
-  const [loading, setLoading] = useState(false);
-
-  const tierLabel =
-    tenant?.tier === "professional"
-      ? "Pro"
-      : tenant?.tier === "business"
-        ? "Business"
-        : "Basic";
-  const statusLabel =
-    tenant?.subscription_status === "trialing"
-      ? "Trial"
-      : tenant?.subscription_status === "active"
-        ? "Active"
-        : (tenant?.subscription_status ?? "—");
-
-  const handleManage = async () => {
-    setLoading(true);
-    try {
-      const { data, error } =
-        await supabase.functions.invoke("customer-portal");
-      if (error) {
-        // Parse the error body for a friendly message
-        const errorBody =
-          typeof error === "object" && "message" in error
-            ? error.message
-            : String(error);
-        if (errorBody.includes("No Stripe customer")) {
-          toast.info(
-            "No active subscription yet. Choose a plan to get started!",
-            {
-              action: {
-                label: "View Plans",
-                onClick: () => window.open("/pricing", "_blank"),
-              },
-            },
-          );
-        } else {
-          toast.error(errorBody || "Failed to open subscription portal");
-        }
-        return;
-      }
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      } else {
-        toast.info(
-          "No active subscription yet. Choose a plan to get started!",
-          {
-            action: {
-              label: "View Plans",
-              onClick: () => window.open("/pricing", "_blank"),
-            },
-          },
-        );
-      }
-    } catch (err: any) {
-      const msg = err?.message || String(err);
-      if (msg.includes("No Stripe customer") || msg.includes("non-2xx")) {
-        toast.info(
-          "No active subscription yet. Choose a plan to get started!",
-          {
-            action: {
-              label: "View Plans",
-              onClick: () => window.open("/pricing", "_blank"),
-            },
-          },
-        );
-      } else {
-        toast.error(msg || "Failed to open subscription portal");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-serif flex items-center gap-2">
-          <CreditCard className="h-4 w-4" />
-          {"Subscription"}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-accent/10 flex items-center justify-center">
-              <Crown className="h-5 w-5 text-accent" />
-            </div>
-            <div>
-              <p className="font-medium text-foreground">{tierLabel}</p>
-              <p className="text-xs text-muted-foreground capitalize">
-                {statusLabel}
-              </p>
-            </div>
-          </div>
-          <Badge
-            variant={
-              tenant?.subscription_status === "active" ? "default" : "secondary"
-            }
-            className="text-xs"
-          >
-            {statusLabel}
-          </Badge>
-        </div>
-        {!isAdmin ? (
-          <p
-            role="note"
-            className="rounded-lg border border-border bg-muted/50 p-3 text-sm text-muted-foreground"
-          >
-            {t("settings.planParentOnly")}
-          </p>
-        ) : (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={handleManage}
-              disabled={loading}
-            >
-              {loading ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <ExternalLink className="h-3.5 w-3.5" />
-              )}
-              {"Manage Subscription"}
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <a
-                href="/pricing"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="gap-1.5"
-              >
-                {"View Plans"}
-                <ArrowRight className="h-3.5 w-3.5" />
-              </a>
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
 
 const MAX_LOGO_SIZE = 2 * 1024 * 1024; // 2MB
 const MAX_HERO_SIZE = 5 * 1024 * 1024; // 5MB
