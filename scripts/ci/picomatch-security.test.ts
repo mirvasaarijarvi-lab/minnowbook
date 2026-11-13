@@ -36,21 +36,29 @@ describe("picomatch local repeated-extglob mitigation", () => {
     expect(entries.length).toBeGreaterThan(0);
     for (const [, entry] of entries) {
       expect(JSON.stringify(entry)).toContain(archive);
-      expect(JSON.stringify(entry)).not.toContain("picomatch@4.0.7\"");
+      expect(JSON.stringify(entry)).not.toContain('picomatch@4.0.7"');
     }
   });
 
   it("ships the reviewed parser, version and license unchanged in the tarball", () => {
     for (const file of ["lib/parse.js", "package.json", "LICENSE"]) {
       const packed = execFileSync("tar", ["-xOf", archive, `package/${file}`]);
-      expect(packed.equals(readFileSync(`vendor/picomatch/${file}`))).toBe(true);
+      expect(packed.equals(readFileSync(`vendor/picomatch/${file}`))).toBe(
+        true,
+      );
     }
   });
 
   it("rejects attack patterns through every entry point before matching can hang", () => {
     const patterns = [
-      "+(*)b", "*(*)b", "+(a*)b", "+(a)b", "+(a|aa)b",
-      "+(*(a))b", "**/+(*)b", "@(+(a*))b",
+      "+(*)b",
+      "*(*)b",
+      "+(a*)b",
+      "+(a)b",
+      "+(a|aa)b",
+      "+(*(a))b",
+      "**/+(*)b",
+      "@(+(a*))b",
     ];
     for (const key of installedPaths) {
       const script = `
@@ -70,9 +78,12 @@ describe("picomatch local repeated-extglob mitigation", () => {
         }
         console.log('all attacks refused');
       `;
-      expect(execFileSync(process.execPath, ["-e", script], {
-        timeout: 3000, encoding: "utf8",
-      }).trim()).toBe("all attacks refused");
+      expect(
+        execFileSync(process.execPath, ["-e", script], {
+          timeout: 3000,
+          encoding: "utf8",
+        }).trim(),
+      ).toBe("all attacks refused");
     }
   });
 
@@ -88,8 +99,14 @@ describe("picomatch local repeated-extglob mitigation", () => {
       expect(picomatch(pattern)(yes)).toBe(true);
       expect(picomatch(pattern)(no)).toBe(false);
     }
-    expect(picomatch("**/*", {ignore: "**/node_modules/**"})("src/index.ts")).toBe(true);
-    expect(picomatch("**/*", {ignore: "**/node_modules/**"})("node_modules/pkg/index.js")).toBe(false);
+    expect(
+      picomatch("**/*", { ignore: "**/node_modules/**" })("src/index.ts"),
+    ).toBe(true);
+    expect(
+      picomatch("**/*", { ignore: "**/node_modules/**" })(
+        "node_modules/pkg/index.js",
+      ),
+    ).toBe(false);
     expect(picomatch(String.raw`\+\(a\)`)("+(a)")).toBe(true);
   });
 });
