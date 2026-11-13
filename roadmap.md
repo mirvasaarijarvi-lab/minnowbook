@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Repair PR #158 by retaining React Query 5.104.2, preserving other intended updates and current main fixes, regenerating locks/SBOMs, and rerunning dashboard and dependency checks. No PR merging or closing.
+
 - [x] Resolve PR #159 against main 8dc9490. Final head b7a0137 is conflict-free and zero commits behind; only seven dependency/lock/SBOM files changed. Both locks resolve postgres 4.1.1 within the intended ^4.1.0 range; safety pins and open picomatch risk preserved. Regeneration, manifest agreement, public URL hygiene and security floors passed on GitHub. Fresh PR checks started and missing build/security summary workflows dispatched; no merging or closing PRs.
 - [ ] Confirm PR #159's final required-check results. At 18:30 UTC, 32 passed, 12 running, 7 queued and 6 skipped, none failed; RLS/CORS summary is produced after its prerequisite jobs. Waiting on GitHub completion.
 
