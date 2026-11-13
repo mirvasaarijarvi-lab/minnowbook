@@ -1,6 +1,7 @@
 # Dependency sync
 
-- [ ] Investigate multipart local-stack startup failure, repair the cause, and rerun the affected GitHub job without merging or closing PRs.
+- [x] Repair local-stack startup cleanup to inspect Docker HostPort mappings instead of the publish filter, before the first attempt and each retry. Port conflict 54322 confirmed in all three failed attempts; 22 regressions, action gate, shell syntax, formatting and lint pass. No PR merged or closed.
+- [ ] Confirm multipart GitHub rerun completes. Historical job rerun started on a fresh runner but uses its original commit, not this repair; verification of the repaired workflow waits for automatic GitHub sync and a fresh run.
 
 - [x] Repair PR #156 browser crash caused by query releases 5.106.1 and 5.107.1. Pinned verified 5.104.2 with both locks and SBOMs refreshed. Nine offer browser flows and 254 targeted regressions pass; security floors, lock hygiene and action gate pass, moderate production audit has zero blockers. Fresh GitHub checks still required; no PR merged or closed.
 
