@@ -37,7 +37,10 @@ describe("jsdom cross-origin redirect security", () => {
         return;
       }
       originalAuthorization = request.headers.authorization;
-      response.writeHead(302, { Location: `${destinationUrl}/target` });
+      response.writeHead(302, {
+        Location: `${destinationUrl}/target`,
+        "Access-Control-Allow-Origin": "*",
+      });
       response.end();
     });
     const sourceUrl = await listen(source);
