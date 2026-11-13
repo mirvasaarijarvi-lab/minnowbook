@@ -1,5 +1,7 @@
 # Project rules
 
+- Keep jsdom pinned to a patched release and exercise cross-origin XMLHttpRequest credential stripping, because the test environment must not forward Basic authentication to redirected origins.
+
 - Deno live-test retries honor HTTP Retry-After on 429 responses and retain failure assertions after exhaustion, because short retries cannot outwait the booking cooldown.
 - Playwright booking requests use the shared rate-limit retry helper with cooldown-sized test budgets; only explicit 429 refusals are replayed and final assertions remain mandatory.
 
