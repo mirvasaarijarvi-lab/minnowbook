@@ -30,10 +30,10 @@ describe("tenant-private-url helper", () => {
       error: null,
     });
     await createTenantPrivateSignedUrl("tenant-123/offer.pdf");
-    expect(PRIVATE_SIGNED_URL_TTL_SECONDS).toBe(86_400);
+    expect(PRIVATE_SIGNED_URL_TTL_SECONDS).toBe(3_600);
     expect(createSignedUrl).toHaveBeenCalledWith(
       "tenant-123/offer.pdf",
-      86_400,
+      3_600,
       { download: undefined },
     );
   });
@@ -46,7 +46,7 @@ describe("tenant-private-url helper", () => {
     await createTenantPrivateSignedUrl("a/b.pdf", {
       expiresInSeconds: 9_999_999,
     });
-    expect(createSignedUrl).toHaveBeenCalledWith("a/b.pdf", 7 * 24 * 60 * 60, {
+    expect(createSignedUrl).toHaveBeenCalledWith("a/b.pdf", 60 * 60, {
       download: undefined,
     });
   });
