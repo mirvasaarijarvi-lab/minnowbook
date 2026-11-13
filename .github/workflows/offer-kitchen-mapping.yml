@@ -82,7 +82,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node: ["20", "22", "24"]
+        node: ["22", "24"]
 
     steps:
       - name: Checkout code
@@ -101,8 +101,8 @@ jobs:
           # The checksum step needs sha256sum, which only the Linux runner
           # ships; the pinned version itself is still installed everywhere.
           verify-checksum: ${{ runner.os == 'Linux' }}
-          # This matrix deliberately exercises Node 20/22/24, so keep the
-          # matrix version instead of the repo-wide Node 22 floor.
+          # The patched jsdom/undici test environment requires Node 22+.
+          # Keep both supported runtimes rather than downgrade security fixes.
           node-version: ${{ matrix.node }}
 
       - name: Install dependencies

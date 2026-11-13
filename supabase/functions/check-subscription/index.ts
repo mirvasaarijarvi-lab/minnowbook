@@ -13,12 +13,13 @@ import {
 export async function handleCheckSubscriptionRequest(
   req: Request,
 ): Promise<Response> {
+  const corsHeaders = getCorsHeaders(req);
   const headers = {
-    ...getCorsHeaders(req),
+    ...corsHeaders,
     "Content-Type": "application/json",
   };
   const respond = (body: unknown, status = 200) =>
-    new Response(JSON.stringify(body), { headers, status });
+    new Response(JSON.stringify(body), { headers: headers, status });
   if (req.method === "OPTIONS") return new Response(null, { headers });
   if (Number(req.headers.get("content-length")) > 50 * 1024) {
     return respond({ error: "Request too large" }, 413);
