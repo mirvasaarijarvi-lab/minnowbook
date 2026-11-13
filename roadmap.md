@@ -1,6 +1,6 @@
 # Dependency sync
 
-- [ ] Synchronize the config package's npm lock from 2.27.0 to the declared 2.27.1, refresh SBOMs, and verify the three reported drift gates without merging or closing PRs.
+- [x] Synchronize the config package's npm lock from 2.27.0 to the declared 2.27.1 and refresh both SBOMs. Manifest drift, public-registry hygiene, security floors and 20 regression tests pass. Production scan has no known registry findings; local picomatch risk remains open and unassessed by that scan. GitHub must test the refreshed files after automatic sync; no PR merged or closed.
 
 - [x] Repair local-stack startup cleanup to inspect Docker HostPort mappings instead of the publish filter, before the first attempt and each retry. Port conflict 54322 confirmed in all three failed attempts; 22 regressions, action gate, shell syntax, formatting and lint pass. No PR merged or closed.
 - [ ] Confirm multipart GitHub rerun completes. Historical job rerun started on a fresh runner but uses its original commit, not this repair; verification of the repaired workflow waits for automatic GitHub sync and a fresh run.
