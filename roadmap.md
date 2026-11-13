@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Verify every open PR contains latest main and preserves dashboard, public booking and function behavior through final-commit diff review and regression checks; do not merge or close PRs.
+
 - [x] Refresh PR #160 with main 3db1958; new head 3df24e8 verified ahead with zero commits behind. No PR merged or closed.
 - [ ] Complete latest-main refresh of PRs #158 and #159. GitHub update-branch refused both due to conflicts; Dependabot rebase requested for #159 and ignore of the known dashboard-breaking React Query 5.107.1 requested for #158. Dependabot acknowledged the ignore and #158 shows rebasing, but both heads remain unchanged at 18:08 UTC. Waiting on Dependabot before verifying new heads and fresh checks.
 
