@@ -4,7 +4,10 @@
 export const BILLING_ROLES = ["owner", "admin", "superadmin"] as const;
 
 // deno-lint-ignore no-explicit-any
-export async function findBillingTenantId(client: any, userId: string): Promise<string | null> {
+export async function findBillingTenantId(
+  client: any,
+  userId: string,
+): Promise<string | null> {
   const { data, error } = await client
     .from("tenant_users")
     .select("tenant_id")

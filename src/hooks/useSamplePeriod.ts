@@ -31,7 +31,11 @@ export const useSamplePeriod = (): SamplePeriodInfo => {
 
   const base = { isBypassedByAdmin: false };
 
-  if (!startDate || !endDate || ["active", "trialing"].includes((tenant as any)?.subscription_status)) {
+  if (
+    !startDate ||
+    !endDate ||
+    ["active", "trialing"].includes((tenant as any)?.subscription_status)
+  ) {
     return {
       ...base,
       status: "no_sample",

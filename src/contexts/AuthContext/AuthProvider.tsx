@@ -49,16 +49,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // instead of serving the previous user's answer. The provider lives
   // inside `<QueryClientProvider>` (see App.tsx), so this hook is safe.
   const queryClient = useQueryClient();
-  const subscriptionCheckRef = useRef<{ userId: string; promise: Promise<SubscriptionInfo | null> } | null>(null);
+  const subscriptionCheckRef = useRef<{
+    userId: string;
+    promise: Promise<SubscriptionInfo | null>;
+  } | null>(null);
 
   const checkSubscription = useCallback(async () => {
-    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    const {
+      data: { session: currentSession },
+    } = await supabase.auth.getSession();
     if (!currentSession) return null;
     const userId = currentSession.user.id;
-    if (subscriptionCheckRef.current?.userId === userId) return subscriptionCheckRef.current.promise;
+    if (subscriptionCheckRef.current?.userId === userId)
+      return subscriptionCheckRef.current.promise;
     const promise = (async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("check-subscription", { signal: AbortSignal.timeout(45000) });
+        const { data, error } = await supabase.functions.invoke(
+          "check-subscription",
+          { signal: AbortSignal.timeout(45000) },
+        );
         if (error || !data || typeof data.subscribed !== "boolean") return null;
         const { data: latest } = await supabase.auth.getSession();
         if (latest.session?.user.id !== userId) return null;
@@ -69,12 +78,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           subscriptionStatus: data.subscription_status ?? null,
         };
         setSubscription(info);
-        await queryClient.invalidateQueries({ queryKey: ["tenant-user", userId] });
+        await queryClient.invalidateQueries({
+          queryKey: ["tenant-user", userId],
+        });
         return info;
       } catch {
         return null;
       } finally {
-        if (subscriptionCheckRef.current?.promise === promise) subscriptionCheckRef.current = null;
+        if (subscriptionCheckRef.current?.promise === promise)
+          subscriptionCheckRef.current = null;
       }
     })();
     subscriptionCheckRef.current = { userId, promise };

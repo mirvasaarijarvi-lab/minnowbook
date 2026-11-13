@@ -463,7 +463,12 @@ const Dashboard = () => {
 
             <SamplePeriodBanner />
 
-            {(samplePeriod.isBlocked || samplePeriod.isReadOnly || (typeof window !== "undefined" && /(?:checkout=success|billing=return)/.test(window.location.search))) && (
+            {(samplePeriod.isBlocked ||
+              samplePeriod.isReadOnly ||
+              (typeof window !== "undefined" &&
+                /(?:checkout=success|billing=return)/.test(
+                  window.location.search,
+                ))) && (
               <div className="mx-4 sm:mx-6 lg:mx-8 mt-4 max-w-3xl">
                 <SubscriptionCard tenant={tenant} />
               </div>
