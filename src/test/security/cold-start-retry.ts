@@ -4,7 +4,7 @@
  * Wraps a fetch with a bounded retry on transient 5xx responses (502,
  * 503, 504) and per-attempt network timeouts, using a small exponential
  * backoff (500ms, then 1500ms) plus +/- 25% jitter. Logs each retry
- * with method, URL, status, and attempt count so CI gate failures show
+ * with method, endpoint name, status, and attempt count so CI gate failures show
  * exactly which probe tripped a cold-start retry. Real regressions
  * still fail because they reproduce on every attempt.
  *
@@ -24,6 +24,7 @@ export async function fetchWithColdStartRetry(
   init: RequestInit,
 ): Promise<Response> {
   const method = (init.method ?? "GET").toUpperCase();
+  const endpoint = new URL(input).pathname.split("/").pop() || "probe";
   const maxAttempts = 4; // 1 initial + 3 retries
   const baseDelayMs = 500;
 
@@ -69,33 +70,37 @@ export async function fetchWithColdStartRetry(
     // Drain body so the connection can be reused.
     if (last.res) await last.res.text().catch(() => "");
 
-    const retryAfterSec = Number(last.res?.headers.get("retry-after"));
+    const retryAfter = last.res?.headers.get("retry-after");
+    const retryAfterSec = Number(retryAfter);
+    const retryAfterDate = retryAfter ? Date.parse(retryAfter) : NaN;
     const expDelay =
       last.res?.status === 429
-        ? Math.min(
-            Number.isFinite(retryAfterSec) && retryAfterSec > 0
-              ? retryAfterSec * 1000
-              : 1000 * Math.pow(2, i),
-            10_000,
-          )
+        ? Number.isFinite(retryAfterSec) && retryAfterSec > 0
+          ? retryAfterSec * 1000
+          : Number.isFinite(retryAfterDate)
+            ? Math.max(0, retryAfterDate - Date.now())
+            : 1000 * Math.pow(2, i)
         : baseDelayMs * Math.pow(3, i - 1);
-    const jitter = expDelay * 0.25 * (Math.random() * 2 - 1);
+    // Never shorten the server's cooldown with a cap or negative jitter.
+    const jitter = last.res?.status === 429
+      ? 0
+      : expDelay * 0.25 * (Math.random() * 2 - 1);
     const delay = Math.max(0, Math.round(expDelay + jitter));
     const statusLabel = last.aborted
       ? `timeout(${PER_ATTEMPT_TIMEOUT_MS}ms)`
-      : String(last.res!.status);
+      : String(last.res?.status);
 
     console.warn(
-      `[cors-gate] transient ${statusLabel} on ${method} ${input} (attempt ${i}/${maxAttempts}), retrying after ${delay}ms backoff`,
+      `[cors-gate] transient ${statusLabel} on ${method} ${endpoint} (attempt ${i}/${maxAttempts}), retrying after ${delay}ms backoff`,
     );
     await new Promise((r) => setTimeout(r, delay));
     last = await attempt();
     const resultLabel = last.aborted
       ? `timeout(${PER_ATTEMPT_TIMEOUT_MS}ms)`
-      : `status=${last.res!.status}`;
+      : `status=${last.res?.status}`;
 
     console.warn(
-      `[cors-gate] retry result for ${method} ${input} (attempt ${i + 1}/${maxAttempts}): ${resultLabel}`,
+      `[cors-gate] retry result for ${method} ${endpoint} (attempt ${i + 1}/${maxAttempts}): ${resultLabel}`,
     );
   }
 

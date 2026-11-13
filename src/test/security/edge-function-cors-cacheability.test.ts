@@ -33,6 +33,7 @@
  */
 import "@/test/setup";
 import { describe, it, expect } from "vitest";
+import { fetchWithColdStartRetry } from "./cold-start-retry";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env
@@ -55,33 +56,8 @@ function fnUrl(name: string) {
   return `${SUPABASE_URL}/functions/v1/${name}`;
 }
 
-async function fetchWithRetry(
-  input: string,
-  init: RequestInit,
-  {
-    attempts = 3,
-    perAttemptTimeoutMs = 15000,
-  }: { attempts?: number; perAttemptTimeoutMs?: number } = {},
-): Promise<Response> {
-  let lastErr: unknown;
-  for (let i = 0; i < attempts; i++) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), perAttemptTimeoutMs);
-    try {
-      return await fetch(input, { ...init, signal: ctrl.signal });
-    } catch (err) {
-      lastErr = err;
-    } finally {
-      clearTimeout(timer);
-    }
-    // Brief backoff before retry (cold-start tolerant).
-    await new Promise((r) => setTimeout(r, 500 * (i + 1)));
-  }
-  throw lastErr;
-}
-
 async function preflight(name: string, origin: string) {
-  return await fetchWithRetry(fnUrl(name), {
+  return await fetchWithColdStartRetry(fnUrl(name), {
     method: "OPTIONS",
     headers: {
       Origin: origin,
@@ -92,7 +68,7 @@ async function preflight(name: string, origin: string) {
 }
 
 async function postCall(name: string, origin: string) {
-  return await fetchWithRetry(fnUrl(name), {
+  return await fetchWithColdStartRetry(fnUrl(name), {
     method: "POST",
     headers: {
       Origin: origin,
@@ -184,11 +160,8 @@ function expectNoOriginEcho(res: Response, forbidden: string, label: string) {
   expect(acao).not.toBe("*");
 }
 
-// Per-test budget must comfortably exceed the worst-case retry envelope in
-// fetchWithRetry (3 attempts × 15s + 2 backoffs of 0.5–1s ≈ ~47s) plus a
-// margin for cold-start latency on the live edge functions. The default
-// vitest timeout (5s) would otherwise mask transient cold starts as failures.
-const LIVE_NETWORK_TIMEOUT_MS = 60_000;
+// Four bounded attempts plus three full 60-second gateway cooldowns.
+const LIVE_NETWORK_TIMEOUT_MS = 240_000;
 
 describe("Forbidden origins — responses are never cacheable cross-origin", () => {
   for (const fn of FUNCTIONS) {

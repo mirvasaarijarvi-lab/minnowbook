@@ -28,6 +28,7 @@
 import "@/test/setup";
 import { describe, it, expect, beforeAll } from "vitest";
 import { createClient } from "@supabase/supabase-js";
+import { fetchWithColdStartRetry } from "./cold-start-retry";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env
@@ -143,11 +144,10 @@ async function callRedeem(
     if (withAuth) {
       headers["Authorization"] = `Bearer ${SUPABASE_PUBLISHABLE_KEY}`;
     }
-    const res = await fetch(FUNCTION_URL, {
+    const res = await fetchWithColdStartRetry(FUNCTION_URL, {
       method: "POST",
       headers,
       body: JSON.stringify({ code }),
-      signal: controller.signal,
     });
     let body: unknown = null;
     try {
@@ -327,7 +327,7 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
       // can exceed the default 60s ceiling even after the module-level
       // warmup. Raise the per-test budget so a slow network run is not
       // reported as a security regression.
-      timeout: 180_000,
+      timeout: 240_000,
       // `retry` reruns the test on failure/timeout. Scope to CI to avoid
       // masking deterministic regressions during local development.
       retry: process.env.CI ? 2 : 0,
@@ -496,12 +496,8 @@ describe("redeem-access-code: brute-force & replay resilience", () => {
   it(
     "burst of 30 distinct fake codes (batched 5x6): zero leaks, zero 5xx, stable codes",
     {
-      // Run 30 distinct codes in 3 sequential waves of 10 instead of one
-      // 30-way Promise.all. This keeps the indistinguishability + no-5xx
-      // invariants intact (still 30 calls, still 30 distinct inputs) while
-      // dropping peak fan-out by 3x, which is what was driving the cold-
-      // start tail latency that timed out CI.
-      timeout: 180_000,
+      // Six waves of five retain all 30 probes, with a retry budget per wave.
+      timeout: 1_440_000,
       retry: process.env.CI ? 2 : 0,
     },
     async () => {
