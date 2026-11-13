@@ -2,9 +2,9 @@
 
 # Subscription checkout and recovery review
 
-- [ ] Fix checkout and portal failure handling, including same-tab recovery and duplicate subscription prevention.
-- [ ] Fix business-bound subscription lookup and status synchronization, including delayed activation and expired sample recovery.
-- [ ] Add regression coverage and verify signed-in mobile recovery without charging a customer.
+- [x] Fix checkout and portal failure handling, same-tab recovery, provider timeouts and repeat-checkout protection.
+- [x] Fix business-bound lookup, Basil billing dates, checked persistence and expired sample restoration; preserve active sample access and fail closed on account checks.
+- [x] Verify 36 targeted regressions, five billing-role tests, deployment checks, lint and signed-in phone/desktop failure controls. Simulated portal retry, same-tab handoff and successful refresh pass without charges. Real paid restoration remains unverified because the available account has no linked Stripe subscription; the unmocked retry displayed verification failure, not a false success.
 
 - [x] Fix the reported jsdom cross-origin credential leak with 30.1.3, synchronize both lockfiles and SBOMs, and verify redirect security plus affected UI tests. All 22 selected tests, targeted lint, manifest drift and registry hygiene checks pass.
 
