@@ -75,10 +75,13 @@ export async function findBusinessSubscription(
   const candidates: any[] = [];
   // Stable business linkage survives owner and email changes.
   if (tenant.stripe_subscription_id) {
-    const linked = await stripe.subscriptions.retrieve(
-      tenant.stripe_subscription_id,
-    );
-    if (belongsToBusiness(linked, tenant)) candidates.push(linked);
+    try {
+      const linked = await stripe.subscriptions.retrieve(tenant.stripe_subscription_id);
+      if (belongsToBusiness(linked, tenant)) candidates.push(linked);
+    } catch (error) {
+      // A removed legacy ID must not block discovery through the linked customer.
+      if ((error as { code?: string }).code !== "resource_missing") throw error;
+    }
   }
   const customers: string[] = [];
   if (tenant.stripe_customer_id) {
@@ -117,6 +120,11 @@ export async function syncBusinessSubscription(
     : subscription.customer?.id;
   const { error } = await client.from("tenants").update({
     ...(entitled ? { tier } : !onSample ? { tier: "basic" } : {}),
+    // The paid subscription replaces an expired sample, including for staff
+    // whose safe tenant view intentionally masks billing identifiers.
+    ...(entitled && tenant.sample_end_date && !onSample
+      ? { sample_start_date: null, sample_end_date: null }
+      : {}),
     subscription_status: subscription.status,
     stripe_customer_id: customer,
     stripe_subscription_id: subscription.id,
