@@ -21,6 +21,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { bunInstalledVersions } from "./bun-installed-versions.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(__dirname, "..", "..");
@@ -57,6 +58,8 @@ const FLOORS = {
       "3.0.9",
       "3.0.10",
       "3.0.11",
+      "3.0.12",
+      "3.0.13",
       "3.1.0",
       "3.1.1",
       "3.1.2",
@@ -201,11 +204,10 @@ for (const [name, { min, reason, denied }] of Object.entries(FLOORS)) {
   const bunLockPath = path.join(repoRoot, "bun.lock");
   if (fs.existsSync(bunLockPath)) {
     const bunText = fs.readFileSync(bunLockPath, "utf8");
-    const escaped = name.replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
-    const re = new RegExp(`"${escaped}":\\s*\\["${escaped}@([^"\\s]+)"`, "g");
-    let m;
-    while ((m = re.exec(bunText)) !== null) {
-      installs.push({ path: `bun.lock:${name}`, version: m[1] });
+    try {
+      installs.push(...bunInstalledVersions(bunText, name, repoRoot));
+    } catch (error) {
+      errors.push(`${name}: ${error.message}`);
     }
   }
   if (installs.length === 0) {
