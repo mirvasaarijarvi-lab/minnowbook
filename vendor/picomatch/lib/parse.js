@@ -521,6 +521,13 @@ const parse = (input, options) => {
   };
 
   const extglobOpen = (type, value) => {
+    // Local mitigation for AIKIDO-2026-928674. Refuse repeated extglobs
+    // before constructing any regex, including single branches and nests.
+    // Never let maxExtglobRecursion:false disable this fail-closed guard.
+    if (type === 'plus' || type === 'star') {
+      throw new SyntaxError('Repeated extglobs are disabled by the picomatch security mitigation');
+    }
+
     const token = { ...EXTGLOB_CHARS[value], conditions: 1, inner: '' };
 
     token.prev = prev;
