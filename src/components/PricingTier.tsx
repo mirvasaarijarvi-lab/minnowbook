@@ -68,6 +68,7 @@ const PricingTier = ({
         "create-checkout",
         {
           body: { priceId },
+          signal: AbortSignal.timeout(45000),
         },
       );
       if (error) throw error;

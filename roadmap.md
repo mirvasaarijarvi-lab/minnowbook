@@ -1,5 +1,11 @@
 # Dependency sync
 
+# Subscription checkout and recovery review
+
+- [x] Fix checkout and portal failure handling, same-tab recovery, provider timeouts and repeat-checkout protection.
+- [x] Fix business-bound lookup, Basil billing dates, checked persistence and expired sample restoration; preserve active sample access and fail closed on account checks.
+- [x] Verify 36 targeted regressions, five billing-role tests, deployment checks, lint and signed-in phone/desktop failure controls. Simulated portal retry, same-tab handoff and successful refresh pass without charges. Real paid restoration remains unverified because the available account has no linked Stripe subscription; the unmocked retry displayed verification failure, not a false success.
+
 - [x] Fix the reported jsdom cross-origin credential leak with 30.1.3, synchronize both lockfiles and SBOMs, and verify redirect security plus affected UI tests. All 22 selected tests, targeted lint, manifest drift and registry hygiene checks pass.
 
 - [x] Fix Playwright booking checks to honor HTTP 429 cooldowns without skipping assertions, and honor the configured app URL in cross-booking. Eight retry regressions and all four live warmup/cross-booking checks pass. Browser confirms Analytics uses the real measurement ID with no secret placeholder; no Analytics change needed.

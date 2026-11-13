@@ -40,6 +40,7 @@ import ForecastPanel from "@/components/dashboard/ForecastPanel";
 import ReservationList from "@/components/dashboard/ReservationList";
 import ResourceManagement from "@/components/dashboard/ResourceManagement";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
+import SubscriptionCard from "@/components/dashboard/SubscriptionCard";
 import ReportsPanel from "@/components/dashboard/ReportsPanel";
 import OperationsSheetPanel from "@/components/dashboard/OperationsSheetPanel";
 import PeakHoursPanel from "@/components/dashboard/PeakHoursPanel";
@@ -461,6 +462,17 @@ const Dashboard = () => {
             </header>
 
             <SamplePeriodBanner />
+
+            {(samplePeriod.isBlocked ||
+              samplePeriod.isReadOnly ||
+              (typeof window !== "undefined" &&
+                /(?:checkout=success|billing=return)/.test(
+                  window.location.search,
+                ))) && (
+              <div className="mx-4 sm:mx-6 lg:mx-8 mt-4 max-w-3xl">
+                <SubscriptionCard tenant={tenant} />
+              </div>
+            )}
 
             {samplePeriod.isBlocked ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center gap-4">

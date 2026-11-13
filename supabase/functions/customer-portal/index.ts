@@ -1,90 +1,63 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
-import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getCorsHeaders, isOriginAllowed } from "../_shared/http-headers.ts";
+import { requireAuth } from "../_shared/require-auth.ts";
+import {
+  billingTenant,
+  findBusinessSubscription,
+} from "../_shared/subscription-billing.ts";
 
-const SAFE_ORIGIN_FALLBACK = "https://mimmobook.com";
-const GENERIC_ERROR = "Payment service temporarily unavailable.";
-
-const logStep = (step: string, details?: any) => {
-  const d = details ? ` - ${JSON.stringify(details)}` : "";
-  console.log(`[CUSTOMER-PORTAL] ${step}${d}`);
-};
-
-export async function handleCustomerPortalRequest(req: Request): Promise<Response> {
-  const corsHeaders = getCorsHeaders(req);
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+export async function handleCustomerPortalRequest(
+  req: Request,
+): Promise<Response> {
+  const headers = {
+    ...getCorsHeaders(req),
+    "Content-Type": "application/json",
+  };
+  const respond = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), { headers, status });
+  if (req.method === "OPTIONS") return new Response(null, { headers });
+  if (Number(req.headers.get("content-length")) > 50 * 1024) {
+    return respond({ error: "Request too large" }, 413);
   }
-
-  // Reject oversized request bodies (50KB max) — cheap pre-auth check.
-  const MAX_BODY_SIZE = 50 * 1024;
-  const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
-  if (contentLength > MAX_BODY_SIZE) {
-    return new Response(JSON.stringify({ error: "Request too large" }), {
-      status: 413,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  // Auth-header short-circuit MUST happen before any createClient(...) call so
-  // that missing/empty Supabase env vars cannot turn an expected 401 into a
-  // 500 via `supabaseKey is required.`.
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return new Response(
-      JSON.stringify({ error: "No authorization header provided" }),
-      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
-
   try {
-    logStep("Function started");
-
-    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } },
-    );
-
-    const token = authHeader.replace("Bearer ", "");
-
-    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
-    const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id });
-
-    const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    if (customers.data.length === 0) throw new Error("No Stripe customer found for this user");
-
-    const customerId = customers.data[0].id;
+    const auth = await requireAuth(req, headers, { caller: "customer-portal" });
+    if (auth instanceof Response) return auth;
+    const tenant = await billingTenant(auth.adminClient, auth.userId);
+    if (!tenant) {
+      return respond({
+        error: "Only a business owner or admin can manage a plan.",
+      }, 403);
+    }
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+      apiVersion: "2025-08-27.basil",
+      timeout: 8000,
+      maxNetworkRetries: 1,
+    });
+    let customer = tenant.stripe_customer_id;
+    if (!customer) {
+      const sub = await findBusinessSubscription(stripe, tenant, auth.email);
+      customer = typeof sub?.customer === "string"
+        ? sub.customer
+        : sub?.customer?.id;
+    }
+    if (!customer) {
+      return respond({
+        error: "No subscription found for this business.",
+        code: "NO_SUBSCRIPTION",
+      }, 404);
+    }
     const rawOrigin = req.headers.get("origin") ?? "";
-    const origin = isOriginAllowed(rawOrigin) ? rawOrigin : SAFE_ORIGIN_FALLBACK;
-
-    const portalSession = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: `${origin}/dashboard`,
+    const origin = isOriginAllowed(rawOrigin)
+      ? rawOrigin
+      : "https://mimmobook.com";
+    const session = await stripe.billingPortal.sessions.create({
+      customer,
+      return_url: `${origin}/dashboard?billing=return`,
     });
-
-    logStep("Portal session created", { sessionId: portalSession.id });
-
-    return new Response(JSON.stringify({ url: portalSession.url }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("[customer-portal] Internal error:", errorMessage);
-    logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: GENERIC_ERROR }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    return respond({ url: session.url });
+  } catch {
+    console.error("[customer-portal] Portal handoff failed");
+    return respond({ error: "Payment service temporarily unavailable." }, 503);
   }
 }
 Deno.serve(handleCustomerPortalRequest);

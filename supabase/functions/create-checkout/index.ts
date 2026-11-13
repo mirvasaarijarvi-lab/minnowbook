@@ -1,8 +1,11 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
-import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { getCorsHeaders, isOriginAllowed } from "../_shared/http-headers.ts";
-import { findBillingTenantId } from "./billing-access.ts";
+import { requireAuth } from "../_shared/require-auth.ts";
+import {
+  billingTenant,
+  findBusinessSubscription,
+  RECOVERABLE_STATUSES,
+} from "../_shared/subscription-billing.ts";
 
 const SAFE_ORIGIN_FALLBACK = "https://mimmobook.com";
 const GENERIC_ERROR = "Payment service temporarily unavailable.";
@@ -21,7 +24,9 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-CHECKOUT] ${step}${d}`);
 };
 
-export async function handleCreateCheckoutRequest(req: Request): Promise<Response> {
+export async function handleCreateCheckoutRequest(
+  req: Request,
+): Promise<Response> {
   const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -44,71 +49,83 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return new Response(
       JSON.stringify({ error: "No authorization header provided" }),
-      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      },
     );
   }
 
-  const supabaseClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-  );
-
   try {
-    logStep("Function started");
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
-
-    const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id });
+    const auth = await requireAuth(req, corsHeaders, {
+      caller: "create-checkout",
+    });
+    if (auth instanceof Response) return auth;
+    const tenant = await billingTenant(auth.adminClient, auth.userId);
+    if (!tenant) {
+      return new Response(
+        JSON.stringify({
+          error: "Only a business owner or admin can buy a plan.",
+        }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+    const tenantId = tenant.id;
 
     const { priceId } = await req.json();
-    if (!priceId || typeof priceId !== "string") throw new Error("priceId is required");
+    if (!priceId || typeof priceId !== "string") {
+      throw new Error("priceId is required");
+    }
     // Validate priceId format (Stripe price IDs start with "price_")
-    if (!/^price_[a-zA-Z0-9]+$/.test(priceId)) throw new Error("Invalid priceId format");
+    if (!/^price_[a-zA-Z0-9]+$/.test(priceId)) {
+      throw new Error("Invalid priceId format");
+    }
     if (!ALLOWED_PRICE_IDS.has(priceId)) {
       return new Response(
-        JSON.stringify({ error: "This plan is not available for self-serve checkout. Request an offer instead." }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({
+          error:
+            "This plan is not available for self-serve checkout. Request an offer instead.",
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
       );
     }
-    logStep("Price ID received", { priceId });
-
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
+      timeout: 8000,
+      maxNetworkRetries: 1,
     });
 
-    // Check if customer exists
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    let customerId: string | undefined;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-      logStep("Existing customer found", { customerId });
-    }
-
     const rawOrigin = req.headers.get("origin") ?? "";
-    const origin = isOriginAllowed(rawOrigin) ? rawOrigin : SAFE_ORIGIN_FALLBACK;
+    const origin = isOriginAllowed(rawOrigin)
+      ? rawOrigin
+      : SAFE_ORIGIN_FALLBACK;
 
-    // Bind the subscription to the business it is bought for, so the plan
-    // sync only ever applies it to that business.
-    const adminClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } },
-    );
-    const billingTenantId = await findBillingTenantId(adminClient, user.id);
-    if (!billingTenantId) {
-      return new Response(
-        JSON.stringify({ error: "Only a business owner or admin can buy a plan." }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+    const existing = await findBusinessSubscription(stripe, tenant, auth.email);
+    // Recover or change an existing subscription instead of charging for a second one.
+    if (existing && RECOVERABLE_STATUSES.has(existing.status)) {
+      const customer = typeof existing.customer === "string"
+        ? existing.customer
+        : existing.customer.id;
+      const portal = await stripe.billingPortal.sessions.create({
+        customer,
+        return_url: `${origin}/dashboard?billing=return`,
+      });
+      return new Response(JSON.stringify({ url: portal.url }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-    const tenantId = billingTenantId;
+    const customerId = tenant.stripe_customer_id ||
+      (typeof existing?.customer === "string" ? existing.customer : undefined);
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : user.email,
+      customer_email: customerId ? undefined : auth.email ?? undefined,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       client_reference_id: tenantId,
@@ -119,6 +136,10 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
       },
       success_url: `${origin}/dashboard?checkout=success`,
       cancel_url: `${origin}/pricing?checkout=cancelled`,
+    }, {
+      idempotencyKey: `checkout-${tenantId}-${priceId}-${
+        Math.floor(Date.now() / 300000)
+      }`,
     });
 
     logStep("Checkout session created");
@@ -127,10 +148,8 @@ export async function handleCreateCheckoutRequest(req: Request): Promise<Respons
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("[create-checkout] Internal error:", errorMessage);
-    logStep("ERROR", { message: errorMessage });
+  } catch {
+    console.error("[create-checkout] Checkout handoff failed");
     return new Response(JSON.stringify({ error: GENERIC_ERROR }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

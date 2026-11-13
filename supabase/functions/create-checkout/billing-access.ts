@@ -4,8 +4,11 @@
 export const BILLING_ROLES = ["owner", "admin", "superadmin"] as const;
 
 // deno-lint-ignore no-explicit-any
-export async function findBillingTenantId(client: any, userId: string): Promise<string | null> {
-  const { data } = await client
+export async function findBillingTenantId(
+  client: any,
+  userId: string,
+): Promise<string | null> {
+  const { data, error } = await client
     .from("tenant_users")
     .select("tenant_id")
     .eq("user_id", userId)
@@ -13,5 +16,6 @@ export async function findBillingTenantId(client: any, userId: string): Promise<
     .in("role", [...BILLING_ROLES])
     .limit(1)
     .maybeSingle();
+  if (error) throw new Error("Billing membership lookup failed");
   return (data?.tenant_id as string | undefined) ?? null;
 }

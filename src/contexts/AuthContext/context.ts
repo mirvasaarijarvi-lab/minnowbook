@@ -35,7 +35,7 @@ export interface AuthContextType {
   user: User | null;
   loading: boolean;
   subscription: SubscriptionInfo;
-  refreshSubscription: () => Promise<void>;
+  refreshSubscription: () => Promise<SubscriptionInfo | null | void>;
   /** Sign the user out. A reason is REQUIRED so we can audit the call site. */
   signOut: (reason: SignOutReason) => Promise<void>;
 }

@@ -63,9 +63,11 @@ describe("subscription checkout recovery", () => {
     );
     expect(mocks.invoke).toHaveBeenNthCalledWith(1, "create-checkout", {
       body: { priceId: "price_basic" },
+      signal: expect.any(AbortSignal),
     });
     expect(mocks.invoke).toHaveBeenNthCalledWith(2, "create-checkout", {
       body: { priceId: "price_basic" },
+      signal: expect.any(AbortSignal),
     });
   });
 });
