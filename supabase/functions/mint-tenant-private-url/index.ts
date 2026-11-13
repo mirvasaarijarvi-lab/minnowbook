@@ -65,8 +65,10 @@ function sanitise(path: unknown): { ok: true; safe: string } | { ok: false; reas
   return { ok: true, safe: trimmed };
 }
 
-const MAX_TTL = 7 * 24 * 60 * 60;
-const DEFAULT_TTL = 24 * 60 * 60;
+// Short-lived links: a member removed from a business loses file access
+// within an hour, since a signed URL cannot be revoked once issued.
+const MAX_TTL = 60 * 60;
+const DEFAULT_TTL = 60 * 60;
 
 export async function handleMintTenantPrivateUrlRequest(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") {
