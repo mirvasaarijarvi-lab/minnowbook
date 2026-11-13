@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Resolve seven expired live-test quarantines with bounded network retries and adequate budgets, verify the original checks and remove skips without extending dates.
+
 - [x] Mitigate picomatch with a licensed local 4.0.7 source patch refusing repeated extglobs, no upstream upgrade. Both locks and SBOMs synchronized; 24 security regressions, targeted lint, clean npm ci, frozen Bun install, stable regeneration and moderate audit gate pass. Live preview renders with zero runtime errors. Registry scanner cannot assess the local tarball; finding not suppressed. Full-project lint exceeded the 600-second sandbox limit, so its result remains unverified.
 
 # Subscription checkout and recovery review
