@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userId = currentSession.user.id;
     if (subscriptionCheckRef.current?.userId === userId)
       return subscriptionCheckRef.current.promise;
+    const request = { userId, promise: Promise.resolve<SubscriptionInfo | null>(null) };
     const promise = (async () => {
       try {
         const { data, error } = await supabase.functions.invoke(
@@ -85,11 +86,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } catch {
         return null;
       } finally {
-        if (subscriptionCheckRef.current?.promise === promise)
+        if (subscriptionCheckRef.current === request)
           subscriptionCheckRef.current = null;
       }
     })();
-    subscriptionCheckRef.current = { userId, promise };
+    request.promise = promise;
+    subscriptionCheckRef.current = request;
     return promise;
   }, [queryClient]);
 
