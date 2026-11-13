@@ -1,6 +1,7 @@
 # Dependency sync
 
-- [ ] Review all open repository PRs, consolidate compatible updates on the latest synced code, verify recent fixes and checks, and create one replacement PR without merging or closing originals. Waiting on authenticated repository API access.
+- [x] Review all eight open repository PRs and create combined replacement draft PR #156 on latest main, preserving November 13 fixes. Reconstructed 26 dependency updates, refreshed both locks and SBOM copies, verified action pins, 58 targeted tests and 749 live checks. Originals remain open; nothing merged.
+- [ ] Confirm every GitHub check on combined PR #156's latest commit passes before marking ready or closing originals. Waiting on external CI completion; local checks are not a substitute for full CI.
 
 - [ ] Resolve AIKIDO-2026-928674 with a verified official picomatch fix, then rerun attack/compatibility tests, refresh both locks and SBOMs, and confirm a fresh Aikido scan before closing. Blocked: npm latest is still unpatched 4.0.7 on November 13, 2026. Local mitigation retained; risk and closure criteria documented in vendor/README.md.
 
