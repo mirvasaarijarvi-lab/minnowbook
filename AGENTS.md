@@ -1,5 +1,7 @@
 # Project rules
 
+- Keep the local picomatch override, source and tarball synchronized and test repeated-extglob refusal across all resolved copies; no upstream release is patched yet, so rejecting that syntax prevents matcher ReDoS without replacing the Vite stack.
+
 - Keep jsdom pinned to a patched release and exercise cross-origin XMLHttpRequest credential stripping, because the test environment must not forward Basic authentication to redirected origins.
 
 - Deno live-test retries honor HTTP Retry-After on 429 responses and retain failure assertions after exhaustion, because short retries cannot outwait the booking cooldown.

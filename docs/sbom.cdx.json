@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:43f69e85-8dee-53b7-8747-0a9e681c64e6",
+  "serialNumber": "urn:uuid:baa00dd1-9f27-5fe6-9ad2-8a6be7a1e398",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "a81e222941b8c7bf9c72182e27cf7adabf1c5f49659bfca2b13e237d0085df2e"
+          "value": "84b89ca4ea9e982e2161e8e3e37e6a934036df9ec5453f1e77d2c5c1ed02b4ac"
         }
       ]
     }
@@ -649,6 +649,14 @@
       "version": "1.17.1",
       "purl": "pkg:npm/pdf-lib@1.17.1",
       "scope": "required"
+    },
+    {
+      "bom-ref": "pkg:npm/picomatch@file:vendor/picomatch-4.0.7-mimmobook.1.tgz",
+      "type": "library",
+      "name": "picomatch",
+      "version": "file:vendor/picomatch-4.0.7-mimmobook.1.tgz",
+      "purl": "pkg:npm/picomatch@file:vendor/picomatch-4.0.7-mimmobook.1.tgz",
+      "scope": "optional"
     },
     {
       "bom-ref": "pkg:npm/postgres@3.4.9",

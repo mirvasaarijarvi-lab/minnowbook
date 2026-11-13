@@ -54,7 +54,7 @@
     "dompurify": "$dompurify",
     "rollup": ">=4.30.0",
     "@remix-run/router": ">=1.23.2",
-    "picomatch": ">=4.0.4",
+    "picomatch": "$picomatch",
     "js-yaml": ">=4.2.0",
     "yaml": ">=2.8.3",
     "minimatch": ">=11.0.3 <12",
@@ -156,6 +156,7 @@
     "@react-email/render": "^2.0.10"
   },
   "devDependencies": {
+    "picomatch": "file:vendor/picomatch-4.0.7-mimmobook.1.tgz",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-plugin-dev-server-bridge": "^1.0.2",
     "@lovable.dev/vite-plugin-hmr-gate": "^1.8.0",

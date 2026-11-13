@@ -26,6 +26,9 @@ export default tseslint.config(
       "reports",
       "drizzle/**/*.sql",
       "supabase/functions",
+      // Preserve the licensed third-party source byte-for-byte apart from
+      // the documented security patch; our regression tests are still linted.
+      "vendor/picomatch",
     ],
   },
   {
