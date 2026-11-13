@@ -1,12 +1,14 @@
 # Dependency sync
 
+- [x] Repair PR #160's booking/email-preview smoke test on e48f0a9: trace proved HTTP 429 with Retry-After 60, while the test stopped at 30 seconds before navigation. Set scoped 300-second budget covering both retry attempts and preview rendering; removed network-idle dependency, retained all final assertions. Eight retry regressions and actual local smoke flow passed. GitHub PR run 43484236987 and manual rerun 43484247234 both completed successfully, including Playwright, Vitest and Deno steps. No merge/close action performed by this agent; existing auto-merge merged #160 at 18:41:58 UTC after checks passed, attributed by GitHub to mirvasaarijarvi-lab.
+
 - [x] Repair PR #158 on c1a5bac by retaining React Query and query-core 5.104.2 across all npm/Bun resolutions, preserving four intended updates and main 8e12730, and regenerating locks/SBOMs. Manifest agreement, registry hygiene, security floors and Query resolution checks passed. Only seven dependency/lock/SBOM files differ; temporary workflow restored. No PR merged or closed.
 - [ ] Confirm PR #158's corrected final-commit checks. Dashboard/browser/function tests, offer regressions, build and security workflows dispatched. At 18:32 UTC, 24 checks passed, 22 running, six queued and six skipped, none failed. Waiting on GitHub completion.
 
 - [x] Resolve PR #159 against main 8dc9490. Final head b7a0137 is conflict-free and zero commits behind; only seven dependency/lock/SBOM files changed. Both locks resolve postgres 4.1.1 within the intended ^4.1.0 range; safety pins and open picomatch risk preserved. Regeneration, manifest agreement, public URL hygiene and security floors passed on GitHub. Fresh PR checks started and missing build/security summary workflows dispatched; no merging or closing PRs.
 - [ ] Confirm PR #159's final required-check results. At 18:30 UTC, 32 passed, 12 running, 7 queued and 6 skipped, none failed; RLS/CORS summary is produced after its prerequisite jobs. Waiting on GitHub completion.
 
-- [ ] Complete final-commit regression verification for all open PRs. PR #160 has zero changed files, but its browser check failed after 49 passed and six skipped. PR #158's unsafe Query update is removed and fresh final-commit checks are running. PR #159's conflict repair completed and checks are pending. Wait for full dashboard/public/function results; nothing merged or closed.
+- [ ] Complete final-commit regression verification for remaining PRs. PR #160's repaired browser checks passed in both runs; existing auto-merge then merged it externally. PR #158's unsafe Query update is removed and fresh final-commit checks need final confirmation. PR #159's conflict repair completed and checks need final confirmation. No merge/close action performed by this agent.
 
 - [x] Refresh PR #160 with main 3db1958; new head 3df24e8 verified ahead with zero commits behind. No PR merged or closed.
 - [x] Complete corrected dependency selection for #158. Removed known-broken Query 5.106.1; both Query packages remain 5.104.2 in all resolved copies. Four other updates preserved on c1a5bac and fresh checks requested.
