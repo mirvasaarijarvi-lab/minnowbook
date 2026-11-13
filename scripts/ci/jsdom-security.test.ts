@@ -1,5 +1,5 @@
 import { createServer, type Server } from "node:http";
-import { JSDOM } from "jsdom";
+import { JSDOM, VirtualConsole } from "jsdom";
 import { describe, expect, it } from "vitest";
 
 async function listen(server: Server): Promise<string> {
@@ -44,7 +44,12 @@ describe("jsdom cross-origin redirect security", () => {
       response.end();
     });
     const sourceUrl = await listen(source);
-    const dom = new JSDOM("", { url: sourceUrl });
+    let requestError = "Redirect request failed";
+    const virtualConsole = new VirtualConsole();
+    virtualConsole.on("jsdomError", (error) => {
+      requestError = error.message;
+    });
+    const dom = new JSDOM("", { url: sourceUrl, virtualConsole });
     try {
       await new Promise<void>((resolve, reject) => {
         const xhr = new dom.window.XMLHttpRequest();
@@ -57,7 +62,7 @@ describe("jsdom cross-origin redirect security", () => {
         );
         xhr.timeout = 5000;
         xhr.onload = () => resolve();
-        xhr.onerror = () => reject(new Error("Redirect request failed"));
+        xhr.onerror = () => reject(new Error(requestError));
         xhr.ontimeout = () => reject(new Error("Redirect request timed out"));
         xhr.send();
       });
