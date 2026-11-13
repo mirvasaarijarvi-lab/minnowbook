@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Fix the reported jsdom cross-origin credential leak, synchronize both lockfiles and SBOMs, and verify redirect security plus affected UI tests.
+
 - [x] Fix Playwright booking checks to honor HTTP 429 cooldowns without skipping assertions, and honor the configured app URL in cross-booking. Eight retry regressions and all four live warmup/cross-booking checks pass. Browser confirms Analytics uses the real measurement ID with no secret placeholder; no Analytics change needed.
 
 - [x] Align the Python setup manifest and both workflow references with verified v7.1.0; the exact action-version gate passes for 150 pins across 43 files and all 20 regression tests pass.
