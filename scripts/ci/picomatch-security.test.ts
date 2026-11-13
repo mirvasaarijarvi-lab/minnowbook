@@ -18,7 +18,8 @@ describe("picomatch local repeated-extglob mitigation", () => {
   it("locks every copy to the integrity-checked local mitigation in both managers", () => {
     const manifest = JSON.parse(readFileSync("package.json", "utf8"));
     const integrity = `sha512-${createHash("sha512").update(readFileSync(archive)).digest("base64")}`;
-    expect(manifest.overrides.picomatch).toBe(`file:${archive}`);
+    expect(manifest.overrides.picomatch).toBe("$picomatch");
+    expect(manifest.devDependencies.picomatch).toBe(`file:${archive}`);
     expect(installedPaths.length).toBeGreaterThan(0);
     for (const key of installedPaths) {
       expect(lock.packages[key].version).toBe(version);
@@ -29,7 +30,7 @@ describe("picomatch local repeated-extglob mitigation", () => {
     const bun = JSON.parse(
       readFileSync("bun.lock", "utf8").replace(/,(\s*[}\]])/g, "$1"),
     );
-    expect(bun.overrides.picomatch).toBe(`file:${archive}`);
+    expect(bun.overrides.picomatch).toBe("$picomatch");
     const entries = Object.entries(bun.packages).filter(([key]) =>
       /(^|\/)picomatch$/.test(key),
     );

@@ -24,8 +24,10 @@ npm pack ./vendor/picomatch --pack-destination /tmp/picomatch-review --ignore-sc
 cp /tmp/picomatch-review/picomatch-4.0.7-mimmobook.1.tgz vendor/
 ```
 
-Both package managers override every picomatch instance to the committed
-tarball. The security test checks lockfile integrity, installed nested copies,
+The root development dependency points to the committed tarball and the
+`$picomatch` override binds every transitive instance to it. This avoids npm
+resolving a relative file override inside each dependent package directory.
+The security test checks lockfile integrity, installed nested copies,
 source/archive equivalence, attack rejection in timeout-bounded processes,
 and normal filename matching. Remove the local override only when an official
 fixed release passes the same security and compatibility checks.
