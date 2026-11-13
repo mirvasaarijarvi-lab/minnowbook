@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Resolve PR #159 against the latest main while retaining its postgres update, regenerate both lockfiles and SBOMs, and rerun required checks. No merging or closing PRs.
+
 - [ ] Complete final-commit regression verification for all open PRs. PR #160 contains main e78d4b7, has zero changed files, and 44 successful checks with 6 skipped and 6 pending at 18:15 UTC. Current main public page and signed-in dashboard render without page errors, not a substitute for PR browser tests. PR #158 still proposes known dashboard-breaking React Query 5.106.1 after ignoring 5.107.x; requested full dependency ignore and updated its branch with main, but exclusion remains unverified. PR #159 recreation requested because conflict refresh has not completed. Wait for corrected heads and full dashboard/public/function checks; nothing merged or closed.
 
 - [x] Refresh PR #160 with main 3db1958; new head 3df24e8 verified ahead with zero commits behind. No PR merged or closed.
