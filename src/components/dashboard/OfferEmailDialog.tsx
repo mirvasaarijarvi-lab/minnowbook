@@ -170,11 +170,7 @@ const OfferEmailDialog = forwardRef<HTMLDivElement, Props>(
               <Label htmlFor="offer-email-subject">
                 {t("offers.emailSubject")}
               </Label>
-              <Input
-                id="offer-email-subject"
-                value={subject}
-                readOnly
-              />
+              <Input id="offer-email-subject" value={subject} readOnly />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="offer-email-body">{t("offers.emailBody")}</Label>
