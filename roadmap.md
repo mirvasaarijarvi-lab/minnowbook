@@ -1,14 +1,15 @@
 # Dependency sync
 
-- [ ] Repair PR #158 by retaining React Query 5.104.2, preserving other intended updates and current main fixes, regenerating locks/SBOMs, and rerunning dashboard and dependency checks. No PR merging or closing.
+- [x] Repair PR #158 on c1a5bac by retaining React Query and query-core 5.104.2 across all npm/Bun resolutions, preserving four intended updates and main 8e12730, and regenerating locks/SBOMs. Manifest agreement, registry hygiene, security floors and Query resolution checks passed. Only seven dependency/lock/SBOM files differ; temporary workflow restored. No PR merged or closed.
+- [ ] Confirm PR #158's corrected final-commit checks. Dashboard/browser/function tests, offer regressions, build and security workflows dispatched. At 18:32 UTC, 24 checks passed, 22 running, six queued and six skipped, none failed. Waiting on GitHub completion.
 
 - [x] Resolve PR #159 against main 8dc9490. Final head b7a0137 is conflict-free and zero commits behind; only seven dependency/lock/SBOM files changed. Both locks resolve postgres 4.1.1 within the intended ^4.1.0 range; safety pins and open picomatch risk preserved. Regeneration, manifest agreement, public URL hygiene and security floors passed on GitHub. Fresh PR checks started and missing build/security summary workflows dispatched; no merging or closing PRs.
 - [ ] Confirm PR #159's final required-check results. At 18:30 UTC, 32 passed, 12 running, 7 queued and 6 skipped, none failed; RLS/CORS summary is produced after its prerequisite jobs. Waiting on GitHub completion.
 
-- [ ] Complete final-commit regression verification for all open PRs. PR #160 contains main e78d4b7, has zero changed files, and 44 successful checks with 6 skipped and 6 pending at 18:15 UTC. Current main public page and signed-in dashboard render without page errors, not a substitute for PR browser tests. PR #158 still proposes known dashboard-breaking React Query 5.106.1 after ignoring 5.107.x; requested full dependency ignore and updated its branch with main, but exclusion remains unverified. PR #159 recreation requested because conflict refresh has not completed. Wait for corrected heads and full dashboard/public/function checks; nothing merged or closed.
+- [ ] Complete final-commit regression verification for all open PRs. PR #160 has zero changed files, but its browser check failed after 49 passed and six skipped. PR #158's unsafe Query update is removed and fresh final-commit checks are running. PR #159's conflict repair completed and checks are pending. Wait for full dashboard/public/function results; nothing merged or closed.
 
 - [x] Refresh PR #160 with main 3db1958; new head 3df24e8 verified ahead with zero commits behind. No PR merged or closed.
-- [ ] Complete corrected dependency selection for #158. It regenerated but substituted known-broken 5.106.1, so full query ignore requested; main update accepted at 18:15 UTC. PR #159 conflict repair and main refresh completed separately above. Waiting on Dependabot before verifying #158's corrected head and fresh checks.
+- [x] Complete corrected dependency selection for #158. Removed known-broken Query 5.106.1; both Query packages remain 5.104.2 in all resolved copies. Four other updates preserved on c1a5bac and fresh checks requested.
 
 - [x] Synchronize the config package's npm lock from 2.27.0 to the declared 2.27.1 and refresh both SBOMs. Manifest drift, public-registry hygiene, security floors and 20 regression tests pass. Production scan has no known registry findings; local picomatch risk remains open and unassessed by that scan. GitHub must test the refreshed files after automatic sync; no PR merged or closed.
 
