@@ -34,3 +34,5 @@
 - Workflow steps that retry a command start with `set +e` (or use `shell: bash {0}`), because GitHub's default bash runs with -e and exits on the first failed attempt before any retry runs.
 - Live security probes send requests through `src/test/security/cold-start-retry.ts` (fetchWithColdStartRetry, or retryingFetch as the client's global fetch), because a per-attempt timeout plus retry on dropped connections and platform 429/5xx replies keeps cold starts and gateway rate limits from failing correct tests.
 - Live probe budgets cover all retry attempts and full Retry-After cooldowns, including sequential burst waves; never cap or shorten server cooldowns, and preserve assertions on the final response after exhaustion.
+
+- Keep React Query on the browser-verified pinned release until an upgrade passes the full dashboard offer suite; newer query snapshots caused a dashboard update loop.
