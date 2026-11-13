@@ -82,9 +82,8 @@ export async function fetchWithColdStartRetry(
             : 1000 * Math.pow(2, i)
         : baseDelayMs * Math.pow(3, i - 1);
     // Never shorten the server's cooldown with a cap or negative jitter.
-    const jitter = last.res?.status === 429
-      ? 0
-      : expDelay * 0.25 * (Math.random() * 2 - 1);
+    const jitter =
+      last.res?.status === 429 ? 0 : expDelay * 0.25 * (Math.random() * 2 - 1);
     const delay = Math.max(0, Math.round(expDelay + jitter));
     const statusLabel = last.aborted
       ? `timeout(${PER_ATTEMPT_TIMEOUT_MS}ms)`
