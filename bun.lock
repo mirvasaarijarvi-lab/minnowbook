@@ -126,7 +126,7 @@
     "lodash": ">=4.18.1",
     "minimatch": ">=11.0.3 <12",
     "nanoid": "^3.3.17",
-    "picomatch": ">=4.0.4",
+    "picomatch": "file:vendor/picomatch-4.0.7-mimmobook.1.tgz",
     "postcss": "^8.5.25",
     "postcss-selector-parser": "^7.1.6",
     "react": "^19.3.0",
@@ -1426,7 +1426,7 @@
 
     "picocolors": ["picocolors@1.1.1", "", {}, "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA=="],
 
-    "picomatch": ["picomatch@4.0.7", "", {}, "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA=="],
+    "picomatch": ["picomatch@vendor/picomatch-4.0.7-mimmobook.1.tgz", {}, "sha512-hR6p9mF+y6bbJZ/7Y/uv3q2Xh0FqMGRF61XZt3F2k/mLvqe/p1v1FvtYHHRB8x0O4O/AMxmbU0+61CX2TPwt2w=="],
 
     "playwright": ["playwright@1.64.1", "", { "dependencies": { "playwright-core": "1.64.1" }, "bin": { "playwright": "cli.js" } }, "sha512-HCrVhHr5QQuwYoswEUGTb7gGp522yflbv/ST8nF4sFWGuLjQCt17Q/EubpGGSNKYn1tsTCPZxqHhHCfVURu7UA=="],
 
