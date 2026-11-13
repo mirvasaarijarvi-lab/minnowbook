@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:12f806d4-c36e-576c-80dc-01b224910b92",
+  "serialNumber": "urn:uuid:ff01d45a-1dd3-55a0-ae9d-e86bd4d2f400",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "2f9ec5b6794ceee0e1ffd3ef5b932088956effd190408199e96eef4dbf587219"
+          "value": "bea29375769312b5c51653ced5d2a75b7ec7f2285d82707d701d2bdcb608b53a"
         }
       ]
     }
@@ -355,11 +355,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.106.1",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.104.2",
       "type": "library",
       "name": "@tanstack/react-query",
-      "version": "5.106.1",
-      "purl": "pkg:npm/@tanstack%2Freact-query@5.106.1",
+      "version": "5.104.2",
+      "purl": "pkg:npm/@tanstack%2Freact-query@5.104.2",
       "scope": "required"
     },
     {
@@ -371,19 +371,19 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.5",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.4",
       "type": "library",
       "name": "@tanstack/react-start",
-      "version": "1.169.5",
-      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.5",
+      "version": "1.169.4",
+      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.4",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.169.0",
+      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.48",
       "type": "library",
       "name": "@tanstack/router-plugin",
-      "version": "1.169.0",
-      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.169.0",
+      "version": "1.168.48",
+      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.48",
       "scope": "required"
     },
     {
@@ -411,11 +411,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@testing-library%2Fuser-event@14.6.9",
+      "bom-ref": "pkg:npm/@testing-library%2Fuser-event@14.6.8",
       "type": "library",
       "name": "@testing-library/user-event",
-      "version": "14.6.9",
-      "purl": "pkg:npm/@testing-library%2Fuser-event@14.6.9",
+      "version": "14.6.8",
+      "purl": "pkg:npm/@testing-library%2Fuser-event@14.6.8",
       "scope": "required"
     },
     {
@@ -619,11 +619,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.71.0",
+      "bom-ref": "pkg:npm/lucide-react@1.70.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.71.0",
-      "purl": "pkg:npm/lucide-react@1.71.0",
+      "version": "1.70.0",
+      "purl": "pkg:npm/lucide-react@1.70.0",
       "scope": "required"
     },
     {
