@@ -111,19 +111,50 @@ describe("business-bound billing recovery", () => {
     await syncBusinessSubscription(client, tenant, null);
     expect(client.from).not.toHaveBeenCalled();
   });
-  it.each(["active", "trialing"])("clears an expired sample only after a verified %s subscription", async (status) => {
-    const update = vi.fn().mockReturnValue({ eq: async () => ({ error: null }) });
-    await syncBusinessSubscription({ from: () => ({ update }) }, { ...tenant, sample_end_date: "2020-01-01" }, { ...sub, status });
-    expect(update).toHaveBeenCalledWith(expect.objectContaining({ tier: "business", sample_start_date: null, sample_end_date: null }));
-  });
+  it.each(["active", "trialing"])(
+    "clears an expired sample only after a verified %s subscription",
+    async (status) => {
+      const update = vi
+        .fn()
+        .mockReturnValue({ eq: async () => ({ error: null }) });
+      await syncBusinessSubscription(
+        { from: () => ({ update }) },
+        { ...tenant, sample_end_date: "2020-01-01" },
+        { ...sub, status },
+      );
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tier: "business",
+          sample_start_date: null,
+          sample_end_date: null,
+        }),
+      );
+    },
+  );
   it("keeps an existing sample when payment is overdue", async () => {
-    const update = vi.fn().mockReturnValue({ eq: async () => ({ error: null }) });
-    await syncBusinessSubscription({ from: () => ({ update }) }, { ...tenant, sample_end_date: "2099-01-01" }, { ...sub, status: "past_due" });
+    const update = vi
+      .fn()
+      .mockReturnValue({ eq: async () => ({ error: null }) });
+    await syncBusinessSubscription(
+      { from: () => ({ update }) },
+      { ...tenant, sample_end_date: "2099-01-01" },
+      { ...sub, status: "past_due" },
+    );
     expect(update.mock.calls[0]?.[0]).not.toHaveProperty("sample_end_date");
     expect(update.mock.calls[0]?.[0]).not.toHaveProperty("tier");
   });
   it("continues recovery when a legacy subscription ID was removed", async () => {
-    const stripe = { subscriptions: { retrieve: async () => { throw { code: "resource_missing" }; }, list: () => (async function* () { yield sub; })() } };
+    const stripe = {
+      subscriptions: {
+        retrieve: async () => {
+          throw { code: "resource_missing" };
+        },
+        list: () =>
+          (async function* () {
+            yield sub;
+          })(),
+      },
+    };
     expect(await findBusinessSubscription(stripe, tenant, null)).toEqual(sub);
   });
 });

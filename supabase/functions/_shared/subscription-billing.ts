@@ -76,7 +76,9 @@ export async function findBusinessSubscription(
   // Stable business linkage survives owner and email changes.
   if (tenant.stripe_subscription_id) {
     try {
-      const linked = await stripe.subscriptions.retrieve(tenant.stripe_subscription_id);
+      const linked = await stripe.subscriptions.retrieve(
+        tenant.stripe_subscription_id,
+      );
       if (belongsToBusiness(linked, tenant)) candidates.push(linked);
     } catch (error) {
       // A removed legacy ID must not block discovery through the linked customer.

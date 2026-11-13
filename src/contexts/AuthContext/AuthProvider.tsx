@@ -62,7 +62,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const userId = currentSession.user.id;
     if (subscriptionCheckRef.current?.userId === userId)
       return subscriptionCheckRef.current.promise;
-    const request = { userId, promise: Promise.resolve<SubscriptionInfo | null>(null) };
+    const request = {
+      userId,
+      promise: Promise.resolve<SubscriptionInfo | null>(null),
+    };
     const promise = (async () => {
       try {
         const { data, error } = await supabase.functions.invoke(
