@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Investigate multipart local-stack startup failure, repair the cause, and rerun the affected GitHub job without merging or closing PRs.
+
 - [x] Repair PR #156 browser crash caused by query releases 5.106.1 and 5.107.1. Pinned verified 5.104.2 with both locks and SBOMs refreshed. Nine offer browser flows and 254 targeted regressions pass; security floors, lock hygiene and action gate pass, moderate production audit has zero blockers. Fresh GitHub checks still required; no PR merged or closed.
 
 - [x] Review all eight open repository PRs and create combined replacement draft PR #156 on latest main, preserving November 13 fixes. Reconstructed 26 dependency updates, refreshed both locks and SBOM copies, verified action pins, 58 targeted tests and 749 live checks. Originals remain open; nothing merged.
