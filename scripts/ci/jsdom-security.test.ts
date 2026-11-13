@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { createServer, type Server } from "node:http";
 import { JSDOM } from "jsdom";
 import { describe, expect, it } from "vitest";
