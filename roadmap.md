@@ -1,7 +1,10 @@
 # Dependency sync
 
+- [x] Repair PR #156 browser crash caused by query releases 5.106.1 and 5.107.1. Pinned verified 5.104.2 with both locks and SBOMs refreshed. Nine offer browser flows and 254 targeted regressions pass; security floors, lock hygiene and action gate pass, moderate production audit has zero blockers. Fresh GitHub checks still required; no PR merged or closed.
+
 - [x] Review all eight open repository PRs and create combined replacement draft PR #156 on latest main, preserving November 13 fixes. Reconstructed 26 dependency updates, refreshed both locks and SBOM copies, verified action pins, 58 targeted tests and 749 live checks. Originals remain open; nothing merged.
 - [ ] Confirm every GitHub check on combined PR #156's latest commit passes before marking ready or closing originals. Waiting on external CI completion; local checks are not a substitute for full CI.
+- [x] Fix PR #156 subscription header scanning and integrity-checked local tarball version detection; align CI to Node 22/24 because patched jsdom/undici cannot support Node 20 without downgrades. Preserved local mitigation, upstream risk, locks and SBOMs. Reran GitHub checks on 348e580, local floor/action/hygiene gates, 163 targeted tests, 171 mapping tests, 749 live checks and 2,827 unit tests. The isolated unit run excluded only the git-metadata scan, which GitHub still runs; no PR merged or closed.
 
 - [ ] Resolve AIKIDO-2026-928674 with a verified official picomatch fix, then rerun attack/compatibility tests, refresh both locks and SBOMs, and confirm a fresh Aikido scan before closing. Blocked: npm latest is still unpatched 4.0.7 on November 13, 2026. Local mitigation retained; risk and closure criteria documented in vendor/README.md.
 

@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:772da509-8102-50a9-87b9-d2b25a827ed6",
+  "serialNumber": "urn:uuid:0dc08424-2f95-5243-9343-9b014f9d16fc",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "805a5e72ec0ac37115735d2f795ce928667b37c7a7e5e29ad93f62e4b78ac29e"
+          "value": "19b3c2202d82ca17329ffaf089ede986c1e1e7f495191c469ef9eb4485fd2de7"
         }
       ]
     }
@@ -355,11 +355,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.106.1",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.104.2",
       "type": "library",
       "name": "@tanstack/react-query",
-      "version": "5.106.1",
-      "purl": "pkg:npm/@tanstack%2Freact-query@5.106.1",
+      "version": "5.104.2",
+      "purl": "pkg:npm/@tanstack%2Freact-query@5.104.2",
       "scope": "required"
     },
     {

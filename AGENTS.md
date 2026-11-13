@@ -1,5 +1,8 @@
 # Project rules
 
+- Security-floor checks inspect integrity-verified local archive metadata and every nested Bun resolution, never filenames; local mitigations do not close upstream findings.
+- CI runtime matrices cover Node 22 and newer because the patched test environment cannot run safely on Node 20; do not downgrade security dependencies to keep unsupported runtimes green.
+
 - Keep the local picomatch override, source and tarball synchronized and test repeated-extglob refusal across all resolved copies; no upstream release is patched yet, so rejecting that syntax prevents matcher ReDoS without replacing the Vite stack.
 
 - Keep jsdom pinned to a patched release and exercise cross-origin XMLHttpRequest credential stripping, because the test environment must not forward Basic authentication to redirected origins.
@@ -31,3 +34,5 @@
 - Workflow steps that retry a command start with `set +e` (or use `shell: bash {0}`), because GitHub's default bash runs with -e and exits on the first failed attempt before any retry runs.
 - Live security probes send requests through `src/test/security/cold-start-retry.ts` (fetchWithColdStartRetry, or retryingFetch as the client's global fetch), because a per-attempt timeout plus retry on dropped connections and platform 429/5xx replies keeps cold starts and gateway rate limits from failing correct tests.
 - Live probe budgets cover all retry attempts and full Retry-After cooldowns, including sequential burst waves; never cap or shorten server cooldowns, and preserve assertions on the final response after exhaustion.
+
+- Keep React Query on the browser-verified pinned release until an upgrade passes the full dashboard offer suite; newer query snapshots caused a dashboard update loop.
