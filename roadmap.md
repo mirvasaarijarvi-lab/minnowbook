@@ -1,5 +1,8 @@
 # Dependency sync
 
+- [x] Refresh PR #160 with main 3db1958; new head 3df24e8 verified ahead with zero commits behind. No PR merged or closed.
+- [ ] Complete latest-main refresh of PRs #158 and #159. GitHub update-branch refused both due to conflicts; Dependabot rebase requested for #159 and ignore of the known dashboard-breaking React Query 5.107.1 requested for #158. Dependabot acknowledged the ignore and #158 shows rebasing, but both heads remain unchanged at 18:08 UTC. Waiting on Dependabot before verifying new heads and fresh checks.
+
 - [x] Synchronize the config package's npm lock from 2.27.0 to the declared 2.27.1 and refresh both SBOMs. Manifest drift, public-registry hygiene, security floors and 20 regression tests pass. Production scan has no known registry findings; local picomatch risk remains open and unassessed by that scan. GitHub must test the refreshed files after automatic sync; no PR merged or closed.
 
 - [x] Repair local-stack startup cleanup to inspect Docker HostPort mappings instead of the publish filter, before the first attempt and each retry. Port conflict 54322 confirmed in all three failed attempts; 22 regressions, action gate, shell syntax, formatting and lint pass. No PR merged or closed.
