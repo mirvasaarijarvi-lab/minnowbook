@@ -30,13 +30,15 @@ describe("picomatch local repeated-extglob mitigation", () => {
     const bun = JSON.parse(
       readFileSync("bun.lock", "utf8").replace(/,(\s*[}\]])/g, "$1"),
     );
-    expect(bun.overrides.picomatch).toBe("$picomatch");
+    // Bun records the resolved root spec, while npm's manifest retains $picomatch.
+    expect(bun.overrides.picomatch).toBe(`file:${archive}`);
     const entries = Object.entries(bun.packages).filter(([key]) =>
       /(^|\/)picomatch$/.test(key),
     );
     expect(entries.length).toBeGreaterThan(0);
     for (const [, entry] of entries) {
       expect(JSON.stringify(entry)).toContain(archive);
+      expect(JSON.stringify(entry)).toContain(integrity);
       expect(JSON.stringify(entry)).not.toContain('picomatch@4.0.7"');
     }
   });
