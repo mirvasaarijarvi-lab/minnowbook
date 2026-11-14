@@ -20,6 +20,11 @@ import { futureDate } from "./fixtures/test-tenant";
 const LOG_PREFIX = "[smoke:reservation+email-preview]";
 
 test.describe("Smoke: reservation submit + confirmation email preview", () => {
+  // Two booking attempts can each take two 30-second requests plus a full
+  // 60-second Retry-After cooldown. Leave another minute for preview rendering.
+  // Keep the server cooldown and every final booking/preview assertion intact.
+  test.setTimeout(300_000);
+
   test("submits a reservation and renders the confirmation email preview", async ({
     page,
     request,
@@ -93,7 +98,6 @@ test.describe("Smoke: reservation submit + confirmation email preview", () => {
     });
 
     await page.goto(previewUrl, { waitUntil: "domcontentloaded" });
-    await page.waitForLoadState("networkidle");
 
     const root = page.getByTestId("email-preview-smoke-root");
     await expect(root, "email preview root must mount").toBeVisible({
