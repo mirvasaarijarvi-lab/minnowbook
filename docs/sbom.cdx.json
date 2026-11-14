@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:ff01d45a-1dd3-55a0-ae9d-e86bd4d2f400",
+  "serialNumber": "urn:uuid:a1b5c5e8-f62b-5b0a-a4f6-b7ece4e510ea",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "bea29375769312b5c51653ced5d2a75b7ec7f2285d82707d701d2bdcb608b53a"
+          "value": "e837f6b127ef147a16778de9c6b00062d394ffd7bdff3e43f9bf16ec9f38eaee"
         }
       ]
     }
@@ -371,19 +371,19 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.4",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.5",
       "type": "library",
       "name": "@tanstack/react-start",
-      "version": "1.169.4",
-      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.4",
+      "version": "1.169.5",
+      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.5",
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.168.48",
+      "bom-ref": "pkg:npm/@tanstack%2Frouter-plugin@1.169.0",
       "type": "library",
       "name": "@tanstack/router-plugin",
-      "version": "1.168.48",
-      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.168.48",
+      "version": "1.169.0",
+      "purl": "pkg:npm/@tanstack%2Frouter-plugin@1.169.0",
       "scope": "required"
     },
     {
@@ -411,11 +411,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@testing-library%2Fuser-event@14.6.8",
+      "bom-ref": "pkg:npm/@testing-library%2Fuser-event@14.6.9",
       "type": "library",
       "name": "@testing-library/user-event",
-      "version": "14.6.8",
-      "purl": "pkg:npm/@testing-library%2Fuser-event@14.6.8",
+      "version": "14.6.9",
+      "purl": "pkg:npm/@testing-library%2Fuser-event@14.6.9",
       "scope": "required"
     },
     {
@@ -619,11 +619,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.70.0",
+      "bom-ref": "pkg:npm/lucide-react@1.71.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.70.0",
-      "purl": "pkg:npm/lucide-react@1.70.0",
+      "version": "1.71.0",
+      "purl": "pkg:npm/lucide-react@1.71.0",
       "scope": "required"
     },
     {
@@ -659,11 +659,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/postgres@3.4.9",
+      "bom-ref": "pkg:npm/postgres@4.1.0",
       "type": "library",
       "name": "postgres",
-      "version": "3.4.9",
-      "purl": "pkg:npm/postgres@3.4.9",
+      "version": "4.1.0",
+      "purl": "pkg:npm/postgres@4.1.0",
       "scope": "optional"
     },
     {
