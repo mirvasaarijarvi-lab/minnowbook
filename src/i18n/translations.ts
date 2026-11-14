@@ -2787,8 +2787,10 @@ const en: TranslationKeys = {
   "booking.stallFee": "Setup fee (€)",
   "email.subject": "Subject",
   "email.acknowledgmentTitle": "Booking request received",
-  "email.acknowledgmentBody": "We have received your booking request. It is awaiting staff approval and is not yet confirmed. Here are your requested details:",
-  "email.acknowledgmentFooter": "We will contact you after reviewing your request. Please wait for confirmation before making plans.",
+  "email.acknowledgmentBody":
+    "We have received your booking request. It is awaiting staff approval and is not yet confirmed. Here are your requested details:",
+  "email.acknowledgmentFooter":
+    "We will contact you after reviewing your request. Please wait for confirmation before making plans.",
   "email.confirmationSubject": "Booking Confirmation",
   "email.confirmationTitle": "Booking Confirmed!",
   "email.greeting": "Dear",
@@ -5797,8 +5799,10 @@ const fi: TranslationKeys = {
   "booking.stallFee": "Pystytysmaksu (€)",
   "email.subject": "Aihe",
   "email.acknowledgmentTitle": "Varauspyyntö vastaanotettu",
-  "email.acknowledgmentBody": "Olemme vastaanottaneet varauspyyntösi. Se odottaa henkilökunnan hyväksyntää eikä ole vielä vahvistettu. Tässä ovat pyytämäsi tiedot:",
-  "email.acknowledgmentFooter": "Otamme sinuun yhteyttä käsiteltyämme pyyntösi. Odota vahvistusta ennen suunnitelmien tekemistä.",
+  "email.acknowledgmentBody":
+    "Olemme vastaanottaneet varauspyyntösi. Se odottaa henkilökunnan hyväksyntää eikä ole vielä vahvistettu. Tässä ovat pyytämäsi tiedot:",
+  "email.acknowledgmentFooter":
+    "Otamme sinuun yhteyttä käsiteltyämme pyyntösi. Odota vahvistusta ennen suunnitelmien tekemistä.",
   "email.confirmationSubject": "Varausvahvistus",
   "email.confirmationTitle": "Varaus vahvistettu!",
   "email.greeting": "Hyvä",
@@ -8817,8 +8821,10 @@ const sv: TranslationKeys = {
   "booking.stallFee": "Uppställningsavgift (€)",
   "email.subject": "Ämne",
   "email.acknowledgmentTitle": "Bokningsförfrågan mottagen",
-  "email.acknowledgmentBody": "Vi har tagit emot din bokningsförfrågan. Den väntar på personalens godkännande och är ännu inte bekräftad. Här är de önskade uppgifterna:",
-  "email.acknowledgmentFooter": "Vi kontaktar dig när vi har granskat din förfrågan. Vänta på bekräftelse innan du gör planer.",
+  "email.acknowledgmentBody":
+    "Vi har tagit emot din bokningsförfrågan. Den väntar på personalens godkännande och är ännu inte bekräftad. Här är de önskade uppgifterna:",
+  "email.acknowledgmentFooter":
+    "Vi kontaktar dig när vi har granskat din förfrågan. Vänta på bekräftelse innan du gör planer.",
   "email.confirmationSubject": "Bokningsbekräftelse",
   "email.confirmationTitle": "Bokning bekräftad!",
   "email.greeting": "Kära",

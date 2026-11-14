@@ -169,15 +169,27 @@ const ConfirmationEmailPreview = ({
 
   const title = isCancellation
     ? t("email.cancellationTitle")
-    : t(isAcknowledgment ? "email.acknowledgmentTitle" : "email.confirmationTitle");
+    : t(
+        isAcknowledgment
+          ? "email.acknowledgmentTitle"
+          : "email.confirmationTitle",
+      );
 
   const bodyText = isCancellation
     ? t("email.cancellationBody")
-    : t(isAcknowledgment ? "email.acknowledgmentBody" : "email.confirmationBody");
+    : t(
+        isAcknowledgment
+          ? "email.acknowledgmentBody"
+          : "email.confirmationBody",
+      );
 
   const footerText = isCancellation
     ? t("email.cancellationFooter")
-    : t(isAcknowledgment ? "email.acknowledgmentFooter" : "email.confirmationFooter");
+    : t(
+        isAcknowledgment
+          ? "email.acknowledgmentFooter"
+          : "email.confirmationFooter",
+      );
 
   const headerBgColor = isCancellation ? "#7f1d1d" : primaryColor;
   const titleColor = isCancellation ? "#991b1b" : primaryColor;
