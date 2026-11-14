@@ -35,8 +35,8 @@ interface BusinessData {
 interface ConfirmationEmailPreviewProps {
   reservation: ReservationData;
   business: BusinessData;
-  /** "confirmation" (default) or "cancellation" */
-  variant?: "confirmation" | "cancellation";
+  /** Receipt for pending public requests, or a staff-confirmed/cancelled booking. */
+  variant?: "confirmation" | "cancellation" | "acknowledgment";
   /** Custom subject override */
   customSubject?: string;
   /** Custom body HTML inserted before the details table */
@@ -69,6 +69,7 @@ const ConfirmationEmailPreview = ({
   const dateLocale: Locale =
     language === "fi" ? fiFns : language === "sv" ? svFns : enUS;
   const isCancellation = variant === "cancellation";
+  const isAcknowledgment = variant === "acknowledgment";
   const primaryColor = business.primary_color || "#1e3a5f";
   const accentColor = business.accent_color || "#d4a853";
   const businessName = business.business_name || "Business";
@@ -161,22 +162,34 @@ const ConfirmationEmailPreview = ({
   }, [reservation.date, reservation.check_out_date]);
 
   const defaultSubject = isCancellation
-    ? `${t("email.cancellationSubject")} — ${businessName}`
-    : `${t("email.confirmationSubject")} — ${businessName}`;
+    ? `${t("email.cancellationSubject")}, ${businessName}`
+    : `${t(isAcknowledgment ? "email.acknowledgmentTitle" : "email.confirmationSubject")}, ${businessName}`;
 
   const subject = customSubject || defaultSubject;
 
   const title = isCancellation
     ? t("email.cancellationTitle")
-    : t("email.confirmationTitle");
+    : t(
+        isAcknowledgment
+          ? "email.acknowledgmentTitle"
+          : "email.confirmationTitle",
+      );
 
   const bodyText = isCancellation
     ? t("email.cancellationBody")
-    : t("email.confirmationBody");
+    : t(
+        isAcknowledgment
+          ? "email.acknowledgmentBody"
+          : "email.confirmationBody",
+      );
 
   const footerText = isCancellation
     ? t("email.cancellationFooter")
-    : t("email.confirmationFooter");
+    : t(
+        isAcknowledgment
+          ? "email.acknowledgmentFooter"
+          : "email.confirmationFooter",
+      );
 
   const headerBgColor = isCancellation ? "#7f1d1d" : primaryColor;
   const titleColor = isCancellation ? "#991b1b" : primaryColor;
