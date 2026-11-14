@@ -15,12 +15,13 @@ jobs:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: ./.github/actions/stale-commit-check
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: 22
       - uses: ./.github/actions/setup-bun-with-diagnostics
-      - name: Apply only the five reviewed dependency updates
+      - name: Apply only reviewed updates and verify records
         run: |
           node --input-type=module <<'JS'
           import fs from 'node:fs';
@@ -38,7 +39,7 @@ jobs:
           node scripts/ci/check-dependency-floors.mjs
           node scripts/generate-sbom.mjs
           git show fc8df880a49ce76adde51b1f0f720d733f4369ff:.github/workflows/dependabot-lockfile-refresh.yml > .github/workflows/dependabot-lockfile-refresh.yml
-      - name: Save only combined dependency files and restore original workflow
+      - name: Save combined records and restored workflow
         env:
           PUSH_TOKEN: ${{ secrets.REPO_PUSH_TOKEN }}
         run: |
