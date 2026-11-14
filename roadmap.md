@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Review signed-in live dashboard and public pages against recent booking, staffing, payroll and subscription fixes; compare preview, repair only reproduced regressions, and do not publish or merge.
+
 - [x] Verify live public booking submission, dashboard readback and receipt handling. Live test booking 95a49215-0e58-4942-ab71-b2b3c5046f75 saved for November 16 at 12:00 and read back as Pending in the signed-in dashboard; managed email event confirms dispatch at 08:47:53 UTC, not inbox delivery. Fixed misleading confirmed wording with a public acknowledgment preview and EN/FI/SV pending copy, preserving staff confirmation previews. New preview booking 93aa0140-9777-4c20-bf84-c0f6e2b0ca09 at 13:00 saved and read back; repeated submissions correctly returned duplicate without creating another booking. Desktop success page verified; phone duplicate receipt has no horizontal overflow. All 22 email-preview security regressions, targeted lint and preview build pass. Test bookings remain clearly marked; nothing published, deployed or merged. Finnish/Swedish browser switching not verified.
 
 - [x] Reconcile newest saved Lovable work (9f4a829, lovable-sync-1794595583) with repository main 57193e8. Compared all 1,512 file blobs and modes: only roadmap.md differs. The booking/email-preview smoke test is already byte-identical on both sides. Preserve main's newer PR #159 result, recover saved PR #160 repair and PR #158 refresh details below, and retain both branch histories without resets, force pushes, merges or deletions.
