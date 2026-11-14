@@ -1,1 +1,51 @@
-name: Combined dependency refresh
+name: Dependabot lockfile refresh
+on:
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: dependabot-lockfile-refresh-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/stale-commit-check
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 22
+      - uses: ./.github/actions/setup-bun-with-diagnostics
+      - name: Apply only the five reviewed dependency updates
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const p=JSON.parse(fs.readFileSync('package.json','utf8'));
+          if(p.dependencies['@tanstack/react-query'] !== '5.104.2') throw Error('Query safety pin changed');
+          Object.assign(p.dependencies, {'@tanstack/react-start':'1.169.5','@tanstack/router-plugin':'1.169.0','@testing-library/user-event':'^14.6.9','lucide-react':'1.71.0'});
+          p.devDependencies.postgres='^4.1.0';
+          fs.writeFileSync('package.json', JSON.stringify(p,null,2)+'\n');
+          JS
+          bun install --lockfile-only --ignore-scripts --no-summary --registry=https://registry.npmjs.org
+          npx --yes --registry=https://registry.npmjs.org npm@11.21.1 install --registry=https://registry.npmjs.org --package-lock-only --ignore-scripts --no-audit --no-fund
+          node scripts/ci/check-npm-lockfile-hygiene.mjs --fix-urls
+          node scripts/ci/check-npm-lockfile-hygiene.mjs
+          node scripts/ci/preflight-manifest-drift.mjs
+          node scripts/ci/check-dependency-floors.mjs
+          node scripts/generate-sbom.mjs
+          git show fc8df880a49ce76adde51b1f0f720d733f4369ff:.github/workflows/dependabot-lockfile-refresh.yml > .github/workflows/dependabot-lockfile-refresh.yml
+      - name: Save only combined dependency files and restore original workflow
+        env:
+          PUSH_TOKEN: ${{ secrets.REPO_PUSH_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$PUSH_TOKEN"
+          git config user.name combined-dependency-refresh
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add package.json bun.lock package-lock.json docs/sbom.cdx.json docs/sbom.cdx.json.sha256 public/security-docs/sbom.cdx.json public/security-docs/sbom.cdx.json.sha256 .github/workflows/dependabot-lockfile-refresh.yml
+          git commit -m 'Combine PRs 158 and 159 preserving all November 14 Lovable work'
+          git push "https://x-access-token:${PUSH_TOKEN}@github.com/${{ github.repository }}.git" HEAD:review/combined-lovable-2026-11-14
