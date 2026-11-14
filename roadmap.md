@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Verify live public booking submission, dashboard readback and receipt handling. Live test booking 95a49215-0e58-4942-ab71-b2b3c5046f75 saved successfully for November 16 at 12:00; discovered pending request displayed as confirmed. Correct public receipt preview without publishing or merging.
+
 - [x] Reconcile newest saved Lovable work (9f4a829, lovable-sync-1794595583) with repository main 57193e8. Compared all 1,512 file blobs and modes: only roadmap.md differs. The booking/email-preview smoke test is already byte-identical on both sides. Preserve main's newer PR #159 result, recover saved PR #160 repair and PR #158 refresh details below, and retain both branch histories without resets, force pushes, merges or deletions.
 
 - [x] Repair PR #160's booking/email-preview smoke test on e48f0a9: trace proved HTTP 429 with Retry-After 60, while the test stopped at 30 seconds before navigation. Set scoped 300-second budget covering both retry attempts and preview rendering; removed network-idle dependency, retained all final assertions. Eight retry regressions and actual local smoke flow passed. GitHub PR run 43484236987 and manual rerun 43484247234 both completed successfully, including Playwright, Vitest and Deno steps. No merge/close action performed by this agent; existing auto-merge merged #160 at 18:41:58 UTC after checks passed, attributed by GitHub to mirvasaarijarvi-lab.

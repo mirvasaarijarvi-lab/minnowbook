@@ -331,6 +331,9 @@ type TranslationKeys = {
 
   // Email
   "email.subject": string;
+  "email.acknowledgmentTitle": string;
+  "email.acknowledgmentBody": string;
+  "email.acknowledgmentFooter": string;
   "email.confirmationSubject": string;
   "email.confirmationTitle": string;
   "email.greeting": string;
@@ -2734,7 +2737,7 @@ const en: TranslationKeys = {
   "booking.fixedPricePlaceholder": "e.g. 45.00",
   "booking.thankYou": "Thank you!",
   "booking.confirmationMsg":
-    "Your reservation has been received. You will receive a confirmation email from {name}.",
+    "Your booking request has been received and is awaiting staff approval. You will receive a receipt email from {name}. Your booking is not yet confirmed.",
   "booking.checkSpam":
     "If you don't see the email in your inbox, please check your spam or junk folder.",
   "booking.duplicateTitle": "You already sent this booking",
@@ -2783,6 +2786,9 @@ const en: TranslationKeys = {
   "booking.foodPermits": "Food safety permits / licenses",
   "booking.stallFee": "Setup fee (€)",
   "email.subject": "Subject",
+  "email.acknowledgmentTitle": "Booking request received",
+  "email.acknowledgmentBody": "We have received your booking request. It is awaiting staff approval and is not yet confirmed. Here are your requested details:",
+  "email.acknowledgmentFooter": "We will contact you after reviewing your request. Please wait for confirmation before making plans.",
   "email.confirmationSubject": "Booking Confirmation",
   "email.confirmationTitle": "Booking Confirmed!",
   "email.greeting": "Dear",
@@ -5740,7 +5746,7 @@ const fi: TranslationKeys = {
   "booking.fixedPricePlaceholder": "esim. 45,00",
   "booking.thankYou": "Kiitos!",
   "booking.confirmationMsg":
-    "Varauksesi on vastaanotettu. Saat vahvistusviestin lähettäjältä {name}.",
+    "Varauspyyntösi on vastaanotettu ja odottaa henkilökunnan hyväksyntää. Saat vastaanottoviestin lähettäjältä {name}. Varausta ei ole vielä vahvistettu.",
   "booking.checkSpam":
     "Jos et näe sähköpostia saapuneissa, tarkista roskaposti- tai roskapostikansio.",
   "booking.duplicateTitle": "Lähetit tämän varauksen jo",
@@ -5790,6 +5796,9 @@ const fi: TranslationKeys = {
   "booking.foodPermits": "Elintarvikeluvat / todistukset",
   "booking.stallFee": "Pystytysmaksu (€)",
   "email.subject": "Aihe",
+  "email.acknowledgmentTitle": "Varauspyyntö vastaanotettu",
+  "email.acknowledgmentBody": "Olemme vastaanottaneet varauspyyntösi. Se odottaa henkilökunnan hyväksyntää eikä ole vielä vahvistettu. Tässä ovat pyytämäsi tiedot:",
+  "email.acknowledgmentFooter": "Otamme sinuun yhteyttä käsiteltyämme pyyntösi. Odota vahvistusta ennen suunnitelmien tekemistä.",
   "email.confirmationSubject": "Varausvahvistus",
   "email.confirmationTitle": "Varaus vahvistettu!",
   "email.greeting": "Hyvä",
@@ -8757,7 +8766,7 @@ const sv: TranslationKeys = {
   "booking.fixedPricePlaceholder": "t.ex. 45,00",
   "booking.thankYou": "Tack!",
   "booking.confirmationMsg":
-    "Din bokning har mottagits. Du kommer att få ett bekräftelsemail från {name}.",
+    "Din bokningsförfrågan har mottagits och väntar på personalens godkännande. Du får ett mottagningsmejl från {name}. Bokningen är ännu inte bekräftad.",
   "booking.checkSpam":
     "Om du inte ser e-postmeddelandet i din inkorg, kontrollera din skräppost- eller skräppostmapp.",
   "booking.duplicateTitle": "Du har redan skickat den här bokningen",
@@ -8807,6 +8816,9 @@ const sv: TranslationKeys = {
   "booking.foodPermits": "Livsmedelstillstånd / certifikat",
   "booking.stallFee": "Uppställningsavgift (€)",
   "email.subject": "Ämne",
+  "email.acknowledgmentTitle": "Bokningsförfrågan mottagen",
+  "email.acknowledgmentBody": "Vi har tagit emot din bokningsförfrågan. Den väntar på personalens godkännande och är ännu inte bekräftad. Här är de önskade uppgifterna:",
+  "email.acknowledgmentFooter": "Vi kontaktar dig när vi har granskat din förfrågan. Vänta på bekräftelse innan du gör planer.",
   "email.confirmationSubject": "Bokningsbekräftelse",
   "email.confirmationTitle": "Bokning bekräftad!",
   "email.greeting": "Kära",

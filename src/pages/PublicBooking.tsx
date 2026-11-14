@@ -1886,6 +1886,7 @@ const PublicBookingInner = () => {
               {t("booking.whatGuestReceives")}
             </h3>
             <ConfirmationEmailPreview
+              variant="acknowledgment"
               reservation={{
                 guest_name: form.guest_name,
                 guest_email: form.guest_email,
