@@ -43,6 +43,9 @@ describe("seroval-plugins security and compatibility", () => {
   it("round trips a Blob through the pinned core serializer", async () => {
     vi.stubGlobal("Blob", NodeBlob);
     try {
+      // jsdom and Node buffers use distinct realms; match the Blob's realm.
+      const buffer = await new NodeBlob([]).arrayBuffer();
+      vi.stubGlobal("ArrayBuffer", buffer.constructor);
       const plugins = [BlobPlugin];
       const original = new Blob(["MimmoBook receipt"], { type: "text/plain" });
       const restored = fromJSON(await toJSONAsync(original, { plugins }), {
