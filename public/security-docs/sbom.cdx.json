@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:4aa357e9-0326-5075-aab7-8b2fcbb432b7",
+  "serialNumber": "urn:uuid:c97c27e4-e2bc-50ee-bd6f-2a5c20f0297c",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "c51e39f3c59019edf339bceeaa74985b188d9db902d6cf1daf12ea5bd78b6830"
+          "value": "e8fc605f70bd6f6cf1b3237a641600f79b13ba040bf1552d6256ce8d7dabeb38"
         }
       ]
     }
@@ -51,11 +51,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Femail-js@0.6.0",
+      "bom-ref": "pkg:npm/@lovable.dev%2Femail-js@0.8.0",
       "type": "library",
       "name": "@lovable.dev/email-js",
-      "version": "0.6.0",
-      "purl": "pkg:npm/@lovable.dev%2Femail-js@0.6.0",
+      "version": "0.8.0",
+      "purl": "pkg:npm/@lovable.dev%2Femail-js@0.8.0",
       "scope": "required"
     },
     {
@@ -75,11 +75,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.27.1",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.27.2",
       "type": "library",
       "name": "@lovable.dev/vite-tanstack-config",
-      "version": "2.27.1",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.27.1",
+      "version": "2.27.2",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-tanstack-config@2.27.2",
       "scope": "optional"
     },
     {
@@ -619,11 +619,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.71.0",
+      "bom-ref": "pkg:npm/lucide-react@1.72.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.71.0",
-      "purl": "pkg:npm/lucide-react@1.71.0",
+      "version": "1.72.0",
+      "purl": "pkg:npm/lucide-react@1.72.0",
       "scope": "required"
     },
     {
@@ -667,11 +667,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/prettier@3.9.10",
+      "bom-ref": "pkg:npm/prettier@3.10.1",
       "type": "library",
       "name": "prettier",
-      "version": "3.9.10",
-      "purl": "pkg:npm/prettier@3.9.10",
+      "version": "3.10.1",
+      "purl": "pkg:npm/prettier@3.10.1",
       "scope": "optional"
     },
     {
@@ -707,11 +707,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-resizable-panels@4.18.1",
+      "bom-ref": "pkg:npm/react-resizable-panels@4.22.0",
       "type": "library",
       "name": "react-resizable-panels",
-      "version": "4.18.1",
-      "purl": "pkg:npm/react-resizable-panels@4.18.1",
+      "version": "4.22.0",
+      "purl": "pkg:npm/react-resizable-panels@4.22.0",
       "scope": "required"
     },
     {
