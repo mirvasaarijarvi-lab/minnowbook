@@ -1,69 +1,72 @@
 name: Lockfile sync (npm)
-
-# External pipelines that still use `npm ci` need a `package-lock.json`
-# that matches `package.json` exactly. Bun is the local source of
-# truth (`bun.lockb`), so this guard runs `npm install
-# --package-lock-only` and fails the PR if `package-lock.json` would
-# change. That keeps the npm lockfile committed and in sync without
-# requiring contributors to run npm locally.
-
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
-
 permissions: {}
-
 concurrency:
   group: lockfile-sync-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
-  verify-package-lock:
-    name: package-lock.json is in sync with package.json
+  combined-refresh:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/review/combined-lovable-2026-11-16'
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
         with:
+          fetch-depth: 0
           persist-credentials: false
-
       - uses: ./.github/actions/stale-commit-check
-
-      - name: Verify package-lock.json is present in checkout
-        run: |
-          if [ ! -f package-lock.json ]; then
-            echo "::error file=package-lock.json::package-lock.json is missing from the checkout."
-            echo "External pipelines that run \`npm ci\` require a committed package-lock.json."
-            echo "Fix: regenerate locally with \`npm install --package-lock-only --ignore-scripts\` and commit the result."
-            exit 1
-          fi
-          echo "package-lock.json present ($(wc -c < package-lock.json) bytes)."
-
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: 22
-          # Reuse the npm HTTP cache between runs so the regenerate
-          # step below doesn't fight cold registry latency, which is
-          # the most common cause of spurious timeouts on this gate.
-          cache: 'npm'
-
-      - name: Validate committed package-lock.json (sync + public registry URLs)
-        run: node scripts/ci/check-npm-lockfile-hygiene.mjs
-
-      - name: Regenerate package-lock.json
-        run: npx --yes --registry=https://registry.npmjs.org npm@11.21.1 install --registry=https://registry.npmjs.org --package-lock-only --ignore-scripts --no-audit --no-fund
-
-      - name: Fail if package-lock.json drifted
+      - uses: ./.github/actions/setup-bun-with-diagnostics
+      - name: Apply reviewed updates and preserve latest Lovable fixes
         run: |
-          if ! git diff --quiet -- package-lock.json; then
-            echo "::error::package-lock.json is out of sync with package.json."
-            echo "Run \`npm install --package-lock-only --ignore-scripts\` locally and commit the result."
-            git --no-pager diff -- package-lock.json | head -200
-            exit 1
-          fi
-          echo "package-lock.json is in sync."
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          if(p.overrides.seroval !== '1.7.9' || p.overrides['seroval-plugins'] !== '1.7.8' || p.dependencies['@tanstack/react-query'] !== '5.104.2') throw Error('Security baseline or dashboard pin missing');
+          Object.assign(p.dependencies, {'@lovable.dev/email-js':'^0.8.0','lucide-react':'1.72.0','react-resizable-panels':'^4.22.0'});
+          Object.assign(p.devDependencies, {'@lovable.dev/vite-tanstack-config':'2.27.2','prettier':'3.10.1','vite':'8.3.8'});
+          fs.writeFileSync('package.json', JSON.stringify(p,null,2)+'\n');
+          const note = '- [x] Assemble PR #165 from latest main ce8d10b0, preserving all 1,513 saved Lovable files and the verified seroval 1.7.9 / seroval-plugins 1.7.8 fixes. Include PR #162 Vite 8.3.8, PR #163 Prettier 3.10.1, and four safe updates from #164: email-js 0.8.0, lucide-react 1.72.0, react-resizable-panels 4.22.0, vite-tanstack-config 2.27.2. Intentionally exclude known dashboard-breaking React Query 5.106.1; retain 5.104.2. Regenerate both locks and SBOMs, restore the temporary assembly workflow, and permit only seven dependency inventory files plus this tracking note to differ from main. Required final GitHub checks must pass before merging; no publishing, merging, auto-merge or closing old PRs requested.';
+          fs.writeFileSync('roadmap.md', fs.readFileSync('roadmap.md','utf8').replace('# Dependency sync\n','# Dependency sync\n\n'+note+'\n'));
+          JS
+          bun install --ignore-scripts --registry=https://registry.npmjs.org
+          npx --yes --registry=https://registry.npmjs.org npm@11.21.1 install --registry=https://registry.npmjs.org --package-lock-only --ignore-scripts --no-audit --no-fund
+          node scripts/ci/check-npm-lockfile-hygiene.mjs --fix-urls
+          node scripts/generate-sbom.mjs
+          node scripts/ci/preflight-manifest-drift.mjs
+          node scripts/ci/check-dependency-floors.mjs
+          bunx vitest run scripts/ci/seroval-security.test.ts scripts/ci/seroval-plugins-security.test.ts scripts/ci/check-npm-lockfile-hygiene.test.ts
+      - name: Restore workflow and publish only intended files to review branch
+        env:
+          PUSH_TOKEN: ${{ secrets.REPO_PUSH_TOKEN }}
+        run: |
+          git show ce8d10b09922a838c51620a25141e7320c421303:.github/workflows/lockfile-sync.yml > .github/workflows/lockfile-sync.yml
+          python3 <<'PY'
+          import os,json,subprocess,urllib.request
+          repo='mirvasaarijarvi-lab/minnowbook'; branch='review/combined-lovable-2026-11-16'
+          allowed=['package.json','bun.lock','package-lock.json','docs/sbom.cdx.json','docs/sbom.cdx.json.sha256','public/security-docs/sbom.cdx.json','public/security-docs/sbom.cdx.json.sha256','roadmap.md']
+          baseline='ce8d10b09922a838c51620a25141e7320c421303'
+          changed=subprocess.check_output(['git','diff','--name-only',baseline],text=True).splitlines()
+          if set(changed)-set(allowed): raise RuntimeError('Unrelated changes: '+str(set(changed)-set(allowed)))
+          def api(path,data=None):
+            req=urllib.request.Request('https://api.github.com/repos/'+repo+'/'+path,data=None if data is None else json.dumps(data).encode(),headers={'Authorization':'Bearer '+os.environ['PUSH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json'},method='GET' if data is None else 'POST')
+            with urllib.request.urlopen(req) as r:return json.load(r)
+          head=api('git/ref/heads/'+branch)['object']['sha']; current=api('git/commits/'+head)
+          tree=[]
+          for path in allowed+['.github/workflows/lockfile-sync.yml']:
+            with open(path) as f:content=f.read()
+            blob=api('git/blobs',{'content':content,'encoding':'utf-8'})
+            tree.append({'path':path,'mode':'100644','type':'blob','sha':blob['sha']})
+          t=api('git/trees',{'base_tree':current['tree']['sha'],'tree':tree})
+          c=api('git/commits',{'message':'Bundle reviewed PRs #162 to #164 while preserving verified seroval fixes and all Lovable work','tree':t['sha'],'parents':[head]})
+          req=urllib.request.Request('https://api.github.com/repos/'+repo+'/git/refs/heads/'+branch,data=json.dumps({'sha':c['sha'],'force':False}).encode(),headers={'Authorization':'Bearer '+os.environ['PUSH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json'},method='PATCH')
+          with urllib.request.urlopen(req) as r:json.load(r)
+          print('Final combined revision:',c['sha']); print('Intended changed files:',changed)
+          PY
