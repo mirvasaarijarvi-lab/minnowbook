@@ -31,6 +31,10 @@ const repoRoot = path.resolve(__dirname, "..", "..");
  * Bump these when a new patched release ships.
  */
 const FLOORS = {
+  seroval: {
+    min: "1.7.9",
+    reason: "AIKIDO-2026-893376, 486770, 722541, 495499, 571319",
+  },
   "seroval-plugins": {
     min: "1.7.8",
     reason: "AIKIDO-2026-363572, AIKIDO-2026-468160, AIKIDO-2026-574852",
