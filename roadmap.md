@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [x] Patch reported seroval-plugins advisories with override 1.7.8, synchronize both locks and SBOMs, and enforce the security floor across nested resolutions. All 19 targeted regressions pass, including hostile Blob refusal and native Blob/query-field round trips with pinned seroval. Manifest agreement, floor gate, formatting and targeted lint pass; preview build OK. Signed-in dashboard and public booking open without page errors. Registry production scan reports no known findings but cannot assess local picomatch; its risk remains open. Fresh Aikido/GitHub results and the other named repository remain unverified. Nothing published, merged or closed.
+
 - [x] Create combined draft PR #161 from main fc8df880 with all saved Lovable work verified byte-identical before branching. Combined all five updates from #158/#159, retained Query 5.104.2 and security risk documentation, regenerated both locks/SBOMs, restored temporary refresh workflow, and verified only seven dependency inventory files differ on final head 3ff77a2. Refresh and security floors passed; fresh required checks running, none failed at initial read. No merging, publishing or auto-merge enabled.
 - [ ] Verify all 20 required contexts on combined PR #161's final head and then close superseded PRs #158 and #159 without merging #161 or publishing. Blocked on external GitHub check completion; both old PRs remain open. Check current main and coverage again before closure.
 
