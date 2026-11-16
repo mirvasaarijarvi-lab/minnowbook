@@ -33,7 +33,7 @@ describe("seroval injection regressions", () => {
   it("does not execute a Date's attacker-controlled method", () => {
     const value = new Date("2026-11-16T12:00:00Z");
     Object.defineProperty(value, "toISOString", {
-      value: () => '\");globalThis.injected=true;//',
+      value: () => '");globalThis.injected=true;//',
     });
     const context = { injected: false };
     const restored = runInNewContext(serialize(value), context);
