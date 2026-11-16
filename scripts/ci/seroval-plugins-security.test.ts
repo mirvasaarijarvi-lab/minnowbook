@@ -1,8 +1,8 @@
-import { Blob as NodeBlob } from "node:buffer";
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fromJSON, toJSONAsync } from "seroval";
 import { BlobPlugin, URLSearchParamsPlugin } from "seroval-plugins/web";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { bunInstalledVersions } from "./bun-installed-versions.mjs";
 
 describe("seroval-plugins security and compatibility", () => {
@@ -40,22 +40,26 @@ describe("seroval-plugins security and compatibility", () => {
     expect(coerced).toBe(false);
   });
 
-  it("round trips a Blob through the pinned core serializer", async () => {
-    vi.stubGlobal("Blob", NodeBlob);
-    try {
-      // jsdom and Node buffers use distinct realms; match the Blob's realm.
-      const buffer = await new NodeBlob([]).arrayBuffer();
-      vi.stubGlobal("ArrayBuffer", buffer.constructor);
-      const plugins = [BlobPlugin];
-      const original = new Blob(["MimmoBook receipt"], { type: "text/plain" });
-      const restored = fromJSON(await toJSONAsync(original, { plugins }), {
-        plugins,
-      }) as Blob;
-      expect(restored.type).toBe("text/plain");
-      expect(await restored.text()).toBe("MimmoBook receipt");
-    } finally {
-      vi.unstubAllGlobals();
-    }
+  it("round trips a Blob through the pinned core serializer", () => {
+    // Run in one native realm, not jsdom's mixed DOM/Node buffer realms.
+    const output = execFileSync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        `import { fromJSON, toJSONAsync } from "seroval";
+         import { BlobPlugin } from "seroval-plugins/web";
+         const plugins = [BlobPlugin];
+         const original = new Blob(["MimmoBook receipt"], { type: "text/plain" });
+         const restored = fromJSON(await toJSONAsync(original, { plugins }), { plugins });
+         console.log(JSON.stringify({ type: restored.type, text: await restored.text() }));`,
+      ],
+      { encoding: "utf8", timeout: 10000 },
+    );
+    expect(JSON.parse(output)).toEqual({
+      type: "text/plain",
+      text: "MimmoBook receipt",
+    });
   });
 
   it("preserves repeated query fields used by booking links", async () => {
