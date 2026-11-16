@@ -81,7 +81,7 @@
     "shell-quote": "^1.11.0",
     "zod": "^4.6.7",
     "traverse": ">=0.3.10 <0.4",
-    "seroval": "1.6.11",
+    "seroval": "1.7.9",
     "seroval-plugins": "1.7.8"
   },
   "dependencies": {
