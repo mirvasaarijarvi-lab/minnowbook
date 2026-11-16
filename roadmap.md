@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [ ] Bundle latest Lovable work and reviewed PRs #162, #163 and #164 into PR #165 from latest main; verify seroval 1.7.9, intended-only diff and completeness. Leave all PRs unmerged and unpublished.
+
 - [x] Patch the five newly reported seroval advisories with override 1.7.9 and refresh both locks/SBOMs. All 23 targeted regressions pass, including constructor/method injection, Unicode-regexp budgets, decoded promise rejection handling, stream failure containment and Blob/query round trips. Manifest agreement, security floors, lint, formatting and preview build pass. Signed-in dashboard and public booking load without page errors. Registry production scan has no known findings; local picomatch remains unassessed and its documented risk stays open. Fresh Aikido/GitHub results and the other named repository remain unverified. Nothing published, merged or closed.
 
 - [x] Patch reported seroval-plugins advisories with override 1.7.8, synchronize both locks and SBOMs, and enforce the security floor across nested resolutions. All 19 targeted regressions pass, including hostile Blob refusal and native Blob/query-field round trips with pinned seroval. Manifest agreement, floor gate, formatting and targeted lint pass; preview build OK. Signed-in dashboard and public booking open without page errors. Registry production scan reports no known findings but cannot assess local picomatch; its risk remains open. Fresh Aikido/GitHub results and the other named repository remain unverified. Nothing published, merged or closed.
