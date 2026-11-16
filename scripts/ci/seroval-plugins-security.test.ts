@@ -1,8 +1,8 @@
-// @vitest-environment node
+import { Blob as NodeBlob } from "node:buffer";
 import { readFileSync } from "node:fs";
 import { fromJSON, toJSONAsync } from "seroval";
 import { BlobPlugin, URLSearchParamsPlugin } from "seroval-plugins/web";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { bunInstalledVersions } from "./bun-installed-versions.mjs";
 
 describe("seroval-plugins security and compatibility", () => {
@@ -41,13 +41,18 @@ describe("seroval-plugins security and compatibility", () => {
   });
 
   it("round trips a Blob through the pinned core serializer", async () => {
-    const plugins = [BlobPlugin];
-    const original = new Blob(["MimmoBook receipt"], { type: "text/plain" });
-    const restored = fromJSON(await toJSONAsync(original, { plugins }), {
-      plugins,
-    }) as Blob;
-    expect(restored.type).toBe("text/plain");
-    expect(await restored.text()).toBe("MimmoBook receipt");
+    vi.stubGlobal("Blob", NodeBlob);
+    try {
+      const plugins = [BlobPlugin];
+      const original = new Blob(["MimmoBook receipt"], { type: "text/plain" });
+      const restored = fromJSON(await toJSONAsync(original, { plugins }), {
+        plugins,
+      }) as Blob;
+      expect(restored.type).toBe("text/plain");
+      expect(await restored.text()).toBe("MimmoBook receipt");
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("preserves repeated query fields used by booking links", async () => {
