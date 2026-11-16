@@ -12,7 +12,11 @@ describe("seroval injection regressions", () => {
       .filter(([key]) => key.endsWith("node_modules/seroval"))
       .map(([, value]) => value.version);
     versions.push(
-      ...bunInstalledVersions(readFileSync("bun.lock", "utf8"), "seroval", process.cwd()).map((entry) => entry.version),
+      ...bunInstalledVersions(
+        readFileSync("bun.lock", "utf8"),
+        "seroval",
+        process.cwd(),
+      ).map((entry) => entry.version),
     );
     expect(versions.length).toBeGreaterThanOrEqual(2);
     expect(new Set(versions)).toEqual(new Set(["1.7.9"]));
@@ -38,7 +42,12 @@ describe("seroval injection regressions", () => {
   });
 
   it("handles decoded rejections and stream failures without uncaught process errors", () => {
-    const output = execFileSync(process.execPath, ["--input-type=module", "-e", `
+    const output = execFileSync(
+      process.execPath,
+      [
+        "--input-type=module",
+        "-e",
+        `
       import { fromJSON, toJSONAsync, crossSerializeStream } from "seroval";
       const failures = [];
       process.on("unhandledRejection", () => failures.push("rejection"));
@@ -51,8 +60,14 @@ describe("seroval injection regressions", () => {
       crossSerializeStream(Promise.resolve(Symbol("unsupported")), { onSerialize() {} });
       await new Promise(resolve => setTimeout(resolve, 30));
       console.log(JSON.stringify({ failures, message }));
-    `], { encoding: "utf8", timeout: 10000 });
-    expect(JSON.parse(output)).toEqual({ failures: [], message: "expected rejection" });
+    `,
+      ],
+      { encoding: "utf8", timeout: 10000 },
+    );
+    expect(JSON.parse(output)).toEqual({
+      failures: [],
+      message: "expected rejection",
+    });
   });
 
   it("does not execute a typed array's attacker-controlled constructor", () => {
