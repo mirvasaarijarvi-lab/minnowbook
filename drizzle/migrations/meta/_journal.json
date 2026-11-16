@@ -351,6 +351,13 @@
       "when": 1790661239726,
       "tag": "0049_guest_portal_limit_monitoring",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1794842036603,
+      "tag": "0050_restrict_dashboard_plan_diagnostics",
+      "breakpoints": true
     }
   ]
 }
