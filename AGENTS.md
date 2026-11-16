@@ -39,3 +39,4 @@
 - Keep React Query on the browser-verified pinned release until an upgrade passes the full dashboard offer suite; newer query snapshots caused a dashboard update loop.
 
 - Public booking receipts use the email preview's acknowledgment variant, leaving staff confirmation previews unchanged, because receiving a pending request is not confirming a reservation.
+- Dashboard EXPLAIN and ANALYZE diagnostic RPCs are service-role-only, with no PUBLIC, anon or authenticated EXECUTE grants, because only server performance tests use their privileged plans.
