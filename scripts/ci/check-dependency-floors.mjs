@@ -31,6 +31,10 @@ const repoRoot = path.resolve(__dirname, "..", "..");
  * Bump these when a new patched release ships.
  */
 const FLOORS = {
+  "seroval-plugins": {
+    min: "1.7.8",
+    reason: "AIKIDO-2026-363572, AIKIDO-2026-468160, AIKIDO-2026-574852",
+  },
   // Each entry locks in the patched floor for a security-critical
   // dependency. Bump `min` whenever a new patched release ships and
   // refresh lockfiles in the same commit.
