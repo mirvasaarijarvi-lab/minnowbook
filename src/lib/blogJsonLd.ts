@@ -297,9 +297,9 @@ export const posts: Record<string, BlogPostData> = {
       "blog.post6C7",
       "blog.post6C6",
     ],
-    seoTitle: "Best Reservation Apps 2026: vs Acuity, Mindbody, Vagaro",
+    seoTitle: "Best Restaurant Reservation Apps 2026: Free vs Paid",
     seoDescription:
-      "Compare the best reservation apps for restaurants in 2026, plus how Acuity, Mindbody and Vagaro differ. See monthly cost, commission fees and setup time.",
+      "Compare free and paid restaurant reservation apps for 2026: per-cover fees, booking limits, guest data ownership and where MimmoBook fits for independent restaurants.",
     relatedSlugs: [
       "MimmoBook_compared_to_other_bookingsystems_for_wellness",
       "comparison-resy-tock-mimmobook",
