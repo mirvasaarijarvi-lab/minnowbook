@@ -1,3 +1,4 @@
+import { toCount } from "@/lib/safe-count";
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   MessageCircle,
@@ -99,7 +100,7 @@ const SupportChatWidget = ({
         .eq("status", "fixed")
         .eq("is_read_by_user", false);
       if (error) return 0;
-      return count ?? 0;
+      return toCount(count);
     },
     enabled: !!tenantId && !!session?.user?.id && businessTier,
     refetchInterval: 30000,

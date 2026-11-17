@@ -1,3 +1,4 @@
+import { toCount } from "@/lib/safe-count";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -47,12 +48,12 @@ const OnboardingChecklist = ({
         {
           key: "resource",
           label: "Add your first resource",
-          done: (resourcesRes.count ?? 0) > 0,
+          done: toCount(resourcesRes.count) > 0,
         },
         {
           key: "hours",
           label: "Set opening hours",
-          done: (hoursRes.count ?? 0) > 0,
+          done: toCount(hoursRes.count) > 0,
         },
         {
           key: "branding",

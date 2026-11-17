@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { parse } from "yaml";
 
 const read = (name: string) => readFileSync(name, "utf8");
 const manifest = JSON.parse(read("package.json"));
@@ -34,13 +33,22 @@ describe("dashboard Query regression hold", () => {
   }
 
   it("holds both Query packages out of automatic dependency upgrades", () => {
-    const config = parse(read(".github/dependabot.yml"));
-    const bun = config.updates.find(
-      (update: { "package-ecosystem": string }) =>
-        update["package-ecosystem"] === "bun",
-    );
+    // Read the Bun ecosystem block as text: CI installs no YAML parser, and
+    // importing one here stopped the whole test run before browser tests.
+    const config = read(".github/dependabot.yml");
+    const start = config.indexOf('package-ecosystem: "bun"');
+    expect(start).toBeGreaterThanOrEqual(0);
+    const next = config.indexOf("package-ecosystem:", start + 1);
+    const bunBlock = config.slice(start, next === -1 ? undefined : next);
+    const ignoreAt = bunBlock.search(/^\s+ignore:\s*$/m);
+    expect(ignoreAt).toBeGreaterThanOrEqual(0);
+    const ignored = [
+      ...bunBlock
+        .slice(ignoreAt)
+        .matchAll(/^\s+-\s+dependency-name:\s*"([^"]+)"\s*$/gm),
+    ].map((match) => match[1]);
     for (const name of ["@tanstack/react-query", "@tanstack/query-core"]) {
-      expect(bun.ignore).toContainEqual({ "dependency-name": name });
+      expect(ignored).toContain(name);
     }
   });
 });

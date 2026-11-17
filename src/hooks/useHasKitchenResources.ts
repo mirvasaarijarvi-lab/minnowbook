@@ -1,3 +1,4 @@
+import { toCount } from "@/lib/safe-count";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -20,7 +21,7 @@ export const useHasKitchenResources = () => {
         .eq("is_active", true)
         .in("resource_type", ["restaurant", "venue"]);
       if (error) throw error;
-      return (count ?? 0) > 0;
+      return toCount(count) > 0;
     },
   });
 

@@ -1,3 +1,4 @@
+import { toCount } from "@/lib/safe-count";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -77,7 +78,7 @@ export function useMarkAccessReviewed() {
       ]);
       for (const r of [users, siteUsers, staff, open])
         if (r.error) throw r.error;
-      if ((open.count ?? 0) > 0) throw new OpenRequestsError();
+      if (toCount(open.count) > 0) throw new OpenRequestsError();
       const snapshot = accessSnapshot(
         siteId,
         users.data ?? [],

@@ -36,7 +36,8 @@
 - Live security probes send requests through `src/test/security/cold-start-retry.ts` (fetchWithColdStartRetry, or retryingFetch as the client's global fetch), because a per-attempt timeout plus retry on dropped connections and platform 429/5xx replies keeps cold starts and gateway rate limits from failing correct tests.
 - Live probe budgets cover all retry attempts and full Retry-After cooldowns, including sequential burst waves; never cap or shorten server cooldowns, and preserve assertions on the final response after exhaustion.
 
-- Keep React Query on the browser-verified pinned release and exclude Query/core from automatic dependency upgrades until a deliberate upgrade passes the full dashboard offer suite; newer query snapshots caused a dashboard update loop. The dashboard-query-pin regression checks both lockfiles and the bot hold.
+- Keep React Query on the browser-verified pinned release and exclude Query/core from automatic dependency upgrades until a deliberate upgrade passes the full dashboard offer suite; the dashboard-query-pin regression checks both lockfiles and the bot hold without extra parser dependencies.
+- Read backend row counts through `toCount` (src/lib/safe-count.ts), because an unknown content-range total parses as NaN, which never equals itself and made newer React Query re-render the dashboard sidebar forever.
 
 - Public booking receipts use the email preview's acknowledgment variant, leaving staff confirmation previews unchanged, because receiving a pending request is not confirming a reservation.
 - Dashboard EXPLAIN and ANALYZE diagnostic RPCs are service-role-only, with no PUBLIC, anon or authenticated EXECUTE grants, because only server performance tests use their privileged plans.
