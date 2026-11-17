@@ -358,6 +358,13 @@
       "when": 1794842036603,
       "tag": "0050_restrict_dashboard_plan_diagnostics",
       "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1794935403952,
+      "tag": "0051_public_availability_status_and_redemption_cleanup",
+      "breakpoints": true
     }
   ]
 }

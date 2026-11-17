@@ -277,6 +277,12 @@ const OffersManager = () => {
         id: offer.id,
         archived_at: new Date().toISOString(),
       } as any);
+      // Cut off any offer PDF links already emailed to the guest.
+      const { error: revokeError } = await supabase.functions.invoke(
+        "send-offer-email",
+        { body: { action: "revoke_pdf", offerId: offer.id } },
+      );
+      if (revokeError) console.error("[offers] PDF revoke failed", revokeError);
       toast.success(t("offers.archivedSuccess"));
     } catch {
       toast.error(t("offers.archiveError"));

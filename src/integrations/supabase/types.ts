@@ -4314,7 +4314,7 @@ export type Database = {
         }
         Returns: {
           day: string
-          reservation_count: number
+          day_status: string
         }[]
       }
       get_published_reviews: {

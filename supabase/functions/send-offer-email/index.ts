@@ -276,8 +276,42 @@ export async function handleSendOfferEmailRequest(
       return jsonResponse({ error: "Forbidden" }, 403);
     }
 
-    const { offerId, acceptToken, origin, pdfBase64, pdfFilename } =
+    const { action, offerId, acceptToken, origin, pdfBase64, pdfFilename } =
       await req.json();
+
+    // Withdrawing an offer deletes its stored PDFs so earlier download links
+    // stop working immediately instead of lasting until they expire.
+    if (action === "revoke_pdf") {
+      if (typeof offerId !== "string" || !UUID_REGEX.test(offerId)) {
+        return jsonResponse({ error: "Missing required fields" }, 400);
+      }
+      const { data: owned } = await supabaseAdmin
+        .from("offers")
+        .select("id")
+        .eq("id", offerId)
+        .eq("tenant_id", tenantUser.tenant_id)
+        .maybeSingle();
+      if (!owned) return jsonResponse({ error: "Offer not found" }, 404);
+      const prefix = assertSafeStoragePath(
+        `${assertUuid(tenantUser.tenant_id, "tenant id")}/offers/${assertUuid(offerId, "offer id")}`,
+      );
+      const { data: files, error: listError } = await supabaseAdmin.storage
+        .from(OFFER_BUCKET)
+        .list(prefix, { limit: 1000 });
+      if (listError)
+        throw new Error(`Failed to list offer PDFs: ${listError.message}`);
+      const paths = (files ?? []).map((f) => `${prefix}/${f.name}`);
+      if (paths.length > 0) {
+        const { error: removeError } = await supabaseAdmin.storage
+          .from(OFFER_BUCKET)
+          .remove(paths);
+        if (removeError)
+          throw new Error(
+            `Failed to remove offer PDFs: ${removeError.message}`,
+          );
+      }
+      return jsonResponse({ revoked: paths.length });
+    }
 
     // SECURITY: the subject and message are composed here from the stored
     // offer, never taken from the request, so a workspace admin cannot send
@@ -334,14 +368,14 @@ export async function handleSendOfferEmailRequest(
     if (typeof pdfBase64 === "string" && pdfBase64.length > 0) {
       const safeFilename = safeFilenameOnly(pdfFilename || "Offer.pdf");
       const safeTenantId = assertUuid(tenantUser.tenant_id, "tenant id");
-      const safeUserId = assertUuid(user.id, "user id");
+      const safeOfferId = assertUuid(offerId, "offer id");
       // Path components are individually validated above; the final path is
       // also asserted via assertSafeStoragePath() to defend against any
       // future regression in component builders. Supabase Storage resolves
       // paths internally, so we never let user input flow into a path
       // without this guard.
       const filePath = assertSafeStoragePath(
-        `${safeTenantId}/offers/${safeUserId}/${Date.now()}-${safeFilename}`,
+        `${safeTenantId}/offers/${safeOfferId}/${Date.now()}-${safeFilename}`,
       );
       const MAX_PDF_BYTES = 10 * 1024 * 1024;
       if (pdfBase64.length > Math.ceil((MAX_PDF_BYTES * 4) / 3) + 4) {

@@ -41,3 +41,5 @@
 
 - Public booking receipts use the email preview's acknowledgment variant, leaving staff confirmation previews unchanged, because receiving a pending request is not confirming a reservation.
 - Dashboard EXPLAIN and ANALYZE diagnostic RPCs are service-role-only, with no PUBLIC, anon or authenticated EXECUTE grants, because only server performance tests use their privileged plans.
+- Public availability RPCs return only per-day busy/full status computed server-side, never booking counts, because counts expose a business's activity to strangers.
+- Offer PDFs are stored under the offer id and deleted when the offer is archived, because signed links otherwise outlive a withdrawn offer.

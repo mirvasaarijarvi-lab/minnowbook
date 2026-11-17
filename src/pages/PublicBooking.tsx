@@ -153,7 +153,6 @@ const AvailabilityCalendar = ({
   siteId,
   primaryColor,
   accentColor,
-  thresholds,
   reservationType,
   t,
 }: {
@@ -161,7 +160,7 @@ const AvailabilityCalendar = ({
   siteId: string | null;
   primaryColor: string;
   accentColor: string;
-  thresholds: Record<string, number>;
+  thresholds?: Record<string, number>;
   reservationType: string;
   t: (key: TranslationKey) => string;
 }) => {
@@ -188,7 +187,7 @@ const AvailabilityCalendar = ({
       reservationType,
     ],
     queryFn: async () => {
-      // Visitors only need per-day counts, never reservation rows.
+      // Visitors only learn whether a day is busy or full, never counts.
       const { data, error } = await supabase.rpc(
         "get_public_availability_counts",
         {
@@ -200,32 +199,22 @@ const AvailabilityCalendar = ({
         },
       );
       if (error) throw error;
-      const counts: Record<string, number> = {};
+      const statuses: Record<string, "busy" | "full"> = {};
       (data ?? []).forEach((row) => {
-        counts[row.day] = row.reservation_count;
+        statuses[row.day] = row.day_status === "full" ? "full" : "busy";
       });
-      return counts;
+      return statuses;
     },
     enabled: !!tenantId && mappedTypes.length > 0,
   });
 
-  // Use the max threshold across all types as the general full limit
-  const fullThreshold = useMemo(() => {
-    if (reservationType && thresholds[reservationType])
-      return thresholds[reservationType];
-    const values = Object.values(thresholds);
-    return values.length > 0 ? Math.min(...values) : 5;
-  }, [thresholds, reservationType]);
-
+  // The server applies the business's "full" limit, so no counts reach visitors.
   const getDayStatus = useCallback(
     (date: Date): "available" | "busy" | "full" => {
       const key = format(date, "yyyy-MM-dd");
-      const count = dayCounts[key] || 0;
-      if (count === 0) return "available";
-      if (count >= fullThreshold) return "full";
-      return "busy";
+      return dayCounts[key] ?? "available";
     },
-    [dayCounts, fullThreshold],
+    [dayCounts],
   );
 
   return (
