@@ -24,21 +24,21 @@ describe("tenant-private-url helper", () => {
     vi.useRealTimers();
   });
 
-  it("uses a 24h TTL by default", async () => {
+  it("uses a 5 minute TTL by default", async () => {
     createSignedUrl.mockResolvedValue({
       data: { signedUrl: "https://example/sig" },
       error: null,
     });
     await createTenantPrivateSignedUrl("tenant-123/offer.pdf");
-    expect(PRIVATE_SIGNED_URL_TTL_SECONDS).toBe(3_600);
+    expect(PRIVATE_SIGNED_URL_TTL_SECONDS).toBe(300);
     expect(createSignedUrl).toHaveBeenCalledWith(
       "tenant-123/offer.pdf",
-      3_600,
+      300,
       { download: undefined },
     );
   });
 
-  it("caps oversized TTLs at 7 days", async () => {
+  it("caps oversized TTLs at 5 minutes", async () => {
     createSignedUrl.mockResolvedValue({
       data: { signedUrl: "https://example/sig" },
       error: null,
@@ -46,7 +46,7 @@ describe("tenant-private-url helper", () => {
     await createTenantPrivateSignedUrl("a/b.pdf", {
       expiresInSeconds: 9_999_999,
     });
-    expect(createSignedUrl).toHaveBeenCalledWith("a/b.pdf", 60 * 60, {
+    expect(createSignedUrl).toHaveBeenCalledWith("a/b.pdf", 5 * 60, {
       download: undefined,
     });
   });

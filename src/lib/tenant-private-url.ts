@@ -26,18 +26,18 @@ export {
   type SignedUrlErrorCode,
 } from "@/lib/signed-url-error";
 
-/** 1 hour, in seconds. Short so removed members lose access quickly. */
-export const PRIVATE_SIGNED_URL_TTL_SECONDS = 60 * 60;
+/** 5 minutes, in seconds. Short so removed members lose access quickly. */
+export const PRIVATE_SIGNED_URL_TTL_SECONDS = 5 * 60;
 
 export const TENANT_PRIVATE_BUCKET = "tenant-private";
 
 /** Refresh entries this many seconds before they actually expire. */
-const RENEWAL_WINDOW_SECONDS = 5 * 60;
+const RENEWAL_WINDOW_SECONDS = 60;
 
-const MAX_TTL_SECONDS = 60 * 60;
+const MAX_TTL_SECONDS = 5 * 60;
 
 export interface SignedUrlOptions {
-  /** Override the default 1h TTL. Capped to 1 hour. */
+  /** Override the default 5 minute TTL. Capped to 5 minutes. */
   expiresInSeconds?: number;
   /** Optional Content-Disposition / transform options forwarded to Supabase. */
   download?: boolean | string;
