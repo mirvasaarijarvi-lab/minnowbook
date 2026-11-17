@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:c97c27e4-e2bc-50ee-bd6f-2a5c20f0297c",
+  "serialNumber": "urn:uuid:d28e09c5-b12c-5f69-a333-44db436fa697",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "e8fc605f70bd6f6cf1b3237a641600f79b13ba040bf1552d6256ce8d7dabeb38"
+          "value": "4622f9c49d50d777cfd69127b7f5832ae15afa1652233850bd1815da4342d491"
         }
       ]
     }
@@ -43,11 +43,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fcloud-auth-js@1.2.3",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fcloud-auth-js@1.3.0",
       "type": "library",
       "name": "@lovable.dev/cloud-auth-js",
-      "version": "1.2.3",
-      "purl": "pkg:npm/@lovable.dev%2Fcloud-auth-js@1.2.3",
+      "version": "1.3.0",
+      "purl": "pkg:npm/@lovable.dev%2Fcloud-auth-js@1.3.0",
       "scope": "required"
     },
     {
@@ -67,11 +67,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-plugin-hmr-gate@1.8.2",
+      "bom-ref": "pkg:npm/@lovable.dev%2Fvite-plugin-hmr-gate@1.8.3",
       "type": "library",
       "name": "@lovable.dev/vite-plugin-hmr-gate",
-      "version": "1.8.2",
-      "purl": "pkg:npm/@lovable.dev%2Fvite-plugin-hmr-gate@1.8.2",
+      "version": "1.8.3",
+      "purl": "pkg:npm/@lovable.dev%2Fvite-plugin-hmr-gate@1.8.3",
       "scope": "optional"
     },
     {
@@ -91,11 +91,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@playwright%2Ftest@1.65.0",
+      "bom-ref": "pkg:npm/@playwright%2Ftest@1.65.1",
       "type": "library",
       "name": "@playwright/test",
-      "version": "1.65.0",
-      "purl": "pkg:npm/@playwright%2Ftest@1.65.0",
+      "version": "1.65.1",
+      "purl": "pkg:npm/@playwright%2Ftest@1.65.1",
       "scope": "required"
     },
     {
@@ -355,11 +355,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.104.2",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-query@5.105.3",
       "type": "library",
       "name": "@tanstack/react-query",
-      "version": "5.104.2",
-      "purl": "pkg:npm/@tanstack%2Freact-query@5.104.2",
+      "version": "5.105.3",
+      "purl": "pkg:npm/@tanstack%2Freact-query@5.105.3",
       "scope": "required"
     },
     {
@@ -491,11 +491,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/dompurify@3.4.17",
+      "bom-ref": "pkg:npm/dompurify@3.4.18",
       "type": "library",
       "name": "dompurify",
-      "version": "3.4.17",
-      "purl": "pkg:npm/dompurify@3.4.17",
+      "version": "3.4.18",
+      "purl": "pkg:npm/dompurify@3.4.18",
       "scope": "required"
     },
     {
@@ -619,11 +619,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.72.0",
+      "bom-ref": "pkg:npm/lucide-react@1.73.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.72.0",
-      "purl": "pkg:npm/lucide-react@1.72.0",
+      "version": "1.73.0",
+      "purl": "pkg:npm/lucide-react@1.73.0",
       "scope": "required"
     },
     {
