@@ -1,3 +1,4 @@
+import { toCount } from "@/lib/safe-count";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, Navigate } from "@/lib/router-compat";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -137,9 +138,9 @@ const Superadmin = () => {
           return {
             ...t,
             is_active: t.is_active ?? true,
-            userCount: usersRes.count ?? 0,
-            reservationCount: reservationsRes.count ?? 0,
-            resourceCount: resourcesRes.count ?? 0,
+            userCount: toCount(usersRes.count),
+            reservationCount: toCount(reservationsRes.count),
+            resourceCount: toCount(resourcesRes.count),
           };
         }),
       );

@@ -1,3 +1,4 @@
+import { toCount } from "@/lib/safe-count";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -22,7 +23,7 @@ export function usePendingGuestRequests() {
         .eq("tenant_id", tenantId!)
         .eq("status", "pending");
       if (error) throw error;
-      return count ?? 0;
+      return toCount(count);
     },
   });
 

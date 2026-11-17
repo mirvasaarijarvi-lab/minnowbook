@@ -1,3 +1,4 @@
+import { toCount } from "@/lib/safe-count";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import DashboardTooltip from "./DashboardTooltip";
 import { supabase } from "@/integrations/supabase/client";
@@ -364,7 +365,7 @@ const ReservationList = ({
       const to = from + PAGE_SIZE - 1;
       const { data, error, count } = await query.range(from, to);
       if (error) throw error;
-      return { rows: data ?? [], total: count ?? 0 };
+      return { rows: data ?? [], total: toCount(count) };
     },
     enabled: !!tenantId,
   });
@@ -1925,7 +1926,7 @@ const ReservationList = ({
                     lastError = error;
                     break;
                   }
-                  totalDeleted += data?.length ?? count ?? 0;
+                  totalDeleted += data?.length ?? toCount(count);
                 }
                 setBulkDeleting(false);
                 console.log("[bulk-delete] response", {

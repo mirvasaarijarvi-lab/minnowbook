@@ -1,3 +1,4 @@
+import { toCount } from "@/lib/safe-count";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useTenant } from "@/hooks/useTenant";
@@ -262,11 +263,11 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
       });
 
       return {
-        todayCount: todayRes.count ?? 0,
-        pendingCount: pendingRes.count ?? 0,
+        todayCount: toCount(todayRes.count),
+        pendingCount: toCount(pendingRes.count),
         todayGuests,
-        checkedIn: todayCheckedInRes.count ?? 0,
-        todayConfirmed: todayTotalRes.count ?? 0,
+        checkedIn: toCount(todayCheckedInRes.count),
+        todayConfirmed: toCount(todayTotalRes.count),
         weekRevenue,
         prevWeekRevenue,
         weekReservations: weekData.length,
@@ -275,8 +276,8 @@ const DashboardOverview = ({ onNavigate }: DashboardOverviewProps) => {
         prevWeekGuests,
         utilization,
         byType,
-        checkoutsToday: checkoutsRes.count ?? 0,
-        uninvoiced: uninvoicedRes.count ?? 0,
+        checkoutsToday: toCount(checkoutsRes.count),
+        uninvoiced: toCount(uninvoicedRes.count),
         chartData: Object.entries(chartData).map(([date, value]) => ({
           date,
           value: Math.round(value * 100) / 100,
