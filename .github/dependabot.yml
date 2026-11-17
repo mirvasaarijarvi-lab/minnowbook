@@ -62,6 +62,11 @@ updates:
           - "js-yaml"
           - "yaml"
     ignore:
+      # Newer Query observer snapshots caused a DashboardSidebar update loop
+      # before Offers could appear. Hold the browser-verified 5.104.2 release
+      # until a deliberate upgrade passes the complete dashboard offer suite.
+      - dependency-name: "@tanstack/react-query"
+      - dependency-name: "@tanstack/query-core"
       # react-router / react-router-dom are no longer dependencies: the app
       # routes entirely through @tanstack/react-router. Blocked here so a
       # transitive reintroduction never opens an update PR for them.
