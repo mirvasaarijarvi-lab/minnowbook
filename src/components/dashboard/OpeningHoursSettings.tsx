@@ -268,7 +268,7 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
       <CardContent className="space-y-4">
         {reservationTypes.length > 1 && (
           <Tabs value={activeType} onValueChange={setActiveType}>
-            <TabsList>
+            <TabsList className="h-auto flex-wrap justify-start">
               {reservationTypes.map((rt) => (
                 <TabsTrigger key={rt} value={rt} className="capitalize">
                   {typeLabel(rt)}
@@ -284,11 +284,13 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
             return (
               <div
                 key={row.day_of_week}
-                className={`grid grid-cols-[120px_1fr_1fr_auto] sm:grid-cols-[140px_1fr_1fr_auto] items-center gap-2 sm:gap-3 px-2 py-1.5 rounded-md ${
+                className={`grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:grid-cols-[140px_1fr_1fr_auto] items-center gap-2 sm:gap-3 px-2 py-1.5 rounded-md ${
                   row.is_closed ? "opacity-50 bg-muted/40" : ""
                 }`}
               >
-                <Label className="font-medium text-sm">{dayName}</Label>
+                <Label className="font-medium text-sm col-span-3 sm:col-span-1">
+                  {dayName}
+                </Label>
                 <Input
                   type="time"
                   value={row.open_time}
@@ -296,7 +298,7 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
                     updateHour(activeType, idx, "open_time", e.target.value)
                   }
                   disabled={row.is_closed}
-                  className="h-9 text-sm"
+                  className="h-9 text-sm min-w-0"
                 />
                 <Input
                   type="time"
@@ -305,7 +307,7 @@ const OpeningHoursSettings = ({ siteId = null }: OpeningHoursSettingsProps) => {
                     updateHour(activeType, idx, "close_time", e.target.value)
                   }
                   disabled={row.is_closed}
-                  className="h-9 text-sm"
+                  className="h-9 text-sm min-w-0"
                 />
                 <div className="flex items-center gap-1.5">
                   <Switch
