@@ -188,6 +188,15 @@ const DiscountCodesPanel = () => {
 
   if (!isOwner) return null;
 
+  const validityText = (c: any) =>
+    c.valid_from && c.valid_until
+      ? `${c.valid_from} to ${c.valid_until}`
+      : c.valid_from
+        ? `${t("discountCodes.from")} ${c.valid_from}`
+        : c.valid_until
+          ? `${t("discountCodes.until")} ${c.valid_until}`
+          : "-";
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -222,82 +231,147 @@ const DiscountCodesPanel = () => {
             <p>{t("discountCodes.empty")}</p>
           </div>
         ) : (
-          <div className="overflow-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("discountCodes.code")}</TableHead>
-                  <TableHead>{t("discountCodes.discountCol")}</TableHead>
-                  <TableHead>{t("discountCodes.uses")}</TableHead>
-                  <TableHead>{t("discountCodes.validity")}</TableHead>
-                  <TableHead>{t("common.status")}</TableHead>
-                  <TableHead className="text-right">
-                    {t("discountCodes.actions")}
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {codes.map((c) => (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-mono font-semibold">
-                      {c.code}
-                    </TableCell>
-                    <TableCell>
-                      {c.discount_type === "percentage"
-                        ? `${c.discount_value}%`
-                        : `€${c.discount_value}`}
-                    </TableCell>
-                    <TableCell>
-                      {c.used_count}
-                      {c.max_uses ? ` / ${c.max_uses}` : ""}
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      {c.valid_from && c.valid_until
-                        ? `${c.valid_from} – ${c.valid_until}`
-                        : c.valid_from
-                          ? `${t("discountCodes.from")} ${c.valid_from}`
-                          : c.valid_until
-                            ? `${t("discountCodes.until")} ${c.valid_until}`
-                            : "—"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={c.is_active}
-                          onCheckedChange={(v) =>
-                            toggleMutation.mutate({ id: c.id, active: v })
-                          }
-                        />
-                        <Badge variant={c.is_active ? "default" : "secondary"}>
-                          {c.is_active
-                            ? t("discountCodes.active")
-                            : t("discountCodes.inactive")}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEdit(c)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setDeleteId(c.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
+          <>
+            <ul className="space-y-3 sm:hidden">
+              {codes.map((c) => (
+                <li key={c.id} className="rounded-lg border p-3 space-y-3">
+                  <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+                    <div className="min-w-0">
+                      <p className="font-mono font-semibold break-all">
+                        {c.code}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {c.discount_type === "percentage"
+                          ? `${c.discount_value}%`
+                          : `€${c.discount_value}`}
+                        {" · "}
+                        {t("discountCodes.uses")}: {c.used_count}
+                        {c.max_uses ? ` / ${c.max_uses}` : ""}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {validityText(c)}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={c.is_active ? "default" : "secondary"}
+                      className="shrink-0"
+                    >
+                      {c.is_active
+                        ? t("discountCodes.active")
+                        : t("discountCodes.inactive")}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <Switch
+                      checked={c.is_active}
+                      aria-label={
+                        c.is_active
+                          ? t("discountCodes.active")
+                          : t("discountCodes.inactive")
+                      }
+                      onCheckedChange={(v) =>
+                        toggleMutation.mutate({ id: c.id, active: v })
+                      }
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="min-h-11"
+                        onClick={() => openEdit(c)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                        {t("common.edit")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="min-h-11"
+                        onClick={() => setDeleteId(c.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                        {t("common.delete")}
+                      </Button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden sm:block overflow-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("discountCodes.code")}</TableHead>
+                    <TableHead>{t("discountCodes.discountCol")}</TableHead>
+                    <TableHead>{t("discountCodes.uses")}</TableHead>
+                    <TableHead>{t("discountCodes.validity")}</TableHead>
+                    <TableHead>{t("common.status")}</TableHead>
+                    <TableHead className="text-right">
+                      {t("discountCodes.actions")}
+                    </TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {codes.map((c) => (
+                    <TableRow key={c.id}>
+                      <TableCell className="font-mono font-semibold">
+                        {c.code}
+                      </TableCell>
+                      <TableCell>
+                        {c.discount_type === "percentage"
+                          ? `${c.discount_value}%`
+                          : `€${c.discount_value}`}
+                      </TableCell>
+                      <TableCell>
+                        {c.used_count}
+                        {c.max_uses ? ` / ${c.max_uses}` : ""}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {validityText(c)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={c.is_active}
+                            onCheckedChange={(v) =>
+                              toggleMutation.mutate({ id: c.id, active: v })
+                            }
+                          />
+                          <Badge
+                            variant={c.is_active ? "default" : "secondary"}
+                          >
+                            {c.is_active
+                              ? t("discountCodes.active")
+                              : t("discountCodes.inactive")}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={t("common.edit")}
+                            onClick={() => openEdit(c)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={t("common.delete")}
+                            onClick={() => setDeleteId(c.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </CardContent>
 
