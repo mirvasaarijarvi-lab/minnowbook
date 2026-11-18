@@ -31,11 +31,9 @@ describe("tenant-private-url helper", () => {
     });
     await createTenantPrivateSignedUrl("tenant-123/offer.pdf");
     expect(PRIVATE_SIGNED_URL_TTL_SECONDS).toBe(300);
-    expect(createSignedUrl).toHaveBeenCalledWith(
-      "tenant-123/offer.pdf",
-      300,
-      { download: undefined },
-    );
+    expect(createSignedUrl).toHaveBeenCalledWith("tenant-123/offer.pdf", 300, {
+      download: undefined,
+    });
   });
 
   it("caps oversized TTLs at 5 minutes", async () => {
