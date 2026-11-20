@@ -97,7 +97,11 @@ const FLOORS = {
       "3.4.10", // pre-GHSA-cmwh-pvxp-8882 patch (3.4.11)
     ],
   },
-  ws: { min: "8.21.0", reason: "ws DoS via tiny fragments" },
+  ws: {
+    min: "8.23.0",
+    reason:
+      "AIKIDO-2026-844803 (unbounded automatic pong queue), tiny fragments DoS",
+  },
   esbuild: { min: "0.28.1", reason: "esbuild Deno binary integrity advisory" },
   "form-data": {
     min: "4.0.6",

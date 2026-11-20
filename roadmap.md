@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [x] Patch AIKIDO-2026-844803: raise the ws override and both lockfile resolutions to 8.23.0, refresh security inventories, and enforce the automatic-pong security floor. Add deterministic server/client queue-cap, queue-drain and real WebSocket round-trip regressions. Fresh external Aikido results remain unverified; no publishing or merging requested.
+
 - [x] Request PR #166 recreation from the permanent Query hold and verify replacement #167 at 4430465c. Dependabot closed #166 without merging at 15:57:23 UTC and created #167 with only the five intended updates: cloud-auth-js 1.3.0, Playwright 1.65.1, DOMPurify 3.4.18, lucide-react 1.73.0 and hmr-gate 1.8.3. Actual manifest and every npm/Bun Query/core resolution remain 5.104.2; permanent bot holds and the four-test guard are inherited from main. Posted explicit exclusion documentation for 5.106.1's dashboard loop and unverified 5.105.3. Current diff is package.json (5 additions/5 deletions) and bun.lock (13/13), with no Query or app-code changes. Neither PR merged; #167 auto-merge is null.
 - [ ] Verify #167's automatic npm lock/SBOM refresh and subsequent required checks. Initial head 4430465c still changes only package.json and bun.lock; npm lock/SBOM synchronization has not yet appeared, so do not treat it as merge-ready. Isolated corrected #166 copy regenerated cleanly, but was not uploaded after Dependabot supplied replacement #167.
 
