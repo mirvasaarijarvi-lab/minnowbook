@@ -1,6 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/http-headers.ts";
 import { sendManagedEmail } from "../_shared/managed-email.ts";
+import {
+  assertSafeStoragePath,
+  buildOfferRemovalPaths,
+} from "./storage-path.ts";
 
 const SENDER_DOMAIN = "notify.mimmobook.com";
 const FROM_DOMAIN = "mimmobook.com";
@@ -135,32 +139,6 @@ function safeFilenameOnly(value: string): string {
   const base = value.split(/[/\\]/).pop() || "";
   const cleaned = base.replace(/\.\.+/g, ".").replace(/[^a-zA-Z0-9._-]/g, "");
   return cleaned || "Offer.pdf";
-}
-
-/**
- * Defence-in-depth: even though every component of the offer storage path
- * is independently validated (UUIDs via {@link assertUuid}, the filename
- * via {@link safeFilenameOnly}), assert the **fully-assembled** path is
- * free of traversal sequences, absolute-path markers, NUL bytes, and
- * backslashes before handing it to the Storage SDK. The Supabase SDK
- * resolves paths internally, so a single regression in any component
- * builder could otherwise reach the bucket. This guard is intentionally
- * stricter than the per-segment sanitisers and throws on any anomaly.
- */
-function assertSafeStoragePath(path: string): string {
-  if (
-    !path ||
-    path.length > 512 ||
-    path.startsWith("/") ||
-    path.includes("..") ||
-    path.includes("\\") ||
-    path.includes("\0") ||
-    path.includes("//") ||
-    /[^a-zA-Z0-9._\-/]/.test(path)
-  ) {
-    throw new Error("Refused to use unsafe storage path");
-  }
-  return path;
 }
 
 function decodeBase64(base64: string) {
@@ -300,7 +278,9 @@ export async function handleSendOfferEmailRequest(
         .list(prefix, { limit: 1000 });
       if (listError)
         throw new Error(`Failed to list offer PDFs: ${listError.message}`);
-      const paths = (files ?? []).map((f) => `${prefix}/${f.name}`);
+      // Storage listings are not trusted path segments. Validate every final
+      // key before removing anything; never sanitize a name into another key.
+      const paths = buildOfferRemovalPaths(prefix, files ?? []);
       if (paths.length > 0) {
         const { error: removeError } = await supabaseAdmin.storage
           .from(OFFER_BUCKET)

@@ -43,3 +43,4 @@
 - Dashboard EXPLAIN and ANALYZE diagnostic RPCs are service-role-only, with no PUBLIC, anon or authenticated EXECUTE grants, because only server performance tests use their privileged plans.
 - Public availability RPCs return only per-day busy/full status computed server-side, never booking counts, because counts expose a business's activity to strangers.
 - Offer PDFs are stored under the offer id and deleted when the offer is archived, because signed links otherwise outlive a withdrawn offer.
+- Offer file deletion validates every listed filename and fully assembled key through the shared storage-path guard before any removal, because Storage normalizes paths and returned filenames must not escape the authorized offer folder.
