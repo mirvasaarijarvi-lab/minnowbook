@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:42225667-04e8-50da-a533-b29bd42be5fa",
+  "serialNumber": "urn:uuid:b6dd89f9-efb2-5269-b208-ebec6f74c35b",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "9e950f43207c131f69391f9d2f14faa6a0cd10684447988a917021a75a27364a"
+          "value": "32f7452e620cca93aed9b72785e05498d459567120100b03e66a1f866840b5c0"
         }
       ]
     }
@@ -411,11 +411,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/@testing-library%2Fuser-event@14.6.9",
+      "bom-ref": "pkg:npm/@testing-library%2Fuser-event@14.6.12",
       "type": "library",
       "name": "@testing-library/user-event",
-      "version": "14.6.9",
-      "purl": "pkg:npm/@testing-library%2Fuser-event@14.6.9",
+      "version": "14.6.12",
+      "purl": "pkg:npm/@testing-library%2Fuser-event@14.6.12",
       "scope": "required"
     },
     {
@@ -619,11 +619,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.73.0",
+      "bom-ref": "pkg:npm/lucide-react@1.74.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.73.0",
-      "purl": "pkg:npm/lucide-react@1.73.0",
+      "version": "1.74.0",
+      "purl": "pkg:npm/lucide-react@1.74.0",
       "scope": "required"
     },
     {
@@ -707,11 +707,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/react-resizable-panels@4.22.0",
+      "bom-ref": "pkg:npm/react-resizable-panels@4.24.0",
       "type": "library",
       "name": "react-resizable-panels",
-      "version": "4.22.0",
-      "purl": "pkg:npm/react-resizable-panels@4.22.0",
+      "version": "4.24.0",
+      "purl": "pkg:npm/react-resizable-panels@4.24.0",
       "scope": "required"
     },
     {
@@ -763,11 +763,11 @@
       "scope": "optional"
     },
     {
-      "bom-ref": "pkg:npm/typescript-eslint@8.72.1",
+      "bom-ref": "pkg:npm/typescript-eslint@8.73.0",
       "type": "library",
       "name": "typescript-eslint",
-      "version": "8.72.1",
-      "purl": "pkg:npm/typescript-eslint@8.72.1",
+      "version": "8.73.0",
+      "purl": "pkg:npm/typescript-eslint@8.73.0",
       "scope": "optional"
     },
     {
