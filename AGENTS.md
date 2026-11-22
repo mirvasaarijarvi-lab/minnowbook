@@ -46,3 +46,5 @@
 - Offer file deletion validates every listed filename and fully assembled key through the shared storage-path guard before any removal, because Storage normalizes paths and returned filenames must not escape the authorized offer folder.
 - Keep every ws resolution at or above the automatic-pong security floor and test its queue cap, because backpressured WebSocket peers must not cause unbounded memory growth in development tooling.
 - Run the non-security offer compatibility matrix on weekly schedules and manual dispatch only while retaining its required Linux gate on pushes and PRs, because six redundant platform jobs per update are unnecessary for a browser-hosted app.
+- Guest reminder sends require explicitly approved membership before reading reservations, except independently verified system admins, because pending members have no authority to email guests.
+- Premium support inserts use a restrictive plan policy in addition to membership and identity rules, because permissive owner/admin ALL policies must not bypass Business-level support eligibility.

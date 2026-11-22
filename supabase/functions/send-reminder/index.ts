@@ -315,7 +315,7 @@ export async function handleSendReminderRequest(req: Request): Promise<Response>
     // Verify caller has tenant membership
     const { data: callerRole } = await adminClient
       .from("tenant_users")
-      .select("role, tenant_id")
+      .select("role, tenant_id, is_approved")
       .eq("user_id", callingUser.id)
       .single();
 
@@ -325,7 +325,14 @@ export async function handleSendReminderRequest(req: Request): Promise<Response>
       .eq("user_id", callingUser.id)
       .maybeSingle();
 
-    if (!callerRole && !sysAdmin) throw new Error("Insufficient permissions");
+    // A pending membership is not authority to read reservations or email guests.
+    // Keep the independently verified system-admin exception.
+    if (!sysAdmin && callerRole?.is_approved !== true) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden", message: "Insufficient permissions" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     const body = await req.json();
     const reservationId = body.reservationId;
