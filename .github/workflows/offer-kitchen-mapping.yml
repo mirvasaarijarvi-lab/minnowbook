@@ -14,6 +14,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    # Weekly compatibility sweep, Monday at 07:43 UTC.
+    - cron: "43 7 * * 1"
   workflow_dispatch:
 
 permissions: {}
@@ -33,6 +36,9 @@ jobs:
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
+
+      - name: Stale commit check
+        uses: ./.github/actions/stale-commit-check
 
       - name: Setup Bun
         uses: ./.github/actions/setup-bun-with-diagnostics
@@ -67,11 +73,11 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-  # Environment matrix: the same tests under every supported Node.js version
-  # on Linux, macOS and Windows, so a failure caused by the runtime or the
-  # operating system (line endings, path handling, Intl data) is caught here
-  # rather than on a contributor's machine.
+  # Run the full compatibility matrix weekly or on demand, not for every
+  # push and PR. The required Linux mapping gate above still runs each time.
+  # Platform-specific regressions can take up to a week to be detected.
   matrix:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     name: Node ${{ matrix.node }} on ${{ matrix.os }}
     needs: offer-kitchen-mapping
     runs-on: ${{ matrix.os }}
@@ -89,6 +95,9 @@ jobs:
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
+
+      - name: Stale commit check
+        uses: ./.github/actions/stale-commit-check
 
       - name: Setup Node.js ${{ matrix.node }}
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0

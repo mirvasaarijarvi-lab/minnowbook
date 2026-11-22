@@ -1,5 +1,7 @@
 # Dependency sync
 
+- [x] Review GitHub Actions frequency on November 22: all eight existing scheduled workflows are security-related and remain unchanged. Keep all required checks on pushes/PRs; move only the six-job offer OS/Node compatibility matrix to Monday 07:43 UTC or manual dispatch. Register stale-result coverage and regression-test event gating. Actual GitHub billing and cash savings remain unverified; platform-only failures may surface up to a week later.
+
 - [x] Patch AIKIDO-2026-844803: raise the ws override and both lockfile resolutions to 8.23.0, refresh security inventories, and enforce the automatic-pong security floor. Add deterministic server/client queue-cap, queue-drain and real WebSocket round-trip regressions. Fresh external Aikido results remain unverified; no publishing or merging requested.
 
 - [x] Request PR #166 recreation from the permanent Query hold and verify replacement #167 at 4430465c. Dependabot closed #166 without merging at 15:57:23 UTC and created #167 with only the five intended updates: cloud-auth-js 1.3.0, Playwright 1.65.1, DOMPurify 3.4.18, lucide-react 1.73.0 and hmr-gate 1.8.3. Actual manifest and every npm/Bun Query/core resolution remain 5.104.2; permanent bot holds and the four-test guard are inherited from main. Posted explicit exclusion documentation for 5.106.1's dashboard loop and unverified 5.105.3. Current diff is package.json (5 additions/5 deletions) and bun.lock (13/13), with no Query or app-code changes. Neither PR merged; #167 auto-merge is null.

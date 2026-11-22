@@ -20,6 +20,7 @@ on:
       - RLS / CORS Security Gate
       - Access control tests
       - Guest link test backend
+      - Offer kitchen mapping
     types: [completed]
   # A push makes the previous commit outdated. Checks that already finished
   # on it are marked stale by the stale-after-push job below.
