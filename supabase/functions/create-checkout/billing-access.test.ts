@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
-import { findBillingTenantId } from "./billing-access.ts";
+import { findBillingTenantId } from "../_shared/billing-access.ts";
 
 type Row = { user_id: string; tenant_id: string; role: string; is_approved: boolean };
 

@@ -41,7 +41,12 @@ export async function handleCheckSubscriptionRequest(
       tenant,
       auth.email,
     );
-    await syncBusinessSubscription(auth.adminClient, tenant, subscription);
+    await syncBusinessSubscription(
+      auth.adminClient,
+      tenant,
+      subscription,
+      stripe,
+    );
     return respond({
       subscribed: Boolean(
         subscription && ENTITLED_STATUSES.has(subscription.status),

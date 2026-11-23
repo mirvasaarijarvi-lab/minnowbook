@@ -48,3 +48,5 @@
 - Run the non-security offer compatibility matrix on weekly schedules and manual dispatch only while retaining its required Linux gate on pushes and PRs, because six redundant platform jobs per update are unnecessary for a browser-hosted app.
 - Guest reminder sends require explicitly approved membership before reading reservations, except independently verified system admins, because pending members have no authority to email guests.
 - Premium support inserts use a restrictive plan policy in addition to membership and identity rules, because permissive owner/admin ALL policies must not bypass Business-level support eligibility.
+- Guest portal booking tokens are minted only by service-role server code; members have no INSERT on booking_tokens, because a chosen token lets its holder cancel as the guest.
+- Subscription refreshes re-retrieve the subscription from Stripe by id and require business linkage before saving a tier, because the plan must come only from Stripe's authoritative record.

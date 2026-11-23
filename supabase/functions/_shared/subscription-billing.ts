@@ -1,4 +1,4 @@
-import { findBillingTenantId } from "../create-checkout/billing-access.ts";
+import { findBillingTenantId } from "./billing-access.ts";
 
 export const PRICE_TO_TIER: Record<string, string> = {
   price_1TM3VZAi9C4ePV8hzIKzpZHb: "basic",
@@ -109,9 +109,21 @@ export async function findBusinessSubscription(
 export async function syncBusinessSubscription(
   client: any,
   tenant: any,
-  subscription: any,
+  candidate: any,
+  stripe?: any,
 ) {
-  if (!subscription) return;
+  if (!candidate) return;
+  // Re-read the subscription straight from Stripe by id so the saved plan
+  // reflects only Stripe's authoritative record, never caller-shaped data.
+  const subscription = stripe
+    ? await stripe.subscriptions.retrieve(candidate.id)
+    : candidate;
+  if (subscription?.object !== "subscription") {
+    throw new Error("Subscription record invalid");
+  }
+  if (!belongsToBusiness(subscription, tenant)) {
+    throw new Error("Subscription does not belong to this business");
+  }
   const entitled = ENTITLED_STATUSES.has(subscription.status);
   const tier = PRICE_TO_TIER[subscription.items?.data?.[0]?.price?.id];
   if (entitled && !tier) throw new Error("Subscription plan not recognized");
