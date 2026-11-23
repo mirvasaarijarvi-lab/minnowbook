@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:b6dd89f9-efb2-5269-b208-ebec6f74c35b",
+  "serialNumber": "urn:uuid:67f42c47-dccb-583d-b00c-afd705d1f1cc",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "32f7452e620cca93aed9b72785e05498d459567120100b03e66a1f866840b5c0"
+          "value": "fe535f3719c2aafe3ad6c9eb39b6bd237589eccaaa436c75ba1e8a3997bcffa7"
         }
       ]
     }
@@ -331,11 +331,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.119.0",
+      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.119.2",
       "type": "library",
       "name": "@supabase/supabase-js",
-      "version": "2.119.0",
-      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.119.0",
+      "version": "2.119.2",
+      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.119.2",
       "scope": "required"
     },
     {
@@ -371,11 +371,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.5",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.7",
       "type": "library",
       "name": "@tanstack/react-start",
-      "version": "1.169.5",
-      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.5",
+      "version": "1.169.7",
+      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.7",
       "scope": "required"
     },
     {
@@ -619,11 +619,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.74.0",
+      "bom-ref": "pkg:npm/lucide-react@1.77.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.74.0",
-      "purl": "pkg:npm/lucide-react@1.74.0",
+      "version": "1.77.0",
+      "purl": "pkg:npm/lucide-react@1.77.0",
       "scope": "required"
     },
     {
@@ -715,11 +715,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/recharts@3.10.1",
+      "bom-ref": "pkg:npm/recharts@3.11.0",
       "type": "library",
       "name": "recharts",
-      "version": "3.10.1",
-      "purl": "pkg:npm/recharts@3.10.1",
+      "version": "3.11.0",
+      "purl": "pkg:npm/recharts@3.11.0",
       "scope": "required"
     },
     {
@@ -731,11 +731,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/tailwind-merge@3.5.0",
+      "bom-ref": "pkg:npm/tailwind-merge@3.7.1",
       "type": "library",
       "name": "tailwind-merge",
-      "version": "3.5.0",
-      "purl": "pkg:npm/tailwind-merge@3.5.0",
+      "version": "3.7.1",
+      "purl": "pkg:npm/tailwind-merge@3.7.1",
       "scope": "required"
     },
     {
