@@ -49,8 +49,12 @@ function escapeHtml(str: unknown): string {
 }
 
 /** Recipients come from tenant settings, so re-validate before we mail them. */
-export function normalizeRecipients(raw: unknown, fallback?: unknown): string[] {
-  const source = Array.isArray(raw) && raw.length > 0 ? raw : (fallback ? [fallback] : []);
+export function normalizeRecipients(
+  raw: unknown,
+  fallback?: unknown,
+): string[] {
+  const source =
+    Array.isArray(raw) && raw.length > 0 ? raw : fallback ? [fallback] : [];
   const seen = new Set<string>();
   for (const entry of source) {
     if (typeof entry !== "string") continue;
@@ -80,7 +84,10 @@ export type DaySummary = {
 };
 
 /** Per-day rollup covering every day in the window, including empty ones. */
-export function summarizeByDay(startDate: string, rows: ReportRow[]): DaySummary[] {
+export function summarizeByDay(
+  startDate: string,
+  rows: ReportRow[],
+): DaySummary[] {
   const days: DaySummary[] = [];
   for (let i = 0; i < REPORT_DAYS; i++) {
     const date = addDaysIso(startDate, i);
@@ -89,7 +96,10 @@ export function summarizeByDay(startDate: string, rows: ReportRow[]): DaySummary
       date,
       reservations: dayRows.length,
       guests: dayRows.reduce((sum, r) => sum + guestsOf(r), 0),
-      revenue: Math.round(dayRows.reduce((sum, r) => sum + Number(r.price_eur ?? 0), 0) * 100) / 100,
+      revenue:
+        Math.round(
+          dayRows.reduce((sum, r) => sum + Number(r.price_eur ?? 0), 0) * 100,
+        ) / 100,
     });
   }
   return days;
@@ -103,7 +113,16 @@ function csvCell(value: unknown): string {
 }
 
 export function buildReportCsv(rows: ReportRow[]): string {
-  const header = ["date", "start_time", "end_time", "type", "status", "guest", "guests", "price_eur"];
+  const header = [
+    "date",
+    "start_time",
+    "end_time",
+    "type",
+    "status",
+    "guest",
+    "guests",
+    "price_eur",
+  ];
   const lines = [header.map(csvCell).join(",")];
   for (const r of rows) {
     lines.push(
@@ -133,11 +152,15 @@ export function buildReportHtml(
   const endDate = addDaysIso(startDate, REPORT_DAYS - 1);
   const totalRes = days.reduce((s, d) => s + d.reservations, 0);
   const totalGuests = days.reduce((s, d) => s + d.guests, 0);
-  const totalRevenue = Math.round(days.reduce((s, d) => s + d.revenue, 0) * 100) / 100;
+  const totalRevenue =
+    Math.round(days.reduce((s, d) => s + d.revenue, 0) * 100) / 100;
 
   const dayRows = days
     .map(
-      (d, i) => `<tr style="background-color:${i % 2 === 0 ? "#faf8f5" : "#ffffff"}">
+      (
+        d,
+        i,
+      ) => `<tr style="background-color:${i % 2 === 0 ? "#faf8f5" : "#ffffff"}">
       <td style="padding:8px 12px;font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1E1519">${escapeHtml(d.date)}</td>
       <td style="padding:8px 12px;font-family:'Inter',Arial,sans-serif;font-size:13px;color:#1E1519">${d.reservations}</td>
       <td style="padding:8px 12px;font-family:'Inter',Arial,sans-serif;font-size:13px;color:#63516E">${d.guests}</td>
@@ -194,9 +217,12 @@ type TenantSetting = {
   timezone: string | null;
 };
 
-export async function handleWeeklyOpsReportRequest(req: Request): Promise<Response> {
+export async function handleWeeklyOpsReportRequest(
+  req: Request,
+): Promise<Response> {
   const corsHeaders = getCorsHeaders(req, { allowMethods: "POST, OPTIONS" });
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method === "OPTIONS")
+    return new Response("ok", { headers: corsHeaders });
 
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {
@@ -204,10 +230,13 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
-  const serviceRoleKey = (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "").trim();
+  const serviceRoleKey = (
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+  ).trim();
   const supabaseUrl = (Deno.env.get("SUPABASE_URL") ?? "").trim();
   const authHeader = req.headers.get("Authorization");
-  const isCron = Boolean(serviceRoleKey) && authHeader === `Bearer ${serviceRoleKey}`;
+  const isCron =
+    Boolean(serviceRoleKey) && authHeader === `Bearer ${serviceRoleKey}`;
 
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   const wantsTestSend = (body as Record<string, unknown>).test === true;
@@ -217,7 +246,9 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
   if (!isCron) {
     if (!wantsTestSend) return json({ error: "Unauthorized" }, 401);
 
-    const auth = await requireAuth(req, corsHeaders, { caller: "weekly-ops-report" });
+    const auth = await requireAuth(req, corsHeaders, {
+      caller: "weekly-ops-report",
+    });
     if (auth instanceof Response) return auth;
 
     const { data: membership } = await auth.adminClient
@@ -227,15 +258,22 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
       .maybeSingle();
 
     const allowedRoles = ["owner", "admin", "superadmin"];
-    if (!membership || membership.is_approved === false || !allowedRoles.includes(String(membership.role))) {
+    if (
+      !membership ||
+      membership.is_approved === false ||
+      !allowedRoles.includes(String(membership.role))
+    ) {
       return json({ error: "Insufficient permissions" }, 403);
     }
     staffTenantId = membership.tenant_id as string;
     // Test sends go only to the requester's own sign-in address, never to the
     // stored recipient list, so a test cannot mail reports to outsiders.
-    const { data: callerUser } = await auth.adminClient.auth.admin.getUserById(auth.userId);
+    const { data: callerUser } = await auth.adminClient.auth.admin.getUserById(
+      auth.userId,
+    );
     callerEmail = callerUser?.user?.email?.trim().toLowerCase() || null;
-    if (!callerEmail) return json({ error: "No valid recipients configured." }, 400);
+    if (!callerEmail)
+      return json({ error: "No valid recipients configured." }, 400);
   }
 
   try {
@@ -248,7 +286,11 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
       "tenant_id, business_name, business_email, weekly_report_recipients, weekly_report_weekday, timezone";
 
     const query = staffTenantId
-      ? admin.from("tenant_settings").select(columns).eq("tenant_id", staffTenantId).limit(1)
+      ? admin
+          .from("tenant_settings")
+          .select(columns)
+          .eq("tenant_id", staffTenantId)
+          .limit(1)
       : admin
           .from("tenant_settings")
           .select(columns)
@@ -257,7 +299,10 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
 
     const { data: settings, error: settingsErr } = await query;
     if (settingsErr) {
-      console.error("Failed to load weekly report settings", settingsErr.message);
+      console.error(
+        "Failed to load weekly report settings",
+        settingsErr.message,
+      );
       return json({ error: "Failed to load weekly report settings" }, 500);
     }
 
@@ -272,7 +317,9 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
       // Hourly cron, one send: only the tenants whose local clock reads the
       // send hour on their chosen weekday are mailed.
       if (!staffTenantId) {
-        const dueToday = tenantLocalWeekday(now, timezone) === normalizeWeekday(setting.weekly_report_weekday);
+        const dueToday =
+          tenantLocalWeekday(now, timezone) ===
+          normalizeWeekday(setting.weekly_report_weekday);
         if (!dueToday || tenantLocalHour(now, timezone) !== SEND_LOCAL_HOUR) {
           skipped++;
           continue;
@@ -285,7 +332,10 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
         : await approvedRecipients(
             admin,
             setting.tenant_id,
-            normalizeRecipients(setting.weekly_report_recipients, setting.business_email),
+            normalizeRecipients(
+              setting.weekly_report_recipients,
+              setting.business_email,
+            ),
             setting.business_email,
           );
       if (recipients.length === 0) {
@@ -321,8 +371,14 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
         .limit(MAX_ROWS);
 
       const businessName = setting.business_name || "MimmoBook";
-      const html = buildReportHtml(businessName, startDate, (rows ?? []) as ReportRow[]);
-      const subjectPrefix = staffTenantId ? "Test weekly report" : "Weekly report";
+      const html = buildReportHtml(
+        businessName,
+        startDate,
+        (rows ?? []) as ReportRow[],
+      );
+      const subjectPrefix = staffTenantId
+        ? "Test weekly report"
+        : "Weekly report";
 
       for (const to of recipients) {
         try {
@@ -332,12 +388,17 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
             sender_domain: SENDER_DOMAIN,
             subject: `${subjectPrefix} ${startDate} to ${endDate} · ${businessName}`,
             html,
-            label: staffTenantId ? "weekly_ops_report_test" : "weekly_ops_report",
+            label: staffTenantId
+              ? "weekly_ops_report_test"
+              : "weekly_ops_report",
             tenant_id: setting.tenant_id,
           });
           if (!result.sent) continue;
         } catch (sendErr) {
-          console.error("Failed to send weekly report", sendErr instanceof Error ? sendErr.message : sendErr);
+          console.error(
+            "Failed to send weekly report",
+            sendErr instanceof Error ? sendErr.message : sendErr,
+          );
           continue;
         }
         enqueued++;
@@ -367,7 +428,8 @@ Deno.serve(handleWeeklyOpsReportRequest);
 // Scheduled reports contain guest details, so they only go to the business
 // email or to approved members of that business, never to arbitrary addresses.
 async function approvedRecipients(
-  admin: ReturnType<typeof createClient>,
+  // deno-lint-ignore no-explicit-any
+  admin: any,
   tenantId: string,
   candidates: string[],
   businessEmail: string | null,
