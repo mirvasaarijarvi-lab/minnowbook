@@ -2,8 +2,9 @@ name: Test CI (test:ci)
 
 # Runs the full `npm run test:ci` pipeline (Vitest unit tests, Deno edge
 # function tests, and Playwright e2e tests) on every push and pull request
-# against main. The script itself lives in scripts/test-ci.sh and fails
-# fast on the first failing suite.
+# against main, except Dependabot pull requests. Lint, type-check, and the
+# build stay on ci.yml and lint.yml. The script itself lives in
+# scripts/test-ci.sh and fails fast on the first failing suite.
 
 concurrency:
   # Supersede in-progress runs for the SAME branch (PR head or pushed ref).
@@ -28,6 +29,8 @@ permissions: {}
 jobs:
   test-ci:
     name: npm run test:ci
+    # Dependabot pull requests skip this heavy end-to-end pipeline.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     # Hard ceiling so a wedged suite (hung Playwright preview server, stalled
     # Supabase socket) fails in a readable time instead of occupying the

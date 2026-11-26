@@ -50,6 +50,9 @@ permissions: {}
 jobs:
   check-secrets:
     name: Check live-mode secrets
+    # Dependabot pull requests cannot read these secrets, so the live suite
+    # is skipped before a runner is spent on the secret check.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions: {}

@@ -1,10 +1,18 @@
 name: Stale result check
 
-# After each listed workflow finishes, checks whether it tested an older
-# commit than the current head of its branch. If so, it adds a
-# "Stale result" check to the tested commit and a STALE RESULT summary,
-# so a green or red result from an outdated commit is never mistaken
-# for the state of the latest code.
+# Marks finished checks on the previous commit of the default branch as
+# stale, so a green or red result from an outdated commit is not mistaken
+# for the latest code. Pushes to any other branch do not start a run.
+#
+# The workflow_run list is the source of watched workflow names for the
+# push job. scripts/ci/stale-result-check.test.ts extracts the same lines.
+# branches-ignore matches every branch, so a completed workflow does not
+# start this workflow. The stale job still ignores cancelled runs if that
+# filter is ever narrowed.
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   workflow_run:
@@ -22,10 +30,13 @@ on:
       - Guest link test backend
       - Offer kitchen mapping
     types: [completed]
-  # A push makes the previous commit outdated. Checks that already finished
-  # on it are marked stale by the stale-after-push job below.
+    # `**` matches every branch name, including names that contain
+    # slashes, so this event does not create a run.
+    branches-ignore:
+      - "**"
   push:
-    branches: ["**"]
+    branches: [main]
+  workflow_dispatch:
 
 permissions: {}
 
@@ -75,7 +86,7 @@ jobs:
 
   stale-after-push:
     name: stale-after-push
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -95,7 +106,8 @@ jobs:
           BRANCH: ${{ github.ref_name }}
         run: |
           # The watched workflows are the ones listed under on.workflow_run,
-          # so both jobs always cover the same checks.
+          # so the push job covers the same checks. A manual dispatch has no
+          # before/after commits; the script exits without marking anything.
           WORKFLOWS=$(sed -n '/^  workflow_run:/,/^    types:/p' .github/workflows/stale-result-check.yml \
             | sed -n 's/^      - //p')
           export WORKFLOWS

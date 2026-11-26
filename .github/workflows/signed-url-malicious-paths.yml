@@ -1,11 +1,12 @@
 name: Signed-URL Malicious Paths
 
-# Required PR gate. Runs the Playwright spec
-# `e2e/signed-url-malicious-paths.spec.ts`, which asserts that every
+# Required PR gate, except on Dependabot pull requests. Runs the Playwright
+# spec `e2e/signed-url-malicious-paths.spec.ts`, which asserts that every
 # known malicious storage object key is rejected by
 # `assertSafeStorageObjectPath` BEFORE reaching Supabase, throws
 # `InvalidStoragePathError`, and resolves to the localised friendly
-# message contract used across the UI.
+# message contract used across the UI. The fast unit and fuzz suite in
+# storage-path-sanitizer.yml still runs on Dependabot pull requests.
 #
 # This file is intentionally separate from the broader `e2e.yml`
 # (which is `workflow_dispatch`-only) so the malicious-paths contract
@@ -36,6 +37,8 @@ concurrency:
 jobs:
   malicious-paths:
     name: malicious-paths
+    # Dependabot pull requests skip this Playwright end-to-end spec.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

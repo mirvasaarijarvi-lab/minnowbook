@@ -1,6 +1,6 @@
 name: SQL Trigger Tests
 
-# Runs on every PR and push to main. Boots a fully local Supabase stack via
+# Runs on every non-Dependabot pull request and on push to main. Boots a fully local Supabase stack via
 # the Supabase CLI, applies all migrations from supabase/migrations/, and
 # runs the trigger regression tests in supabase/tests/. Any test that
 # regresses (a valid combo rejected, or an invalid combo accepted) raises
@@ -27,6 +27,8 @@ permissions: {}
 jobs:
   trigger-tests:
     name: Reservation type limit trigger
+    # Dependabot pull requests skip this local Supabase stack.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:

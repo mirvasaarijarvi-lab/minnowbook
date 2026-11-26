@@ -1,12 +1,13 @@
 name: Cross-Tenant RLS (Local Supabase)
 
-# Boots a fully local Supabase stack via the Supabase CLI on every push/PR,
-# applies the project's migrations, seeds two tenants + two users with the
-# `seed-rls-test-data.ts` script, and runs the cross-tenant RLS live-mode
-# tests against it. This means the live-mode coverage no longer depends on
-# a staging project being reachable — every PR exercises the full sweep
-# (anon denial + authenticated cross-tenant denial + write/delete denial +
-# positive controls) in an isolated ephemeral database.
+# Boots a fully local Supabase stack via the Supabase CLI on every push and
+# on non-Dependabot pull requests, applies the project's migrations, seeds
+# two tenants + two users with the `seed-rls-test-data.ts` script, and runs
+# the cross-tenant RLS live-mode tests against it. This means the live-mode
+# coverage no longer depends on a staging project being reachable — each of
+# those runs exercises the full sweep (anon denial + authenticated
+# cross-tenant denial + write/delete denial + positive controls) in an
+# isolated ephemeral database.
 #
 # When the stack fails to start (e.g. Docker unavailable on a runner) the
 # job emits a clear skip notice and exits 0 so it doesn't block PRs that
@@ -28,6 +29,8 @@ permissions: {}
 jobs:
   rls-local:
     name: Cross-Tenant RLS (local stack, ${{ matrix.label }})
+    # Dependabot pull requests skip this seven-leg local Supabase matrix.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
