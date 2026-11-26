@@ -386,6 +386,13 @@
       "when": 1795687885861,
       "tag": "0054_booking_token_revoke_only_updates",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1795688743036,
+      "tag": "0055_restrict_claim_discount_code",
+      "breakpoints": true
     }
   ]
 }

@@ -213,6 +213,7 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
   const wantsTestSend = (body as Record<string, unknown>).test === true;
 
   let staffTenantId: string | null = null;
+  let callerEmail: string | null = null;
   if (!isCron) {
     if (!wantsTestSend) return json({ error: "Unauthorized" }, 401);
 
@@ -230,6 +231,11 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
       return json({ error: "Insufficient permissions" }, 403);
     }
     staffTenantId = membership.tenant_id as string;
+    // Test sends go only to the requester's own sign-in address, never to the
+    // stored recipient list, so a test cannot mail reports to outsiders.
+    const { data: callerUser } = await auth.adminClient.auth.admin.getUserById(auth.userId);
+    callerEmail = callerUser?.user?.email?.trim().toLowerCase() || null;
+    if (!callerEmail) return json({ error: "No valid recipients configured." }, 400);
   }
 
   try {
@@ -274,7 +280,14 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
       }
       dueTenants++;
 
-      const recipients = normalizeRecipients(setting.weekly_report_recipients, setting.business_email);
+      const recipients = callerEmail
+        ? [callerEmail]
+        : await approvedRecipients(
+            admin,
+            setting.tenant_id,
+            normalizeRecipients(setting.weekly_report_recipients, setting.business_email),
+            setting.business_email,
+          );
       if (recipients.length === 0) {
         skipped++;
         continue;
@@ -350,3 +363,29 @@ export async function handleWeeklyOpsReportRequest(req: Request): Promise<Respon
 }
 
 Deno.serve(handleWeeklyOpsReportRequest);
+
+// Scheduled reports contain guest details, so they only go to the business
+// email or to approved members of that business, never to arbitrary addresses.
+async function approvedRecipients(
+  admin: ReturnType<typeof createClient>,
+  tenantId: string,
+  candidates: string[],
+  businessEmail: string | null,
+): Promise<string[]> {
+  if (candidates.length === 0) return [];
+  const allowed = new Set<string>();
+  const biz = businessEmail?.trim().toLowerCase();
+  if (biz) allowed.add(biz);
+  const { data: members } = await admin
+    .from("tenant_users")
+    .select("user_id")
+    .eq("tenant_id", tenantId)
+    .eq("is_approved", true)
+    .limit(200);
+  for (const m of (members ?? []) as { user_id: string }[]) {
+    const { data } = await admin.auth.admin.getUserById(m.user_id);
+    const e = data?.user?.email?.trim().toLowerCase();
+    if (e) allowed.add(e);
+  }
+  return candidates.filter((c) => allowed.has(c.trim().toLowerCase()));
+}
