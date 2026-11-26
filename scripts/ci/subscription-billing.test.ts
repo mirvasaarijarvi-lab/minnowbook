@@ -14,6 +14,7 @@ const tenant = {
   tier: "business",
 };
 const sub = {
+  object: "subscription",
   id: "sub_a",
   status: "active",
   customer: "cus_a",
