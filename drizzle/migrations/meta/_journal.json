@@ -379,6 +379,13 @@
       "when": 1795448071966,
       "tag": "0053_restrict_booking_token_insert",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1795687885861,
+      "tag": "0054_booking_token_revoke_only_updates",
+      "breakpoints": true
     }
   ]
 }

@@ -50,3 +50,4 @@
 - Premium support inserts use a restrictive plan policy in addition to membership and identity rules, because permissive owner/admin ALL policies must not bypass Business-level support eligibility.
 - Guest portal booking tokens are minted only by service-role server code; members have no INSERT on booking_tokens, because a chosen token lets its holder cancel as the guest.
 - Subscription refreshes re-retrieve the subscription from Stripe by id and require business linkage before saving a tier, because the plan must come only from Stripe's authoritative record.
+- Members may only revoke guest booking links (column grant on is_revoked plus revoke-only trigger), because retargeting a link lets its holder cancel another booking as the guest.
