@@ -481,7 +481,7 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     // Get the user's tenant
     const { data: tenantUser } = await adminClient
       .from("tenant_users")
-      .select("tenant_id, role")
+      .select("tenant_id, role, is_approved")
       .eq("user_id", userId)
       .maybeSingle();
 
@@ -503,7 +503,11 @@ export async function handleRedeemAccessCodeRequest(req: Request): Promise<Respo
     }
 
     // Only workspace owners and admins may change the workspace plan.
-    if (!["owner", "admin", "superadmin"].includes(String(tenantUser.role))) {
+    // Pending (unapproved) memberships carry no authority, whatever their role.
+    if (
+      tenantUser.is_approved !== true ||
+      !["owner", "admin", "superadmin"].includes(String(tenantUser.role))
+    ) {
       logDecision({
         requestId,
         decision: "reject",
