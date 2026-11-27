@@ -41,6 +41,9 @@ jobs:
 
   revoked-link:
     name: Revoked guest link (local backend)
+    # Dependabot pull requests skip the local Supabase backend. The log
+    # guard job above still runs.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 40
     permissions:

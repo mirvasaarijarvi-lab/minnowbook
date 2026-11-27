@@ -3,7 +3,8 @@ name: Live Reservation-Type Cap Tests
 # Boots a real local Supabase stack (Postgres + PostgREST + Auth) and
 # runs the end-to-end vitest suite in supabase/tests/integration/ that
 # verifies the Professional 5-type cap through the same supabase-js
-# network path the production app uses.
+# network path the production app uses. Dependabot pull requests skip
+# this stack.
 #
 # This complements:
 #   - .github/workflows/tier-trigger-tests.yml (raw psql trigger tests)
@@ -28,6 +29,8 @@ permissions: {}
 jobs:
   live-cap-tests:
     name: Reservation-type cap (live Postgres)
+    # Dependabot pull requests skip this local end-to-end stack.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:

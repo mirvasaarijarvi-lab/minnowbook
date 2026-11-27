@@ -2,7 +2,7 @@ name: CodeQL
 
 # Static analysis for JS/TS using GitHub's CodeQL engine.
 #
-# - Runs on every pull request and on pushes to main.
+# - Runs on every pull request (except Dependabot) and on pushes to main.
 # - Uploads SARIF to GitHub Code Scanning so alerts show up in the
 #   Security tab and inline on the PR diff.
 # - Fails the workflow when the PR introduces NEW alerts at severity
@@ -37,6 +37,9 @@ concurrency:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
+    # Dependabot pull requests skip this CodeQL scan. The weekly schedule
+    # still analyzes the default branch.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

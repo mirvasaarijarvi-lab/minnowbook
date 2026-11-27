@@ -7,25 +7,29 @@ updates:
   - package-ecosystem: "bun"
     directory: "/"
     schedule:
-      interval: "daily"
+      # Version updates only. Security updates are opened when an alert
+      # is published and do not wait for this interval.
+      interval: "weekly"
     open-pull-requests-limit: 10
     # NOTE: no `labels:` here on purpose. Dependabot errors on every PR when a
     # label does not exist in the repo, and this repo has no dependency labels.
 
-    # Group routine updates so security PRs stand out on their own.
-    # Every group lands as ONE pull request, which is what the
-    # dependency-audit checks in .github/workflows/security-scan.yml grade:
-    # the gate job (high/critical) plus the "Dependency audit report" job,
-    # which diffs the PR against the base branch and annotates only the
-    # advisories the update itself introduces. Neither job needs repository
-    # secrets, so they run normally on Dependabot pull requests.
+    # Group routine version updates so each group lands as one pull request.
+    # applies-to stays on version-updates, so security updates remain their
+    # own pull requests. Grouped Dependabot pull requests are still graded by
+    # dependency-audit.yml, package-registry-audit.yml, and
+    # dependency-floors.yml. Automated Security Scan does not run on
+    # Dependabot pull requests; it still runs on push, on other pull
+    # requests, and on its weekly schedule.
     groups:
       # @tanstack router/start packages must always move together; a
       # partial update breaks the build.
       tanstack:
+        applies-to: version-updates
         patterns:
           - "@tanstack/*"
       yaml-parsers:
+        applies-to: version-updates
         patterns:
           - "js-yaml"
           - "yaml"
@@ -35,6 +39,7 @@ updates:
       # Build/test toolchain moves as one PR so a Vite bump and its plugins
       # are audited and built together rather than in sequence.
       build-toolchain:
+        applies-to: version-updates
         patterns:
           - "vite"
           - "@vitejs/*"
@@ -43,6 +48,7 @@ updates:
           - "typescript"
           - "jsdom"
       linting:
+        applies-to: version-updates
         patterns:
           - "eslint"
           - "@eslint/*"
@@ -50,11 +56,13 @@ updates:
           - "prettier"
           - "globals"
       types:
+        applies-to: version-updates
         patterns:
           - "@types/*"
         exclude-patterns:
           - "@types/js-yaml"
       minor-and-patch:
+        applies-to: version-updates
         update-types:
           - "minor"
           - "patch"
@@ -147,6 +155,12 @@ updates:
       interval: "weekly"
     # No labels: the repo has no `dependencies` / `ci` labels, and Dependabot
     # reports an error comment on every PR when a configured label is missing.
+    # One version-update pull request per week. Security updates stay separate.
+    groups:
+      actions:
+        applies-to: version-updates
+        patterns:
+          - "*"
 
     commit-message:
       prefix: "chore(ci)"

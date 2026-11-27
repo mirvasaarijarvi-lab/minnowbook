@@ -10,8 +10,9 @@ name: RLS / CORS Security Gate
 #
 # The other security workflows (security-scan.yml, security-tests.yml,
 # cross-tenant-rls.yml) still run the full matrix on a slower cadence.
-# This one runs the RLS- and CORS-specific subset on EVERY push/PR so
-# a regression in either class blocks merge with a clearly-named gate.
+# This one runs the RLS- and CORS-specific subset on every push and on
+# non-Dependabot pull requests so a regression in either class blocks
+# merge with a clearly-named gate.
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -34,6 +35,8 @@ jobs:
   # error per problem, so a mis-wired gate never reports a hollow success.
   gate-config:
     name: RLS/CORS gate configuration
+    # Dependabot pull requests skip this live security gate.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -46,6 +49,8 @@ jobs:
   rls-cors-tests:
     name: RLS + CORS regression tests
     needs: [gate-config]
+    # Dependabot pull requests skip this live security gate.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     # Surfaced to the notification job so a tenant-access denial is reported
@@ -334,6 +339,8 @@ jobs:
 
   rls-advisor-gate:
     name: Supabase RLS advisor gate
+    # Dependabot pull requests skip this live security gate.
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -419,7 +426,9 @@ jobs:
   gate-summary:
     name: RLS/CORS gate summary
     needs: [gate-config, rls-cors-tests, rls-advisor-gate]
-    if: always()
+    # always() still reports a failed upstream job. Dependabot pull requests
+    # skip the gate, and a skipped summary must not turn that into a failure.
+    if: always() && github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
