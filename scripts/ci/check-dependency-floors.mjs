@@ -97,6 +97,14 @@ const FLOORS = {
       "3.4.10", // pre-GHSA-cmwh-pvxp-8882 patch (3.4.11)
     ],
   },
+  tldts: {
+    min: "7.6.1",
+    reason: "AIKIDO-2026-453894 (wildcard public suffix misclassification)",
+  },
+  "tldts-core": {
+    min: "7.6.1",
+    reason: "AIKIDO-2026-453894 (wildcard public suffix misclassification)",
+  },
   ws: {
     min: "8.23.0",
     reason:
