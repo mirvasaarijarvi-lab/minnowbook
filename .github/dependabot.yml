@@ -7,60 +7,38 @@ updates:
   - package-ecosystem: "bun"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Helsinki"
     open-pull-requests-limit: 10
     # NOTE: no `labels:` here on purpose. Dependabot errors on every PR when a
     # label does not exist in the repo, and this repo has no dependency labels.
 
-    # Group routine updates so security PRs stand out on their own.
-    # Every group lands as ONE pull request, which is what the
-    # dependency-audit checks in .github/workflows/security-scan.yml grade:
-    # the gate job (high/critical) plus the "Dependency audit report" job,
-    # which diffs the PR against the base branch and annotates only the
-    # advisories the update itself introduces. Neither job needs repository
-    # secrets, so they run normally on Dependabot pull requests.
+    # Version updates arrive as two pull requests. applies-to stays on
+    # version-updates, so security updates stay ungrouped. The minor-and-patch
+    # group still moves every package together, including @tanstack router
+    # and start, because a partial TanStack update breaks the build.
+    # Grouped pull requests are still graded by the dependency-audit checks
+    # in .github/workflows/security-scan.yml: the gate job (high/critical)
+    # plus the "Dependency audit report" job, which diffs the PR against the
+    # base branch and annotates only the advisories the update itself
+    # introduces. Neither job needs repository secrets, so they run normally
+    # on Dependabot pull requests.
     groups:
-      # @tanstack router/start packages must always move together; a
-      # partial update breaks the build.
-      tanstack:
-        patterns:
-          - "@tanstack/*"
-      yaml-parsers:
-        patterns:
-          - "js-yaml"
-          - "yaml"
-          - "@types/js-yaml"
-          - "@stoplight/yaml*"
-          - "yaml-ast-parser"
-      # Build/test toolchain moves as one PR so a Vite bump and its plugins
-      # are audited and built together rather than in sequence.
-      build-toolchain:
-        patterns:
-          - "vite"
-          - "@vitejs/*"
-          - "vitest"
-          - "@vitest/*"
-          - "typescript"
-          - "jsdom"
-      linting:
-        patterns:
-          - "eslint"
-          - "@eslint/*"
-          - "eslint-plugin-*"
-          - "prettier"
-          - "globals"
-      types:
-        patterns:
-          - "@types/*"
-        exclude-patterns:
-          - "@types/js-yaml"
       minor-and-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
         update-types:
           - "minor"
           - "patch"
-        exclude-patterns:
-          - "js-yaml"
-          - "yaml"
+      majors:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "major"
     ignore:
       # Newer Query observer snapshots caused a DashboardSidebar update loop
       # before Offers could appear. Hold the browser-verified 5.104.2 release
@@ -145,8 +123,18 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Helsinki"
+    open-pull-requests-limit: 5
     # No labels: the repo has no `dependencies` / `ci` labels, and Dependabot
     # reports an error comment on every PR when a configured label is missing.
+    # One group for every action. Security updates stay ungrouped.
+    groups:
+      actions:
+        applies-to: version-updates
+        patterns:
+          - "*"
 
     commit-message:
       prefix: "chore(ci)"

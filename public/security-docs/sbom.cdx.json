@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.5",
-  "serialNumber": "urn:uuid:09630e15-e26b-552f-af81-2ca367313078",
+  "serialNumber": "urn:uuid:9a743f8f-978a-5b55-be0d-9ece4de2fc92",
   "version": 1,
   "metadata": {
     "tools": [
@@ -20,7 +20,7 @@
       "properties": [
         {
           "name": "dependencies:sha256",
-          "value": "5dab5e3b5af875e10bb91737fddf30a296133dca08fde20aa5d2523bfb315a75"
+          "value": "e4b1a121e0e1dae6e701c2524397d19d4159a9203fbe79463d87fa05d0e97995"
         }
       ]
     }
@@ -331,11 +331,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.119.0",
+      "bom-ref": "pkg:npm/@supabase%2Fsupabase-js@2.119.2",
       "type": "library",
       "name": "@supabase/supabase-js",
-      "version": "2.119.0",
-      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.119.0",
+      "version": "2.119.2",
+      "purl": "pkg:npm/@supabase%2Fsupabase-js@2.119.2",
       "scope": "required"
     },
     {
@@ -371,11 +371,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.5",
+      "bom-ref": "pkg:npm/@tanstack%2Freact-start@1.169.7",
       "type": "library",
       "name": "@tanstack/react-start",
-      "version": "1.169.5",
-      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.5",
+      "version": "1.169.7",
+      "purl": "pkg:npm/@tanstack%2Freact-start@1.169.7",
       "scope": "required"
     },
     {
@@ -491,11 +491,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/dompurify@3.4.18",
+      "bom-ref": "pkg:npm/dompurify@3.5.0",
       "type": "library",
       "name": "dompurify",
-      "version": "3.4.18",
-      "purl": "pkg:npm/dompurify@3.4.18",
+      "version": "3.5.0",
+      "purl": "pkg:npm/dompurify@3.5.0",
       "scope": "required"
     },
     {
@@ -619,11 +619,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/lucide-react@1.74.0",
+      "bom-ref": "pkg:npm/lucide-react@1.77.0",
       "type": "library",
       "name": "lucide-react",
-      "version": "1.74.0",
-      "purl": "pkg:npm/lucide-react@1.74.0",
+      "version": "1.77.0",
+      "purl": "pkg:npm/lucide-react@1.77.0",
       "scope": "required"
     },
     {
@@ -715,11 +715,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/recharts@3.10.1",
+      "bom-ref": "pkg:npm/recharts@3.11.0",
       "type": "library",
       "name": "recharts",
-      "version": "3.10.1",
-      "purl": "pkg:npm/recharts@3.10.1",
+      "version": "3.11.0",
+      "purl": "pkg:npm/recharts@3.11.0",
       "scope": "required"
     },
     {
@@ -731,11 +731,11 @@
       "scope": "required"
     },
     {
-      "bom-ref": "pkg:npm/tailwind-merge@3.5.0",
+      "bom-ref": "pkg:npm/tailwind-merge@3.7.1",
       "type": "library",
       "name": "tailwind-merge",
-      "version": "3.5.0",
-      "purl": "pkg:npm/tailwind-merge@3.5.0",
+      "version": "3.7.1",
+      "purl": "pkg:npm/tailwind-merge@3.7.1",
       "scope": "required"
     },
     {
