@@ -158,7 +158,7 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
     // Check caller is owner or admin (or system admin for impersonation)
     const { data: callerRole } = await adminClient
       .from("tenant_users")
-      .select("role, tenant_id")
+      .select("role, tenant_id, is_approved")
       .eq("user_id", callingUserId)
       .single();
 
@@ -170,6 +170,11 @@ export const handleAdminUsersRequest = async (req: Request): Promise<Response> =
       .maybeSingle();
 
     if (!callerRole && !sysAdmin) {
+      throw new Error("Insufficient permissions");
+    }
+
+    // Pending (unapproved) memberships carry no authority, whatever their role.
+    if (!sysAdmin && callerRole?.is_approved !== true) {
       throw new Error("Insufficient permissions");
     }
 
